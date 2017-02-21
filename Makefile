@@ -12,6 +12,8 @@ CURR_HEAD   := $(firstword $(shell git show-ref --hash HEAD | cut -b -6) master)
 GITHUB_PROJ := https://github.com//markdown-it/${NPM_PACKAGE}
 
 
+build: lint browserify doc test demo todo 
+
 demo: lint
 	rm -rf ./demo
 	mkdir ./demo
@@ -103,8 +105,12 @@ specsplit:
 	./support/specsplit.js ./test/fixtures/commonmark/spec.txt
 
 todo:
+	@echo ""
+	@echo "TODO list"
+	@echo "---------"
+	@echo ""
 	grep 'TODO' -n -r ./lib 2>/dev/null || test true
 
 
-.PHONY: publish lint test todo demo coverage doc
+.PHONY: publish lint test todo demo coverage doc build
 .SILENT: help lint test todo

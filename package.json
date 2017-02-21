@@ -17,6 +17,7 @@
   },
   "scripts": {
     "test": "make test",
+    "build": "make",
     "heroku-postbuild": "npm install express"
   },
   "files": [
