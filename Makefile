@@ -112,5 +112,5 @@ todo:
 	grep 'TODO' -n -r ./lib 2>/dev/null || test true
 
 
-.PHONY: publish lint test todo demo coverage doc build
+.PHONY: publish lint test todo demo coverage report-coverage doc build
 .SILENT: help lint test todo
