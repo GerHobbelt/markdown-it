@@ -31,12 +31,7 @@ demo: lint
 
 gh-demo: demo
 	touch ./demo/.nojekyll
-	cd ./demo \
-		&& git init . \
-		&& git add . \
-		&& git commit -m "Auto-generate demo" \
-		&& git remote add origin git@github.com:markdown-it/markdown-it.github.io.git \
-		&& git push --force origin master
+	git commit -m "Auto-generate demo"
 	rm -rf ./demo
 
 lint:
@@ -60,12 +55,7 @@ doc:
 
 gh-doc: doc
 	touch ./apidoc/.nojekyll
-	cd ./apidoc \
-		&& git init . \
-		&& git add . \
-		&& git commit -m "Auto-generate API doc" \
-		&& git remote add remote git@github.com:markdown-it/markdown-it.git \
-		&& git push --force remote +master:gh-pages
+	git commit -m "Auto-generate API doc"
 	rm -rf ./apidoc
 
 publish:
