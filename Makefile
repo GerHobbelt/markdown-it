@@ -28,10 +28,11 @@ demo: lint
 	browserify ./ -s markdownit > ./demo/markdown-it.js
 	browserify ./support/demo_template/index.js > ./demo/index.js
 	cp ./support/demo_template/README.md ./demo/
+	touch ./demo/.nojekyll
 
 gh-demo: demo
-	touch ./demo/.nojekyll
 	git add ./demo/
+	touch ./demo/.nojekyll
 	git commit -m "Auto-generate demo"
 	#rm -rf ./demo
 
@@ -53,10 +54,11 @@ report-coverage:
 doc:
 	rm -rf ./apidoc
 	ndoc --link-format "https://github.com/{package.repository}/blob/${CURR_HEAD}/{file}#L{line}"
+	touch ./apidoc/.nojekyll
 
 gh-doc: doc
-	touch ./apidoc/.nojekyll
 	git add ./apidoc/
+	touch ./demo/.nojekyll
 	git commit -m "Auto-generate API doc"
 	#rm -rf ./apidoc
 
@@ -105,6 +107,10 @@ todo:
 	@echo ""
 	grep 'TODO' -n -r ./lib 2>/dev/null || test true
 
+clean:
+	-rm -rf ./demo/
+	-rm -rf ./apidoc/
+	-rm -rf ./dist/
 
-.PHONY: publish lint test todo demo coverage report-coverage doc build browserify minify gh-demo gh-doc
+.PHONY: clean publish lint test todo demo coverage report-coverage doc build browserify minify gh-demo gh-doc
 .SILENT: help lint test todo
