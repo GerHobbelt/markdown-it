@@ -31,8 +31,9 @@ demo: lint
 
 gh-demo: demo
 	touch ./demo/.nojekyll
+	git add ./demo/
 	git commit -m "Auto-generate demo"
-	rm -rf ./demo
+	#rm -rf ./demo
 
 lint:
 	eslint .
@@ -55,8 +56,9 @@ doc:
 
 gh-doc: doc
 	touch ./apidoc/.nojekyll
+	git add ./apidoc/
 	git commit -m "Auto-generate API doc"
-	rm -rf ./apidoc
+	#rm -rf ./apidoc
 
 publish:
 	@if test 0 -ne `git status --porcelain | wc -l` ; then \
@@ -81,6 +83,8 @@ browserify:
 	( printf "/*! ${NPM_PACKAGE} ${NPM_VERSION} ${GITHUB_PROJ} @license MIT */" ; \
 		browserify ./ -s markdownit \
 		) > dist/markdown-it.js
+
+minify: browserify
 	# Minify
 	uglifyjs dist/markdown-it.js -b beautify=false,ascii-only=true -c -m \
 		--preamble "/*! ${NPM_PACKAGE} ${NPM_VERSION} ${GITHUB_PROJ} @license MIT */" \
@@ -102,5 +106,5 @@ todo:
 	grep 'TODO' -n -r ./lib 2>/dev/null || test true
 
 
-.PHONY: publish lint test todo demo coverage report-coverage doc build
+.PHONY: publish lint test todo demo coverage report-coverage doc build browserify minify gh-demo gh-doc
 .SILENT: help lint test todo
