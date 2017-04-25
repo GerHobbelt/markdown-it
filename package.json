@@ -15,6 +15,9 @@
   "bin": {
     "markdown-it": "bin/markdown-it.js"
   },
+  "engines": {
+    "node": ">=0.10.0"
+  },
   "scripts": {
     "test": "make test",
     "build": "make",
