@@ -46,7 +46,7 @@ test: lint
 
 coverage:
 	rm -rf coverage
-	istanbul cover node_modules/.bin/_mocha
+	istanbul cover node_modules/mocha/bin/_mocha
 
 report-coverage:
 	-istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage
@@ -108,6 +108,7 @@ todo:
 	grep 'TODO' -n -r ./lib 2>/dev/null || test true
 
 clean:
+	-rm -rf ./coverage/
 	-rm -rf ./demo/
 	-rm -rf ./apidoc/
 	-rm -rf ./dist/
