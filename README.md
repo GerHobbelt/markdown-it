@@ -120,7 +120,10 @@ var md = require('markdown-it')({
   // Highlighter function. Should return escaped HTML,
   // or '' if the source string is not changed and should be escaped externaly.
   // If result starts with <pre... internal wrapper is skipped.
-  highlight: function (/*str, lang*/) { return ''; }
+  highlight: function (/*str, lang*/) { return ''; },
+  
+  // Configure default attributes for given tags
+  default_attributes:  { 'a': [['rel', 'nofollow']] }
 });
 ```
 
