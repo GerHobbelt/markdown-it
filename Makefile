@@ -89,7 +89,7 @@ browserify:
 
 minify: browserify
 	# Minify
-	uglifyjs dist/markdown-it.js -b beautify=false,ascii-only=true -c -m \
+	uglifyjs dist/markdown-it.js -b beautify=false,ascii_only=true -c -m \
 		--preamble "/*! ${NPM_PACKAGE} ${NPM_VERSION} ${GITHUB_PROJ} @license MIT */" \
 		> dist/markdown-it.min.js
 
