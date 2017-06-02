@@ -46,14 +46,13 @@ test: lint
 	./support/specsplit.js test/fixtures/commonmark/spec.txt
 
 coverage:
-	rm -rf coverage
+	-rm -rf coverage
 	istanbul cover node_modules/mocha/bin/_mocha
 
-report-coverage:
-	-istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage
+report-coverage: coverage
 
 doc:
-	rm -rf ./apidoc
+	-rm -rf ./apidoc
 	ndoc --link-format "https://github.com/{package.repository}/blob/${CURR_HEAD}/{file}#L{line}"
 	touch ./apidoc/.nojekyll
 
