@@ -28,6 +28,7 @@ demo: lint
 	browserify ./ -s markdownit > ./demo/markdown-it.js
 	browserify ./support/demo_template/index.js > ./demo/index.js
 	cp ./support/demo_template/README.md ./demo/
+	cp ./support/demo_template/test.html ./demo/
 	touch ./demo/.nojekyll
 
 gh-demo: demo

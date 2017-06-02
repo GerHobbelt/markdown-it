@@ -1,4 +1,4 @@
-/*! markdown-it 8.3.2-5 https://github.com//markdown-it/markdown-it @license MIT */(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.markdownit = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+/*! markdown-it 8.3.2-6 https://github.com//markdown-it/markdown-it @license MIT */(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.markdownit = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 // HTML5 entities map: { name -> utf16string }
 //
 'use strict';
@@ -1097,15 +1097,14 @@ MarkdownIt.prototype.use = function (plugin /*, params, ... */) {
  *
  * `env` is used to pass data between "distributed" rules and return additional
  * metadata like reference info, needed for the renderer. It also can be used to
- * inject data in specific cases. Usually, you will be ok to pass `{}`,
+ * inject data in specific cases. Usually, you will be ok to pass `{}` or NULL,
  * and then pass updated object to renderer.
  **/
 MarkdownIt.prototype.parse = function (src, env) {
   if (typeof src !== 'string') {
     throw new Error('Input data should be a String');
   }
-
-  var state = new this.core.State(src, this, env);
+  var state = new this.core.State(src, this, env || {});
 
   this.core.process(state);
 
@@ -1250,7 +1249,7 @@ ParserBlock.prototype.tokenize = function (state, startLine, endLine) {
       if (ok) { break; }
     }
 
-    // set state.tight iff we had an empty line before current tag
+    // set state.tight if we had an empty line before current tag
     // i.e. latest empty line should not count
     state.tight = !hasEmptyLines;
 
@@ -1802,7 +1801,7 @@ default_rules.fence = function (tokens, idx, options, env, slf) {
   }
 
 
-  return  '<pre><code' + slf.renderAttrs(token) + '>'
+  return  '<pre><code' + slf.renderAttrs(token, options) + '>'
         + highlighted
         + '</code></pre>\n';
 };
@@ -1888,8 +1887,12 @@ function Renderer() {
  *
  * Render token attributes to string.
  **/
-Renderer.prototype.renderAttrs = function renderAttrs(token) {
+Renderer.prototype.renderAttrs = function renderAttrs(token, options) {
   var i, l, result;
+
+  if (options && options.default_attributes && options.default_attributes[token.tag]) {
+    token.attrs = (token.attrs || []).concat(options.default_attributes[token.tag]);
+  }
 
   if (!token.attrs) { return ''; }
 
@@ -1938,7 +1941,7 @@ Renderer.prototype.renderToken = function renderToken(tokens, idx, options) {
   result += (token.nesting === -1 ? '</' : '<') + token.tag;
 
   // Encode attributes, e.g. `<img src="foo"`
-  result += this.renderAttrs(token);
+  result += this.renderAttrs(token, options);
 
   // Add a slash for self-closing tags, e.g. `<img src="foo" /`
   if (token.nesting === 0 && options.xhtmlOut) {
@@ -3106,7 +3109,7 @@ module.exports = function lheading(state, startLine, endLine/*, silent*/) {
 var isSpace = require('../common/utils').isSpace;
 
 
-// Search `[-+*][\n ]`, returns next pos arter marker on success
+// Search `[-+*][\n ]`, returns next pos after marker on success
 // or -1 on fail.
 function skipBulletListMarker(state, startLine) {
   var marker, pos, max, ch;
@@ -3134,7 +3137,7 @@ function skipBulletListMarker(state, startLine) {
   return pos;
 }
 
-// Search `\d+[.)][\n ]`, returns next pos arter marker on success
+// Search `\d+[.)][\n ]`, returns next pos after marker on success
 // or -1 on fail.
 function skipOrderedListMarker(state, startLine) {
   var ch,
@@ -3311,12 +3314,10 @@ module.exports = function list(state, startLine, endLine, silent) {
     while (pos < max) {
       ch = state.src.charCodeAt(pos);
 
-      if (isSpace(ch)) {
-        if (ch === 0x09) {
-          offset += 4 - (offset + state.bsCount[nextLine]) % 4;
-        } else {
-          offset++;
-        }
+      if (ch === 0x09) {
+        offset += 4 - (offset + state.bsCount[nextLine]) % 4;
+      } else if (ch === 0x20) {
+        offset++;
       } else {
         break;
       }
@@ -3417,7 +3418,7 @@ module.exports = function list(state, startLine, endLine, silent) {
     if (markerCharCode !== state.src.charCodeAt(posAfterMarker - 1)) { break; }
   }
 
-  // Finilize list
+  // Finalize list
   if (isOrdered) {
     token = state.push('ordered_list_close', 'ol', -1);
   } else {
@@ -3993,7 +3994,7 @@ function escapedSplit(str) {
 
 module.exports = function table(state, startLine, endLine, silent) {
   var ch, lineText, pos, i, nextLine, columns, columnCount, token,
-      aligns, t, tableLines, tbodyLines;
+      aligns, t, tableLines, tbodyLines, len;
 
   // should have at least two lines
   if (startLine + 2 > endLine) { return false; }
@@ -4100,7 +4101,8 @@ module.exports = function table(state, startLine, endLine, silent) {
     columns = escapedSplit(lineText.replace(/^\||\|$/g, ''));
 
     token = state.push('tr_open', 'tr', 1);
-    for (i = 0; i < columnCount; i++) {
+    len = Math.max(columns.length, columnCount);
+    for (i = 0; i < len; i++) {
       token          = state.push('td_open', 'td', 1);
       if (aligns[i]) {
         token.attrs  = [ [ 'style', 'text-align:' + aligns[i] ] ];
@@ -4313,7 +4315,7 @@ module.exports = function inline(state) {
 };
 
 },{}],34:[function(require,module,exports){
-// Simple typographyc replacements
+// Simple typographic replacements
 //
 // (c) (C) → ©
 // (tm) (TM) → ™
@@ -4323,6 +4325,8 @@ module.exports = function inline(state) {
 // ... → … (also ?.... → ?.., !.... → !..)
 // ???????? → ???, !!!!! → !!!, `,,` → `,`
 // -- → &ndash;, --- → &mdash;
+// --> → →; <-- → ←; <--> → ↔
+// ==> → ⇒; <== → ⇐; <==> → ⇔
 //
 'use strict';
 
@@ -4330,7 +4334,7 @@ module.exports = function inline(state) {
 // - fractionals 1/2, 1/4, 3/4 -> ½, ¼, ¾
 // - miltiplication 2 x 4 -> 2 × 4
 
-var RARE_RE = /\+-|\.\.|\?\?\?\?|!!!!|,,|--/;
+var RARE_RE = /\+-|\.\.|\?\?\?\?|!!!!|,,|--|==/;
 
 // Workaround for phantomjs - need regex without /g flag,
 // or root check will fail every second time
@@ -4382,11 +4386,29 @@ function replace_rare(inlineTokens) {
                     // but ?..... & !..... -> ?.. & !..
                     .replace(/\.{2,}/g, '…').replace(/([?!])…/g, '$1..')
                     .replace(/([?!]){4,}/g, '$1$1$1').replace(/,{2,}/g, ',')
+                    // <-->
+                    .replace(/(^|\s)<-->(\s|$)/mg, '$1\u2194$2')
+                    .replace(/(^|[^<\s])<-->([^>\s]|$)/mg, '$1\u2194$2')
+                    // -->
+                    .replace(/(^|\s)-->(\s|$)/mg, '$1\u2192$2')
+                    .replace(/(^|[^-\s])-->([^>\s]|$)/mg, '$1\u2192$2')
+                    // -->
+                    .replace(/(^|\s)<--(\s|$)/mg, '$1\u2190$2')
+                    .replace(/(^|[^<\s])<--([^-\s]|$)/mg, '$1\u2190$2')
+                    // <==>
+                    .replace(/(^|\s)<==>(\s|$)/mg, '$1\u21d4$2')
+                    .replace(/(^|[^<\s])<==>([^>\s]|$)/mg, '$1\u21d4$2')
+                    // ==>
+                    .replace(/(^|\s)==>(\s|$)/mg, '$1\u21d2$2')
+                    .replace(/(^|[^=\s])==>([^>\s]|$)/mg, '$1\u21d2$2')
+                    // -->
+                    .replace(/(^|\s)<==(\s|$)/mg, '$1\u21d0$2')
+                    .replace(/(^|[^<\s])<==([^=\s]|$)/mg, '$1\u21d0$2')
                     // em-dash
                     .replace(/(^|[^-])---([^-]|$)/mg, '$1\u2014$2')
                     // en-dash
                     .replace(/(^|\s)--(\s|$)/mg, '$1\u2013$2')
-                    .replace(/(^|[^-\s])--([^-\s]|$)/mg, '$1\u2013$2');
+                    .replace(/(^|[^-\s,\/])--([^-\s,\/]|$)/mg, '$1\u2013$2');
       }
     }
 
@@ -4457,7 +4479,7 @@ function process_inlines(tokens, state) {
     }
     stack.length = j + 1;
 
-    if (token.type !== 'text') { continue; }
+    if (token.type !== 'text' || !QUOTE_TEST_RE.test(token.content)) { continue; }
 
     text = token.content;
     pos = 0;
@@ -5340,7 +5362,9 @@ module.exports = function link(state, silent) {
     //
     // Link reference
     //
-    if (typeof state.env.references === 'undefined') { return false; }
+    if (typeof state.env === 'undefined' || typeof state.env.references === 'undefined') {
+      return false;
+    }
 
     if (pos < max && state.src.charCodeAt(pos) === 0x5B/* [ */) {
       start = pos + 1;
