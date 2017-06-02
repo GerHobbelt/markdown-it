@@ -32,26 +32,26 @@
   "dependencies": {
     "argparse": "1.0.9",
     "entities": "1.1.1",
-    "github-markdown-css": "2.4.1",
+    "github-markdown-css": "2.6.0",
     "linkify-it": "2.0.3",
     "mdurl": "1.0.1",
     "uc.micro": "1.0.3"
   },
   "devDependencies": {
     "ansi": "0.3.1",
-    "autoprefixer-stylus": "0.13.0",
+    "autoprefixer-stylus": "0.14.0",
     "benchmark": "2.1.4",
-    "browserify": "14.3.0",
-    "chai": "3.5.0",
-    "coveralls": "2.13.0",
+    "browserify": "14.4.0",
+    "chai": "4.0.1",
+    "coveralls": "2.13.1",
     "eslint": "3.19.0",
-    "express": "4.15.2",
-    "highlight.js": "9.11.0",
+    "express": "4.15.3",
+    "highlight.js": "9.12.0",
     "istanbul": "0.4.5",
     "jade": "1.11.0",
     "markdown-it-abbr": "1.0.4",
     "markdown-it-container": "2.0.0",
-    "markdown-it-deflist": "2.0.1",
+    "markdown-it-deflist": "2.0.2",
     "markdown-it-emoji": "1.3.0",
     "markdown-it-footnote": "3.0.1",
     "markdown-it-for-inline": "0.1.1",
@@ -60,10 +60,10 @@
     "markdown-it-sub": "1.0.0",
     "markdown-it-sup": "1.0.0",
     "markdown-it-testgen": "0.1.4",
-    "mocha": "3.3.0",
+    "mocha": "3.4.2",
     "ndoc": "5.0.1",
     "stylus": "0.54.5",
     "supertest": "3.0.0",
-    "uglify-js": "2.8.22"
+    "uglify-js": "3.0.15"
   }
 }
