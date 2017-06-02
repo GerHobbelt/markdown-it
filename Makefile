@@ -12,7 +12,7 @@ CURR_HEAD   := $(firstword $(shell git show-ref --hash HEAD | cut -b -6) master)
 GITHUB_PROJ := https://github.com//markdown-it/${NPM_PACKAGE}
 
 
-build: lint browserify doc test demo todo 
+build: lint browserify minify doc test demo todo 
 
 demo: lint
 	rm -rf ./demo
