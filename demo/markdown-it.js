@@ -459,7 +459,6 @@ module.exports = function parseLinkDestination(str, pos, max) {
 
     if (code === 0x28 /* ( */) {
       level++;
-      if (level > 1) { break; }
     }
 
     if (code === 0x29 /* ) */) {
@@ -3679,7 +3678,9 @@ module.exports = function reference(state, startLine, _endLine, silent) {
   // Reference can not terminate anything. This check is for safety only.
   /*istanbul ignore if*/
   if (silent) { return true; }
-
+  if (typeof state.env === 'undefined') {
+    state.env = {};
+  }
   if (typeof state.env.references === 'undefined') {
     state.env.references = {};
   }
@@ -4479,7 +4480,7 @@ function process_inlines(tokens, state) {
     }
     stack.length = j + 1;
 
-    if (token.type !== 'text' || !QUOTE_TEST_RE.test(token.content)) { continue; }
+    if (token.type !== 'text') { continue; }
 
     text = token.content;
     pos = 0;
@@ -4905,7 +4906,7 @@ module.exports.postProcess = function emphasis(state) {
       delimiters = state.delimiters,
       max = state.delimiters.length;
 
-  for (i = 0; i < max; i++) {
+  for (i = max - 1; i >= 0; i--) {
     startDelim = delimiters[i];
 
     if (startDelim.marker !== 0x5F/* _ */ && startDelim.marker !== 0x2A/* * */) {
@@ -4924,11 +4925,11 @@ module.exports.postProcess = function emphasis(state) {
     //
     // `<em><em>whatever</em></em>` -> `<strong>whatever</strong>`
     //
-    isStrong = i + 1 < max &&
-               delimiters[i + 1].end === startDelim.end - 1 &&
-               delimiters[i + 1].token === startDelim.token + 1 &&
-               delimiters[startDelim.end - 1].token === endDelim.token - 1 &&
-               delimiters[i + 1].marker === startDelim.marker;
+    isStrong = i - 1 >= 0 &&
+               delimiters[i - 1].end === startDelim.end + 1 &&
+               delimiters[i - 1].token === startDelim.token - 1 &&
+               delimiters[startDelim.end + 1].token === endDelim.token + 1 &&
+               delimiters[i - 1].marker === startDelim.marker;
 
     ch = String.fromCharCode(startDelim.marker);
 
@@ -4947,9 +4948,9 @@ module.exports.postProcess = function emphasis(state) {
     token.content = '';
 
     if (isStrong) {
-      state.tokens[delimiters[i + 1].token].content = '';
-      state.tokens[delimiters[startDelim.end - 1].token].content = '';
-      i++;
+      state.tokens[delimiters[i - 1].token].content = '';
+      state.tokens[delimiters[startDelim.end + 1].token].content = '';
+      i--;
     }
   }
 };
@@ -5205,7 +5206,7 @@ module.exports = function image(state, silent) {
     //
     // Link reference
     //
-    if (typeof state.env.references === 'undefined') { return false; }
+    if (typeof state.env === 'undefined' || typeof state.env.references === 'undefined') { return false; }
 
     if (pos < max && state.src.charCodeAt(pos) === 0x5B/* [ */) {
       start = pos + 1;
@@ -5362,9 +5363,7 @@ module.exports = function link(state, silent) {
     //
     // Link reference
     //
-    if (typeof state.env === 'undefined' || typeof state.env.references === 'undefined') {
-      return false;
-    }
+    if (typeof state.env === 'undefined' || typeof state.env.references === 'undefined') { return false; }
 
     if (pos < max && state.src.charCodeAt(pos) === 0x5B/* [ */) {
       start = pos + 1;
