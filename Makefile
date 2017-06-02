@@ -15,7 +15,7 @@ GITHUB_PROJ := https://github.com//markdown-it/${NPM_PACKAGE}
 build: lint browserify doc test demo todo 
 
 demo: lint
-	rm -rf ./demo
+	-rm -rf ./demo
 	mkdir ./demo
 	./support/demodata.js > ./support/demo_template/sample.json
 	jade ./support/demo_template/index.jade --pretty \
@@ -79,7 +79,7 @@ publish:
 	npm publish ${GITHUB_PROJ}/tarball/${NPM_VERSION}
 
 browserify:
-	rm -rf ./dist
+	-rm -rf ./dist
 	mkdir dist
 	# Browserify
 	( printf "/*! ${NPM_PACKAGE} ${NPM_VERSION} ${GITHUB_PROJ} @license MIT */" ; \
