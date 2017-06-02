@@ -20,6 +20,7 @@
 *.md            text eol=lf
 *.markdown      text eol=lf
 *.json5         text eol=lf
+Makefile        text eol=lf
 
 *.pdf			binary
 *.psd			binary
