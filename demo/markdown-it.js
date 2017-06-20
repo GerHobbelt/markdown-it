@@ -203,7 +203,7 @@ function replaceEntityPattern(match, name) {
   if (name.charCodeAt(0) === 0x23/* # */ && DIGITAL_ENTITY_TEST_RE.test(name)) {
     code = name[1].toLowerCase() === 'x' ?
       parseInt(name.slice(2), 16)
-    :
+      :
       parseInt(name.slice(1), 10);
     if (isValidEntityCode(code)) {
       return fromCodePoint(code);
@@ -4382,34 +4382,34 @@ function replace_rare(inlineTokens) {
     if (token.type === 'text' && !inside_autolink) {
       if (RARE_RE.test(token.content)) {
         token.content = token.content
-                    .replace(/\+-/g, '±')
-                    // .., ..., ....... -> …
-                    // but ?..... & !..... -> ?.. & !..
-                    .replace(/\.{2,}/g, '…').replace(/([?!])…/g, '$1..')
-                    .replace(/([?!]){4,}/g, '$1$1$1').replace(/,{2,}/g, ',')
-                    // <-->
-                    .replace(/(^|\s)<-->(\s|$)/mg, '$1\u2194$2')
-                    .replace(/(^|[^<\s])<-->([^>\s]|$)/mg, '$1\u2194$2')
-                    // -->
-                    .replace(/(^|\s)-->(\s|$)/mg, '$1\u2192$2')
-                    .replace(/(^|[^-\s])-->([^>\s]|$)/mg, '$1\u2192$2')
-                    // -->
-                    .replace(/(^|\s)<--(\s|$)/mg, '$1\u2190$2')
-                    .replace(/(^|[^<\s])<--([^-\s]|$)/mg, '$1\u2190$2')
-                    // <==>
-                    .replace(/(^|\s)<==>(\s|$)/mg, '$1\u21d4$2')
-                    .replace(/(^|[^<\s])<==>([^>\s]|$)/mg, '$1\u21d4$2')
-                    // ==>
-                    .replace(/(^|\s)==>(\s|$)/mg, '$1\u21d2$2')
-                    .replace(/(^|[^=\s])==>([^>\s]|$)/mg, '$1\u21d2$2')
-                    // -->
-                    .replace(/(^|\s)<==(\s|$)/mg, '$1\u21d0$2')
-                    .replace(/(^|[^<\s])<==([^=\s]|$)/mg, '$1\u21d0$2')
-                    // em-dash
-                    .replace(/(^|[^-])---([^-]|$)/mg, '$1\u2014$2')
-                    // en-dash
-                    .replace(/(^|\s)--(\s|$)/mg, '$1\u2013$2')
-                    .replace(/(^|[^-\s,\/])--([^-\s,\/]|$)/mg, '$1\u2013$2');
+          .replace(/\+-/g, '±')
+          // .., ..., ....... -> …
+          // but ?..... & !..... -> ?.. & !..
+          .replace(/\.{2,}/g, '…').replace(/([?!])…/g, '$1..')
+          .replace(/([?!]){4,}/g, '$1$1$1').replace(/,{2,}/g, ',')
+          // <-->
+          .replace(/(^|\s)<-->(\s|$)/mg, '$1\u2194$2')
+          .replace(/(^|[^<\s])<-->([^>\s]|$)/mg, '$1\u2194$2')
+          // -->
+          .replace(/(^|\s)-->(\s|$)/mg, '$1\u2192$2')
+          .replace(/(^|[^-\s])-->([^>\s]|$)/mg, '$1\u2192$2')
+          // -->
+          .replace(/(^|\s)<--(\s|$)/mg, '$1\u2190$2')
+          .replace(/(^|[^<\s])<--([^-\s]|$)/mg, '$1\u2190$2')
+          // <==>
+          .replace(/(^|\s)<==>(\s|$)/mg, '$1\u21d4$2')
+          .replace(/(^|[^<\s])<==>([^>\s]|$)/mg, '$1\u21d4$2')
+          // ==>
+          .replace(/(^|\s)==>(\s|$)/mg, '$1\u21d2$2')
+          .replace(/(^|[^=\s])==>([^>\s]|$)/mg, '$1\u21d2$2')
+          // -->
+          .replace(/(^|\s)<==(\s|$)/mg, '$1\u21d0$2')
+          .replace(/(^|[^<\s])<==([^=\s]|$)/mg, '$1\u21d0$2')
+          // em-dash
+          .replace(/(^|[^-])---([^-]|$)/mg, '$1\u2014$2')
+          // en-dash
+          .replace(/(^|\s)--(\s|$)/mg, '$1\u2013$2')
+          .replace(/(^|[^-\s,\/])--([^-\s,\/]|$)/mg, '$1\u2013$2');
       }
     }
 
@@ -4767,8 +4767,8 @@ module.exports = function backtick(state, silent) {
         token         = state.push('code_inline', 'code', 0);
         token.markup  = marker;
         token.content = state.src.slice(pos, matchStart)
-                                 .replace(/[ \n]+/g, ' ')
-                                 .trim();
+          .replace(/[ \n]+/g, ' ')
+          .trim();
       }
       state.pos = matchEnd;
       return true;
