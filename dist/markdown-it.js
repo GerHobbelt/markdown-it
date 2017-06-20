@@ -3737,8 +3737,7 @@ function StateBlock(src, md, env, tokens) {
   this.bsCount = [];
 
   // block parser variables
-  this.blkIndent  = 0; // required block content indent
-  // (for example, if we are in list)
+  this.blkIndent  = 0; // required block content indent (for example, if we are in list)
   this.line       = 0; // line index in src
   this.lineMax    = 0; // lines count
   this.tight      = false;  // loose/tight mode for lists
@@ -5482,8 +5481,7 @@ function StateInline(src, md, env, outTokens) {
   this.pending = '';
   this.pendingLevel = 0;
 
-  this.cache = {};        // Stores { start: end } pairs. Useful for backtrack
-  // optimization of pairs parse (emphasis, strikes).
+  this.cache = {};        // Stores { start: end } pairs. Useful for backtrack optimization of pairs parse (emphasis, strikes).
 
   this.delimiters = [];   // Emphasis-like delimiters
 }
