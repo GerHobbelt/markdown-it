@@ -1776,7 +1776,7 @@ default_rules.fence = function (tokens, idx, options, env, slf) {
     return highlighted + '\n';
   }
 
-  // If language exists, inject class gently, without mudofying original token.
+  // If language exists, inject class gently, without modifying original token.
   // May be, one day we will add .clone() for token and simplify this part, but
   // now we prefer to keep things local.
   if (info) {
@@ -5005,7 +5005,7 @@ module.exports = function entity(state, silent) {
 };
 
 },{"../common/entities":1,"../common/utils":4}],42:[function(require,module,exports){
-// Proceess escaped chars and hardbreaks
+// Process escaped chars and hardbreaks
 
 'use strict';
 
