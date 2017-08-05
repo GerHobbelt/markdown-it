@@ -86,6 +86,7 @@ rules:
   no-loop-func:           2
   no-mixed-requires:      2
   no-mixed-spaces-and-tabs: 2
+  no-multi-str:         2
   # Postponed
   #no-native-reassign:     2
   no-negated-in-lhs:      2
@@ -105,6 +106,7 @@ rules:
   # Postponed
   #no-regex-spaces:        2
   no-return-assign:       2
+  no-script-url:        2
   no-self-compare:        2
   no-sequences:           2
   no-shadow:              2
@@ -127,6 +129,7 @@ rules:
   #operator-linebreak:     [ 2, after ]
   semi:                   2
   semi-spacing:           2
+  space-before-blocks:  2
   space-before-function-paren: [ 2, { "anonymous": "always", "named": "never" } ]
   space-in-parens:        [ 2, never ]
   space-infix-ops:        2
