@@ -12,7 +12,7 @@ CURR_HEAD   := $(firstword $(shell git show-ref --hash HEAD | cut -b -6) master)
 GITHUB_PROJ := https://github.com//markdown-it/${NPM_PACKAGE}
 
 
-build: lint browserify doc test demo todo 
+build: lint browserify doc test coverage demo todo 
 
 demo: lint
 	-rm -rf ./demo
@@ -40,10 +40,8 @@ gh-demo: demo
 lint:
 	eslint .
 
-test: lint
+test: lint specsplit
 	mocha
-	echo "CommonMark stat:\n"
-	./support/specsplit.js test/fixtures/commonmark/spec.txt
 
 coverage:
 	-rm -rf coverage
@@ -113,5 +111,5 @@ clean:
 	-rm -rf ./apidoc/
 	-rm -rf ./dist/
 
-.PHONY: clean publish lint test todo demo coverage report-coverage doc build browserify minify gh-demo gh-doc
+.PHONY: clean publish lint test todo demo coverage report-coverage doc build browserify minify gh-demo gh-doc specsplit
 .SILENT: help lint test todo
