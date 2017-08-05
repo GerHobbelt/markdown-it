@@ -1,4 +1,4 @@
-/*! markdown-it 8.3.2-10 https://github.com//markdown-it/markdown-it @license MIT */(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.markdownit = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+/*! markdown-it 8.3.3-11 https://github.com//markdown-it/markdown-it @license MIT */(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.markdownit = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 // HTML5 entities map: { name -> utf16string }
 //
 'use strict';
@@ -267,9 +267,9 @@ function escapeRE(str) {
 
 function isSpace(code) {
   switch (code) {
-    case 0x09:
-    case 0x20:
-      return true;
+  case 0x09:
+  case 0x20:
+    return true;
   }
   return false;
 }
@@ -278,18 +278,18 @@ function isSpace(code) {
 function isWhiteSpace(code) {
   if (code >= 0x2000 && code <= 0x200A) { return true; }
   switch (code) {
-    case 0x09: // \t
-    case 0x0A: // \n
-    case 0x0B: // \v
-    case 0x0C: // \f
-    case 0x0D: // \r
-    case 0x20:
-    case 0xA0:
-    case 0x1680:
-    case 0x202F:
-    case 0x205F:
-    case 0x3000:
-      return true;
+  case 0x09: // \t
+  case 0x0A: // \n
+  case 0x0B: // \v
+  case 0x0C: // \f
+  case 0x0D: // \r
+  case 0x20:
+  case 0xA0:
+  case 0x1680:
+  case 0x202F:
+  case 0x205F:
+  case 0x3000:
+    return true;
   }
   return false;
 }
@@ -314,41 +314,41 @@ function isPunctChar(ch) {
 //
 function isMdAsciiPunct(ch) {
   switch (ch) {
-    case 0x21/* ! */:
-    case 0x22/* " */:
-    case 0x23/* # */:
-    case 0x24/* $ */:
-    case 0x25/* % */:
-    case 0x26/* & */:
-    case 0x27/* ' */:
-    case 0x28/* ( */:
-    case 0x29/* ) */:
-    case 0x2A/* * */:
-    case 0x2B/* + */:
-    case 0x2C/* , */:
-    case 0x2D/* - */:
-    case 0x2E/* . */:
-    case 0x2F/* / */:
-    case 0x3A/* : */:
-    case 0x3B/* ; */:
-    case 0x3C/* < */:
-    case 0x3D/* = */:
-    case 0x3E/* > */:
-    case 0x3F/* ? */:
-    case 0x40/* @ */:
-    case 0x5B/* [ */:
-    case 0x5C/* \ */:
-    case 0x5D/* ] */:
-    case 0x5E/* ^ */:
-    case 0x5F/* _ */:
-    case 0x60/* ` */:
-    case 0x7B/* { */:
-    case 0x7C/* | */:
-    case 0x7D/* } */:
-    case 0x7E/* ~ */:
-      return true;
-    default:
-      return false;
+  case 0x21/* ! */:
+  case 0x22/* " */:
+  case 0x23/* # */:
+  case 0x24/* $ */:
+  case 0x25/* % */:
+  case 0x26/* & */:
+  case 0x27/* ' */:
+  case 0x28/* ( */:
+  case 0x29/* ) */:
+  case 0x2A/* * */:
+  case 0x2B/* + */:
+  case 0x2C/* , */:
+  case 0x2D/* - */:
+  case 0x2E/* . */:
+  case 0x2F/* / */:
+  case 0x3A/* : */:
+  case 0x3B/* ; */:
+  case 0x3C/* < */:
+  case 0x3D/* = */:
+  case 0x3E/* > */:
+  case 0x3F/* ? */:
+  case 0x40/* @ */:
+  case 0x5B/* [ */:
+  case 0x5C/* \ */:
+  case 0x5D/* ] */:
+  case 0x5E/* ^ */:
+  case 0x5F/* _ */:
+  case 0x60/* ` */:
+  case 0x7B/* { */:
+  case 0x7C/* | */:
+  case 0x7D/* } */:
+  case 0x7E/* ~ */:
+    return true;
+  default:
+    return false;
   }
 }
 
@@ -1183,7 +1183,7 @@ var _rules = [
   [ 'table',      require('./rules_block/table'),      [ 'paragraph', 'reference' ] ],
   [ 'code',       require('./rules_block/code') ],
   [ 'fence',      require('./rules_block/fence'),      [ 'paragraph', 'reference', 'blockquote', 'list' ] ],
-  [ 'blockquote', require('./rules_block/blockquote'), [ 'paragraph', 'reference', 'list' ] ],
+  [ 'blockquote', require('./rules_block/blockquote'), [ 'paragraph', 'reference', 'blockquote', 'list' ] ],
   [ 'hr',         require('./rules_block/hr'),         [ 'paragraph', 'reference', 'blockquote', 'list' ] ],
   [ 'list',       require('./rules_block/list'),       [ 'paragraph', 'reference', 'blockquote' ] ],
   [ 'reference',  require('./rules_block/reference') ],
@@ -2428,7 +2428,6 @@ module.exports = function blockquote(state, startLine, endLine, silent) {
       ch,
       i,
       initial,
-      isOutdented,
       l,
       lastLineEmpty,
       lines,
@@ -2444,6 +2443,7 @@ module.exports = function blockquote(state, startLine, endLine, silent) {
       terminate,
       terminatorRules,
       token,
+      wasOutdented,
       oldLineMax = state.lineMax,
       pos = state.bMarks[startLine] + state.tShift[startLine],
       max = state.eMarks[startLine];
@@ -2524,6 +2524,7 @@ module.exports = function blockquote(state, startLine, endLine, silent) {
 
   oldParentType = state.parentType;
   state.parentType = 'blockquote';
+  wasOutdented = false;
 
   // Search the end of the block
   //
@@ -2552,7 +2553,7 @@ module.exports = function blockquote(state, startLine, endLine, silent) {
     //    > current blockquote
     // 2. checking this line
     // ```
-    isOutdented = state.sCount[nextLine] < state.blkIndent;
+    if (state.sCount[nextLine] < state.blkIndent) wasOutdented = true;
 
     pos = state.bMarks[nextLine] + state.tShift[nextLine];
     max = state.eMarks[nextLine];
@@ -2562,7 +2563,7 @@ module.exports = function blockquote(state, startLine, endLine, silent) {
       break;
     }
 
-    if (state.src.charCodeAt(pos++) === 0x3E/* > */ && !isOutdented) {
+    if (state.src.charCodeAt(pos++) === 0x3E/* > */ && !wasOutdented) {
       // This line is inside the blockquote.
 
       // skip spaces after ">" and re-calculate offset
@@ -2661,8 +2662,6 @@ module.exports = function blockquote(state, startLine, endLine, silent) {
 
       break;
     }
-
-    if (isOutdented) break;
 
     oldBMarks.push(state.bMarks[nextLine]);
     oldBSCount.push(state.bsCount[nextLine]);
@@ -5723,32 +5722,32 @@ module.exports.postProcess = function strikethrough(state) {
 // http://spec.commonmark.org/0.15/#ascii-punctuation-character
 function isTerminatorChar(ch) {
   switch (ch) {
-    case 0x0A/* \n */:
-    case 0x21/* ! */:
-    case 0x23/* # */:
-    case 0x24/* $ */:
-    case 0x25/* % */:
-    case 0x26/* & */:
-    case 0x2A/* * */:
-    case 0x2B/* + */:
-    case 0x2D/* - */:
-    case 0x3A/* : */:
-    case 0x3C/* < */:
-    case 0x3D/* = */:
-    case 0x3E/* > */:
-    case 0x40/* @ */:
-    case 0x5B/* [ */:
-    case 0x5C/* \ */:
-    case 0x5D/* ] */:
-    case 0x5E/* ^ */:
-    case 0x5F/* _ */:
-    case 0x60/* ` */:
-    case 0x7B/* { */:
-    case 0x7D/* } */:
-    case 0x7E/* ~ */:
-      return true;
-    default:
-      return false;
+  case 0x0A/* \n */:
+  case 0x21/* ! */:
+  case 0x23/* # */:
+  case 0x24/* $ */:
+  case 0x25/* % */:
+  case 0x26/* & */:
+  case 0x2A/* * */:
+  case 0x2B/* + */:
+  case 0x2D/* - */:
+  case 0x3A/* : */:
+  case 0x3C/* < */:
+  case 0x3D/* = */:
+  case 0x3E/* > */:
+  case 0x40/* @ */:
+  case 0x5B/* [ */:
+  case 0x5C/* \ */:
+  case 0x5D/* ] */:
+  case 0x5E/* ^ */:
+  case 0x5F/* _ */:
+  case 0x60/* ` */:
+  case 0x7B/* { */:
+  case 0x7D/* } */:
+  case 0x7E/* ~ */:
+    return true;
+  default:
+    return false;
   }
 }
 
