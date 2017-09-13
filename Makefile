@@ -12,7 +12,7 @@ CURR_HEAD   := $(firstword $(shell git show-ref --hash HEAD | cut -b -6) master)
 GITHUB_PROJ := https://github.com//markdown-it/${NPM_PACKAGE}
 
 
-build: lint browserify doc test coverage demo todo 
+build: lint browserify doc test coverage demo todo
 
 demo: lint
 	-rm -rf ./demo
@@ -103,7 +103,7 @@ todo:
 	@echo "TODO list"
 	@echo "---------"
 	@echo ""
-	grep 'TODO' -n -r ./lib 2>/dev/null || test true
+	-grep 'TODO' -n -r ./ --exclude-dir=node_modules --exclude-dir=dist --exclude-dir=coverage --exclude=Makefile   2>/dev/null
 
 clean:
 	-rm -rf ./coverage/
@@ -111,5 +111,14 @@ clean:
 	-rm -rf ./apidoc/
 	-rm -rf ./dist/
 
-.PHONY: clean publish lint test todo demo coverage report-coverage doc build browserify minify gh-demo gh-doc specsplit
+superclean: clean
+	-rm -rf ./node_modules/
+	-rm -f ./package-lock.json
+
+prep: superclean
+	-ncu -a --packageFile=package.json
+	-npm install
+
+
+.PHONY: clean superclean publish lint test todo demo coverage report-coverage doc build browserify minify gh-demo gh-doc specsplit
 .SILENT: help lint test todo
