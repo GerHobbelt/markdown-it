@@ -64,10 +64,8 @@ module.exports = [
   'option',
   'p',
   'param',
-  'pre',
   'section',
   'source',
-  'title',
   'summary',
   'table',
   'tbody',
@@ -462,14 +460,15 @@ module.exports = function parseLinkDestination(str, pos, max) {
     }
 
     if (code === 0x29 /* ) */) {
+      if (level === 0) { break; }
       level--;
-      if (level < 0) { break; }
     }
 
     pos++;
   }
 
   if (start === pos) { return result; }
+  if (level !== 0) { return result; }
 
   result.str = unescapeAll(str.slice(start, pos));
   result.lines = lines;
@@ -4918,12 +4917,12 @@ module.exports.postProcess = function emphasis(state) {
 
     endDelim = delimiters[startDelim.end];
 
-    // If the next delimiter has the same marker and is adjacent to this one,
+    // If the previous delimiter has the same marker and is adjacent to this one,
     // merge those into one strong delimiter.
     //
     // `<em><em>whatever</em></em>` -> `<strong>whatever</strong>`
     //
-    isStrong = i - 1 >= 0 &&
+    isStrong = i > 0 &&
                delimiters[i - 1].end === startDelim.end + 1 &&
                delimiters[i - 1].token === startDelim.token - 1 &&
                delimiters[startDelim.end + 1].token === endDelim.token + 1 &&
