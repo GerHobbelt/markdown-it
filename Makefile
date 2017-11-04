@@ -74,7 +74,7 @@ publish:
 		exit 128 ; \
 		fi
 	git tag ${NPM_VERSION} && git push origin ${NPM_VERSION}
-	npm publish ${GITHUB_PROJ}/tarball/${NPM_VERSION}
+	npm run pub
 
 browserify:
 	-rm -rf ./dist
@@ -103,7 +103,7 @@ todo:
 	@echo "TODO list"
 	@echo "---------"
 	@echo ""
-	-grep 'TODO' -n -r ./ --exclude-dir=node_modules --exclude-dir=dist --exclude-dir=coverage --exclude=Makefile   2>/dev/null
+	grep 'TODO' -n -r ./ --exclude-dir=node_modules --exclude-dir=dist --exclude-dir=coverage --exclude=Makefile 2>/dev/null || test true
 
 clean:
 	-rm -rf ./coverage/
@@ -120,5 +120,5 @@ prep: superclean
 	-npm install
 
 
-.PHONY: clean superclean publish lint test todo demo coverage report-coverage doc build browserify minify gh-demo gh-doc specsplit
+.PHONY: clean superclean prep publish lint test todo demo coverage report-coverage doc build browserify minify gh-demo gh-doc specsplit
 .SILENT: help lint test todo
