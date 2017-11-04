@@ -21,7 +21,7 @@
   "scripts": {
     "build": "make",
     "test": "make test",
-    "pub": "npm run publish --access public"
+    "pub": "npm publish --access public"
   },
   "files": [
     "index.js",
