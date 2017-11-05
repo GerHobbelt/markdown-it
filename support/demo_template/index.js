@@ -130,25 +130,25 @@ function mdInit() {
     mdSrc = window.markdownit('commonmark');
   } else {
     mdHtml = window.markdownit(defaults)
-      .use(require('markdown-it-abbr'))
-      .use(require('markdown-it-container'), 'warning')
-      .use(require('markdown-it-deflist'))
-      .use(require('markdown-it-emoji'))
-      .use(require('markdown-it-footnote'))
-      .use(require('markdown-it-ins'))
-      .use(require('markdown-it-mark'))
-      .use(require('markdown-it-sub'))
-      .use(require('markdown-it-sup'));
+      .use(require('@gerhobbelt/markdown-it-abbr'))
+      .use(require('@gerhobbelt/markdown-it-container'), 'warning')
+      .use(require('@gerhobbelt/markdown-it-deflist'))
+      .use(require('@gerhobbelt/markdown-it-emoji'))
+      .use(require('@gerhobbelt/markdown-it-footnote'))
+      .use(require('@gerhobbelt/markdown-it-ins'))
+      .use(require('@gerhobbelt/markdown-it-mark'))
+      .use(require('@gerhobbelt/markdown-it-sub'))
+      .use(require('@gerhobbelt/markdown-it-sup'));
     mdSrc = window.markdownit(defaults)
-      .use(require('markdown-it-abbr'))
-      .use(require('markdown-it-container'), 'warning')
-      .use(require('markdown-it-deflist'))
-      .use(require('markdown-it-emoji'))
-      .use(require('markdown-it-footnote'))
-      .use(require('markdown-it-ins'))
-      .use(require('markdown-it-mark'))
-      .use(require('markdown-it-sub'))
-      .use(require('markdown-it-sup'));
+      .use(require('@gerhobbelt/markdown-it-abbr'))
+      .use(require('@gerhobbelt/markdown-it-container'), 'warning')
+      .use(require('@gerhobbelt/markdown-it-deflist'))
+      .use(require('@gerhobbelt/markdown-it-emoji'))
+      .use(require('@gerhobbelt/markdown-it-footnote'))
+      .use(require('@gerhobbelt/markdown-it-ins'))
+      .use(require('@gerhobbelt/markdown-it-mark'))
+      .use(require('@gerhobbelt/markdown-it-sub'))
+      .use(require('@gerhobbelt/markdown-it-sup'));
   }
 
   // Beautify output of parser for html content

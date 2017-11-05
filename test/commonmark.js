@@ -2,7 +2,7 @@
 
 
 var p      = require('path');
-var load   = require('markdown-it-testgen').load;
+var load   = require('@gerhobbelt/markdown-it-testgen').load;
 var assert = require('chai').assert;
 
 

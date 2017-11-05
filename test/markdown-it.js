@@ -4,7 +4,7 @@
 var path = require('path');
 
 
-var generate = require('markdown-it-testgen');
+var generate = require('@gerhobbelt/markdown-it-testgen');
 
 
 describe('markdown-it', function () {
