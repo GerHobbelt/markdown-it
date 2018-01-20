@@ -1508,9 +1508,9 @@ ParserInline.prototype.tokenize = function (state) {
  *
  * Process input string and push inline tokens into `outTokens`
  **/
-ParserInline.prototype.parse = function (str, md, env, outTokens) {
+ParserInline.prototype.parse = function (str, md, env, outTokens, srcPos) {
   var i, rules, len;
-  var state = new this.State(str, md, env, outTokens);
+  var state = new this.State(str, md, env, outTokens, srcPos);
 
   this.tokenize(state);
 
@@ -1865,7 +1865,7 @@ function Renderer() {
    * var result = md.renderInline(...);
    * ```
    *
-   * Each rule is called as independed static function with fixed signature:
+   * Each rule is called as independent static function with fixed signature:
    *
    * ```javascript
    * function my_token_render(tokens, idx, options, env, renderer) {
@@ -2836,7 +2836,7 @@ var isSpace = require('../common/utils').isSpace;
 
 
 module.exports = function heading(state, startLine, endLine, silent) {
-  var ch, level, tmp, token,
+  var ch, level, tmp, token, content,
       pos = state.bMarks[startLine] + state.tShift[startLine],
       max = state.eMarks[startLine];
 
@@ -2867,6 +2867,8 @@ module.exports = function heading(state, startLine, endLine, silent) {
     max = tmp;
   }
 
+  content = state.src.slice(pos, max);
+
   state.line = startLine + 1;
 
   token        = state.push('heading_open', 'h' + String(level), 1);
@@ -2874,8 +2876,9 @@ module.exports = function heading(state, startLine, endLine, silent) {
   token.map    = [ startLine, state.line ];
 
   token          = state.push('inline', '', 0);
-  token.content  = state.src.slice(pos, max).trim();
+  token.content  = content.trim();
   token.map      = [ startLine, state.line ];
+  token.srcPos   = pos + content.indexOf(content.trim());
   token.children = [];
 
   token        = state.push('heading_close', 'h' + String(level), -1);
@@ -3071,7 +3074,7 @@ module.exports = function lheading(state, startLine, endLine/*, silent*/) {
     return false;
   }
 
-  content = state.getLines(startLine, nextLine, state.blkIndent, false).trim();
+  content = state.getLines(startLine, nextLine, state.blkIndent, false);
 
   state.line = nextLine + 1;
 
@@ -3080,8 +3083,9 @@ module.exports = function lheading(state, startLine, endLine/*, silent*/) {
   token.map      = [ startLine, state.line ];
 
   token          = state.push('inline', '', 0);
-  token.content  = content;
+  token.content  = content.trim();
   token.map      = [ startLine, state.line - 1 ];
+  token.srcPos   = state.bMarks[startLine] + content.indexOf(content.trim());
   token.children = [];
 
   token          = state.push('heading_close', 'h' + String(level), -1);
@@ -3465,7 +3469,7 @@ module.exports = function paragraph(state, startLine/*, endLine*/) {
     if (terminate) { break; }
   }
 
-  content = state.getLines(startLine, nextLine, state.blkIndent, false).trim();
+  content = state.getLines(startLine, nextLine, state.blkIndent, false);
 
   state.line = nextLine;
 
@@ -3473,8 +3477,9 @@ module.exports = function paragraph(state, startLine/*, endLine*/) {
   token.map      = [ startLine, state.line ];
 
   token          = state.push('inline', '', 0);
-  token.content  = content;
+  token.content  = content.trim();
   token.map      = [ startLine, state.line ];
+  token.srcPos   = state.bMarks[startLine] + content.indexOf(content.trim());
   token.children = [];
 
   token          = state.push('paragraph_close', 'p', -1);
@@ -3931,7 +3936,7 @@ function getLine(state, line) {
   return state.src.substr(pos, max - pos);
 }
 
-function escapedSplit(str) {
+function escapedSplit(str, positions) {
   var result = [],
       pos = 0,
       max = str.length,
@@ -3956,6 +3961,7 @@ function escapedSplit(str) {
       }
     } else if (ch === 0x7c/* | */ && (escapes % 2 === 0) && !backTicked) {
       result.push(str.substring(lastPos, pos));
+      positions.push(lastPos);
       lastPos = pos + 1;
     }
 
@@ -3978,14 +3984,15 @@ function escapedSplit(str) {
   }
 
   result.push(str.substring(lastPos));
+  positions.push(lastPos);
 
   return result;
 }
 
 
 module.exports = function table(state, startLine, endLine, silent) {
-  var ch, lineText, pos, i, nextLine, columns, columnCount, token,
-      aligns, t, tableLines, tbodyLines;
+  var ch, lineText, lineTextReplaced, pos, i, nextLine, columns, columnCount, token,
+      aligns, t, tableLines, tbodyLines, positions;
 
   // should have at least two lines
   if (startLine + 2 > endLine) { return false; }
@@ -4044,7 +4051,10 @@ module.exports = function table(state, startLine, endLine, silent) {
   lineText = getLine(state, startLine).trim();
   if (lineText.indexOf('|') === -1) { return false; }
   if (state.sCount[startLine] - state.blkIndent >= 4) { return false; }
-  columns = escapedSplit(lineText.replace(/^\||\|$/g, ''));
+  lineTextReplaced = lineText.replace(/^\||\|$/g, '');
+  pos = state.bMarks[startLine] + lineText.indexOf(lineTextReplaced);
+  positions = [];
+  columns = escapedSplit(lineTextReplaced, positions);
 
   // header row will define an amount of columns in the entire table,
   // and align row shouldn't be smaller than that (the rest of the rows can)
@@ -4072,6 +4082,7 @@ module.exports = function table(state, startLine, endLine, silent) {
     token          = state.push('inline', '', 0);
     token.content  = columns[i].trim();
     token.map      = [ startLine, startLine + 1 ];
+    token.srcPos   = pos + positions[i] + columns[i].indexOf(columns[i].trim());
     token.children = [];
 
     token          = state.push('th_close', 'th', -1);
@@ -4089,7 +4100,10 @@ module.exports = function table(state, startLine, endLine, silent) {
     lineText = getLine(state, nextLine).trim();
     if (lineText.indexOf('|') === -1) { break; }
     if (state.sCount[nextLine] - state.blkIndent >= 4) { break; }
-    columns = escapedSplit(lineText.replace(/^\||\|$/g, ''));
+    lineTextReplaced = lineText.replace(/^\||\|$/g, '');
+    pos = state.bMarks[nextLine] + lineText.indexOf(lineTextReplaced);
+    positions = [];
+    columns = escapedSplit(lineTextReplaced, positions);
 
     token = state.push('tr_open', 'tr', 1);
     for (i = 0; i < columnCount; i++) {
@@ -4100,6 +4114,7 @@ module.exports = function table(state, startLine, endLine, silent) {
 
       token          = state.push('inline', '', 0);
       token.content  = columns[i] ? columns[i].trim() : '';
+      token.srcPos   = pos + positions[i] + (columns[i] ? columns[i].indexOf(columns[i].trim()) : 0);
       token.children = [];
 
       token          = state.push('td_close', 'td', -1);
@@ -4125,6 +4140,7 @@ module.exports = function block(state) {
     token          = new state.Token('inline', '', 0);
     token.content  = state.src;
     token.map      = [ 0, 1 ];
+    token.srcPos   = 0;
     token.children = [];
     state.tokens.push(token);
   } else {
@@ -4142,7 +4158,7 @@ module.exports = function inline(state) {
   for (i = 0, l = tokens.length; i < l; i++) {
     tok = tokens[i];
     if (tok.type === 'inline') {
-      state.md.inline.parse(tok.content, state.md, state.env, tok.children);
+      state.md.inline.parse(tok.content, state.md, state.env, tok.children, tok.srcPos ? tok.srcPos : 0);
     }
   }
 };
@@ -5439,11 +5455,12 @@ var isPunctChar    = require('../common/utils').isPunctChar;
 var isMdAsciiPunct = require('../common/utils').isMdAsciiPunct;
 
 
-function StateInline(src, md, env, outTokens) {
+function StateInline(src, md, env, outTokens, srcPos) {
   this.src = src;
   this.env = env;
   this.md = md;
   this.tokens = outTokens;
+  this.srcPos = srcPos;
 
   this.pos = 0;
   this.posMax = this.src.length;
@@ -5463,6 +5480,7 @@ function StateInline(src, md, env, outTokens) {
 StateInline.prototype.pushPending = function () {
   var token = new Token('text', '', 0);
   token.content = this.pending;
+  token.srcPos = this.srcPos + this.pos - this.pending.length;
   token.level = this.pendingLevel;
   this.tokens.push(token);
   this.pending = '';
@@ -5792,6 +5810,9 @@ module.exports = function text_collapse(state) {
 
       // collapse two adjacent text nodes
       tokens[curr + 1].content = tokens[curr].content + tokens[curr + 1].content;
+      if (typeof tokens[curr].srcPos !== 'undefined') {
+        tokens[curr + 1].srcPos = tokens[curr].srcPos;
+      }
     } else {
       if (curr !== last) { tokens[last] = tokens[curr]; }
 
