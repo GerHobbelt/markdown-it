@@ -1766,7 +1766,7 @@ default_rules.fence = function (tokens, idx, options, env, slf) {
   }
 
   if (options.highlight) {
-    highlighted = options.highlight(token.content, langName) || escapeHtml(token.content);
+    highlighted = options.highlight(token.content, langName, info) || escapeHtml(token.content);
   } else {
     highlighted = escapeHtml(token.content);
   }
@@ -5364,7 +5364,7 @@ module.exports = function link(state, silent) {
     //
     // Link reference
     //
-    if (typeof state.env === 'undefined' || typeof state.env.references === 'undefined') { return false; }
+    if (!state.env || typeof state.env.references === 'undefined') { return false; }
 
     if (pos < max && state.src.charCodeAt(pos) === 0x5B/* [ */) {
       start = pos + 1;
