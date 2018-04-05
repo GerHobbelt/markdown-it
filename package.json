@@ -43,15 +43,15 @@
     "benchmark": "2.1.4",
     "browserify": "16.1.1",
     "chai": "4.1.2",
-    "eslint": "4.18.2",
-    "express": "4.16.2",
+    "eslint": "4.19.1",
+    "express": "4.16.3",
     "highlight.js": "9.12.0",
     "istanbul": "0.4.5",
     "jade": "1.11.0",
     "@gerhobbelt/markdown-it-abbr": "1.0.4-12",
     "@gerhobbelt/markdown-it-container": "2.0.1-3",
     "@gerhobbelt/markdown-it-deflist": "2.0.4-1",
-    "@gerhobbelt/markdown-it-emoji": "1.2.1-3",
+    "@gerhobbelt/markdown-it-emoji": "1.2.1-5",
     "@gerhobbelt/markdown-it-footnote": "3.0.2-3",
     "@gerhobbelt/markdown-it-for-inline": "0.1.2-1",
     "@gerhobbelt/markdown-it-ins": "2.0.1-1",
@@ -59,10 +59,10 @@
     "@gerhobbelt/markdown-it-sub": "1.0.1-5",
     "@gerhobbelt/markdown-it-sup": "1.0.1-4",
     "@gerhobbelt/markdown-it-testgen": "0.1.5-5",
-    "mocha": "5.0.4",
+    "mocha": "5.0.5",
     "ndoc": "5.0.1",
     "stylus": "0.54.5",
     "supertest": "3.0.0",
-    "uglify-js": "3.3.14"
+    "uglify-js": "3.3.18"
   }
 }
