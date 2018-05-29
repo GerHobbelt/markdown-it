@@ -80,7 +80,7 @@ publish:
 		exit 128 ; \
 		fi
 	git tag ${NPM_VERSION} && git push origin ${NPM_VERSION}
-	npm publish ${GITHUB_PROJ}/tarball/${NPM_VERSION}
+	npm publish ./
 
 browserify:
 	rm -rf ./dist
