@@ -1,6 +1,6 @@
 {
   "name": "@gerhobbelt/markdown-it",
-  "version": "8.4.1-19",
+  "version": "8.4.1-20",
   "description": "Markdown-it - modern pluggable markdown parser.",
   "keywords": [
     "markdown",
@@ -41,7 +41,7 @@
     "ansi": "0.3.1",
     "autoprefixer-stylus": "0.14.0",
     "benchmark": "2.1.4",
-    "browserify": "16.1.1",
+    "browserify": "16.2.2",
     "chai": "4.1.2",
     "eslint": "4.19.1",
     "express": "4.16.3",
@@ -59,10 +59,10 @@
     "@gerhobbelt/markdown-it-sub": "1.0.1-5",
     "@gerhobbelt/markdown-it-sup": "1.0.1-4",
     "@gerhobbelt/markdown-it-testgen": "0.1.5-5",
-    "mocha": "5.0.5",
+    "mocha": "5.2.0",
     "ndoc": "5.0.1",
     "stylus": "0.54.5",
-    "supertest": "3.0.0",
-    "uglify-js": "3.3.18"
+    "supertest": "3.1.0",
+    "uglify-js": "3.4.0"
   }
 }
