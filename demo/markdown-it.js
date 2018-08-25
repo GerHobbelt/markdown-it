@@ -5366,7 +5366,7 @@ module.exports = function link(state, silent) {
     //
     // Link reference
     //
-    if (!state.env || typeof state.env.references === 'undefined') { return false; }
+    if (typeof state.env === 'undefined' || typeof state.env.references === 'undefined') { return false; }
 
     if (pos < max && state.src.charCodeAt(pos) === 0x5B/* [ */) {
       start = pos + 1;
@@ -5743,6 +5743,7 @@ function isTerminatorChar(ch) {
   case 0x40/* @ */:
   case 0x5B/* [ */:
   case 0x5C/* \ */:
+  case 0x2F/* / */:
   case 0x5D/* ] */:
   case 0x5E/* ^ */:
   case 0x5F/* _ */:
