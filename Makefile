@@ -25,7 +25,7 @@ demo: lint
 		< ./support/demo_template/index.styl \
 		> ./demo/index.css
 	rm -rf ./support/demo_template/sample.json
-	browserify ./ -s markdownit > ./demo/markdown-it.js
+	browserify ./index.js -s markdownit > ./demo/markdown-it.js
 	browserify ./support/demo_template/index.js > ./demo/index.js
 	cp ./support/demo_template/README.md ./demo/
 	cp ./support/demo_template/test.html ./demo/
@@ -81,7 +81,7 @@ browserify:
 	mkdir dist
 	# Browserify
 	( printf "/*! ${NPM_PACKAGE} ${NPM_VERSION} ${GITHUB_PROJ} @license MIT */" ; \
-		browserify ./ -s markdownit \
+		browserify ./index.js -s markdownit \
 		) > dist/${NPM_PACKAGE}.js
 
 minify: browserify
