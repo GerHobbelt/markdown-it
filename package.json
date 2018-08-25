@@ -1,6 +1,6 @@
 {
   "name": "@gerhobbelt/markdown-it",
-  "version": "8.4.2-21",
+  "version": "8.4.2-22",
   "description": "Markdown-it - modern pluggable markdown parser.",
   "keywords": [
     "markdown",
@@ -56,6 +56,7 @@
     "@gerhobbelt/markdown-it-for-inline": "0.1.2-1",
     "@gerhobbelt/markdown-it-ins": "2.0.1-1",
     "@gerhobbelt/markdown-it-mark": "2.0.1-1",
+    "@gerhobbelt/markdown-it-mathjax": "2.0.1-3",
     "@gerhobbelt/markdown-it-sub": "1.0.1-5",
     "@gerhobbelt/markdown-it-sup": "1.0.1-4",
     "@gerhobbelt/markdown-it-testgen": "0.1.5-5",
@@ -63,6 +64,6 @@
     "ndoc": "5.0.1",
     "stylus": "0.54.5",
     "supertest": "3.1.0",
-    "uglify-js": "3.4.6"
+    "uglify-js": "3.4.7"
   }
 }
