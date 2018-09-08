@@ -2,3 +2,4 @@ benchmark/extra/
 node_modules/
 coverage/
 *.log
+/.nyc_output

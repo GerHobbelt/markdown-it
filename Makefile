@@ -45,7 +45,7 @@ test: lint specsplit
 
 coverage:
 	-rm -rf coverage
-	istanbul cover node_modules/mocha/bin/_mocha
+	node_modules/.bin/cross-env NODE_ENV=test node_modules/.bin/nyc node_modules/mocha/bin/_mocha
 
 report-coverage: coverage
 
