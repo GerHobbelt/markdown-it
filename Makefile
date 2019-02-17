@@ -40,6 +40,9 @@ gh-demo: demo
 lint:
 	eslint .
 
+fix:
+	eslint . --fix
+
 test: lint specsplit
 	mocha
 
@@ -120,5 +123,5 @@ prep: superclean
 	-npm install
 
 
-.PHONY: clean superclean prep publish lint test todo demo coverage report-coverage doc build browserify minify gh-demo gh-doc specsplit
+.PHONY: clean superclean prep publish lint fix test todo demo coverage report-coverage doc build browserify minify gh-demo gh-doc specsplit
 .SILENT: help lint test todo
