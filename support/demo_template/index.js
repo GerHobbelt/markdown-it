@@ -79,7 +79,7 @@ var defaults = {
 
   // modify-token plugin:
   modifyToken: function (token, env) {
-    console.log("TOKEN:", token);
+    console.log('TOKEN:', token, !!env);
     // switch (token.type) {
     // case 'image': // set all images to 200px width
     //   token.attrObj.width = '200px';
@@ -88,7 +88,7 @@ var defaults = {
     //   token.attrObj.target = '_blank'; // set all links to open in new window
     //   break;
     // }
-  },
+  }
 };
 
 defaults.highlight = function (str, lang) {
@@ -170,7 +170,7 @@ function usePlugins(md) {
   .use(require('@gerhobbelt/markdown-it-emoji'))
   .use(require('@gerhobbelt/markdown-it-fontawesome'))
   .use(require('@gerhobbelt/markdown-it-footnote'))
-  .use(require('@gerhobbelt/markdown-it-front-matter'), function processFrontMatter(fm) {        
+  .use(require('@gerhobbelt/markdown-it-front-matter'), function processFrontMatter(fm) {
     console.log('FrontMatter:', fm);
   })
   .use(require('@gerhobbelt/markdown-it-hashtag'))
@@ -189,14 +189,14 @@ function usePlugins(md) {
   .use(require('@gerhobbelt/markdown-it-modify-token'))
 
   .use(pick(
-    require('@gerhobbelt/markdown-it-prism'), 
+    require('@gerhobbelt/markdown-it-prism'),
     require('@gerhobbelt/markdown-it-highlighted'),
     require('@gerhobbelt/markdown-it-highlightjs')
   ))
 
-  .use(require('@gerhobbelt/markdown-it-responsive'), { 
+  .use(require('@gerhobbelt/markdown-it-responsive'), {
     responsive: {
-      'srcset': {
+      srcset: {
         'header-*': [ {
           width: 320,
           rename: {
@@ -209,7 +209,7 @@ function usePlugins(md) {
           }
         } ]
       },
-      'sizes': {
+      sizes: {
         'header-*': '(min-width: 36em) 33.3vw, 100vw'
       }
     }
