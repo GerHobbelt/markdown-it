@@ -744,7 +744,7 @@ function normalizeLinkText(url) {
  *   replacement](https://github.com/markdown-it/markdown-it/blob/master/lib/rules_core/replacements.js) +
  *   quotes beautification (smartquotes).
  * - __quotes__ - `“”‘’`, String or Array. Double + single quotes replacement
- *   pairs, when typographer enabled and smartquotes on. For example, you can
+ *   pairs (a.k.a. "smartquotes"), when typographer enabled. For example, you can
  *   use `'«»„“'` for Russian, `'„“‚‘'` for German, and
  *   `['«\xA0', '\xA0»', '‹\xA0', '\xA0›']` for French (including nbsp).
  * - __highlight__ - `null`. Highlighter function for fenced code blocks.
@@ -4347,6 +4347,15 @@ module.exports = function normalize(state) {
 
 var RARE_RE = /\+-|\.\.|\?\?\?\?|!!!!|,,|--|==/;
 
+var ARROW_REPLACEMENTS = {
+  '<-->': '\u2194',
+  '-->': '\u2192',
+  '<--': '\u2190',
+  '<==>': '\u21d4',
+  '==>': '\u21d2',
+  '<==': '\u21d0'
+};
+
 // Workaround for phantomjs - need regex without /g flag,
 // or root check will fail every second time
 var SCOPED_ABBR_TEST_RE = /\((c|tm|r|p)\)/i;
@@ -4386,6 +4395,13 @@ function replace_scoped(inlineTokens) {
 function replace_rare(inlineTokens) {
   var i, token, inside_autolink = 0;
 
+  function replace_arrow(m, p1, p2, p3) {
+    console.error('replace?',
+      { m:m, p1:p1, p2:p2, p3:p3,
+        repl: ARROW_REPLACEMENTS[p2], out: (ARROW_REPLACEMENTS[p2] || p2) });
+    return p1 + (ARROW_REPLACEMENTS[p2] || p2) + p3;
+  }
+
   for (i = inlineTokens.length - 1; i >= 0; i--) {
     token = inlineTokens[i];
 
@@ -4398,23 +4414,16 @@ function replace_rare(inlineTokens) {
           .replace(/\.{2,}/g, '…').replace(/([?!])…/g, '$1..')
           .replace(/([?!]){4,}/g, '$1$1$1').replace(/,{2,}/g, ',')
           // <-->
-          .replace(/(^|\s)<-->(\s|$)/mg, '$1\u2194$2')
-          .replace(/(^|[^<\s])<-->([^>\s]|$)/mg, '$1\u2194$2')
           // -->
-          .replace(/(^|\s)-->(\s|$)/mg, '$1\u2192$2')
-          .replace(/(^|[^-\s])-->([^>\s]|$)/mg, '$1\u2192$2')
           // -->
-          .replace(/(^|\s)<--(\s|$)/mg, '$1\u2190$2')
-          .replace(/(^|[^<\s])<--([^-\s]|$)/mg, '$1\u2190$2')
           // <==>
-          .replace(/(^|\s)<==>(\s|$)/mg, '$1\u21d4$2')
-          .replace(/(^|[^<\s])<==>([^>\s]|$)/mg, '$1\u21d4$2')
           // ==>
-          .replace(/(^|\s)==>(\s|$)/mg, '$1\u21d2$2')
-          .replace(/(^|[^=\s])==>([^>\s]|$)/mg, '$1\u21d2$2')
           // -->
-          .replace(/(^|\s)<==(\s|$)/mg, '$1\u21d0$2')
-          .replace(/(^|[^<\s])<==([^=\s]|$)/mg, '$1\u21d0$2')
+          .replace(/(^|[^<=-])([<]?(?:==|--)[>]?)([^>=-]|$)/mg, replace_arrow)
+          // and do it once more to catch input which overlaps in the detection
+          // regex, e.g. `<--x-->` where the `-->` will not be detected by
+          // the above `replace()` due to overlap at `x` in the rwuired match:
+          .replace(/(^|[^<=-])([<]?(?:==|--)[>]?)([^>=-]|$)/mg, replace_arrow)
           // em-dash
           .replace(/(^|[^-])---([^-]|$)/mg, '$1\u2014$2')
           // en-dash
@@ -4638,7 +4647,7 @@ module.exports = function smartquotes(state) {
   /*eslint max-depth:0*/
   var blkIdx;
 
-  if (!state.md.options.typographer || !state.md.options.smartQuotes) { return; }
+  if (!state.md.options.typographer) { return; }
 
   for (blkIdx = state.tokens.length - 1; blkIdx >= 0; blkIdx--) {
 
