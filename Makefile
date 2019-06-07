@@ -89,7 +89,7 @@ browserify:
 
 minify: browserify
 	# Minify
-	uglifyjs dist/${NPM_PACKAGE}.js -b beautify=false,ascii_only=true -c -m \
+	terser dist/${NPM_PACKAGE}.js -b beautify=false,ascii_only=true -c -m \
 		--preamble "/*! ${NPM_PACKAGE} ${NPM_VERSION} ${GITHUB_PROJ} @license MIT */" \
 		> dist/${NPM_PACKAGE}.min.js
 

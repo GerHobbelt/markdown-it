@@ -91,7 +91,7 @@
     "nyc": "13.1.0",
     "stylus": "0.54.5",
     "supertest": "3.3.0",
-    "uglify-js": "3.4.9"
+    "terser": "3.16.1"
   },
   "reporter": [
     "lcov",
