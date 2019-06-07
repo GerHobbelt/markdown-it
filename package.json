@@ -1,6 +1,6 @@
 {
   "name": "@gerhobbelt/markdown-it",
-  "version": "8.4.2-24",
+  "version": "8.4.2-25",
   "description": "Markdown-it - modern pluggable markdown parser.",
   "keywords": [
     "markdown",
@@ -33,10 +33,10 @@
   "dependencies": {
     "argparse": "1.0.10",
     "entities": "1.1.2",
-    "github-markdown-css": "2.10.0",
+    "github-markdown-css": "3.0.1",
     "linkify-it": "2.1.0",
     "mdurl": "1.0.1",
-    "uc.micro": "1.0.5"
+    "uc.micro": "1.0.6"
   },
   "devDependencies": {
     "@gerhobbelt/markdown-it-abbr": "1.0.4-12",
@@ -81,17 +81,17 @@
     "browserify": "16.2.3",
     "chai": "4.2.0",
     "cross-env": "5.2.0",
-    "eslint": "5.12.0",
-    "express": "4.16.4",
-    "highlight.js": "9.13.1",
+    "eslint": "5.16.0",
+    "express": "4.17.1",
+    "highlight.js": "9.15.8",
     "istanbul": "0.4.5",
     "jade": "1.11.0",
-    "mocha": "5.2.0",
+    "mocha": "6.1.4",
     "ndoc": "5.0.1",
-    "nyc": "13.1.0",
+    "nyc": "14.1.1",
     "stylus": "0.54.5",
-    "supertest": "3.3.0",
-    "terser": "3.16.1"
+    "supertest": "4.0.2",
+    "terser": "4.0.0"
   },
   "reporter": [
     "lcov",
