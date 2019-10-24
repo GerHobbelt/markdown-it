@@ -21,6 +21,13 @@
   "scripts": {
     "build": "make",
     "test": "make test",
+    "specsplit": "make specsplit",
+    "todo": "make todo",
+    "clean": "make clean",
+    "superclean": "make superclean",
+    "doc": "make doc",
+    "lint": "make lint",
+    "fix": "make fix",
     "cov": "cross-env NODE_ENV=test nyc mocha",
     "pub": "npm publish --access public"
   },
