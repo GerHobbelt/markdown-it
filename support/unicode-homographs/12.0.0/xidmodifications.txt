@@ -1,0 +1,24 @@
+﻿# Security Profile for General Identifiers
+# File: xidmodifications.txt
+# Version: 12.0.0
+#
+# For documentation and usage, see http://www.unicode.org/reports/tr39/
+#
+#  All code points not explicitly listed 
+#  have the values: Restricted; Not-Characters
+# @missing: 0000..10FFFF; Restricted ; Not-Characters
+
+
+#	Status/Type:	Recommended
+
+
+
+# ---------------------------------------------------------------------
+# Please see the file named 'IdentifierType.txt' instead.
+# That file has the same format as this one, but is the sole
+# reference since Unicode 9.0
+#
+# Also note the file named 'IdenfierStatus.txt': that one is
+# a trimmed derivative of 'IdentifierType.txt' but is less
+# strict in some details (inspect the differences to see what I mean).
+# ---------------------------------------------------------------------
