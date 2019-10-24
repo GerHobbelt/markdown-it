@@ -114,6 +114,18 @@ var md = require('markdown-it')({
                               // useful for external highlighters.
   linkify:      false,        // Autoconvert URL-like text to links
 
+  // highSecurity:
+  // - false:           lower protection against XSS/Unicode-Homologue/etc. attacks via the input MarkDown.
+  //                    This setting assumes you own or at least trust the Markdown
+  //                    being fed to MarkDonw-It. The result is a nicer render.
+  // - true (default):  maximum protection against XSS/Unicode-Homologue/etc. attacks via the input MarkDown.
+  //                    This is the default setting and assumes you have no control or absolute trust in the Markdown
+  //                    being fed to MarkDonw-It. Use this setting when using markdown-it as part of a forum or other
+  //                    website where more-or-less arbitrary users can enter and feed any MarkDown to markdown-it.
+  //
+  // See https://en.wikipedia.org/wiki/Internationalized_domain_name for details on homograph attacks, for example.
+  highSecurity: true,
+
   // Enable some language-neutral replacement + quotes beautification
   typographer:  false,
 

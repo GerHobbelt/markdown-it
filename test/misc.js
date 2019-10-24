@@ -245,14 +245,14 @@ describe('Misc', function () {
 describe('Url normalization', function () {
 
   it('Should be overridable', function () {
-    var md = markdownit({ linkify: true });
+    var md = markdownit({ linkify: true, highSecurity: false });
 
     md.normalizeLink = function (url) {
-      assert(url.match(/example\.com/), 'wrong url passed');
+      assert(url.match(/example\.com|xn--\w+\.net/), 'wrong url passed');
       return 'LINK';
     };
     md.normalizeLinkText = function (url) {
-      assert(url.match(/example\.com/), 'wrong url passed');
+      assert(url.match(/example\.com|xn--\w+\.net/), 'wrong url passed');
       return 'TEXT';
     };
 
@@ -262,6 +262,9 @@ describe('Url normalization', function () {
     assert.strictEqual(md.render('<http://example.com>'), '<p><a href="LINK">TEXT</a></p>\n');
     assert.strictEqual(md.render('[test](http://example.com)'), '<p><a href="LINK">test</a></p>\n');
     assert.strictEqual(md.render('![test](http://example.com)'), '<p><img src="LINK" alt="test"></p>\n');
+    assert.strictEqual(md.render('http://xn--gia.net/'), '<p><a href="LINK">TEXT</a></p>\n');
+    assert.strictEqual(md.render('http://xn--jxt.net/'), '<p><a href="LINK">TEXT</a></p>\n');
+    assert.strictEqual(md.render('http://xn--vt3a.net/'), '<p><a href="LINK">TEXT</a></p>\n');
   });
 
 });
@@ -280,8 +283,65 @@ describe('Links validation', function () {
     assert.strictEqual(md.render('<http://example.com>'), '<p>&lt;http://example.com&gt;</p>\n');
     assert.strictEqual(md.render('[test](http://example.com)'), '<p>[test](http://example.com)</p>\n');
     assert.strictEqual(md.render('![test](http://example.com)'), '<p>![test](http://example.com)</p>\n');
+    assert.strictEqual(md.render('http://xn--gia.net/'), '<p>http://xn--gia.net/</p>\n');
+    assert.strictEqual(md.render('http://xn--jxt.net/'), '<p>http://xn--jxt.net/</p>\n');
+    assert.strictEqual(md.render('http://xn--vt3a.net/'), '<p>http://xn--vt3a.net/</p>\n');
   });
 
+});
+
+
+describe('protects against Unicode Homolograph attacks', function () {
+
+  it('Should be overridable (disable security)', function () {
+    var md = markdownit({ linkify: true, highSecurity: false });
+
+    var oldNormLink = md.normalizeLink;
+    md.normalizeLink = function (url) {
+      assert(url.match(/example\.com|xn--\w+\.net/), 'wrong url passed');
+      return 'LINK=' + oldNormLink.call(this, url);
+    };
+    var oldNormLinkText = md.normalizeLinkText;
+    md.normalizeLinkText = function (url) {
+      assert(url.match(/example\.com|xn--\w+\.net/), 'wrong url passed');
+      return 'TEXT=' + oldNormLinkText.call(this, url);
+    };
+
+    assert.strictEqual(md.render('foo@example.com'), '<p><a href="LINK=mailto:foo@example.com">TEXT=mailto:foo@example.com</a></p>\n');
+    assert.strictEqual(md.render('http://example.com'), '<p><a href="LINK=http://example.com">TEXT=http://example.com</a></p>\n');
+    assert.strictEqual(md.render('<foo@example.com>'), '<p><a href="LINK=mailto:foo@example.com">TEXT=foo@example.com</a></p>\n');
+    assert.strictEqual(md.render('<http://example.com>'), '<p><a href="LINK=http://example.com">TEXT=http://example.com</a></p>\n');
+    assert.strictEqual(md.render('[test](http://example.com)'), '<p><a href="LINK=http://example.com">test</a></p>\n');
+    assert.strictEqual(md.render('![test](http://example.com)'), '<p><img src="LINK=http://example.com" alt="test"></p>\n');
+    assert.strictEqual(md.render('http://xn--gia.net/'), '<p><a href="LINK=http://xn--gia.net/">TEXT=http://ƞ.net/</a></p>\n');
+    assert.strictEqual(md.render('http://xn--jxt.net/'), '<p><a href="LINK=http://xn--jxt.net/">TEXT=http://庙.net/</a></p>\n');
+    assert.strictEqual(md.render('http://xn--vt3a.net/'), '<p><a href="LINK=http://xn--vt3a.net/">TEXT=http://跳.net/</a></p>\n');
+  });
+
+  it('Protection should be ENABLED by default', function () {
+    var md = markdownit({ linkify: true });
+
+    var oldNormLink = md.normalizeLink;
+    md.normalizeLink = function (url) {
+      assert(url.match(/example\.com|xn--\w+\.net/), 'wrong url passed');
+      return 'LINK=' + oldNormLink.call(this, url);
+    };
+    var oldNormLinkText = md.normalizeLinkText;
+    md.normalizeLinkText = function (url) {
+      assert(url.match(/example\.com|xn--\w+\.net/), 'wrong url passed');
+      return 'TEXT=' + oldNormLinkText.call(this, url);
+    };
+
+    assert.strictEqual(md.render('foo@example.com'), '<p><a href="LINK=mailto:foo@example.com">TEXT=mailto:foo@example.com</a></p>\n');
+    assert.strictEqual(md.render('http://example.com'), '<p><a href="LINK=http://example.com">TEXT=http://example.com</a></p>\n');
+    assert.strictEqual(md.render('<foo@example.com>'), '<p><a href="LINK=mailto:foo@example.com">TEXT=foo@example.com</a></p>\n');
+    assert.strictEqual(md.render('<http://example.com>'), '<p><a href="LINK=http://example.com">TEXT=http://example.com</a></p>\n');
+    assert.strictEqual(md.render('[test](http://example.com)'), '<p><a href="LINK=http://example.com">test</a></p>\n');
+    assert.strictEqual(md.render('![test](http://example.com)'), '<p><img src="LINK=http://example.com" alt="test"></p>\n');
+    assert.strictEqual(md.render('http://xn--gia.net/'), '<p><a href="LINK=http://xn--gia.net/">TEXT=http://xn--gia.net/</a></p>\n');
+    assert.strictEqual(md.render('http://xn--jxt.net/'), '<p><a href="LINK=http://xn--jxt.net/">TEXT=http://xn--jxt.net/</a></p>\n');
+    assert.strictEqual(md.render('http://xn--vt3a.net/'), '<p><a href="LINK=http://xn--vt3a.net/">TEXT=http://xn--vt3a.net/</a></p>\n');
+  });
 });
 
 

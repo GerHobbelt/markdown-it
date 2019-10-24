@@ -12,7 +12,8 @@ describe('markdown-it', function () {
     html: true,
     langPrefix: '',
     typographer: true,
-    linkify: true
+    linkify: true,
+    highSecurity: false
   });
 
   generate(path.join(__dirname, 'fixtures/markdown-it'), md);
