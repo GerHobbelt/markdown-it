@@ -93,10 +93,11 @@
     "eslint": "6.5.1",
     "express": "4.17.1",
     "highlight.js": "9.15.10",
-    "pug": "2.0.4",
     "mocha": "6.2.2",
     "ndoc": "5.0.1",
     "nyc": "14.1.1",
+    "pug": "2.0.4",
+    "pug-cli": "1.0.0-alpha6",
     "stylus": "0.54.7",
     "supertest": "4.0.2",
     "terser": "4.3.9"
