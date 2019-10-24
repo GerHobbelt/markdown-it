@@ -96,8 +96,19 @@ minify: browserify
 benchmark-deps:
 	npm install --prefix benchmark/extra/ -g marked@0.3.6 commonmark@0.26.0 markdown-it/markdown-it.git#2.2.1
 
-specsplit:
+specsplit: 											\
+			./test/fixtures/commonmark/good.txt     \
+			./test/fixtures/commonmark/bad.txt
+
+./test/fixtures/commonmark/good.txt : 				\
+			./support/specsplit.js 					\
+			./test/fixtures/commonmark/spec.txt
 	./support/specsplit.js good ./test/fixtures/commonmark/spec.txt > ./test/fixtures/commonmark/good.txt
+	./support/specsplit.js ./test/fixtures/commonmark/spec.txt
+
+./test/fixtures/commonmark/bad.txt :    			\
+			./support/specsplit.js 					\
+			./test/fixtures/commonmark/spec.txt 	
 	./support/specsplit.js bad ./test/fixtures/commonmark/spec.txt > ./test/fixtures/commonmark/bad.txt
 	./support/specsplit.js ./test/fixtures/commonmark/spec.txt
 
