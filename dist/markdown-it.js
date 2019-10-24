@@ -706,9 +706,18 @@ function normalizeLinkText(url) {
     // We don't encode unknown schemas, because it's likely that we encode
     // something we shouldn't (e.g. `skype:name` treated as `skype:host`)
     //
+    // Use "toASCII" instead of "toUNICODE" to avoid Unicode homograph attack.
+    // The original *unsafe* normalize action produces nicer URI presentations for
+    // punycode Unicode URIs; only use this setting when you can trust the input MarkDown
+    // fed into markdown-it.
+    // See https://en.wikipedia.org/wiki/Internationalized_domain_name for details.
     if (!parsed.protocol || RECODE_HOSTNAME_FOR.indexOf(parsed.protocol) >= 0) {
       try {
-        parsed.hostname = punycode.toUnicode(parsed.hostname);
+        if (this.options && !this.options.highSecurity) {
+          parsed.hostname = punycode.toUnicode(parsed.hostname);
+        } else {
+          parsed.hostname = punycode.toASCII(parsed.hostname);
+        }
       } catch (er) { /**/ }
     }
   }
@@ -1588,6 +1597,18 @@ module.exports = {
     langPrefix:   'language-',  // CSS language prefix for fenced blocks
     linkify:      false,        // autoconvert URL-like texts to links
 
+    // highSecurity:
+    // - false:           lower protection against XSS/Unicode-Homologue/etc. attacks via the input MarkDown.
+    //                    This setting assumes you own or at least trust the Markdown
+    //                    being fed to MarkDonw-It. The result is a nicer render.
+    // - true (default):  maximum protection against XSS/Unicode-Homologue/etc. attacks via the input MarkDown.
+    //                    This is the default setting and assumes you have no control or absolute trust in the Markdown
+    //                    being fed to MarkDonw-It. Use this setting when using markdown-it as part of a forum or other
+    //                    website where more-or-less arbitrary users can enter and feed any MarkDown to markdown-it.
+    //
+    // See https://en.wikipedia.org/wiki/Internationalized_domain_name for details on homograph attacks, for example.
+    highSecurity: true,
+
     // Enable some language-neutral replacements + quotes beautification
     typographer:  false,
 
@@ -1670,6 +1691,18 @@ module.exports = {
     langPrefix:   'language-',  // CSS language prefix for fenced blocks
     linkify:      false,        // autoconvert URL-like texts to links
 
+    // highSecurity:
+    // - false:           lower protection against XSS/Unicode-Homologue/etc. attacks via the input MarkDown.
+    //                    This setting assumes you own or at least trust the Markdown
+    //                    being fed to MarkDonw-It. The result is a nicer render.
+    // - true (default):  maximum protection against XSS/Unicode-Homologue/etc. attacks via the input MarkDown.
+    //                    This is the default setting and assumes you have no control or absolute trust in the Markdown
+    //                    being fed to MarkDonw-It. Use this setting when using markdown-it as part of a forum or other
+    //                    website where more-or-less arbitrary users can enter and feed any MarkDown to markdown-it.
+    //
+    // See https://en.wikipedia.org/wiki/Internationalized_domain_name for details on homograph attacks, for example.
+    highSecurity: true,
+
     // Enable some language-neutral replacements + quotes beautification
     typographer:  false,
 
@@ -1713,6 +1746,18 @@ module.exports = {
     breaks:       false,        // Convert '\n' in paragraphs into <br>
     langPrefix:   'language-',  // CSS language prefix for fenced blocks
     linkify:      false,        // autoconvert URL-like texts to links
+
+    // highSecurity:
+    // - false:           lower protection against XSS/Unicode-Homologue/etc. attacks via the input MarkDown.
+    //                    This setting assumes you own or at least trust the Markdown
+    //                    being fed to MarkDonw-It. The result is a nicer render.
+    // - true (default):  maximum protection against XSS/Unicode-Homologue/etc. attacks via the input MarkDown.
+    //                    This is the default setting and assumes you have no control or absolute trust in the Markdown
+    //                    being fed to MarkDonw-It. Use this setting when using markdown-it as part of a forum or other
+    //                    website where more-or-less arbitrary users can enter and feed any MarkDown to markdown-it.
+    //
+    // See https://en.wikipedia.org/wiki/Internationalized_domain_name for details on homograph attacks, for example.
+    highSecurity: true,
 
     // Enable some language-neutral replacements + quotes beautification
     typographer:  false,
@@ -4321,14 +4366,12 @@ module.exports = function linkify(state) {
           // Linkifier might send raw hostnames like "example.com", where url
           // starts with domain name. So we prepend http:// in those cases,
           // and remove it afterwards.
-          // Use "normalizeLink" instead of "normalizeText" to avoid homograph attack.
-          // See https://en.wikipedia.org/wiki/Internationalized_domain_name for details.
           if (!links[ln].schema) {
-            urlText = state.md.normalizeLink('http://' + urlText).replace(/^http:\/\//, '');
+            urlText = state.md.normalizeLinkText('http://' + urlText).replace(/^http:\/\//, '');
           } else if (links[ln].schema === 'mailto:' && !/^mailto:/i.test(urlText)) {
-            urlText = state.md.normalizeLink('mailto:' + urlText).replace(/^mailto:/, '');
+            urlText = state.md.normalizeLinkText('mailto:' + urlText).replace(/^mailto:/, '');
           } else {
-            urlText = state.md.normalizeLink(urlText);
+            urlText = state.md.normalizeLinkText(urlText);
           }
 
           pos = links[ln].index;

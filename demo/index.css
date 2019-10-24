@@ -89,6 +89,7 @@ body {
   white-space: pre;
 }
 .footnotes {
+  -moz-column-count: 2;
   -webkit-column-count: 2;
   column-count: 2;
 }
@@ -112,8 +113,7 @@ body {
   white-space: nowrap;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   background-color: #686868;
-  -webkit-box-shadow: 0 0 2px rgba(102,102,102,0.4);
-          box-shadow: 0 0 2px rgba(102,102,102,0.4);
+  box-shadow: 0 0 2px rgba(102,102,102,0.4);
   padding: 1px 0;
 }
 .gh-ribbon a {
