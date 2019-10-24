@@ -1,4 +1,4 @@
-/*! markdown-it 9.1.0-28 https://github.com//GerHobbelt/markdown-it @license MIT */(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.markdownit = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+/*! markdown-it 10.0.0-29 https://github.com//GerHobbelt/markdown-it @license MIT */(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.markdownit = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 'use strict';
 
 
@@ -4879,53 +4879,106 @@ module.exports = function backtick(state, silent) {
 'use strict';
 
 
-module.exports = function link_pairs(state) {
-  var i, j, lastDelim, currDelim,
-      delimiters = state.delimiters,
-      max = state.delimiters.length;
+function processDelimiters(state, delimiters) {
+  var closerIdx, openerIdx, closer, opener, minOpenerIdx, newMinOpenerIdx,
+      isOddMatch, lastJump,
+      openersBottom = {},
+      max = delimiters.length;
 
-  for (i = 0; i < max; i++) {
-    lastDelim = delimiters[i];
+  for (closerIdx = 0; closerIdx < max; closerIdx++) {
+    closer = delimiters[closerIdx];
 
-    if (!lastDelim.close) { continue; }
+    // Length is only used for emphasis-specific "rule of 3",
+    // if it's not defined (in strikethrough or 3rd party plugins),
+    // we can default it to 0 to disable those checks.
+    //
+    closer.length = closer.length || 0;
 
-    j = i - lastDelim.jump - 1;
+    if (!closer.close) continue;
 
-    while (j >= 0) {
-      currDelim = delimiters[j];
+    // Previously calculated lower bounds (previous fails)
+    // for each marker and each delimiter length modulo 3.
+    if (!openersBottom.hasOwnProperty(closer.marker)) {
+      openersBottom[closer.marker] = [ -1, -1, -1 ];
+    }
 
-      if (currDelim.open &&
-          currDelim.marker === lastDelim.marker &&
-          currDelim.end < 0 &&
-          currDelim.level === lastDelim.level) {
+    minOpenerIdx = openersBottom[closer.marker][closer.length % 3];
+    newMinOpenerIdx = -1;
 
-        var odd_match = false;
+    openerIdx = closerIdx - closer.jump - 1;
 
-        // typeofs are for backward compatibility with plugins
-        if ((currDelim.close || lastDelim.open) &&
-            typeof currDelim.length !== 'undefined' &&
-            typeof lastDelim.length !== 'undefined') {
+    for (; openerIdx > minOpenerIdx; openerIdx -= opener.jump + 1) {
+      opener = delimiters[openerIdx];
 
-          // from spec:
-          // sum of the lengths [...] must not be a multiple of 3
-          // unless both lengths are multiples of 3
-          if ((currDelim.length + lastDelim.length) % 3 === 0) {
-            if (currDelim.length % 3 !== 0 || lastDelim.length % 3 !== 0) {
-              odd_match = true;
+      if (opener.marker !== closer.marker) continue;
+
+      if (newMinOpenerIdx === -1) newMinOpenerIdx = openerIdx;
+
+      if (opener.open &&
+          opener.end < 0 &&
+          opener.level === closer.level) {
+
+        isOddMatch = false;
+
+        // from spec:
+        //
+        // If one of the delimiters can both open and close emphasis, then the
+        // sum of the lengths of the delimiter runs containing the opening and
+        // closing delimiters must not be a multiple of 3 unless both lengths
+        // are multiples of 3.
+        //
+        if (opener.close || closer.open) {
+          if ((opener.length + closer.length) % 3 === 0) {
+            if (opener.length % 3 !== 0 || closer.length % 3 !== 0) {
+              isOddMatch = true;
             }
           }
         }
 
-        if (!odd_match) {
-          lastDelim.jump = i - j;
-          lastDelim.open = false;
-          currDelim.end  = i;
-          currDelim.jump = 0;
+        if (!isOddMatch) {
+          // If previous delimiter cannot be an opener, we can safely skip
+          // the entire sequence in future checks. This is required to make
+          // sure algorithm has linear complexity (see *_*_*_*_*_... case).
+          //
+          lastJump = openerIdx > 0 && !delimiters[openerIdx - 1].open ?
+            delimiters[openerIdx - 1].jump + 1 :
+            0;
+
+          closer.jump  = closerIdx - openerIdx + lastJump;
+          closer.open  = false;
+          opener.end   = closerIdx;
+          opener.jump  = lastJump;
+          opener.close = false;
+          newMinOpenerIdx = -1;
           break;
         }
       }
+    }
 
-      j -= currDelim.jump + 1;
+    if (newMinOpenerIdx !== -1) {
+      // If match for this delimiter run failed, we want to set lower bound for
+      // future lookups. This is required to make sure algorithm has linear
+      // complexity.
+      //
+      // See details here:
+      // https://github.com/commonmark/cmark/issues/178#issuecomment-270417442
+      //
+      openersBottom[closer.marker][(closer.length || 0) % 3] = newMinOpenerIdx;
+    }
+  }
+}
+
+
+module.exports = function link_pairs(state) {
+  var curr,
+      tokens_meta = state.tokens_meta,
+      max = state.tokens_meta.length;
+
+  processDelimiters(state, state.delimiters);
+
+  for (curr = 0; curr < max; curr++) {
+    if (tokens_meta[curr] && tokens_meta[curr].delimiters) {
+      processDelimiters(state, tokens_meta[curr].delimiters);
     }
   }
 };
@@ -4975,10 +5028,6 @@ module.exports.tokenize = function emphasis(state, silent) {
       //
       token:  state.tokens.length - 1,
 
-      // Token level.
-      //
-      level:  state.level,
-
       // If this delimiter is matched as a valid opener, `end` will be
       // equal to its position, otherwise it's `-1`.
       //
@@ -4998,17 +5047,14 @@ module.exports.tokenize = function emphasis(state, silent) {
 };
 
 
-// Walk through delimiter list and replace text tokens with tags
-//
-module.exports.postProcess = function emphasis(state) {
+function postProcess(state, delimiters) {
   var i,
       startDelim,
       endDelim,
       token,
       ch,
       isStrong,
-      delimiters = state.delimiters,
-      max = state.delimiters.length;
+      max = delimiters.length;
 
   for (i = max - 1; i >= 0; i--) {
     startDelim = delimiters[i];
@@ -5055,6 +5101,23 @@ module.exports.postProcess = function emphasis(state) {
       state.tokens[delimiters[i - 1].token].content = '';
       state.tokens[delimiters[startDelim.end + 1].token].content = '';
       i--;
+    }
+  }
+}
+
+
+// Walk through delimiter list and replace text tokens with tags
+//
+module.exports.postProcess = function emphasis(state) {
+  var curr,
+      tokens_meta = state.tokens_meta,
+      max = state.tokens_meta.length;
+
+  postProcess(state, state.delimiters);
+
+  for (curr = 0; curr < max; curr++) {
+    if (tokens_meta[curr] && tokens_meta[curr].delimiters) {
+      postProcess(state, tokens_meta[curr].delimiters);
     }
   }
 };
@@ -5579,6 +5642,7 @@ function StateInline(src, md, env, outTokens) {
   this.env = env;
   this.md = md;
   this.tokens = outTokens;
+  this.tokens_meta = Array(outTokens.length);
 
   this.pos = 0;
   this.posMax = this.src.length;
@@ -5586,9 +5650,15 @@ function StateInline(src, md, env, outTokens) {
   this.pending = '';
   this.pendingLevel = 0;
 
-  this.cache = {};        // Stores { start: end } pairs. Useful for backtrack optimization of pairs parse (emphasis, strikes).
+  // Stores { start: end } pairs. Useful for backtrack
+  // optimization of pairs parse (emphasis, strikes).
+  this.cache = {};
 
-  this.delimiters = [];   // Emphasis-like delimiters
+  // List of emphasis-like delimiters for current tag
+  this.delimiters = [];
+
+  // Stack of delimiter lists for upper level tags
+  this._prev_delimiters = [];
 }
 
 
@@ -5613,13 +5683,27 @@ StateInline.prototype.push = function (type, tag, nesting) {
   }
 
   var token = new Token(type, tag, nesting);
+  var token_meta = null;
 
-  if (nesting < 0) this.level--; // closing tag
+  if (nesting < 0) {
+    // closing tag
+    this.level--;
+    this.delimiters = this._prev_delimiters.pop();
+  }
+
   token.level = this.level;
-  if (nesting > 0) this.level++; // opening tag
+
+  if (nesting > 0) {
+    // opening tag
+    this.level++;
+    this._prev_delimiters.push(this.delimiters);
+    this.delimiters = [];
+    token_meta = { delimiters: this.delimiters };
+  }
 
   this.pendingLevel = this.level;
   this.tokens.push(token);
+  this.tokens_meta.push(token_meta);
   return token;
 };
 
@@ -5728,9 +5812,9 @@ module.exports.tokenize = function strikethrough(state, silent) {
 
     state.delimiters.push({
       marker: marker,
+      length: 0, // disable "rule of 3" length checks meant for emphasis
       jump:   i,
       token:  state.tokens.length - 1,
-      level:  state.level,
       end:    -1,
       open:   scanned.can_open,
       close:  scanned.can_close
@@ -5743,16 +5827,13 @@ module.exports.tokenize = function strikethrough(state, silent) {
 };
 
 
-// Walk through delimiter list and replace text tokens with tags
-//
-module.exports.postProcess = function strikethrough(state) {
+function postProcess(state, delimiters) {
   var i, j,
       startDelim,
       endDelim,
       token,
       loneMarkers = [],
-      delimiters = state.delimiters,
-      max = state.delimiters.length;
+      max = delimiters.length;
 
   for (i = 0; i < max; i++) {
     startDelim = delimiters[i];
@@ -5808,6 +5889,23 @@ module.exports.postProcess = function strikethrough(state) {
       token = state.tokens[j];
       state.tokens[j] = state.tokens[i];
       state.tokens[i] = token;
+    }
+  }
+}
+
+
+// Walk through delimiter list and replace text tokens with tags
+//
+module.exports.postProcess = function strikethrough(state) {
+  var curr,
+      tokens_meta = state.tokens_meta,
+      max = state.tokens_meta.length;
+
+  postProcess(state, state.delimiters);
+
+  for (curr = 0; curr < max; curr++) {
+    if (tokens_meta[curr] && tokens_meta[curr].delimiters) {
+      postProcess(state, tokens_meta[curr].delimiters);
     }
   }
 };
