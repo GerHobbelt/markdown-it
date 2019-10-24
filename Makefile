@@ -18,7 +18,7 @@ demo: lint
 	-rm -rf ./demo
 	mkdir ./demo
 	./support/demodata.js > ./support/demo_template/sample.json
-	jade ./support/demo_template/index.jade --pretty \
+	pug ./support/demo_template/index.pug --pretty \
 		--obj ./support/demo_template/sample.json \
 		--out ./demo
 	stylus -u autoprefixer-stylus \

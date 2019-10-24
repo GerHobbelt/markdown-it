@@ -1,3 +1,17 @@
+9.0.1 / 2019-07-12
+------------------
+
+- Fix possible corruption of open/close tag levels, #466
+
+
+9.0.0 / 2019-07-09
+------------------
+
+- Updated CM spec compatibility to 0.29.
+- Update Travis-CI node version to actual (8 & latest).
+- Deps bump.
+
+
 8.4.2 / 2018-02-15
 ------------------
 
