@@ -12,6 +12,7 @@
   "repository": "markdown-it/markdown-it",
   "license": "MIT",
   "main": "index.js",
+  "module": "dist/markdown-it.mjs",
   "bin": {
     "markdown-it": "bin/markdown-it.js"
   },
