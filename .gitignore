@@ -4,3 +4,5 @@ coverage/
 demo/
 apidoc/
 *.log
+*.iml
+*.mjs
