@@ -1,0 +1,10 @@
+version: "1"
+rules:
+  - base: master
+    upstream: markdown-it:master
+    mergeMethod: rebase
+    assignees:
+      - lpellegr
+    reviewers:
+      - lpellegr
+label: ":arrow_heading_down: pull"
