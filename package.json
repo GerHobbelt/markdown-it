@@ -1,5 +1,5 @@
 {
-  "name": "@prosemirror-esm/markdown-it",
+  "name": "markdown-it-esm",
   "version": "10.0.0",
   "description": "Markdown-it - modern pluggable markdown parser.",
   "keywords": [
@@ -9,7 +9,7 @@
     "markdown-it",
     "markdown-it-plugin"
   ],
-  "repository": "prosemirror-esm/markdown-it",
+  "repository": "prosemirror-esm/markdown-it/tree/markdown-it-esm",
   "license": "MIT",
   "main": "index.js",
   "module": "dist/markdown-it.mjs",
