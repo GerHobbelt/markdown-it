@@ -47,8 +47,8 @@ cli.addArgument([ '-o', '--output' ], {
   defaultValue: '-'
 });
 
-cli.addArgument([ '--plugin' ], {
-  help: 'Plugin',
+cli.addArgument([ '-p', '--plugin' ], {
+  help: 'Load an optional plugin. Use multiple times for more than one plugin. Assumes PLUGIN has been installed already.',
   action: 'append'
 });
 
