@@ -12,6 +12,7 @@
   "repository": "GerHobbelt/markdown-it",
   "license": "MIT",
   "main": "dist/markdown-it.js",
+  "module": "dist/markdown-it.mjs",
   "bin": {
     "markdown-it": "bin/markdown-it.js"
   },
@@ -33,6 +34,7 @@
   },
   "files": [
     "index.js",
+    "index.mjs",
     "bin/",
     "lib/",
     "dist/"
@@ -98,6 +100,10 @@
     "nyc": "14.1.1",
     "pug": "2.0.4",
     "pug-cli": "1.0.0-alpha6",
+    "rollup": "1.26.4",
+    "rollup-plugin-commonjs": "10.1.0",
+    "rollup-plugin-json": "4.0.0",
+    "rollup-plugin-node-resolve": "5.2.0",
     "stylus": "0.54.7",
     "supertest": "4.0.2",
     "terser": "4.3.10"

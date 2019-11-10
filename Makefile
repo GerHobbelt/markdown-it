@@ -12,7 +12,7 @@ CURR_HEAD   := $(firstword $(shell git show-ref --hash HEAD | cut -b -6) master)
 GITHUB_PROJ := https://github.com//GerHobbelt/${NPM_PACKAGE}
 
 
-build: lint browserify doc test coverage demo todo
+build: lint browserify rollup doc test coverage demo todo
 
 demo: lint
 	-rm -rf ./demo
@@ -42,6 +42,11 @@ lint:
 
 fix:
 	eslint . --fix
+
+rollup:
+	-mkdir dist
+	# Rollup
+	rollup -c
 
 test: lint specsplit
 	mocha
@@ -108,7 +113,7 @@ specsplit: 											\
 
 ./test/fixtures/commonmark/bad.txt :    			\
 			./support/specsplit.js 					\
-			./test/fixtures/commonmark/spec.txt 	
+			./test/fixtures/commonmark/spec.txt
 	./support/specsplit.js bad ./test/fixtures/commonmark/spec.txt > ./test/fixtures/commonmark/bad.txt
 	./support/specsplit.js ./test/fixtures/commonmark/spec.txt
 
@@ -134,5 +139,5 @@ prep: superclean
 	-npm install
 
 
-.PHONY: clean superclean prep publish lint fix test todo demo coverage report-coverage doc build browserify minify gh-demo gh-doc specsplit
+.PHONY: clean superclean prep publish lint fix test todo demo coverage report-coverage doc build browserify minify gh-demo gh-doc specsplit rollup
 .SILENT: help lint test todo
