@@ -7080,7 +7080,9 @@ var HTML_REPLACEMENTS = {
   '&': '&amp;',
   '<': '&lt;',
   '>': '&gt;',
-  '"': '&quot;'
+  '"': '&quot;',
+  '\'': '&#039;',
+  '`': '&#096;'
 };
 
 function replaceUnsafeChar(ch) {
@@ -8199,132 +8201,6 @@ var inline = function inline(state) {
   }
 };
 
-var arrayReplaceAt = utils.arrayReplaceAt;
-
-
-function isLinkOpen(str) {
-  return /^<a[>\s]/i.test(str);
-}
-function isLinkClose(str) {
-  return /^<\/a\s*>/i.test(str);
-}
-
-
-var linkify = function linkify(state) {
-  var i, j, l, tokens, token, currentToken, nodes, ln, text, pos, lastPos,
-      level, htmlLinkLevel, url, fullUrl, urlText,
-      blockTokens = state.tokens,
-      links;
-
-  if (!state.md.options.linkify) { return; }
-
-  for (j = 0, l = blockTokens.length; j < l; j++) {
-    if (blockTokens[j].type !== 'inline' ||
-        !state.md.linkify.pretest(blockTokens[j].content)) {
-      continue;
-    }
-
-    tokens = blockTokens[j].children;
-
-    htmlLinkLevel = 0;
-
-    // We scan from the end, to keep position when new tags added.
-    // Use reversed logic in links start/end match
-    for (i = tokens.length - 1; i >= 0; i--) {
-      currentToken = tokens[i];
-
-      // Skip content of markdown links
-      if (currentToken.type === 'link_close') {
-        i--;
-        while (tokens[i].level !== currentToken.level && tokens[i].type !== 'link_open') {
-          i--;
-        }
-        continue;
-      }
-
-      // Skip content of html tag links
-      if (currentToken.type === 'html_inline') {
-        if (isLinkOpen(currentToken.content) && htmlLinkLevel > 0) {
-          htmlLinkLevel--;
-        }
-        if (isLinkClose(currentToken.content)) {
-          htmlLinkLevel++;
-        }
-      }
-      if (htmlLinkLevel > 0) { continue; }
-
-      if (currentToken.type === 'text' && state.md.linkify.test(currentToken.content)) {
-
-        text = currentToken.content;
-        links = state.md.linkify.match(text);
-
-        // Now split string to nodes
-        nodes = [];
-        level = currentToken.level;
-        lastPos = 0;
-
-        for (ln = 0; ln < links.length; ln++) {
-
-          url = links[ln].url;
-          fullUrl = state.md.normalizeLink(url);
-          if (!state.md.validateLink(fullUrl)) { continue; }
-
-          urlText = links[ln].text;
-
-          // Linkifier might send raw hostnames like "example.com", where url
-          // starts with domain name. So we prepend http:// in those cases,
-          // and remove it afterwards.
-          if (!links[ln].schema) {
-            urlText = state.md.normalizeLinkText('http://' + urlText).replace(/^http:\/\//, '');
-          } else if (links[ln].schema === 'mailto:' && !/^mailto:/i.test(urlText)) {
-            urlText = state.md.normalizeLinkText('mailto:' + urlText).replace(/^mailto:/, '');
-          } else {
-            urlText = state.md.normalizeLinkText(urlText);
-          }
-
-          pos = links[ln].index;
-
-          if (pos > lastPos) {
-            token         = new state.Token('text', '', 0);
-            token.content = text.slice(lastPos, pos);
-            token.level   = level;
-            nodes.push(token);
-          }
-
-          token         = new state.Token('link_open', 'a', 1);
-          token.attrs   = [ [ 'href', fullUrl ] ];
-          token.level   = level++;
-          token.markup  = 'linkify';
-          token.info    = 'auto';
-          nodes.push(token);
-
-          token         = new state.Token('text', '', 0);
-          token.content = urlText;
-          token.level   = level;
-          nodes.push(token);
-
-          token         = new state.Token('link_close', 'a', -1);
-          token.level   = --level;
-          token.markup  = 'linkify';
-          token.info    = 'auto';
-          nodes.push(token);
-
-          lastPos = links[ln].lastIndex;
-        }
-        if (lastPos < text.length) {
-          token         = new state.Token('text', '', 0);
-          token.content = text.slice(lastPos);
-          token.level   = level;
-          nodes.push(token);
-        }
-
-        // replace current node
-        blockTokens[j].children = tokens = arrayReplaceAt(tokens, i, nodes);
-      }
-    }
-  }
-};
-
 // Simple typographic replacements
 
 // TODO:
@@ -8395,9 +8271,9 @@ function replace_rare(inlineTokens) {
       if (RARE_RE.test(token.content)) {
         token.content = token.content
           .replace(/\+-/g, '±')
-          // .., ..., ....... -> …
+          // ..., ....... -> …
           // but ?..... & !..... -> ?.. & !..
-          .replace(/\.{2,}/g, '…').replace(/([?!])…/g, '$1..')
+          .replace(/\.{3,}/g, '…').replace(/([?!])…/g, '$1..')
           .replace(/([?!]){4,}/g, '$1$1$1').replace(/,{2,}/g, ',')
           // <-->
           // -->
@@ -8878,7 +8754,6 @@ var _rules = [
   [ 'normalize',      normalize      ],
   [ 'block',          block$1          ],
   [ 'inline',         inline         ],
-  [ 'linkify',        linkify        ],
   [ 'replacements',   replacements   ],
   [ 'smartquotes',    smartquotes    ]
 ];
@@ -10814,6 +10689,123 @@ ParserBlock.prototype.State = state_block;
 
 var parser_block = ParserBlock;
 
+// Handle implicit links found by rules_core/linkify that were not yet
+
+var tokenize = function linkify(state, silent) {
+  var link, url, fullUrl, urlText, token;
+
+  if (state.links) {
+    link = state.links[state.pos];
+  }
+  if (!link) {
+    return false;
+  }
+
+  url = link.url;
+  fullUrl = state.md.normalizeLink(url);
+  if (!state.md.validateLink(fullUrl)) { return false; }
+  urlText = link.text;
+
+  // Linkifier might send raw hostnames like "example.com", where url
+  // starts with domain name. So we prepend http:// in those cases,
+  // and remove it afterwards.
+  //
+  if (!link.schema) {
+    urlText = state.md.normalizeLinkText('http://' + urlText).replace(/^http:\/\//, '');
+  } else if (link.schema === 'mailto:' && !/^mailto:/i.test(urlText)) {
+    urlText = state.md.normalizeLinkText('mailto:' + urlText).replace(/^mailto:/, '');
+  } else {
+    urlText = state.md.normalizeLinkText(urlText);
+  }
+
+  if (!silent) {
+    token         = state.push('link_open', 'a', 1);
+    token.attrs   = [ [ 'href', fullUrl ] ];
+    token.markup  = 'linkify';
+    token.info    = 'auto';
+
+    token         = state.push('text', '', 0);
+    token.content = urlText;
+
+    token         = state.push('link_close', 'a', -1);
+    token.markup  = 'linkify';
+    token.info    = 'auto';
+  }
+
+  state.pos = link.lastIndex;
+  return true;
+};
+
+// Set state.links to an index from position to links, if links found
+var preProcess = function linkify(state) {
+  var links, i;
+  if (!state.md.options.linkify || !state.md.linkify.pretest(state.src)) {
+    return;
+  }
+  links = state.md.linkify.match(state.src);
+  if (!links || !links.length) {
+    return;
+  }
+  state.links = {};
+  for (i = 0; i < links.length; i++) {
+    state.links[links[i].index] = links[i];
+  }
+};
+
+function isLinkOpen(str) {
+  return /^<a[>\s]/i.test(str);
+}
+function isLinkClose(str) {
+  return /^<\/a\s*>/i.test(str);
+}
+
+// Remove linkify links if already inside
+var postProcess = function linkify(state) {
+  var i, len, token, linkLevel = 0, htmlLinkLevel = 0;
+
+  len = state.tokens.length;
+  for (i = 0; i < len; i++) {
+    token = state.tokens[i];
+
+    // Transform into empty tokens any linkify open/close tags inside links
+    if (token.markup === 'linkify') {
+      if (linkLevel > 0 || htmlLinkLevel > 0) {
+        if (token.type === 'link_open') {
+          state.tokens[i + 1].level--;
+        }
+        token.type = 'text';
+        token.attrs = token.markup = token.info = null;
+        token.nesting = 0;
+        token.content = '';
+      }
+      continue;
+    }
+
+    // Skip content of markdown links
+    if (token.type === 'link_open') {
+      linkLevel++;
+    } else if (token.type === 'link_close' && linkLevel > 0) {
+      linkLevel--;
+    }
+
+    // Skip content of html tag links
+    if (token.type === 'html_inline') {
+      if (isLinkOpen(token.content)) {
+        htmlLinkLevel++;
+      }
+      if (isLinkClose(token.content) && htmlLinkLevel > 0) {
+        htmlLinkLevel--;
+      }
+    }
+  }
+};
+
+var linkify = {
+	tokenize: tokenize,
+	preProcess: preProcess,
+	postProcess: postProcess
+};
+
 // Skip text characters for text token, place those to pending buffer
 
 
@@ -10859,7 +10851,8 @@ function isTerminatorChar(ch) {
 var text = function text(state, silent) {
   var pos = state.pos;
 
-  while (pos < state.posMax && !isTerminatorChar(state.src.charCodeAt(pos))) {
+  while (pos < state.posMax && !isTerminatorChar(state.src.charCodeAt(pos)) &&
+         (!state.links || !state.links[pos])) {
     pos++;
   }
 
@@ -11007,7 +11000,7 @@ var backticks = function backtick(state, silent) {
 
 // Insert each marker as a separate text token, and add it to delimiter list
 //
-var tokenize = function strikethrough(state, silent) {
+var tokenize$1 = function strikethrough(state, silent) {
   var i, scanned, token, len, ch,
       start = state.pos,
       marker = state.src.charCodeAt(start);
@@ -11049,7 +11042,7 @@ var tokenize = function strikethrough(state, silent) {
 };
 
 
-function postProcess(state, delimiters) {
+function postProcess$1(state, delimiters) {
   var i, j,
       startDelim,
       endDelim,
@@ -11123,17 +11116,17 @@ var postProcess_1 = function strikethrough(state) {
       tokens_meta = state.tokens_meta,
       max = state.tokens_meta.length;
 
-  postProcess(state, state.delimiters);
+  postProcess$1(state, state.delimiters);
 
   for (curr = 0; curr < max; curr++) {
     if (tokens_meta[curr] && tokens_meta[curr].delimiters) {
-      postProcess(state, tokens_meta[curr].delimiters);
+      postProcess$1(state, tokens_meta[curr].delimiters);
     }
   }
 };
 
 var strikethrough = {
-	tokenize: tokenize,
+	tokenize: tokenize$1,
 	postProcess: postProcess_1
 };
 
@@ -11142,7 +11135,7 @@ var strikethrough = {
 
 // Insert each marker as a separate text token, and add it to delimiter list
 //
-var tokenize$1 = function emphasis(state, silent) {
+var tokenize$2 = function emphasis(state, silent) {
   var i, scanned, token,
       start = state.pos,
       marker = state.src.charCodeAt(start);
@@ -11198,7 +11191,7 @@ var tokenize$1 = function emphasis(state, silent) {
 };
 
 
-function postProcess$1(state, delimiters) {
+function postProcess$2(state, delimiters) {
   var i,
       startDelim,
       endDelim,
@@ -11264,17 +11257,17 @@ var postProcess_1$1 = function emphasis(state) {
       tokens_meta = state.tokens_meta,
       max = state.tokens_meta.length;
 
-  postProcess$1(state, state.delimiters);
+  postProcess$2(state, state.delimiters);
 
   for (curr = 0; curr < max; curr++) {
     if (tokens_meta[curr] && tokens_meta[curr].delimiters) {
-      postProcess$1(state, tokens_meta[curr].delimiters);
+      postProcess$2(state, tokens_meta[curr].delimiters);
     }
   }
 };
 
 var emphasis = {
-	tokenize: tokenize$1,
+	tokenize: tokenize$2,
 	postProcess: postProcess_1$1
 };
 
@@ -11885,6 +11878,7 @@ function StateInline(src, md, env, outTokens) {
   this.tokens = outTokens;
   this.tokens_meta = Array(outTokens.length);
 
+  this.links = null;
   this.pos = 0;
   this.posMax = this.src.length;
   this.level = 0;
@@ -12021,7 +12015,12 @@ var state_inline = StateInline;
 ////////////////////////////////////////////////////////////////////////////////
 // Parser rules
 
+var _rules0 = [
+  [ 'linkify',         linkify.preProcess ]
+];
+
 var _rules$2 = [
+  [ 'linkify',         linkify.tokenize ],
   [ 'text',            text ],
   [ 'newline',         newline ],
   [ 'escape',          _escape ],
@@ -12039,6 +12038,7 @@ var _rules2 = [
   [ 'balance_pairs',   balance_pairs ],
   [ 'strikethrough',   strikethrough.postProcess ],
   [ 'emphasis',        emphasis.postProcess ],
+  [ 'linkify',         linkify.postProcess ],
   [ 'text_collapse',   text_collapse ]
 ];
 
@@ -12070,6 +12070,18 @@ function ParserInline() {
 
   for (i = 0; i < _rules2.length; i++) {
     this.ruler2.push(_rules2[i][0], _rules2[i][1]);
+  }
+
+  /**
+   * ParserInline#ruler0 -> Ruler
+   *
+   * [[Ruler]] instance. Third ruler used for pre-processing
+   * (e.g. in linkify rule).
+   **/
+  this.ruler0 = new ruler();
+
+  for (i = 0; i < _rules0.length; i++) {
+    this.ruler0.push(_rules0[i][0], _rules0[i][1]);
   }
 }
 
@@ -12161,13 +12173,20 @@ ParserInline.prototype.tokenize = function (state) {
 
 
 /**
- * ParserInline.parse(str, md, env, outTokens)
+ * ParserInline.parse(str, links, md, env, outTokens)
  *
  * Process input string and push inline tokens into `outTokens`
  **/
 ParserInline.prototype.parse = function (str, md, env, outTokens) {
   var i, rules, len;
   var state = new this.State(str, md, env, outTokens);
+
+  rules = this.ruler0.getRules('');
+  len = rules.length;
+
+  for (i = 0; i < len; i++) {
+    rules[i](state);
+  }
 
   this.tokenize(state);
 
@@ -14047,6 +14066,9 @@ MarkdownIt.prototype.configure = function (presets) {
       if (presets.components[name].rules2) {
         self[name].ruler2.enableOnly(presets.components[name].rules2);
       }
+      if (presets.components[name].rules0) {
+        self[name].ruler0.enableOnly(presets.components[name].rules2);
+      }
     });
   }
   return this;
@@ -14080,6 +14102,7 @@ MarkdownIt.prototype.enable = function (list, ignoreInvalid) {
   }, this);
 
   result = result.concat(this.inline.ruler2.enable(list, true));
+  result = result.concat(this.inline.ruler0.enable(list, true));
 
   var missed = list.filter(function (name) { return result.indexOf(name) < 0; });
 
@@ -14108,6 +14131,7 @@ MarkdownIt.prototype.disable = function (list, ignoreInvalid) {
   }, this);
 
   result = result.concat(this.inline.ruler2.disable(list, true));
+  result = result.concat(this.inline.ruler0.disable(list, true));
 
   var missed = list.filter(function (name) { return result.indexOf(name) < 0; });
 

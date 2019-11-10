@@ -47,7 +47,7 @@ cli.addArgument([ '-o', '--output' ], {
   defaultValue: '-'
 });
 
-cli.addArgument([ '--plugin'], {
+cli.addArgument([ '--plugin' ], {
   help: 'Plugin',
   action: 'append'
 });
@@ -97,11 +97,11 @@ readFile(options.file, 'utf8', function (err, input) {
     linkify: options.linkify
   });
 
-  if (options.plugin) { 
-    options.plugin.forEach(function(pluginName) {
+  if (options.plugin) {
+    options.plugin.forEach(function (pluginName) {
       var plugin = require(pluginName);
       md.use(plugin.default || plugin);
-    }); 
+    });
   }
 
   try {

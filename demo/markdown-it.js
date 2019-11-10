@@ -244,7 +244,9 @@ var HTML_REPLACEMENTS = {
   '&': '&amp;',
   '<': '&lt;',
   '>': '&gt;',
-  '"': '&quot;'
+  '"': '&quot;',
+  '\'': '&#039;',
+  '`': '&#096;'
 };
 
 function replaceUnsafeChar(ch) {
@@ -1045,6 +1047,9 @@ MarkdownIt.prototype.configure = function (presets) {
       if (presets.components[name].rules2) {
         self[name].ruler2.enableOnly(presets.components[name].rules2);
       }
+      if (presets.components[name].rules0) {
+        self[name].ruler0.enableOnly(presets.components[name].rules2);
+      }
     });
   }
   return this;
@@ -1078,6 +1083,7 @@ MarkdownIt.prototype.enable = function (list, ignoreInvalid) {
   }, this);
 
   result = result.concat(this.inline.ruler2.enable(list, true));
+  result = result.concat(this.inline.ruler0.enable(list, true));
 
   var missed = list.filter(function (name) { return result.indexOf(name) < 0; });
 
@@ -1106,6 +1112,7 @@ MarkdownIt.prototype.disable = function (list, ignoreInvalid) {
   }, this);
 
   result = result.concat(this.inline.ruler2.disable(list, true));
+  result = result.concat(this.inline.ruler0.disable(list, true));
 
   var missed = list.filter(function (name) { return result.indexOf(name) < 0; });
 
@@ -1361,7 +1368,6 @@ var _rules = [
   [ 'normalize',      require('./rules_core/normalize')      ],
   [ 'block',          require('./rules_core/block')          ],
   [ 'inline',         require('./rules_core/inline')         ],
-  [ 'linkify',        require('./rules_core/linkify')        ],
   [ 'replacements',   require('./rules_core/replacements')   ],
   [ 'smartquotes',    require('./rules_core/smartquotes')    ]
 ];
@@ -1404,7 +1410,7 @@ Core.prototype.State = require('./rules_core/state_core');
 
 module.exports = Core;
 
-},{"./ruler":18,"./rules_core/block":31,"./rules_core/inline":32,"./rules_core/linkify":33,"./rules_core/normalize":34,"./rules_core/replacements":35,"./rules_core/smartquotes":36,"./rules_core/state_core":37}],13:[function(require,module,exports){
+},{"./ruler":18,"./rules_core/block":31,"./rules_core/inline":32,"./rules_core/normalize":33,"./rules_core/replacements":34,"./rules_core/smartquotes":35,"./rules_core/state_core":36}],13:[function(require,module,exports){
 /** internal
  * class ParserInline
  *
@@ -1419,7 +1425,12 @@ var Ruler           = require('./ruler');
 ////////////////////////////////////////////////////////////////////////////////
 // Parser rules
 
+var _rules0 = [
+  [ 'linkify',         require('./rules_inline/linkify').preProcess ]
+];
+
 var _rules = [
+  [ 'linkify',         require('./rules_inline/linkify').tokenize ],
   [ 'text',            require('./rules_inline/text') ],
   [ 'newline',         require('./rules_inline/newline') ],
   [ 'escape',          require('./rules_inline/escape') ],
@@ -1437,6 +1448,7 @@ var _rules2 = [
   [ 'balance_pairs',   require('./rules_inline/balance_pairs') ],
   [ 'strikethrough',   require('./rules_inline/strikethrough').postProcess ],
   [ 'emphasis',        require('./rules_inline/emphasis').postProcess ],
+  [ 'linkify',         require('./rules_inline/linkify').postProcess ],
   [ 'text_collapse',   require('./rules_inline/text_collapse') ]
 ];
 
@@ -1468,6 +1480,18 @@ function ParserInline() {
 
   for (i = 0; i < _rules2.length; i++) {
     this.ruler2.push(_rules2[i][0], _rules2[i][1]);
+  }
+
+  /**
+   * ParserInline#ruler0 -> Ruler
+   *
+   * [[Ruler]] instance. Third ruler used for pre-processing
+   * (e.g. in linkify rule).
+   **/
+  this.ruler0 = new Ruler();
+
+  for (i = 0; i < _rules0.length; i++) {
+    this.ruler0.push(_rules0[i][0], _rules0[i][1]);
   }
 }
 
@@ -1559,13 +1583,20 @@ ParserInline.prototype.tokenize = function (state) {
 
 
 /**
- * ParserInline.parse(str, md, env, outTokens)
+ * ParserInline.parse(str, links, md, env, outTokens)
  *
  * Process input string and push inline tokens into `outTokens`
  **/
 ParserInline.prototype.parse = function (str, md, env, outTokens) {
   var i, rules, len;
   var state = new this.State(str, md, env, outTokens);
+
+  rules = this.ruler0.getRules('');
+  len = rules.length;
+
+  for (i = 0; i < len; i++) {
+    rules[i](state);
+  }
 
   this.tokenize(state);
 
@@ -1583,7 +1614,7 @@ ParserInline.prototype.State = require('./rules_inline/state_inline');
 
 module.exports = ParserInline;
 
-},{"./ruler":18,"./rules_inline/autolink":38,"./rules_inline/backticks":39,"./rules_inline/balance_pairs":40,"./rules_inline/emphasis":41,"./rules_inline/entity":42,"./rules_inline/escape":43,"./rules_inline/html_inline":44,"./rules_inline/image":45,"./rules_inline/link":46,"./rules_inline/newline":47,"./rules_inline/state_inline":48,"./rules_inline/strikethrough":49,"./rules_inline/text":50,"./rules_inline/text_collapse":51}],14:[function(require,module,exports){
+},{"./ruler":18,"./rules_inline/autolink":37,"./rules_inline/backticks":38,"./rules_inline/balance_pairs":39,"./rules_inline/emphasis":40,"./rules_inline/entity":41,"./rules_inline/escape":42,"./rules_inline/html_inline":43,"./rules_inline/image":44,"./rules_inline/link":45,"./rules_inline/linkify":46,"./rules_inline/newline":47,"./rules_inline/state_inline":48,"./rules_inline/strikethrough":49,"./rules_inline/text":50,"./rules_inline/text_collapse":51}],14:[function(require,module,exports){
 // Commonmark default options
 
 'use strict';
@@ -4284,140 +4315,6 @@ module.exports = function inline(state) {
 };
 
 },{}],33:[function(require,module,exports){
-// Replace link-like texts with link nodes.
-//
-// Currently restricted by `md.validateLink()` to http/https/ftp
-//
-'use strict';
-
-
-var arrayReplaceAt = require('../common/utils').arrayReplaceAt;
-
-
-function isLinkOpen(str) {
-  return /^<a[>\s]/i.test(str);
-}
-function isLinkClose(str) {
-  return /^<\/a\s*>/i.test(str);
-}
-
-
-module.exports = function linkify(state) {
-  var i, j, l, tokens, token, currentToken, nodes, ln, text, pos, lastPos,
-      level, htmlLinkLevel, url, fullUrl, urlText,
-      blockTokens = state.tokens,
-      links;
-
-  if (!state.md.options.linkify) { return; }
-
-  for (j = 0, l = blockTokens.length; j < l; j++) {
-    if (blockTokens[j].type !== 'inline' ||
-        !state.md.linkify.pretest(blockTokens[j].content)) {
-      continue;
-    }
-
-    tokens = blockTokens[j].children;
-
-    htmlLinkLevel = 0;
-
-    // We scan from the end, to keep position when new tags added.
-    // Use reversed logic in links start/end match
-    for (i = tokens.length - 1; i >= 0; i--) {
-      currentToken = tokens[i];
-
-      // Skip content of markdown links
-      if (currentToken.type === 'link_close') {
-        i--;
-        while (tokens[i].level !== currentToken.level && tokens[i].type !== 'link_open') {
-          i--;
-        }
-        continue;
-      }
-
-      // Skip content of html tag links
-      if (currentToken.type === 'html_inline') {
-        if (isLinkOpen(currentToken.content) && htmlLinkLevel > 0) {
-          htmlLinkLevel--;
-        }
-        if (isLinkClose(currentToken.content)) {
-          htmlLinkLevel++;
-        }
-      }
-      if (htmlLinkLevel > 0) { continue; }
-
-      if (currentToken.type === 'text' && state.md.linkify.test(currentToken.content)) {
-
-        text = currentToken.content;
-        links = state.md.linkify.match(text);
-
-        // Now split string to nodes
-        nodes = [];
-        level = currentToken.level;
-        lastPos = 0;
-
-        for (ln = 0; ln < links.length; ln++) {
-
-          url = links[ln].url;
-          fullUrl = state.md.normalizeLink(url);
-          if (!state.md.validateLink(fullUrl)) { continue; }
-
-          urlText = links[ln].text;
-
-          // Linkifier might send raw hostnames like "example.com", where url
-          // starts with domain name. So we prepend http:// in those cases,
-          // and remove it afterwards.
-          if (!links[ln].schema) {
-            urlText = state.md.normalizeLinkText('http://' + urlText).replace(/^http:\/\//, '');
-          } else if (links[ln].schema === 'mailto:' && !/^mailto:/i.test(urlText)) {
-            urlText = state.md.normalizeLinkText('mailto:' + urlText).replace(/^mailto:/, '');
-          } else {
-            urlText = state.md.normalizeLinkText(urlText);
-          }
-
-          pos = links[ln].index;
-
-          if (pos > lastPos) {
-            token         = new state.Token('text', '', 0);
-            token.content = text.slice(lastPos, pos);
-            token.level   = level;
-            nodes.push(token);
-          }
-
-          token         = new state.Token('link_open', 'a', 1);
-          token.attrs   = [ [ 'href', fullUrl ] ];
-          token.level   = level++;
-          token.markup  = 'linkify';
-          token.info    = 'auto';
-          nodes.push(token);
-
-          token         = new state.Token('text', '', 0);
-          token.content = urlText;
-          token.level   = level;
-          nodes.push(token);
-
-          token         = new state.Token('link_close', 'a', -1);
-          token.level   = --level;
-          token.markup  = 'linkify';
-          token.info    = 'auto';
-          nodes.push(token);
-
-          lastPos = links[ln].lastIndex;
-        }
-        if (lastPos < text.length) {
-          token         = new state.Token('text', '', 0);
-          token.content = text.slice(lastPos);
-          token.level   = level;
-          nodes.push(token);
-        }
-
-        // replace current node
-        blockTokens[j].children = tokens = arrayReplaceAt(tokens, i, nodes);
-      }
-    }
-  }
-};
-
-},{"../common/utils":5}],34:[function(require,module,exports){
 // Normalize input string
 
 'use strict';
@@ -4440,7 +4337,7 @@ module.exports = function normalize(state) {
   state.src = str;
 };
 
-},{}],35:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 // Simple typographic replacements
 //
 // (c) (C) → ©
@@ -4524,9 +4421,9 @@ function replace_rare(inlineTokens) {
       if (RARE_RE.test(token.content)) {
         token.content = token.content
           .replace(/\+-/g, '±')
-          // .., ..., ....... -> …
+          // ..., ....... -> …
           // but ?..... & !..... -> ?.. & !..
-          .replace(/\.{2,}/g, '…').replace(/([?!])…/g, '$1..')
+          .replace(/\.{3,}/g, '…').replace(/([?!])…/g, '$1..')
           .replace(/([?!]){4,}/g, '$1$1$1').replace(/,{2,}/g, ',')
           // <-->
           // -->
@@ -4578,7 +4475,7 @@ module.exports = function replace(state) {
   }
 };
 
-},{}],36:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 // Convert straight quotation marks to typographic ones
 //
 'use strict';
@@ -4775,7 +4672,7 @@ module.exports = function smartquotes(state) {
   }
 };
 
-},{"../common/utils":5}],37:[function(require,module,exports){
+},{"../common/utils":5}],36:[function(require,module,exports){
 // Core state object
 //
 'use strict';
@@ -4797,7 +4694,7 @@ StateCore.prototype.Token = Token;
 
 module.exports = StateCore;
 
-},{"../token":52}],38:[function(require,module,exports){
+},{"../token":52}],37:[function(require,module,exports){
 // Process autolinks '<protocol:...>'
 
 'use strict';
@@ -4871,7 +4768,7 @@ module.exports = function autolink(state, silent) {
   return false;
 };
 
-},{}],39:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 // Parse backticks
 
 'use strict';
@@ -4916,7 +4813,7 @@ module.exports = function backtick(state, silent) {
   return true;
 };
 
-},{}],40:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 // For each opening emphasis-like marker find a matching closing one
 //
 'use strict';
@@ -5026,7 +4923,7 @@ module.exports = function link_pairs(state) {
   }
 };
 
-},{}],41:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 // Process *this* and _that_
 //
 'use strict';
@@ -5165,7 +5062,7 @@ module.exports.postProcess = function emphasis(state) {
   }
 };
 
-},{}],42:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 // Process html entity - &#123;, &#xAF;, &quot;, ...
 
 'use strict';
@@ -5215,7 +5112,7 @@ module.exports = function entity(state, silent) {
   return true;
 };
 
-},{"../common/entities":2,"../common/utils":5}],43:[function(require,module,exports){
+},{"../common/entities":2,"../common/utils":5}],42:[function(require,module,exports){
 // Process escaped chars and hardbreaks
 
 'use strict';
@@ -5269,7 +5166,7 @@ module.exports = function escape(state, silent) {
   return true;
 };
 
-},{"../common/utils":5}],44:[function(require,module,exports){
+},{"../common/utils":5}],43:[function(require,module,exports){
 // Process html tags
 
 'use strict';
@@ -5318,7 +5215,7 @@ module.exports = function html_inline(state, silent) {
   return true;
 };
 
-},{"../common/html_re":4}],45:[function(require,module,exports){
+},{"../common/html_re":4}],44:[function(require,module,exports){
 // Process ![image](<src> "title")
 
 'use strict';
@@ -5472,7 +5369,7 @@ module.exports = function image(state, silent) {
   return true;
 };
 
-},{"../common/utils":5}],46:[function(require,module,exports){
+},{"../common/utils":5}],45:[function(require,module,exports){
 // Process [link](<to> "stuff")
 
 'use strict';
@@ -5624,7 +5521,122 @@ module.exports = function link(state, silent) {
   return true;
 };
 
-},{"../common/utils":5}],47:[function(require,module,exports){
+},{"../common/utils":5}],46:[function(require,module,exports){
+// Handle implicit links found by rules_core/linkify that were not yet
+// subsumed by other inline rules (backticks, link, etc.)
+
+'use strict';
+
+module.exports.tokenize = function linkify(state, silent) {
+  var link, url, fullUrl, urlText, token;
+
+  if (state.links) {
+    link = state.links[state.pos];
+  }
+  if (!link) {
+    return false;
+  }
+
+  url = link.url;
+  fullUrl = state.md.normalizeLink(url);
+  if (!state.md.validateLink(fullUrl)) { return false; }
+  urlText = link.text;
+
+  // Linkifier might send raw hostnames like "example.com", where url
+  // starts with domain name. So we prepend http:// in those cases,
+  // and remove it afterwards.
+  //
+  if (!link.schema) {
+    urlText = state.md.normalizeLinkText('http://' + urlText).replace(/^http:\/\//, '');
+  } else if (link.schema === 'mailto:' && !/^mailto:/i.test(urlText)) {
+    urlText = state.md.normalizeLinkText('mailto:' + urlText).replace(/^mailto:/, '');
+  } else {
+    urlText = state.md.normalizeLinkText(urlText);
+  }
+
+  if (!silent) {
+    token         = state.push('link_open', 'a', 1);
+    token.attrs   = [ [ 'href', fullUrl ] ];
+    token.markup  = 'linkify';
+    token.info    = 'auto';
+
+    token         = state.push('text', '', 0);
+    token.content = urlText;
+
+    token         = state.push('link_close', 'a', -1);
+    token.markup  = 'linkify';
+    token.info    = 'auto';
+  }
+
+  state.pos = link.lastIndex;
+  return true;
+};
+
+// Set state.links to an index from position to links, if links found
+module.exports.preProcess = function linkify(state) {
+  var links, i;
+  if (!state.md.options.linkify || !state.md.linkify.pretest(state.src)) {
+    return;
+  }
+  links = state.md.linkify.match(state.src);
+  if (!links || !links.length) {
+    return;
+  }
+  state.links = {};
+  for (i = 0; i < links.length; i++) {
+    state.links[links[i].index] = links[i];
+  }
+};
+
+function isLinkOpen(str) {
+  return /^<a[>\s]/i.test(str);
+}
+function isLinkClose(str) {
+  return /^<\/a\s*>/i.test(str);
+}
+
+// Remove linkify links if already inside
+module.exports.postProcess = function linkify(state) {
+  var i, len, token, linkLevel = 0, htmlLinkLevel = 0;
+
+  len = state.tokens.length;
+  for (i = 0; i < len; i++) {
+    token = state.tokens[i];
+
+    // Transform into empty tokens any linkify open/close tags inside links
+    if (token.markup === 'linkify') {
+      if (linkLevel > 0 || htmlLinkLevel > 0) {
+        if (token.type === 'link_open') {
+          state.tokens[i + 1].level--;
+        }
+        token.type = 'text';
+        token.attrs = token.markup = token.info = null;
+        token.nesting = 0;
+        token.content = '';
+      }
+      continue;
+    }
+
+    // Skip content of markdown links
+    if (token.type === 'link_open') {
+      linkLevel++;
+    } else if (token.type === 'link_close' && linkLevel > 0) {
+      linkLevel--;
+    }
+
+    // Skip content of html tag links
+    if (token.type === 'html_inline') {
+      if (isLinkOpen(token.content)) {
+        htmlLinkLevel++;
+      }
+      if (isLinkClose(token.content) && htmlLinkLevel > 0) {
+        htmlLinkLevel--;
+      }
+    }
+  }
+};
+
+},{}],47:[function(require,module,exports){
 // Proceess '\n'
 
 'use strict';
@@ -5687,6 +5699,7 @@ function StateInline(src, md, env, outTokens) {
   this.tokens = outTokens;
   this.tokens_meta = Array(outTokens.length);
 
+  this.links = null;
   this.pos = 0;
   this.posMax = this.src.length;
   this.level = 0;
@@ -6002,7 +6015,8 @@ function isTerminatorChar(ch) {
 module.exports = function text(state, silent) {
   var pos = state.pos;
 
-  while (pos < state.posMax && !isTerminatorChar(state.src.charCodeAt(pos))) {
+  while (pos < state.posMax && !isTerminatorChar(state.src.charCodeAt(pos)) &&
+         (!state.links || !state.links[pos])) {
     pos++;
   }
 
