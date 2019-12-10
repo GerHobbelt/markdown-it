@@ -63,7 +63,7 @@
     "@gerhobbelt/markdown-it-header-sections": "0.2.2-1",
     "@gerhobbelt/markdown-it-headinganchor": "1.2.1-1",
     "@gerhobbelt/markdown-it-highlighted": "1.0.1-1",
-    "@gerhobbelt/markdown-it-highlightjs": "2.0.0-1",
+    "@gerhobbelt/markdown-it-highlightjs": "2.0.0-4",
     "@gerhobbelt/markdown-it-implicit-figures": "0.3.2-1",
     "@gerhobbelt/markdown-it-ins": "2.0.1-1",
     "@gerhobbelt/markdown-it-kbd": "2.0.0-1",
@@ -92,7 +92,7 @@
     "chai": "4.2.0",
     "commonmark": "0.29.0",
     "cross-env": "6.0.3",
-    "eslint": "6.6.0",
+    "eslint": "6.7.2",
     "express": "4.17.1",
     "highlight.js": "9.16.2",
     "mocha": "6.2.2",
@@ -100,13 +100,13 @@
     "nyc": "14.1.1",
     "pug": "2.0.4",
     "pug-cli": "1.0.0-alpha6",
-    "rollup": "1.26.4",
+    "rollup": "1.27.9",
     "rollup-plugin-commonjs": "10.1.0",
     "rollup-plugin-json": "4.0.0",
     "rollup-plugin-node-resolve": "5.2.0",
     "stylus": "0.54.7",
     "supertest": "4.0.2",
-    "terser": "4.3.10"
+    "terser": "4.4.2"
   },
   "reporter": [
     "lcov",

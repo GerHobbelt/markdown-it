@@ -7376,8 +7376,6 @@ var parse_link_destination = function parseLinkDestination(str, pos, max) {
   while (pos < max) {
     code = str.charCodeAt(pos);
 
-    if (code === 0x20) { break; }
-
     // ascii control characters
     if (code < 0x20 || code === 0x7F) { break; }
 
