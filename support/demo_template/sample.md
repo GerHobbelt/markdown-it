@@ -169,7 +169,7 @@ The killer feature of `markdown-it` is very effective support of
 >
 > Shortcuts (emoticons): :-) :-( 8-) ;)
 
-see [how to change output](https://github.com/markdown-it/markdown-it-emoji#change-output) with twemoji.
+see [how to change output](https://github.com/markdown-it/markdown-it-emoji#change-output) with [twemoji](https://twemoji.twitter.com/).
 
 
 ### [Subscript](https://github.com/markdown-it/markdown-it-sub) / [Superscript](https://github.com/markdown-it/markdown-it-sup)

@@ -64,12 +64,12 @@ readFile(options.file, 'utf8', function (err, input) {
     html: true,
     xhtmlOut: true,
     typographer: true,
-    linkify: true
+    linkify: true,
+    highSecurity: false
   });
 
   try {
     output = md.render(input);
-
   } catch (e) {
     console.error(e.stack || e.message || String(e));
 

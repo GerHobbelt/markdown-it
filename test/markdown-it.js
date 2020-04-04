@@ -4,7 +4,7 @@
 var path = require('path');
 
 
-var generate = require('markdown-it-testgen');
+var generate = require('@gerhobbelt/markdown-it-testgen');
 
 
 describe('markdown-it', function () {
@@ -12,7 +12,8 @@ describe('markdown-it', function () {
     html: true,
     langPrefix: '',
     typographer: true,
-    linkify: true
+    linkify: true,
+    highSecurity: false
   });
 
   generate(path.join(__dirname, 'fixtures/markdown-it'), md);

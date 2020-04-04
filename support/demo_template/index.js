@@ -70,12 +70,38 @@ var defaults = {
   breaks:       false,        // Convert '\n' in paragraphs into <br>
   langPrefix:   'language-',  // CSS language prefix for fenced blocks
   linkify:      true,         // autoconvert URL-like texts to links
+
+  // highSecurity:
+  // - false:           lower protection against XSS/Unicode-Homologue/etc. attacks via the input MarkDown.
+  //                    This setting assumes you own or at least trust the Markdown
+  //                    being fed to MarkDonw-It. The result is a nicer render.
+  // - true (default):  maximum protection against XSS/Unicode-Homologue/etc. attacks via the input MarkDown.
+  //                    This is the default setting and assumes you have no control or absolute trust in the Markdown
+  //                    being fed to MarkDonw-It. Use this setting when using markdown-it as part of a forum or other
+  //                    website where more-or-less arbitrary users can enter and feed any MarkDown to markdown-it.
+  //
+  // See https://en.wikipedia.org/wiki/Internationalized_domain_name for details on homograph attacks, for example.
+  highSecurity: false,
+
   typographer:  true,         // Enable smartypants and other sweet transforms
 
   // options below are for demo only
-  _highlight: true,
-  _strict: false,
-  _view: 'html'               // html / src / debug
+  _highlight:   true,
+  _strict:      false,
+  _view:        'html',       // html / src / debug
+
+  // modify-token plugin:
+  modifyToken: function (token, env) {
+    console.log('TOKEN:', token, !!env);
+    // switch (token.type) {
+    // case 'image': // set all images to 200px width
+    //   token.attrObj.width = '200px';
+    //   break;
+    // case 'link_open':
+    //   token.attrObj.target = '_blank'; // set all links to open in new window
+    //   break;
+    // }
+  }
 };
 
 defaults.highlight = function (str, lang) {
@@ -124,31 +150,108 @@ function setResultView(val) {
   defaults._view = val;
 }
 
+var pickNumber = 1;
+function pick(pckg1, pckg2, pckg3, pckg4) {
+  var rv;
+  switch (pickNumber) {
+  case 1:
+    rv = pckg1;
+    break;
+
+  case 2:
+    rv = pckg2;
+    break;
+
+  case 3:
+    rv = pckg3;
+    break;
+
+  case 4:
+    rv = pckg4;
+    break;
+  }
+  return rv || pckg1;
+}
+
+function usePlugins(md) {
+  return md
+  .use(require('@gerhobbelt/markdown-it-abbr'))
+  .use(require('@gerhobbelt/markdown-it-attrs'))
+  .use(require('@gerhobbelt/markdown-it-container'), 'warning')
+  .use(require('@gerhobbelt/markdown-it-checkbox'))
+  .use(require('@gerhobbelt/markdown-it-deflist'))
+  .use(require('@gerhobbelt/markdown-it-emoji'))
+  .use(require('@gerhobbelt/markdown-it-fontawesome'))
+  .use(require('@gerhobbelt/markdown-it-footnote'))
+  .use(require('@gerhobbelt/markdown-it-front-matter'), function processFrontMatter(fm) {
+    console.log('FrontMatter:', fm);
+  })
+  .use(require('@gerhobbelt/markdown-it-hashtag'))
+  .use(require('@gerhobbelt/markdown-it-header-sections'))
+  .use(require('@gerhobbelt/markdown-it-headinganchor'), {
+    // anchorClass: 'my-class-name', // default: 'markdown-it-headinganchor'
+    // addHeadingID: true,           // default: true
+    // addHeadingAnchor: true,       // default: true
+    // slugify: function(str, md) {} // default: 'My Heading' -> 'MyHeading'
+  })
+  .use(require('@gerhobbelt/markdown-it-implicit-figures'))
+  .use(require('@gerhobbelt/markdown-it-ins'))
+  .use(require('@gerhobbelt/markdown-it-kbd'))
+  .use(require('@gerhobbelt/markdown-it-mark'))
+  .use(require('@gerhobbelt/markdown-it-mathjax'))
+  .use(require('@gerhobbelt/markdown-it-modify-token'))
+
+  .use(pick(
+    //require('@gerhobbelt/markdown-it-prism'),
+    require('@gerhobbelt/markdown-it-highlighted').default
+    //require('@gerhobbelt/markdown-it-highlightjs')
+  ))
+
+/*  .use(require('@gerhobbelt/markdown-it-responsive'), {
+    responsive: {
+      srcset: {
+        'header-*': [ {
+          width: 320,
+          rename: {
+            suffix: '-small'
+          }
+        }, {
+          width: 640,
+          rename: {
+            suffix: '-medium'
+          }
+        } ]
+      },
+      sizes: {
+        'header-*': '(min-width: 36em) 33.3vw, 100vw'
+      }
+    }
+  })
+*/
+  .use(require('@gerhobbelt/markdown-it-samp'))
+  .use(require('@gerhobbelt/markdown-it-sanitizer'))
+  //.use(require('@gerhobbelt/markdown-it-smartarrows'))
+  .use(require('@gerhobbelt/markdown-it-strikethrough-alt'))
+  .use(require('@gerhobbelt/markdown-it-sub'))
+  .use(require('@gerhobbelt/markdown-it-sup'))
+
+  .use(pick(
+    require('@gerhobbelt/markdown-it-table-of-contents'),
+    require('@gerhobbelt/markdown-it-toc')
+    //require('@gerhobbelt/markdown-it-toc-and-anchor')
+  ))
+
+  //.use(require('@gerhobbelt/markdown-it-title'))
+  .use(require('@gerhobbelt/markdown-it-wikilinks'));
+}
+
 function mdInit() {
   if (defaults._strict) {
     mdHtml = window.markdownit('commonmark');
     mdSrc = window.markdownit('commonmark');
   } else {
-    mdHtml = window.markdownit(defaults)
-      .use(require('markdown-it-abbr'))
-      .use(require('markdown-it-container'), 'warning')
-      .use(require('markdown-it-deflist'))
-      .use(require('markdown-it-emoji'))
-      .use(require('markdown-it-footnote'))
-      .use(require('markdown-it-ins'))
-      .use(require('markdown-it-mark'))
-      .use(require('markdown-it-sub'))
-      .use(require('markdown-it-sup'));
-    mdSrc = window.markdownit(defaults)
-      .use(require('markdown-it-abbr'))
-      .use(require('markdown-it-container'), 'warning')
-      .use(require('markdown-it-deflist'))
-      .use(require('markdown-it-emoji'))
-      .use(require('markdown-it-footnote'))
-      .use(require('markdown-it-ins'))
-      .use(require('markdown-it-mark'))
-      .use(require('markdown-it-sub'))
-      .use(require('markdown-it-sup'));
+    mdHtml = usePlugins(window.markdownit(defaults));
+    mdSrc = usePlugins(window.markdownit(defaults));
   }
 
   // Beautify output of parser for html content

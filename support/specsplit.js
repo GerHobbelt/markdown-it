@@ -78,7 +78,7 @@ readFile(options.spec, 'utf8', function (error, input) {
   markdown.parse(input, {})
     .filter(function (token) {
       return token.tag === 'code' &&
-              token.info.trim() === 'example';
+             token.info.trim() === 'example';
     })
     .forEach(function (token) {
       var arr  = token.content.split(/^\.\s*?$/m, 2);

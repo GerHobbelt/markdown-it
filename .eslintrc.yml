@@ -21,14 +21,14 @@ rules:
   curly:                  [ 2, 'multi-line' ]
   dot-notation:           2
   eol-last:               2
-  eqeqeq:                 2
-  func-style:             [ 2, declaration ]
+  eqeqeq:                 [ 2, always, { "null": "ignore" } ]
+  func-style:             [ 2, declaration, { "allowArrowFunctions": true } ]
   # Postponed
   #global-require:         2
   guard-for-in:           2
   handle-callback-err:    2
 
-  indent:                 [ 2, 2, { VariableDeclarator: { var: 2, let: 2, const: 3 }, SwitchCase: 1, ignoreComments: true } ]
+  indent:                 [ 2, 2, { VariableDeclarator: { var: 2, let: 2, const: 3 }, SwitchCase: 0, MemberExpression: "off", ignoreComments: true } ]
 
   # key-spacing:            [ 2, { "align": "value" } ]
   keyword-spacing:        2
@@ -36,7 +36,7 @@ rules:
   max-depth:              [ 1, 6 ]
   max-nested-callbacks:   [ 1, 4 ]
   # string can exceed 80 chars, but should not overflow github website :)
-  max-len:                [ 2, 120, 1000 ]
+  max-len:                [ 2, 140, 1000 ]
   new-cap:                2
   new-parens:             2
   # Postponed
@@ -51,7 +51,7 @@ rules:
   no-console:             1
   no-constant-condition:  2
   #no-control-regex:       2
-  no-debugger:            2
+  no-debugger:            1
   no-delete-var:          2
   no-div-regex:           2
   no-dupe-args:           2
@@ -62,7 +62,7 @@ rules:
   # no-empty:               1
   no-empty-character-class: 2
   no-empty-pattern:       2
-  no-eq-null:             2
+  no-eq-null:             1
   no-eval:                2
   no-ex-assign:           2
   no-extend-native:       2
@@ -86,6 +86,7 @@ rules:
   no-loop-func:           2
   no-mixed-requires:      2
   no-mixed-spaces-and-tabs: 2
+  no-multi-str:         2
   # Postponed
   #no-native-reassign:     2
   no-negated-in-lhs:      2
@@ -105,6 +106,7 @@ rules:
   # Postponed
   #no-regex-spaces:        2
   no-return-assign:       2
+  no-script-url:        2
   no-self-compare:        2
   no-sequences:           2
   no-shadow:              2
@@ -127,6 +129,7 @@ rules:
   #operator-linebreak:     [ 2, after ]
   semi:                   2
   semi-spacing:           2
+  space-before-blocks:  2
   space-before-function-paren: [ 2, { "anonymous": "always", "named": "never" } ]
   space-in-parens:        [ 2, never ]
   space-infix-ops:        2
