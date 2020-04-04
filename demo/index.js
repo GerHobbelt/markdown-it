@@ -159,13 +159,13 @@ const patternsConfig = require('./patterns.js');
 
 const defaultOptions = {
   leftDelimiter: '{',
-  rightDelimiter: '}'
+  rightDelimiter: '}',
+  allowedAttributes: []
 };
 
-module.exports = function attributes(md, options) {
-  if (!options) {
-    options = defaultOptions;
-  }
+module.exports = function attributes(md, options_) {
+  let options = Object.assign({}, defaultOptions);
+  options = Object.assign(options, options_);
 
   const patterns = patternsConfig(options);
 
@@ -304,6 +304,7 @@ function last(arr) {
 
 },{"./patterns.js":3}],3:[function(require,module,exports){
 'use strict';
+
 /**
  * If a pattern matches the token stream,
  * then run transform.
@@ -455,6 +456,7 @@ module.exports = options => {
               type: 'softbreak'
             }, {
               position: -1,
+              type: 'text',
               content: utils.hasDelimiters('only', options)
             }
           ]
@@ -524,6 +526,7 @@ module.exports = options => {
           children: [
             {
               position: -1,
+              type: 'text',
               content: utils.hasDelimiters('end', options)
             }
           ]
@@ -640,6 +643,7 @@ module.exports = options => {
 function last(arr) {
   return arr.slice(-1)[0];
 }
+
 },{"./utils.js":4}],4:[function(require,module,exports){
 'use strict';
 /**
@@ -667,7 +671,7 @@ exports.getAttrs = function (str, start, options) {
   // breaks when } is found or end of string
   for (let i = start + options.leftDelimiter.length; i < str.length; i++) {
     if (str.slice(i, i + options.rightDelimiter.length) === options.rightDelimiter) {
-      if (key !== '') { attrs.push([key, value]); }
+      if (key !== '') { attrs.push([ key, value ]); }
       break;
     }
     let char_ = str.charAt(i);
@@ -732,7 +736,25 @@ exports.getAttrs = function (str, start, options) {
     }
     value += char_;
   }
+
+  if (options.allowedAttributes && options.allowedAttributes.length) {
+    let allowedAttributes = options.allowedAttributes;
+
+    return attrs.filter(function (attrPair) {
+      let attr = attrPair[0];
+
+      function isAllowedAttribute(allowedAttribute) {
+        return (attr === allowedAttribute
+          || (allowedAttribute instanceof RegExp && allowedAttribute.test(attr))
+        );
+      }
+
+      return allowedAttributes.some(isAllowedAttribute);
+    });
+
+  }
   return attrs;
+
 };
 
 /**
@@ -783,7 +805,7 @@ exports.hasDelimiters = function (where, options) {
       return false;
     }
 
-    function validCurlyLength (curly) {
+    function validCurlyLength(curly) {
       let isClass = curly.charAt(options.leftDelimiter.length) === '.';
       let isId = curly.charAt(options.leftDelimiter.length) === '#';
       return (isClass || isId)
@@ -848,7 +870,7 @@ exports.removeDelimiter = function (str, options) {
  * @param {string} s Regex string.
  * @return {string} Escaped string.
  */
-function escapeRegExp (s) {
+function escapeRegExp(s) {
   return s.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
 }
 exports.escapeRegExp = escapeRegExp;
@@ -865,12 +887,7 @@ exports.getMatchingOpeningToken = function (tokens, i) {
     return tokens[i];
   }
 
-  // inline tokens changes level on same token
-  // that have .nesting +- 1
-  let level = tokens[i].block
-    ? tokens[i].level
-    : tokens[i].level + 1;  // adjust for inline tokens
-
+  let level = tokens[i].level;
   let type = tokens[i].type.replace('_close', '_open');
 
   for (; i >= 0; --i) {
@@ -878,6 +895,7 @@ exports.getMatchingOpeningToken = function (tokens, i) {
       return tokens[i];
     }
   }
+  return false;
 };
 
 
@@ -1014,7 +1032,7 @@ module.exports = function(md, options) {
   md.core.ruler.push("checkbox", checkboxReplace(md, options));
 };
 
-},{"underscore":101}],6:[function(require,module,exports){
+},{"underscore":106}],6:[function(require,module,exports){
 // Process block-level custom containers
 //
 'use strict';
@@ -3131,7 +3149,7 @@ module.exports = function fontawesome_plugin(md) {
         }
     ));
 };
-},{"@gerhobbelt/markdown-it-regexp":27}],15:[function(require,module,exports){
+},{"@gerhobbelt/markdown-it-regexp":28}],15:[function(require,module,exports){
 // Process footnotes
 //
 'use strict';
@@ -3907,31 +3925,25 @@ module.exports = function headinganchorPlugin (md, opts) {
 },{}],20:[function(require,module,exports){
 "use strict";
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
+// export.default = ...  <-- causes slightly different behaviour: MarkDownIt.use(require(plugin).default);
+module.exports = md => {
+  const originalRender = md.render;
 
-var _default = function _default(md) {
-  var originalRender = md.render;
+  md.render = function (src, env = {}) {
+    const defaultHighlight = this.options.highlight;
 
-  md.render = function (src) {
-    var env = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-    var defaultHighlight = this.options.highlight;
-
-    this.options.highlight = function () {
-      var html = defaultHighlight && defaultHighlight.apply(void 0, arguments);
+    this.options.highlight = (...args) => {
+      const html = defaultHighlight && defaultHighlight(...args);
       env.highlighted = !!html;
       return html;
     };
 
     env.highlighted = false;
-    var html = originalRender.call(this, src, env);
+    const html = originalRender.call(this, src, env);
     this.options.highlight = defaultHighlight;
     return html;
   };
 };
-
-exports.default = _default;
 
 },{}],21:[function(require,module,exports){
 'use strict';
@@ -3940,6 +3952,9 @@ module.exports = function implicitFiguresPlugin(md, options) {
   options = options || {};
 
   function implicitFigures(state) {
+    // reset tabIndex on md.render()
+    var tabIndex = 1;
+
     // do not process first and last token
     for (var i=1, l=state.tokens.length; i < (l - 1); ++i) {
       var token = state.tokens[i];
@@ -3965,35 +3980,58 @@ module.exports = function implicitFiguresPlugin(md, options) {
       // Previous token is paragraph open.
       // Next token is paragraph close.
       // Lets replace the paragraph tokens with figure tokens.
-      state.tokens[i - 1].type = 'figure_open';
-      state.tokens[i - 1].tag = 'figure';
+      var figure = state.tokens[i - 1];
+      figure.type = 'figure_open';
+      figure.tag = 'figure';
       state.tokens[i + 1].type = 'figure_close';
       state.tokens[i + 1].tag = 'figure';
 
       if (options.dataType == true) {
         state.tokens[i - 1].attrPush(['data-type', 'image']);
       }
+      var image;
+
+      if (options.link == true && token.children.length === 1) {
+        image = token.children[0];
+        token.children.unshift(
+          new state.Token('link_open', 'a', 1)
+        );
+        token.children[0].attrPush(['href', image.attrGet('src')]);
+        token.children.push(
+          new state.Token('link_close', 'a', -1)
+        );
+      }
+
+      // for linked images, image is one off
+      image = token.children.length === 1 ? token.children[0] : token.children[1];
 
       if (options.figcaption == true) {
-        //for linked images, image is one off
-        var image = (token.children.length === 1) ? token.children[0] : token.children[1];
-
         if (image.children && image.children.length) {
           token.children.push(
             new state.Token('figcaption_open', 'figcaption', 1)
             );
-          token.children.push(
-            md.utils.assign({}, image.children[0])
-            );
+          token.children.splice(token.children.length, 0, ...image.children);
           token.children.push(
             new state.Token('figcaption_close', 'figcaption', -1)
             );
+          image.children.length = 0;
         }
+      }
+
+      if (options.copyAttrs && image.attrs) {
+        const f = options.copyAttrs === true ? '' : options.copyAttrs
+        figure.attrs = image.attrs.filter(([k,v]) => k.match(f))
+      }
+
+      if (options.tabindex == true) {
+        // add a tabindex property
+        // you could use this with css-tricks.com/expanding-images-html5
+        state.tokens[i - 1].attrPush(['tabindex', tabIndex]);
+        tabIndex++;
       }
     }
   }
-
-  md.core.ruler.push('implicit_figures', implicitFigures);
+  md.core.ruler.before('replacements', 'implicit_figures', implicitFigures);
 };
 
 },{}],22:[function(require,module,exports){
@@ -4489,9 +4527,180 @@ module.exports = function (md) {
 };
 
 },{}],27:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = markdownItPrism;
+
+var _prismjs = _interopRequireDefault(require("prismjs"));
+
+var _components = _interopRequireDefault(require("prismjs/components/"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * A callback that can be used to perform custom initialisation of the Prism instance.
+ *
+ * @callback PrismInitialisationCallback
+ * @param {Prism} prism
+ *        The Prism instance
+ */
+
+/**
+ * The options for the markdown-it-prism plugin
+ *
+ * @typedef {Object} MarkdownItPrismOptions
+ * @property {String[]} plugins
+ *        Names of Prism plugins to load
+ * @property {PrismInitialisationCallback} init
+ *        Callback for Prism initialisation
+ * @property {String} defaultLanguageForUnknown
+ *        The language to use for code blocks that specify a language that Prism does not know
+ * @property {String} defaultLanguageForUnspecified
+ *        The language to use for code block that do not specify a language
+ * @property {String} defaultLanguage
+ *        Shorthand to set both {@code defaultLanguageForUnknown} and {@code defaultLanguageForUnspecified} to the same value
+ */
+const DEFAULTS = {
+  plugins: [],
+  init: () => {},
+  defaultLanguageForUnknown: undefined,
+  defaultLanguageForUnspecified: undefined,
+  defaultLanguage: undefined
+};
+/**
+ * Loads the provided {@code lang} into prism.
+ *
+ * @param {String} lang
+ *        Code of the language to load.
+ * @return {Object} The Prism language object for the provided {@code lang} code. {@code undefined} if the language is not known to Prism.
+ */
+
+function loadPrismLang(lang) {
+  if (!lang) return undefined;
+  let langObject = _prismjs.default.languages[lang];
+
+  if (langObject === undefined) {
+    (0, _components.default)([lang]);
+    langObject = _prismjs.default.languages[lang];
+  }
+
+  return langObject;
+}
+/**
+ * Loads the provided Prism plugin.a
+ * @param name
+ *        Name of the plugin to load
+ * @throws {Error} If there is no plugin with the provided {@code name}
+ */
+
+
+function loadPrismPlugin(name) {
+  try {
+    require(`prismjs/plugins/${name}/prism-${name}`);
+  } catch (e) {
+    throw new Error(`Cannot load Prism plugin "${name}". Please check the spelling.`);
+  }
+}
+/**
+ * Select the language to use for highlighting, based on the provided options and the specified language.
+ *
+ * @param {Object} options
+ *        The options that were used to initialise the plugin.
+ * @param {String} lang
+ *        Code of the language to highlight the text in.
+ * @return {Array} An array where the first element is the name of the language to use, and the second element is the PRISM language object for that language.
+ */
+
+
+function selectLanguage(options, lang) {
+  let langToUse = lang;
+
+  if (langToUse === '' && options.defaultLanguageForUnspecified !== undefined) {
+    langToUse = options.defaultLanguageForUnspecified;
+  }
+
+  let prismLang = loadPrismLang(langToUse);
+
+  if (prismLang === undefined && options.defaultLanguageForUnknown !== undefined) {
+    langToUse = options.defaultLanguageForUnknown;
+    prismLang = loadPrismLang(langToUse);
+  }
+
+  return [langToUse, prismLang];
+}
+/**
+ * Highlights the provided text using Prism.
+ *
+ * @param {MarkdownIt} markdownit
+ *        Instance of MarkdownIt Class. This argument is bound in markdownItPrism().
+ * @param {MarkdownItPrismOptions} options
+ *        The options that have been used to initialise the plugin. This argument is bound in markdownItPrism().
+ * @param {String} text
+ *        The text to highlight.
+ * @param {String} lang
+ *        Code of the language to highlight the text in.
+ * @return {String} {@code text} wrapped in {@code &lt;pre&gt;} and {@code &lt;code&gt;}, both equipped with the appropriate class (markdown-it’s langPrefix + lang). If Prism knows {@code lang}, {@code text} will be highlighted by it.
+ */
+
+
+function highlight(markdownit, options, text, lang) {
+  let langToUse, prismLang;
+  [langToUse, prismLang] = selectLanguage(options, lang);
+  const code = prismLang ? _prismjs.default.highlight(text, prismLang) : markdownit.utils.escapeHtml(text);
+  const classAttribute = langToUse ? ` class="${markdownit.options.langPrefix}${langToUse}"` : '';
+  return `<pre${classAttribute}><code${classAttribute}>${code}</code></pre>`;
+}
+/**
+ * Checks whether an option represents a valid Prism language
+ *
+ * @param {MarkdownItPrismOptions} options
+ *        The options that have been used to initialise the plugin.
+ * @param optionName
+ *        The key of the option insides {@code options} that shall be checked.
+ * @throws {Error} If the option is not set to a valid Prism language.
+ */
+
+
+function checkLanguageOption(options, optionName) {
+  const language = options[optionName];
+
+  if (language !== undefined && loadPrismLang(language) === undefined) {
+    throw new Error(`Bad option ${optionName}: There is no Prism language '${language}'.`);
+  }
+}
+/**
+ * Initialisation function of the plugin. This function is not called directly by clients, but is rather provided
+ * to MarkdownIt’s {@link MarkdownIt.use} function.
+ *
+ * @param {MarkdownIt} markdownit
+ *        The markdown it instance the plugin is being registered to.
+ * @param {MarkdownItPrismOptions} useroptions
+ *        The options this plugin is being initialised with.
+ */
+
+
+function markdownItPrism(markdownit, useroptions) {
+  const options = Object.assign({}, DEFAULTS, useroptions);
+  checkLanguageOption(options, 'defaultLanguage');
+  checkLanguageOption(options, 'defaultLanguageForUnknown');
+  checkLanguageOption(options, 'defaultLanguageForUnspecified');
+  options.defaultLanguageForUnknown = options.defaultLanguageForUnknown || options.defaultLanguage;
+  options.defaultLanguageForUnspecified = options.defaultLanguageForUnspecified || options.defaultLanguage;
+  options.plugins.forEach(loadPrismPlugin);
+  options.init(_prismjs.default); // register ourselves as highlighter
+
+  markdownit.options.highlight = (...args) => highlight(markdownit, options, ...args);
+}
+
+module.exports = exports.default;
+module.exports.default = exports.default;
+},{"prismjs":101,"prismjs/components/":99}],28:[function(require,module,exports){
 module.exports = require('./lib')
 
-},{"./lib":28}],28:[function(require,module,exports){
+},{"./lib":29}],29:[function(require,module,exports){
 /*!
  * markdown-it-regexp
  * Copyright (c) 2014 Alex Kocharin
@@ -4580,7 +4789,7 @@ Plugin.prototype.render = function (tokens, id, options, env) {
 }
 
 
-},{"./utils":29,"util":105}],29:[function(require,module,exports){
+},{"./utils":30,"util":110}],30:[function(require,module,exports){
 /*!
  * markdown-it-regexp
  * Copyright (c) 2014 Alex Kocharin
@@ -4602,7 +4811,7 @@ exports.escape = function(html) {
 }
 
 
-},{}],30:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 'use strict';
 
 module.exports = function sample_plugin(md) {
@@ -4703,7 +4912,7 @@ module.exports = function sample_plugin(md) {
 }
 
 
-},{}],31:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 // Sanitizer
 
 'use strict';
@@ -4935,7 +5144,7 @@ module.exports = function sanitizer_plugin(md, options) {
   md.core.ruler.after('sanitize_inline', 'sanitize_balance', balance);
 };
 
-},{}],32:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 // Process --strikethrough--
 // Will not recognize '---' or '-test-'
 
@@ -5032,7 +5241,7 @@ module.exports = function strikethrough_alt_plugin(md) {
   md.inline.ruler2.before('emphasis', 'strikethrough_alt_plugin', postProcess);
 };
 
-},{}],33:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 // Process ~subscript~
 
 'use strict';
@@ -5100,7 +5309,7 @@ module.exports = function sub_plugin(md) {
   md.inline.ruler.after('emphasis', 'sub', subscript);
 };
 
-},{}],34:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 // Process ^superscript^
 
 'use strict';
@@ -5168,7 +5377,7 @@ module.exports = function sup_plugin(md) {
   md.inline.ruler.after('emphasis', 'sup', superscript);
 };
 
-},{}],35:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 'use strict';
 const slugify = (s) => encodeURIComponent(String(s).trim().toLowerCase().replace(/\s+/g, '-'));
 const defaults = {
@@ -5332,7 +5541,7 @@ module.exports = (md, o) => {
   md.inline.ruler.after('emphasis', 'toc', toc);
 };
 
-},{}],36:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 // Process @[toc](|Title)
 
 'use strict';
@@ -5470,7 +5679,7 @@ module.exports = function(md) {
     md.inline.ruler.after('emphasis', 'toc', toc);
 };
 
-},{}],37:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 'use strict'
 
 const Plugin = require('@gerhobbelt/markdown-it-regexp')
@@ -5558,7 +5767,7 @@ module.exports = (options) => {
   )
 }
 
-},{"@gerhobbelt/markdown-it-regexp":27,"extend":38,"sanitize-filename":98}],38:[function(require,module,exports){
+},{"@gerhobbelt/markdown-it-regexp":28,"extend":39,"sanitize-filename":103}],39:[function(require,module,exports){
 'use strict';
 
 var hasOwn = Object.prototype.hasOwnProperty;
@@ -5677,7 +5886,7 @@ module.exports = function extend() {
 	return target;
 };
 
-},{}],39:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 /*
 Syntax highlighting with language autodetection.
 https://highlightjs.org/
@@ -6836,7 +7045,7 @@ https://highlightjs.org/
   return hljs;
 }));
 
-},{}],40:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 module.exports = function(hljs) {
   var IDENT_RE = '[a-zA-Z_$][a-zA-Z0-9_$]*';
   var IDENT_FUNC_RETURN_TYPE_RE = '([*]|[a-zA-Z_$][a-zA-Z0-9_$]*)';
@@ -6910,7 +7119,7 @@ module.exports = function(hljs) {
     illegal: /#/
   };
 };
-},{}],41:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 module.exports = function(hljs) {
   var NUMBER = {className: 'number', begin: '[\\$%]\\d+'};
   return {
@@ -6956,7 +7165,7 @@ module.exports = function(hljs) {
     illegal: /\S/
   };
 };
-},{}],42:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 module.exports = function(hljs) {
 
 	var ARDUINO_KW = {
@@ -7055,7 +7264,7 @@ module.exports = function(hljs) {
 
   return ARDUINO;
 };
-},{}],43:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 module.exports = function(hljs) {
     //local labels: %?[FB]?[AT]?\d{1,2}\w+
   return {
@@ -7147,7 +7356,7 @@ module.exports = function(hljs) {
     ]
   };
 };
-},{}],44:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 module.exports = function(hljs) {
   return {
     aliases: ['adoc'],
@@ -7335,7 +7544,7 @@ module.exports = function(hljs) {
     ]
   };
 };
-},{}],45:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 module.exports = function(hljs) {
   return {
     case_insensitive: true,
@@ -7397,7 +7606,7 @@ module.exports = function(hljs) {
     ]
   };
 };
-},{}],46:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 module.exports = function(hljs) {
   var VAR = {
     className: 'variable',
@@ -7478,7 +7687,7 @@ module.exports = function(hljs) {
     ]
   };
 };
-},{}],47:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 module.exports = function(hljs) {
   var keywords = {
     'builtin-name':
@@ -7574,7 +7783,7 @@ module.exports = function(hljs) {
     contains: [LIST, STRING, HINT, HINT_COL, COMMENT, KEY, COLLECTION, NUMBER, LITERAL]
   }
 };
-},{}],48:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 module.exports = function(hljs) {
   return {
     aliases: ['cmake.in'],
@@ -7627,7 +7836,7 @@ module.exports = function(hljs) {
     ]
   };
 };
-},{}],49:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 module.exports = function(hljs) {
   var KEYWORDS = {
     keyword:
@@ -7773,7 +7982,7 @@ module.exports = function(hljs) {
     ])
   };
 };
-},{}],50:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 module.exports = function(hljs) {
   function optional(s) {
     return '(?:' + s + ')?';
@@ -7992,7 +8201,7 @@ module.exports = function(hljs) {
     }
   };
 };
-},{}],51:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 module.exports = function(hljs) {
   var FUNCTION_LIKE = {
     begin: /[\w-]+\(/, returnBegin: true,
@@ -8118,7 +8327,7 @@ module.exports = function(hljs) {
     ]
   };
 };
-},{}],52:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 module.exports = function(hljs) {
   return {
     aliases: ['patch'],
@@ -8158,7 +8367,7 @@ module.exports = function(hljs) {
     ]
   };
 };
-},{}],53:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
 module.exports = function(hljs) {
   var FILTER = {
     begin: /\|[A-Za-z]+:?/,
@@ -8222,7 +8431,7 @@ module.exports = function(hljs) {
     ]
   };
 };
-},{}],54:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 module.exports = function(hljs) {
   return {
     aliases: ['docker'],
@@ -8244,7 +8453,7 @@ module.exports = function(hljs) {
     illegal: '</'
   }
 };
-},{}],55:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 module.exports = function(hljs) {
   var PARAMS = {
     className: 'params',
@@ -8315,7 +8524,7 @@ module.exports = function(hljs) {
     ]
   };
 };
-},{}],56:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 module.exports = function(hljs) {
   return {
     keywords: {
@@ -8432,7 +8641,7 @@ module.exports = function(hljs) {
     ]
   };
 };
-},{}],57:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 module.exports = function(hljs) {
   var GO_KEYWORDS = {
     keyword:
@@ -8486,7 +8695,7 @@ module.exports = function(hljs) {
     ]
   };
 };
-},{}],58:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 module.exports = function(hljs) {
     return {
         keywords: {
@@ -8580,7 +8789,7 @@ module.exports = function(hljs) {
         illegal: /#|<\//
     }
 };
-},{}],59:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
 module.exports = function (hljs) {
   var BUILT_INS = {'builtin-name': 'each in with if else unless bindattr action collection debugger log outlet template unbound view yield lookup'};
 
@@ -8655,7 +8864,7 @@ module.exports = function (hljs) {
     ]
   };
 };
-},{}],60:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 module.exports = function(hljs) {
   var COMMENT = {
     variants: [
@@ -8777,7 +8986,7 @@ module.exports = function(hljs) {
     ]
   };
 };
-},{}],61:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
 module.exports = function(hljs) {
   var NUMBERS = {
     className: 'number',
@@ -8854,7 +9063,7 @@ module.exports = function(hljs) {
     ]
   };
 };
-},{}],62:[function(require,module,exports){
+},{}],63:[function(require,module,exports){
 module.exports = function(hljs) {
   var JAVA_IDENT_RE = '[\u00C0-\u02B8a-zA-Z_$][\u00C0-\u02B8a-zA-Z_$0-9]*';
   var GENERIC_IDENT_RE = JAVA_IDENT_RE + '(<' + JAVA_IDENT_RE + '(\\s*,\\s*' + JAVA_IDENT_RE + ')*>)?';
@@ -8962,7 +9171,7 @@ module.exports = function(hljs) {
     ]
   };
 };
-},{}],63:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 module.exports = function(hljs) {
   var FRAGMENT = {
     begin: '<>',
@@ -9204,7 +9413,7 @@ module.exports = function(hljs) {
     illegal: /#(?!!)/
   };
 };
-},{}],64:[function(require,module,exports){
+},{}],65:[function(require,module,exports){
 module.exports = function(hljs) {
   var LITERALS = {literal: 'true false null'};
   var ALLOWED_COMMENTS = [
@@ -9248,7 +9457,7 @@ module.exports = function(hljs) {
     illegal: '\\S'
   };
 };
-},{}],65:[function(require,module,exports){
+},{}],66:[function(require,module,exports){
 module.exports = function(hljs) {
   var IDENT_RE        = '[\\w-]+'; // yes, Less identifiers may begin with a digit
   var INTERP_IDENT_RE = '(' + IDENT_RE + '|@{' + IDENT_RE + '})';
@@ -9388,7 +9597,7 @@ module.exports = function(hljs) {
     contains: RULES
   };
 };
-},{}],66:[function(require,module,exports){
+},{}],67:[function(require,module,exports){
 module.exports = function(hljs) {
   var LISP_IDENT_RE = '[a-zA-Z_\\-\\+\\*\\/\\<\\=\\>\\&\\#][a-zA-Z0-9_\\-\\+\\*\\/\\<\\=\\>\\&\\#!]*';
   var MEC_RE = '\\|[^]*?\\|';
@@ -9491,7 +9700,7 @@ module.exports = function(hljs) {
     ]
   };
 };
-},{}],67:[function(require,module,exports){
+},{}],68:[function(require,module,exports){
 module.exports = function(hljs) {
   var KEYWORDS = {
     keyword:
@@ -9645,7 +9854,7 @@ module.exports = function(hljs) {
     ])
   };
 };
-},{}],68:[function(require,module,exports){
+},{}],69:[function(require,module,exports){
 module.exports = function(hljs) {
   var OPENING_LONG_BRACKET = '\\[=*\\[';
   var CLOSING_LONG_BRACKET = '\\]=*\\]';
@@ -9711,7 +9920,7 @@ module.exports = function(hljs) {
     ])
   };
 };
-},{}],69:[function(require,module,exports){
+},{}],70:[function(require,module,exports){
 module.exports = function(hljs) {
   /* Variables: simple (eg $(var)) and special (eg $@) */
   var VARIABLE = {
@@ -9784,7 +9993,7 @@ module.exports = function(hljs) {
     ]
   };
 };
-},{}],70:[function(require,module,exports){
+},{}],71:[function(require,module,exports){
 module.exports = /*
   Formal syntax is not published, helpful link:
   https://github.com/kornilova-l/matlab-IntelliJ-plugin/blob/master/src/main/grammar/Matlab.bnf
@@ -9880,7 +10089,7 @@ function(hljs) {
     ]
   };
 };
-},{}],71:[function(require,module,exports){
+},{}],72:[function(require,module,exports){
 module.exports = function(hljs) {
     //local labels: %?[FB]?[AT]?\d{1,2}\w+
   return {
@@ -9967,7 +10176,7 @@ module.exports = function(hljs) {
     illegal: '\/'
   };
 };
-},{}],72:[function(require,module,exports){
+},{}],73:[function(require,module,exports){
 module.exports = function(hljs) {
   var VAR = {
     className: 'variable',
@@ -10060,7 +10269,7 @@ module.exports = function(hljs) {
     illegal: '[^\\s\\}]'
   };
 };
-},{}],73:[function(require,module,exports){
+},{}],74:[function(require,module,exports){
 module.exports = function(hljs) {
   var API_CLASS = {
     className: 'built_in',
@@ -10156,7 +10365,7 @@ module.exports = function(hljs) {
     ]
   };
 };
-},{}],74:[function(require,module,exports){
+},{}],75:[function(require,module,exports){
 module.exports = function(hljs) {
   var PERL_KEYWORDS = 'getpwent getservent quotemeta msgrcv scalar kill dbmclose undef lc ' +
     'ma syswrite tr send umask sysopen shmwrite vec qx utime local oct semctl localtime ' +
@@ -10313,7 +10522,7 @@ module.exports = function(hljs) {
     contains: PERL_DEFAULT_CONTAINS
   };
 };
-},{}],75:[function(require,module,exports){
+},{}],76:[function(require,module,exports){
 module.exports = function(hljs) {
   var VARIABLE = {
     begin: '\\$+[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*'
@@ -10440,7 +10649,7 @@ module.exports = function(hljs) {
     ]
   };
 };
-},{}],76:[function(require,module,exports){
+},{}],77:[function(require,module,exports){
 module.exports = function(hljs) {
   var KEYWORDS = {
     keyword:
@@ -10564,7 +10773,7 @@ module.exports = function(hljs) {
     ]
   };
 };
-},{}],77:[function(require,module,exports){
+},{}],78:[function(require,module,exports){
 module.exports = function(hljs) {
   var RUBY_METHOD_RE = '[a-zA-Z_]\\w*[!?=]?|[-+~]\\@|<<|>>|=~|===?|<=>|[<>]=?|\\*\\*|[-/+%^&*~`|]|\\[\\]=?';
   var RUBY_KEYWORDS = {
@@ -10749,7 +10958,7 @@ module.exports = function(hljs) {
     contains: COMMENT_MODES.concat(IRB_DEFAULT).concat(RUBY_DEFAULT_CONTAINS)
   };
 };
-},{}],78:[function(require,module,exports){
+},{}],79:[function(require,module,exports){
 module.exports = function(hljs) {
   var NUM_SUFFIX = '([ui](8|16|32|64|128|size)|f(32|64))\?';
   var KEYWORDS =
@@ -10857,7 +11066,7 @@ module.exports = function(hljs) {
     ]
   };
 };
-},{}],79:[function(require,module,exports){
+},{}],80:[function(require,module,exports){
 module.exports = function(hljs) {
 
   var ANNOTATION = { className: 'meta', begin: '@[A-Za-z]+' };
@@ -10972,7 +11181,7 @@ module.exports = function(hljs) {
     ]
   };
 };
-},{}],80:[function(require,module,exports){
+},{}],81:[function(require,module,exports){
 module.exports = function(hljs) {
   var SCHEME_IDENT_RE = '[^\\(\\)\\[\\]\\{\\}",\'`;#|\\\\\\s]+';
   var SCHEME_SIMPLE_NUMBER_RE = '(\\-|\\+)?\\d+([./]\\d+)?';
@@ -11116,7 +11325,7 @@ module.exports = function(hljs) {
     contains: [SHEBANG, NUMBER, STRING, QUOTED_IDENT, QUOTED_LIST, LIST].concat(COMMENT_MODES)
   };
 };
-},{}],81:[function(require,module,exports){
+},{}],82:[function(require,module,exports){
 module.exports = function(hljs) {
   var AT_IDENTIFIER = '@[a-z-]+' // @font-face
   var AT_MODIFIERS = "and or not only"
@@ -11231,7 +11440,7 @@ module.exports = function(hljs) {
     ]
   };
 };
-},{}],82:[function(require,module,exports){
+},{}],83:[function(require,module,exports){
 module.exports = function(hljs) {
   var VAR_IDENT_RE = '[a-z][a-zA-Z0-9_]*';
   var CHAR = {
@@ -11281,7 +11490,7 @@ module.exports = function(hljs) {
     ]
   };
 };
-},{}],83:[function(require,module,exports){
+},{}],84:[function(require,module,exports){
 module.exports = function(hljs) {
 
   var VARIABLE = {
@@ -11726,7 +11935,7 @@ module.exports = function(hljs) {
     ]
   };
 };
-},{}],84:[function(require,module,exports){
+},{}],85:[function(require,module,exports){
 module.exports = function(hljs) {
   var SWIFT_KEYWORDS = {
       keyword: '#available #colorLiteral #column #else #elseif #endif #file ' +
@@ -11857,7 +12066,7 @@ module.exports = function(hljs) {
     ]
   };
 };
-},{}],85:[function(require,module,exports){
+},{}],86:[function(require,module,exports){
 module.exports = function(hljs) {
   return {
     aliases: ['tk'],
@@ -11917,7 +12126,7 @@ module.exports = function(hljs) {
     ]
   }
 };
-},{}],86:[function(require,module,exports){
+},{}],87:[function(require,module,exports){
 module.exports = function(hljs) {
   var COMMAND = {
     className: 'tag',
@@ -11979,7 +12188,7 @@ module.exports = function(hljs) {
     ]
   };
 };
-},{}],87:[function(require,module,exports){
+},{}],88:[function(require,module,exports){
 module.exports = function(hljs) {
   var JS_IDENT_RE = '[A-Za-z$_][0-9A-Za-z$_]*';
   var KEYWORDS = {
@@ -12185,7 +12394,7 @@ module.exports = function(hljs) {
     ]
   };
 };
-},{}],88:[function(require,module,exports){
+},{}],89:[function(require,module,exports){
 module.exports = function(hljs) {
   var SV_KEYWORDS = {
     keyword:
@@ -12284,7 +12493,7 @@ module.exports = function(hljs) {
     ]
   }; // return
 };
-},{}],89:[function(require,module,exports){
+},{}],90:[function(require,module,exports){
 module.exports = function(hljs) {
   // Regular expression for VHDL numeric literals.
 
@@ -12345,7 +12554,7 @@ module.exports = function(hljs) {
     ]
   };
 };
-},{}],90:[function(require,module,exports){
+},{}],91:[function(require,module,exports){
 module.exports = function(hljs) {
   var XML_IDENT_RE = '[A-Za-z0-9\\._:-]+';
   var XML_ENTITIES = {
@@ -12491,7 +12700,7 @@ module.exports = function(hljs) {
     ]
   };
 };
-},{}],91:[function(require,module,exports){
+},{}],92:[function(require,module,exports){
 module.exports = function(hljs) {
   var LITERALS = 'true false yes no null';
 
@@ -12591,7 +12800,7 @@ module.exports = function(hljs) {
     ]
   };
 };
-},{}],92:[function(require,module,exports){
+},{}],93:[function(require,module,exports){
 
 'use strict';
 
@@ -12715,7 +12924,7 @@ decode.componentChars = '';
 
 module.exports = decode;
 
-},{}],93:[function(require,module,exports){
+},{}],94:[function(require,module,exports){
 
 'use strict';
 
@@ -12815,7 +13024,7 @@ encode.componentChars = "-_.!~*'()";
 
 module.exports = encode;
 
-},{}],94:[function(require,module,exports){
+},{}],95:[function(require,module,exports){
 
 'use strict';
 
@@ -12842,7 +13051,7 @@ module.exports = function format(url) {
   return result;
 };
 
-},{}],95:[function(require,module,exports){
+},{}],96:[function(require,module,exports){
 'use strict';
 
 
@@ -12851,7 +13060,7 @@ module.exports.decode = require('./decode');
 module.exports.format = require('./format');
 module.exports.parse  = require('./parse');
 
-},{"./decode":92,"./encode":93,"./format":94,"./parse":96}],96:[function(require,module,exports){
+},{"./decode":93,"./encode":94,"./format":95,"./parse":97}],97:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -13165,7 +13374,1660 @@ Url.prototype.parseHost = function(host) {
 
 module.exports = urlParse;
 
-},{}],97:[function(require,module,exports){
+},{}],98:[function(require,module,exports){
+var components = {"core":{"meta":{"path":"components/prism-core.js","option":"mandatory"},"core":"Core"},"themes":{"meta":{"path":"themes/{id}.css","link":"index.html?theme={id}","exclusive":true},"prism":{"title":"Default","option":"default"},"prism-dark":"Dark","prism-funky":"Funky","prism-okaidia":{"title":"Okaidia","owner":"ocodia"},"prism-twilight":{"title":"Twilight","owner":"remybach"},"prism-coy":{"title":"Coy","owner":"tshedor"},"prism-solarizedlight":{"title":"Solarized Light","owner":"hectormatos2011 "},"prism-tomorrow":{"title":"Tomorrow Night","owner":"Rosey"}},"languages":{"meta":{"path":"components/prism-{id}","noCSS":true,"examplesPath":"examples/prism-{id}","addCheckAll":true},"markup":{"title":"Markup","alias":["html","xml","svg","mathml"],"aliasTitles":{"html":"HTML","xml":"XML","svg":"SVG","mathml":"MathML"},"option":"default"},"css":{"title":"CSS","option":"default","modify":"markup"},"clike":{"title":"C-like","option":"default"},"javascript":{"title":"JavaScript","require":"clike","modify":"markup","alias":"js","option":"default"},"abap":{"title":"ABAP","owner":"dellagustin"},"abnf":{"title":"Augmented Backus–Naur form","owner":"RunDevelopment"},"actionscript":{"title":"ActionScript","require":"javascript","modify":"markup","owner":"Golmote"},"ada":{"title":"Ada","owner":"Lucretia"},"antlr4":{"title":"ANTLR4","alias":"g4","owner":"RunDevelopment"},"apacheconf":{"title":"Apache Configuration","owner":"GuiTeK"},"apl":{"title":"APL","owner":"ngn"},"applescript":{"title":"AppleScript","owner":"Golmote"},"aql":{"title":"AQL","owner":"RunDevelopment"},"arduino":{"title":"Arduino","require":"cpp","owner":"eisbehr-"},"arff":{"title":"ARFF","owner":"Golmote"},"asciidoc":{"alias":"adoc","title":"AsciiDoc","owner":"Golmote"},"asm6502":{"title":"6502 Assembly","owner":"kzurawel"},"aspnet":{"title":"ASP.NET (C#)","require":["markup","csharp"],"owner":"nauzilus"},"autohotkey":{"title":"AutoHotkey","owner":"aviaryan"},"autoit":{"title":"AutoIt","owner":"Golmote"},"bash":{"title":"Bash","alias":"shell","aliasTitles":{"shell":"Shell"},"owner":"zeitgeist87"},"basic":{"title":"BASIC","owner":"Golmote"},"batch":{"title":"Batch","owner":"Golmote"},"bbcode":{"title":"BBcode","alias":"shortcode","aliasTitles":{"shortcode":"Shortcode"},"owner":"RunDevelopment"},"bison":{"title":"Bison","require":"c","owner":"Golmote"},"bnf":{"title":"Backus–Naur form","alias":"rbnf","aliasTitles":{"rbnf":"Routing Backus–Naur form"},"owner":"RunDevelopment"},"brainfuck":{"title":"Brainfuck","owner":"Golmote"},"brightscript":{"title":"BrightScript","owner":"RunDevelopment"},"bro":{"title":"Bro","owner":"wayward710"},"c":{"title":"C","require":"clike","owner":"zeitgeist87"},"concurnas":{"title":"Concurnas","alias":"conc","owner":"jasontatton"},"csharp":{"title":"C#","require":"clike","alias":["cs","dotnet"],"owner":"mvalipour"},"cpp":{"title":"C++","require":"c","owner":"zeitgeist87"},"cil":{"title":"CIL","owner":"sbrl"},"coffeescript":{"title":"CoffeeScript","require":"javascript","alias":"coffee","owner":"R-osey"},"cmake":{"title":"CMake","owner":"mjrogozinski"},"clojure":{"title":"Clojure","owner":"troglotit"},"crystal":{"title":"Crystal","require":"ruby","owner":"MakeNowJust"},"csp":{"title":"Content-Security-Policy","owner":"ScottHelme"},"css-extras":{"title":"CSS Extras","require":"css","modify":"css","owner":"milesj"},"d":{"title":"D","require":"clike","owner":"Golmote"},"dart":{"title":"Dart","require":"clike","owner":"Golmote"},"dax":{"title":"DAX","owner":"peterbud"},"diff":{"title":"Diff","owner":"uranusjr"},"django":{"title":"Django/Jinja2","require":"markup-templating","alias":"jinja2","owner":"romanvm"},"dns-zone-file":{"title":"DNS zone file","owner":"RunDevelopment","alias":"dns-zone"},"docker":{"title":"Docker","alias":"dockerfile","owner":"JustinBeckwith"},"ebnf":{"title":"Extended Backus–Naur form","owner":"RunDevelopment"},"eiffel":{"title":"Eiffel","owner":"Conaclos"},"ejs":{"title":"EJS","require":["javascript","markup-templating"],"owner":"RunDevelopment"},"elixir":{"title":"Elixir","owner":"Golmote"},"elm":{"title":"Elm","owner":"zwilias"},"etlua":{"title":"Embedded Lua templating","require":["lua","markup-templating"],"owner":"RunDevelopment"},"erb":{"title":"ERB","require":["ruby","markup-templating"],"owner":"Golmote"},"erlang":{"title":"Erlang","owner":"Golmote"},"excel-formula":{"title":"Excel Formula","alias":["xlsx","xls"],"owner":"RunDevelopment"},"fsharp":{"title":"F#","require":"clike","owner":"simonreynolds7"},"factor":{"title":"Factor","owner":"catb0t"},"firestore-security-rules":{"title":"Firestore security rules","require":"clike","owner":"RunDevelopment"},"flow":{"title":"Flow","require":"javascript","owner":"Golmote"},"fortran":{"title":"Fortran","owner":"Golmote"},"ftl":{"title":"FreeMarker Template Language","require":"markup-templating","owner":"RunDevelopment"},"gcode":{"title":"G-code","owner":"RunDevelopment"},"gdscript":{"title":"GDScript","owner":"RunDevelopment"},"gedcom":{"title":"GEDCOM","owner":"Golmote"},"gherkin":{"title":"Gherkin","owner":"hason"},"git":{"title":"Git","owner":"lgiraudel"},"glsl":{"title":"GLSL","require":"clike","owner":"Golmote"},"gml":{"title":"GameMaker Language","alias":"gamemakerlanguage","require":"clike","owner":"LiarOnce"},"go":{"title":"Go","require":"clike","owner":"arnehormann"},"graphql":{"title":"GraphQL","owner":"Golmote"},"groovy":{"title":"Groovy","require":"clike","owner":"robfletcher"},"haml":{"title":"Haml","require":"ruby","optional":["css","css-extras","coffeescript","erb","javascript","less","markdown","scss","textile"],"owner":"Golmote"},"handlebars":{"title":"Handlebars","require":"markup-templating","owner":"Golmote"},"haskell":{"title":"Haskell","alias":"hs","owner":"bholst"},"haxe":{"title":"Haxe","require":"clike","owner":"Golmote"},"hcl":{"title":"HCL","owner":"outsideris"},"http":{"title":"HTTP","optional":["css","javascript","json","markup"],"owner":"danielgtaylor"},"hpkp":{"title":"HTTP Public-Key-Pins","owner":"ScottHelme"},"hsts":{"title":"HTTP Strict-Transport-Security","owner":"ScottHelme"},"ichigojam":{"title":"IchigoJam","owner":"BlueCocoa"},"icon":{"title":"Icon","owner":"Golmote"},"inform7":{"title":"Inform 7","owner":"Golmote"},"ini":{"title":"Ini","owner":"aviaryan"},"io":{"title":"Io","owner":"AlesTsurko"},"j":{"title":"J","owner":"Golmote"},"java":{"title":"Java","require":"clike","owner":"sherblot"},"javadoc":{"title":"JavaDoc","require":["markup","java","javadoclike"],"modify":"java","optional":"scala","owner":"RunDevelopment"},"javadoclike":{"title":"JavaDoc-like","modify":["java","javascript","php"],"owner":"RunDevelopment"},"javastacktrace":{"title":"Java stack trace","owner":"RunDevelopment"},"jolie":{"title":"Jolie","require":"clike","owner":"thesave"},"jq":{"title":"JQ","owner":"RunDevelopment"},"jsdoc":{"title":"JSDoc","require":["javascript","javadoclike"],"modify":"javascript","optional":["actionscript","coffeescript"],"owner":"RunDevelopment"},"js-extras":{"title":"JS Extras","require":"javascript","modify":"javascript","optional":["actionscript","coffeescript","flow","n4js","typescript"],"owner":"RunDevelopment"},"js-templates":{"title":"JS Templates","require":"javascript","modify":"javascript","optional":["css","css-extras","graphql","markdown","markup"],"owner":"RunDevelopment"},"json":{"title":"JSON","owner":"CupOfTea696"},"jsonp":{"title":"JSONP","require":"json","owner":"RunDevelopment"},"json5":{"title":"JSON5","require":"json","owner":"RunDevelopment"},"julia":{"title":"Julia","owner":"cdagnino"},"keyman":{"title":"Keyman","owner":"mcdurdin"},"kotlin":{"title":"Kotlin","require":"clike","owner":"Golmote"},"latex":{"title":"LaTeX","alias":["tex","context"],"aliasTitles":{"tex":"TeX","context":"ConTeXt"},"owner":"japborst"},"latte":{"title":"Latte","require":["clike","markup-templating","php"],"owner":"nette"},"less":{"title":"Less","require":"css","optional":"css-extras","owner":"Golmote"},"lilypond":{"title":"LilyPond","require":"scheme","alias":"ly","owner":"RunDevelopment"},"liquid":{"title":"Liquid","owner":"cinhtau"},"lisp":{"title":"Lisp","alias":["emacs","elisp","emacs-lisp"],"owner":"JuanCaicedo"},"livescript":{"title":"LiveScript","owner":"Golmote"},"llvm":{"title":"LLVM IR","owner":"porglezomp"},"lolcode":{"title":"LOLCODE","owner":"Golmote"},"lua":{"title":"Lua","owner":"Golmote"},"makefile":{"title":"Makefile","owner":"Golmote"},"markdown":{"title":"Markdown","require":"markup","alias":"md","owner":"Golmote"},"markup-templating":{"title":"Markup templating","require":"markup","owner":"Golmote"},"matlab":{"title":"MATLAB","owner":"Golmote"},"mel":{"title":"MEL","owner":"Golmote"},"mizar":{"title":"Mizar","owner":"Golmote"},"monkey":{"title":"Monkey","owner":"Golmote"},"moonscript":{"title":"MoonScript","alias":"moon","owner":"RunDevelopment"},"n1ql":{"title":"N1QL","owner":"TMWilds"},"n4js":{"title":"N4JS","require":"javascript","optional":"jsdoc","alias":"n4jsd","owner":"bsmith-n4"},"nand2tetris-hdl":{"title":"Nand To Tetris HDL","owner":"stephanmax"},"nasm":{"title":"NASM","owner":"rbmj"},"neon":{"title":"NEON","owner":"nette"},"nginx":{"title":"nginx","owner":"westonganger","require":"clike"},"nim":{"title":"Nim","owner":"Golmote"},"nix":{"title":"Nix","owner":"Golmote"},"nsis":{"title":"NSIS","owner":"idleberg"},"objectivec":{"title":"Objective-C","require":"c","owner":"uranusjr"},"ocaml":{"title":"OCaml","owner":"Golmote"},"opencl":{"title":"OpenCL","require":"c","modify":["c","cpp"],"owner":"Milania1"},"oz":{"title":"Oz","owner":"Golmote"},"parigp":{"title":"PARI/GP","owner":"Golmote"},"parser":{"title":"Parser","require":"markup","owner":"Golmote"},"pascal":{"title":"Pascal","alias":"objectpascal","aliasTitles":{"objectpascal":"Object Pascal"},"owner":"Golmote"},"pascaligo":{"title":"Pascaligo","owner":"DefinitelyNotAGoat"},"pcaxis":{"title":"PC-Axis","alias":"px","owner":"RunDevelopment"},"perl":{"title":"Perl","owner":"Golmote"},"php":{"title":"PHP","require":["clike","markup-templating"],"owner":"milesj"},"phpdoc":{"title":"PHPDoc","require":["php","javadoclike"],"modify":"php","owner":"RunDevelopment"},"php-extras":{"title":"PHP Extras","require":"php","modify":"php","owner":"milesj"},"plsql":{"title":"PL/SQL","require":"sql","owner":"Golmote"},"powerquery":{"title":"PowerQuery","alias":["pq","mscript"],"owner":"peterbud"},"powershell":{"title":"PowerShell","owner":"nauzilus"},"processing":{"title":"Processing","require":"clike","owner":"Golmote"},"prolog":{"title":"Prolog","owner":"Golmote"},"properties":{"title":".properties","owner":"Golmote"},"protobuf":{"title":"Protocol Buffers","require":"clike","owner":"just-boris"},"pug":{"title":"Pug","require":["markup","javascript"],"optional":["coffeescript","ejs","handlebars","less","livescript","markdown","scss","stylus","twig"],"owner":"Golmote"},"puppet":{"title":"Puppet","owner":"Golmote"},"pure":{"title":"Pure","optional":["c","cpp","fortran"],"owner":"Golmote"},"python":{"title":"Python","alias":"py","owner":"multipetros"},"q":{"title":"Q (kdb+ database)","owner":"Golmote"},"qml":{"title":"QML","require":"javascript","owner":"RunDevelopment"},"qore":{"title":"Qore","require":"clike","owner":"temnroegg"},"r":{"title":"R","owner":"Golmote"},"jsx":{"title":"React JSX","require":["markup","javascript"],"optional":["jsdoc","js-extras","js-templates"],"owner":"vkbansal"},"tsx":{"title":"React TSX","require":["jsx","typescript"]},"renpy":{"title":"Ren'py","owner":"HyuchiaDiego"},"reason":{"title":"Reason","require":"clike","owner":"Golmote"},"regex":{"title":"Regex","modify":["actionscript","coffeescript","flow","javascript","typescript","vala"],"owner":"RunDevelopment"},"rest":{"title":"reST (reStructuredText)","owner":"Golmote"},"rip":{"title":"Rip","owner":"ravinggenius"},"roboconf":{"title":"Roboconf","owner":"Golmote"},"robotframework":{"title":"Robot Framework","alias":"robot","owner":"RunDevelopment"},"ruby":{"title":"Ruby","require":"clike","alias":"rb","owner":"samflores"},"rust":{"title":"Rust","owner":"Golmote"},"sas":{"title":"SAS","optional":["groovy","lua","sql"],"owner":"Golmote"},"sass":{"title":"Sass (Sass)","require":"css","owner":"Golmote"},"scss":{"title":"Sass (Scss)","require":"css","optional":"css-extras","owner":"MoOx"},"scala":{"title":"Scala","require":"java","owner":"jozic"},"scheme":{"title":"Scheme","owner":"bacchus123"},"shell-session":{"title":"Shell session","require":"bash","owner":"RunDevelopment"},"smalltalk":{"title":"Smalltalk","owner":"Golmote"},"smarty":{"title":"Smarty","require":"markup-templating","owner":"Golmote"},"solidity":{"title":"Solidity (Ethereum)","require":"clike","owner":"glachaud"},"solution-file":{"title":"Solution file","alias":"sln","owner":"RunDevelopment"},"soy":{"title":"Soy (Closure Template)","require":"markup-templating","owner":"Golmote"},"sparql":{"title":"SPARQL","require":"turtle","owner":"Triply-Dev","alias":"rq"},"splunk-spl":{"title":"Splunk SPL","owner":"RunDevelopment"},"sqf":{"title":"SQF: Status Quo Function (Arma 3)","require":"clike","owner":"RunDevelopment"},"sql":{"title":"SQL","owner":"multipetros"},"stylus":{"title":"Stylus","owner":"vkbansal"},"swift":{"title":"Swift","require":"clike","owner":"chrischares"},"tap":{"title":"TAP","owner":"isaacs","require":"yaml"},"tcl":{"title":"Tcl","owner":"PeterChaplin"},"textile":{"title":"Textile","require":"markup","optional":"css","owner":"Golmote"},"toml":{"title":"TOML","owner":"RunDevelopment"},"tt2":{"title":"Template Toolkit 2","require":["clike","markup-templating"],"owner":"gflohr"},"turtle":{"title":"Turtle","alias":"trig","aliasTitles":{"trig":"TriG"},"owner":"jakubklimek"},"twig":{"title":"Twig","require":"markup","owner":"brandonkelly"},"typescript":{"title":"TypeScript","require":"javascript","optional":"js-templates","alias":"ts","owner":"vkbansal"},"t4-cs":{"title":"T4 Text Templates (C#)","require":["t4-templating","csharp"],"alias":"t4","owner":"RunDevelopment"},"t4-vb":{"title":"T4 Text Templates (VB)","require":["t4-templating","visual-basic"],"owner":"RunDevelopment"},"t4-templating":{"title":"T4 templating","owner":"RunDevelopment"},"vala":{"title":"Vala","require":"clike","owner":"TemplarVolk"},"vbnet":{"title":"VB.Net","require":"basic","owner":"Bigsby"},"velocity":{"title":"Velocity","require":"markup","owner":"Golmote"},"verilog":{"title":"Verilog","owner":"a-rey"},"vhdl":{"title":"VHDL","owner":"a-rey"},"vim":{"title":"vim","owner":"westonganger"},"visual-basic":{"title":"Visual Basic","alias":"vb","owner":"Golmote"},"wasm":{"title":"WebAssembly","owner":"Golmote"},"wiki":{"title":"Wiki markup","require":"markup","owner":"Golmote"},"xeora":{"title":"Xeora","require":"markup","alias":"xeoracube","aliasTitles":{"xeoracube":"XeoraCube"},"owner":"freakmaxi"},"xojo":{"title":"Xojo (REALbasic)","owner":"Golmote"},"xquery":{"title":"XQuery","require":"markup","owner":"Golmote"},"yaml":{"title":"YAML","alias":"yml","owner":"hason"},"zig":{"title":"Zig","owner":"RunDevelopment"}},"plugins":{"meta":{"path":"plugins/{id}/prism-{id}","link":"plugins/{id}/"},"line-highlight":{"title":"Line Highlight","description":"Highlights specific lines and/or line ranges."},"line-numbers":{"title":"Line Numbers","description":"Line number at the beginning of code lines.","owner":"kuba-kubula"},"show-invisibles":{"title":"Show Invisibles","description":"Show hidden characters such as tabs and line breaks.","optional":["autolinker","data-uri-highlight"]},"autolinker":{"title":"Autolinker","description":"Converts URLs and emails in code to clickable links. Parses Markdown links in comments."},"wpd":{"title":"WebPlatform Docs","description":"Makes tokens link to <a href=\"https://webplatform.github.io/docs/\">WebPlatform.org documentation</a>. The links open in a new tab."},"custom-class":{"title":"Custom Class","description":"This plugin allows you to prefix Prism's default classes (<code>.comment</code> can become <code>.namespace--comment</code>) or replace them with your defined ones (like <code>.editor__comment</code>). You can even add new classes.","owner":"dvkndn","noCSS":true},"file-highlight":{"title":"File Highlight","description":"Fetch external files and highlight them with Prism. Used on the Prism website itself.","noCSS":true},"show-language":{"title":"Show Language","description":"Display the highlighted language in code blocks (inline code does not show the label).","owner":"nauzilus","noCSS":true,"require":"toolbar"},"jsonp-highlight":{"title":"JSONP Highlight","description":"Fetch content with JSONP and highlight some interesting content (e.g. GitHub/Gists or Bitbucket API).","noCSS":true,"owner":"nauzilus"},"highlight-keywords":{"title":"Highlight Keywords","description":"Adds special CSS classes for each keyword matched in the code. For example, the keyword <code>if</code> will have the class <code>keyword-if</code> as well. You can have fine grained control over the appearance of each keyword by providing your own CSS rules.","owner":"vkbansal","noCSS":true},"remove-initial-line-feed":{"title":"Remove initial line feed","description":"Removes the initial line feed in code blocks.","owner":"Golmote","noCSS":true},"inline-color":{"title":"Inline color","description":"Adds a small inline preview for colors in style sheets.","require":"css-extras","owner":"RunDevelopment"},"previewers":{"title":"Previewers","description":"Previewers for angles, colors, gradients, easing and time.","require":"css-extras","owner":"Golmote"},"autoloader":{"title":"Autoloader","description":"Automatically loads the needed languages to highlight the code blocks.","owner":"Golmote","noCSS":true},"keep-markup":{"title":"Keep Markup","description":"Prevents custom markup from being dropped out during highlighting.","owner":"Golmote","optional":"normalize-whitespace","noCSS":true},"command-line":{"title":"Command Line","description":"Display a command line with a prompt and, optionally, the output/response from the commands.","owner":"chriswells0"},"unescaped-markup":{"title":"Unescaped Markup","description":"Write markup without having to escape anything."},"normalize-whitespace":{"title":"Normalize Whitespace","description":"Supports multiple operations to normalize whitespace in code blocks.","owner":"zeitgeist87","optional":"unescaped-markup","noCSS":true},"data-uri-highlight":{"title":"Data-URI Highlight","description":"Highlights data-URI contents.","owner":"Golmote","noCSS":true},"toolbar":{"title":"Toolbar","description":"Attach a toolbar for plugins to easily register buttons on the top of a code block.","owner":"mAAdhaTTah"},"copy-to-clipboard":{"title":"Copy to Clipboard Button","description":"Add a button that copies the code block to the clipboard when clicked.","owner":"mAAdhaTTah","require":"toolbar","noCSS":true},"download-button":{"title":"Download Button","description":"A button in the toolbar of a code block adding a convenient way to download a code file.","owner":"Golmote","require":"toolbar","noCSS":true},"match-braces":{"title":"Match braces","description":"Highlights matching braces.","owner":"RunDevelopment"},"diff-highlight":{"title":"Diff Highlight","description":"Highlights the code inside diff blocks.","owner":"RunDevelopment","require":"diff"},"filter-highlight-all":{"title":"Filter highlightAll","description":"Filters the elements the <code>highlightAll</code> and <code>highlightAllUnder</code> methods actually highlight.","owner":"RunDevelopment","noCSS":true},"treeview":{"title":"Treeview","description":"A language with special styles to highlight file system tree structures.","owner":"Golmote"}}};
+if (typeof module !== 'undefined' && module.exports) { module.exports = components; }
+},{}],99:[function(require,module,exports){
+const components = require('../components.js');
+const getLoader = require('../dependencies');
+
+
+/**
+ * The set of all languages which have been loaded using the below function.
+ *
+ * @type {Set<string>}
+ */
+const loadedLanguages = new Set();
+
+/**
+ * Loads the given languages and adds them to the current Prism instance.
+ *
+ * If no languages are provided, __all__ Prism languages will be loaded.
+ *
+ * @param {string|string[]} [languages]
+ * @returns {void}
+ */
+function loadLanguages(languages) {
+	if (languages === undefined) {
+		languages = Object.keys(components.languages).filter(l => l != 'meta');
+	} else if (!Array.isArray(languages)) {
+		languages = [languages];
+	}
+
+	// the user might have loaded languages via some other way or used `prism.js` which already includes some
+	// we don't need to validate the ids because `getLoader` will ignore invalid ones
+	const loaded = [...loadedLanguages, ...Object.keys(Prism.languages)];
+
+	getLoader(components, languages, loaded).load(lang => {
+		if (!(lang in components.languages)) {
+			if (!loadLanguages.silent) {
+				console.warn('Language does not exist: ' + lang);
+			}
+			return;
+		}
+
+		const pathToLanguage = './prism-' + lang;
+
+		// remove from require cache and from Prism
+		delete require.cache[require.resolve(pathToLanguage)];
+		delete Prism.languages[lang];
+
+		require(pathToLanguage);
+
+		loadedLanguages.add(lang);
+	});
+}
+
+/**
+ * Set this to `true` to prevent all warning messages `loadLanguages` logs.
+ */
+loadLanguages.silent = false;
+
+module.exports = loadLanguages;
+
+},{"../components.js":98,"../dependencies":100}],100:[function(require,module,exports){
+"use strict";
+
+/**
+ * @typedef {Object<string, ComponentCategory>} Components
+ * @typedef {Object<string, ComponentEntry | string>} ComponentCategory
+ *
+ * @typedef ComponentEntry
+ * @property {string} [title] The title of the component.
+ * @property {string} [owner] The GitHub user name of the owner.
+ * @property {boolean} [noCSS=false] Whether the component doesn't have style sheets which should also be loaded.
+ * @property {string | string[]} [alias] An optional list of aliases for the id of the component.
+ * @property {Object<string, string>} [aliasTitles] An optional map from an alias to its title.
+ *
+ * Aliases which are not in this map will the get title of the component.
+ * @property {string | string[]} [optional]
+ * @property {string | string[]} [require]
+ * @property {string | string[]} [modify]
+ */
+
+var getLoader = (function () {
+
+	/**
+	 * A function which does absolutely nothing.
+	 *
+	 * @type {any}
+	 */
+	var noop = function () { };
+
+	/**
+	 * Invokes the given callback for all elements of the given value.
+	 *
+	 * If the given value is an array, the callback will be invokes for all elements. If the given value is `null` or
+	 * `undefined`, the callback will not be invoked. In all other cases, the callback will be invoked with the given
+	 * value as parameter.
+	 *
+	 * @param {null | undefined | T | T[]} value
+	 * @param {(value: T, index: number) => void} callbackFn
+	 * @returns {void}
+	 * @template T
+	 */
+	function forEach(value, callbackFn) {
+		if (Array.isArray(value)) {
+			value.forEach(callbackFn);
+		} else if (value != null) {
+			callbackFn(value, 0);
+		}
+	}
+
+	/**
+	 * Returns a new set for the given string array.
+	 *
+	 * @param {string[]} array
+	 * @returns {StringSet}
+	 *
+	 * @typedef {Object<string, true>} StringSet
+	 */
+	function toSet(array) {
+		/** @type {StringSet} */
+		var set = {};
+		for (var i = 0, l = array.length; i < l; i++) {
+			set[array[i]] = true;
+		}
+		return set;
+	}
+
+	/**
+	 * Creates a map of every components id to its entry.
+	 *
+	 * @param {Components} components
+	 * @returns {EntryMap}
+	 *
+	 * @typedef {{ readonly [id: string]: Readonly<ComponentEntry> | undefined }} EntryMap
+	 */
+	function createEntryMap(components) {
+		/** @type {Object<string, Readonly<ComponentEntry>>} */
+		var map = {};
+
+		for (var categoryName in components) {
+			var category = components[categoryName];
+			for (var id in category) {
+				if (id != 'meta') {
+					/** @type {ComponentEntry | string} */
+					var entry = category[id];
+					map[id] = typeof entry == 'string' ? { title: entry } : entry;
+				}
+			}
+		}
+
+		return map;
+	}
+
+	/**
+	 * Creates a full dependencies map which includes all types of dependencies and their transitive dependencies.
+	 *
+	 * @param {EntryMap} entryMap
+	 * @returns {DependencyResolver}
+	 *
+	 * @typedef {(id: string) => StringSet} DependencyResolver
+	 */
+	function createDependencyResolver(entryMap) {
+		/** @type {Object<string, StringSet>} */
+		var map = {};
+		var _stackArray = [];
+
+		/**
+		 * Adds the dependencies of the given component to the dependency map.
+		 *
+		 * @param {string} id
+		 * @param {string[]} stack
+		 */
+		function addToMap(id, stack) {
+			if (id in map) {
+				return;
+			}
+
+			stack.push(id);
+
+			// check for circular dependencies
+			var firstIndex = stack.indexOf(id);
+			if (firstIndex < stack.length - 1) {
+				throw new Error('Circular dependency: ' + stack.slice(firstIndex).join(' -> '));
+			}
+
+			/** @type {StringSet} */
+			var dependencies = {};
+
+			var entry = entryMap[id];
+			if (entry) {
+				/**
+				 * This will add the direct dependency and all of its transitive dependencies to the set of
+				 * dependencies of `entry`.
+				 *
+				 * @param {string} depId
+				 * @returns {void}
+				 */
+				function handleDirectDependency(depId) {
+					if (!(depId in entryMap)) {
+						throw new Error(id + ' depends on an unknown component ' + depId);
+					}
+					if (depId in dependencies) {
+						// if the given dependency is already in the set of deps, then so are its transitive deps
+						return;
+					}
+
+					addToMap(depId, stack);
+					dependencies[depId] = true;
+					for (var transitiveDepId in map[depId]) {
+						dependencies[transitiveDepId] = true;
+					}
+				}
+
+				forEach(entry.require, handleDirectDependency);
+				forEach(entry.optional, handleDirectDependency);
+				forEach(entry.modify, handleDirectDependency);
+			}
+
+			map[id] = dependencies;
+
+			stack.pop();
+		}
+
+		return function (id) {
+			var deps = map[id];
+			if (!deps) {
+				addToMap(id, _stackArray);
+				deps = map[id];
+			}
+			return deps;
+		};
+	}
+
+	/**
+	 * Returns a function which resolves the aliases of its given id of alias.
+	 *
+	 * @param {EntryMap} entryMap
+	 * @returns {(idOrAlias: string) => string}
+	 */
+	function createAliasResolver(entryMap) {
+		/** @type {Object<string, string> | undefined} */
+		var map;
+
+		return function (idOrAlias) {
+			if (idOrAlias in entryMap) {
+				return idOrAlias;
+			} else {
+				// only create the alias map if necessary
+				if (!map) {
+					map = {};
+
+					for (var id in entryMap) {
+						var entry = entryMap[id];
+						forEach(entry && entry.alias, function (alias) {
+							if (alias in map) {
+								throw new Error(alias + ' cannot be alias for both ' + id + ' and ' + map[alias]);
+							}
+							if (alias in entryMap) {
+								throw new Error(alias + ' cannot be alias of ' + id + ' because it is a component.');
+							}
+							map[alias] = id;
+						});
+					}
+				}
+				return map[idOrAlias] || idOrAlias;
+			}
+		};
+	}
+
+	/**
+	 * @typedef LoadChainer
+	 * @property {(before: T, after: () => T) => T} series
+	 * @property {(values: T[]) => T} parallel
+	 * @template T
+	 */
+
+	/**
+	 * Creates an implicit DAG from the given components and dependencies and call the given `loadComponent` for each
+	 * component in topological order.
+	 *
+	 * @param {DependencyResolver} dependencyResolver
+	 * @param {StringSet} ids
+	 * @param {(id: string) => T} loadComponent
+	 * @param {LoadChainer<T>} [chainer]
+	 * @returns {T}
+	 * @template T
+	 */
+	function loadComponentsInOrder(dependencyResolver, ids, loadComponent, chainer) {
+		const series = chainer ? chainer.series : undefined;
+		const parallel = chainer ? chainer.parallel : noop;
+
+		/** @type {Object<string, T>} */
+		var cache = {};
+
+		/**
+		 * A set of ids of nodes which are not depended upon by any other node in the graph.
+		 * @type {StringSet}
+		 */
+		var ends = {};
+
+		/**
+		 * Loads the given component and its dependencies or returns the cached value.
+		 *
+		 * @param {string} id
+		 * @returns {T}
+		 */
+		function handleId(id) {
+			if (id in cache) {
+				return cache[id];
+			}
+
+			// assume that it's an end
+			// if it isn't, it will be removed later
+			ends[id] = true;
+
+			// all dependencies of the component in the given ids
+			var dependsOn = [];
+			for (var depId in dependencyResolver(id)) {
+				if (depId in ids) {
+					dependsOn.push(depId);
+				}
+			}
+
+			/**
+			 * The value to be returned.
+			 * @type {T}
+			 */
+			var value;
+
+			if (dependsOn.length === 0) {
+				value = loadComponent(id);
+			} else {
+				var depsValue = parallel(dependsOn.map(function (depId) {
+					var value = handleId(depId);
+					// none of the dependencies can be ends
+					delete ends[depId];
+					return value;
+				}));
+				if (series) {
+					// the chainer will be responsibly for calling the function calling loadComponent
+					value = series(depsValue, function () { return loadComponent(id); });
+				} else {
+					// we don't have a chainer, so we call loadComponent ourselves
+					loadComponent(id);
+				}
+			}
+
+			// cache and return
+			return cache[id] = value;
+		}
+
+		for (var id in ids) {
+			handleId(id);
+		}
+
+		/** @type {T[]} */
+		var endValues = [];
+		for (var endId in ends) {
+			endValues.push(cache[endId]);
+		}
+		return parallel(endValues);
+	}
+
+	/**
+	 * Returns whether the given object has any keys.
+	 *
+	 * @param {object} obj
+	 */
+	function hasKeys(obj) {
+		for (var key in obj) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Returns an object which provides methods to get the ids of the components which have to be loaded (`getIds`) and
+	 * a way to efficiently load them in synchronously and asynchronous contexts (`load`).
+	 *
+	 * The set of ids to be loaded is a superset of `load`. If some of these ids are in `loaded`, the corresponding
+	 * components will have to reloaded.
+	 *
+	 * The ids in `load` and `loaded` may be in any order and can contain duplicates.
+	 *
+	 * @param {Components} components
+	 * @param {string[]} load
+	 * @param {string[]} [loaded=[]] A list of already loaded components.
+	 *
+	 * If a component is in this list, then all of its requirements will also be assumed to be in the list.
+	 * @returns {Loader}
+	 *
+	 * @typedef Loader
+	 * @property {() => string[]} getIds A function to get all ids of the components to load.
+	 *
+	 * The returned ids will be duplicate-free, alias-free and in load order.
+	 * @property {LoadFunction} load A functional interface to load components.
+	 *
+	 * @typedef {<T> (loadComponent: (id: string) => T, chainer?: LoadChainer<T>) => T} LoadFunction
+	 * A functional interface to load components.
+	 *
+	 * The `loadComponent` function will be called for every component in the order in which they have to be loaded.
+	 *
+	 * The `chainer` is useful for asynchronous loading and its `series` and `parallel` functions can be thought of as
+	 * `Promise#then` and `Promise.all`.
+	 *
+	 * @example
+	 * load(id => { loadComponent(id); }); // returns undefined
+	 *
+	 * await load(
+	 *     id => loadComponentAsync(id), // returns a Promise for each id
+	 *     {
+	 *         series: async (before, after) => {
+	 *             await before;
+	 *             await after();
+	 *         },
+	 *         parallel: async (values) => {
+	 *             await Promise.all(values);
+	 *         }
+	 *     }
+	 * );
+	 */
+	function getLoader(components, load, loaded) {
+		var entryMap = createEntryMap(components);
+		var resolveAlias = createAliasResolver(entryMap);
+
+		load = load.map(resolveAlias);
+		loaded = (loaded || []).map(resolveAlias);
+
+		var loadSet = toSet(load);
+		var loadedSet = toSet(loaded);
+
+		// add requirements
+
+		load.forEach(addRequirements);
+		function addRequirements(id) {
+			var entry = entryMap[id];
+			forEach(entry && entry.require, function (reqId) {
+				if (!(reqId in loadedSet)) {
+					loadSet[reqId] = true;
+					addRequirements(reqId);
+				}
+			});
+		}
+
+		// add components to reload
+
+		// A component x in `loaded` has to be reloaded if
+		//  1) a component in `load` modifies x.
+		//  2) x depends on a component in `load`.
+		// The above two condition have to be applied until nothing changes anymore.
+
+		var dependencyResolver = createDependencyResolver(entryMap);
+
+		/** @type {StringSet} */
+		var loadAdditions = loadSet;
+		/** @type {StringSet} */
+		var newIds;
+		while (hasKeys(loadAdditions)) {
+			newIds = {};
+
+			// condition 1)
+			for (var loadId in loadAdditions) {
+				var entry = entryMap[loadId];
+				forEach(entry && entry.modify, function (modId) {
+					if (modId in loadedSet) {
+						newIds[modId] = true;
+					}
+				});
+			}
+
+			// condition 2)
+			for (var loadedId in loadedSet) {
+				if (!(loadedId in loadSet)) {
+					for (var depId in dependencyResolver(loadedId)) {
+						if (depId in loadSet) {
+							newIds[loadedId] = true;
+							break;
+						}
+					}
+				}
+			}
+
+			loadAdditions = newIds;
+			for (var newId in loadAdditions) {
+				loadSet[newId] = true;
+			}
+		}
+
+		/** @type {Loader} */
+		var loader = {
+			getIds: function () {
+				var ids = [];
+				loader.load(function (id) {
+					ids.push(id);
+				});
+				return ids;
+			},
+			load: function (loadComponent, chainer) {
+				return loadComponentsInOrder(dependencyResolver, loadSet, loadComponent, chainer);
+			}
+		};
+
+		return loader;
+	}
+
+	return getLoader;
+
+}());
+
+if (typeof module !== 'undefined') {
+	module.exports = getLoader;
+}
+
+},{}],101:[function(require,module,exports){
+(function (global){
+
+/* **********************************************
+     Begin prism-core.js
+********************************************** */
+
+var _self = (typeof window !== 'undefined')
+	? window   // if in browser
+	: (
+		(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope)
+		? self // if in worker
+		: {}   // if in node js
+	);
+
+/**
+ * Prism: Lightweight, robust, elegant syntax highlighting
+ * MIT license http://www.opensource.org/licenses/mit-license.php/
+ * @author Lea Verou http://lea.verou.me
+ */
+
+var Prism = (function (_self){
+
+// Private helper vars
+var lang = /\blang(?:uage)?-([\w-]+)\b/i;
+var uniqueId = 0;
+
+
+var _ = {
+	manual: _self.Prism && _self.Prism.manual,
+	disableWorkerMessageHandler: _self.Prism && _self.Prism.disableWorkerMessageHandler,
+	util: {
+		encode: function encode(tokens) {
+			if (tokens instanceof Token) {
+				return new Token(tokens.type, encode(tokens.content), tokens.alias);
+			} else if (Array.isArray(tokens)) {
+				return tokens.map(encode);
+			} else {
+				return tokens.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/\u00a0/g, ' ');
+			}
+		},
+
+		type: function (o) {
+			return Object.prototype.toString.call(o).slice(8, -1);
+		},
+
+		objId: function (obj) {
+			if (!obj['__id']) {
+				Object.defineProperty(obj, '__id', { value: ++uniqueId });
+			}
+			return obj['__id'];
+		},
+
+		// Deep clone a language definition (e.g. to extend it)
+		clone: function deepClone(o, visited) {
+			var clone, id, type = _.util.type(o);
+			visited = visited || {};
+
+			switch (type) {
+				case 'Object':
+					id = _.util.objId(o);
+					if (visited[id]) {
+						return visited[id];
+					}
+					clone = {};
+					visited[id] = clone;
+
+					for (var key in o) {
+						if (o.hasOwnProperty(key)) {
+							clone[key] = deepClone(o[key], visited);
+						}
+					}
+
+					return clone;
+
+				case 'Array':
+					id = _.util.objId(o);
+					if (visited[id]) {
+						return visited[id];
+					}
+					clone = [];
+					visited[id] = clone;
+
+					o.forEach(function (v, i) {
+						clone[i] = deepClone(v, visited);
+					});
+
+					return clone;
+
+				default:
+					return o;
+			}
+		},
+
+		/**
+		 * Returns the Prism language of the given element set by a `language-xxxx` or `lang-xxxx` class.
+		 *
+		 * If no language is set for the element or the element is `null` or `undefined`, `none` will be returned.
+		 *
+		 * @param {Element} element
+		 * @returns {string}
+		 */
+		getLanguage: function (element) {
+			while (element && !lang.test(element.className)) {
+				element = element.parentElement;
+			}
+			if (element) {
+				return (element.className.match(lang) || [, 'none'])[1].toLowerCase();
+			}
+			return 'none';
+		},
+
+		/**
+		 * Returns the script element that is currently executing.
+		 *
+		 * This does __not__ work for line script element.
+		 *
+		 * @returns {HTMLScriptElement | null}
+		 */
+		currentScript: function () {
+			if (typeof document === 'undefined') {
+				return null;
+			}
+			if ('currentScript' in document) {
+				return document.currentScript;
+			}
+
+			// IE11 workaround
+			// we'll get the src of the current script by parsing IE11's error stack trace
+			// this will not work for inline scripts
+
+			try {
+				throw new Error();
+			} catch (err) {
+				// Get file src url from stack. Specifically works with the format of stack traces in IE.
+				// A stack will look like this:
+				//
+				// Error
+				//    at _.util.currentScript (http://localhost/components/prism-core.js:119:5)
+				//    at Global code (http://localhost/components/prism-core.js:606:1)
+
+				var src = (/at [^(\r\n]*\((.*):.+:.+\)$/i.exec(err.stack) || [])[1];
+				if (src) {
+					var scripts = document.getElementsByTagName('script');
+					for (var i in scripts) {
+						if (scripts[i].src == src) {
+							return scripts[i];
+						}
+					}
+				}
+				return null;
+			}
+		}
+	},
+
+	languages: {
+		extend: function (id, redef) {
+			var lang = _.util.clone(_.languages[id]);
+
+			for (var key in redef) {
+				lang[key] = redef[key];
+			}
+
+			return lang;
+		},
+
+		/**
+		 * Insert a token before another token in a language literal
+		 * As this needs to recreate the object (we cannot actually insert before keys in object literals),
+		 * we cannot just provide an object, we need an object and a key.
+		 * @param inside The key (or language id) of the parent
+		 * @param before The key to insert before.
+		 * @param insert Object with the key/value pairs to insert
+		 * @param root The object that contains `inside`. If equal to Prism.languages, it can be omitted.
+		 */
+		insertBefore: function (inside, before, insert, root) {
+			root = root || _.languages;
+			var grammar = root[inside];
+			var ret = {};
+
+			for (var token in grammar) {
+				if (grammar.hasOwnProperty(token)) {
+
+					if (token == before) {
+						for (var newToken in insert) {
+							if (insert.hasOwnProperty(newToken)) {
+								ret[newToken] = insert[newToken];
+							}
+						}
+					}
+
+					// Do not insert token which also occur in insert. See #1525
+					if (!insert.hasOwnProperty(token)) {
+						ret[token] = grammar[token];
+					}
+				}
+			}
+
+			var old = root[inside];
+			root[inside] = ret;
+
+			// Update references in other language definitions
+			_.languages.DFS(_.languages, function(key, value) {
+				if (value === old && key != inside) {
+					this[key] = ret;
+				}
+			});
+
+			return ret;
+		},
+
+		// Traverse a language definition with Depth First Search
+		DFS: function DFS(o, callback, type, visited) {
+			visited = visited || {};
+
+			var objId = _.util.objId;
+
+			for (var i in o) {
+				if (o.hasOwnProperty(i)) {
+					callback.call(o, i, o[i], type || i);
+
+					var property = o[i],
+					    propertyType = _.util.type(property);
+
+					if (propertyType === 'Object' && !visited[objId(property)]) {
+						visited[objId(property)] = true;
+						DFS(property, callback, null, visited);
+					}
+					else if (propertyType === 'Array' && !visited[objId(property)]) {
+						visited[objId(property)] = true;
+						DFS(property, callback, i, visited);
+					}
+				}
+			}
+		}
+	},
+	plugins: {},
+
+	highlightAll: function(async, callback) {
+		_.highlightAllUnder(document, async, callback);
+	},
+
+	highlightAllUnder: function(container, async, callback) {
+		var env = {
+			callback: callback,
+			container: container,
+			selector: 'code[class*="language-"], [class*="language-"] code, code[class*="lang-"], [class*="lang-"] code'
+		};
+
+		_.hooks.run('before-highlightall', env);
+
+		env.elements = Array.prototype.slice.apply(env.container.querySelectorAll(env.selector));
+
+		_.hooks.run('before-all-elements-highlight', env);
+
+		for (var i = 0, element; element = env.elements[i++];) {
+			_.highlightElement(element, async === true, env.callback);
+		}
+	},
+
+	highlightElement: function(element, async, callback) {
+		// Find language
+		var language = _.util.getLanguage(element);
+		var grammar = _.languages[language];
+
+		// Set language on the element, if not present
+		element.className = element.className.replace(lang, '').replace(/\s+/g, ' ') + ' language-' + language;
+
+		// Set language on the parent, for styling
+		var parent = element.parentNode;
+		if (parent && parent.nodeName.toLowerCase() === 'pre') {
+			parent.className = parent.className.replace(lang, '').replace(/\s+/g, ' ') + ' language-' + language;
+		}
+
+		var code = element.textContent;
+
+		var env = {
+			element: element,
+			language: language,
+			grammar: grammar,
+			code: code
+		};
+
+		function insertHighlightedCode(highlightedCode) {
+			env.highlightedCode = highlightedCode;
+
+			_.hooks.run('before-insert', env);
+
+			env.element.innerHTML = env.highlightedCode;
+
+			_.hooks.run('after-highlight', env);
+			_.hooks.run('complete', env);
+			callback && callback.call(env.element);
+		}
+
+		_.hooks.run('before-sanity-check', env);
+
+		if (!env.code) {
+			_.hooks.run('complete', env);
+			callback && callback.call(env.element);
+			return;
+		}
+
+		_.hooks.run('before-highlight', env);
+
+		if (!env.grammar) {
+			insertHighlightedCode(_.util.encode(env.code));
+			return;
+		}
+
+		if (async && _self.Worker) {
+			var worker = new Worker(_.filename);
+
+			worker.onmessage = function(evt) {
+				insertHighlightedCode(evt.data);
+			};
+
+			worker.postMessage(JSON.stringify({
+				language: env.language,
+				code: env.code,
+				immediateClose: true
+			}));
+		}
+		else {
+			insertHighlightedCode(_.highlight(env.code, env.grammar, env.language));
+		}
+	},
+
+	highlight: function (text, grammar, language) {
+		var env = {
+			code: text,
+			grammar: grammar,
+			language: language
+		};
+		_.hooks.run('before-tokenize', env);
+		env.tokens = _.tokenize(env.code, env.grammar);
+		_.hooks.run('after-tokenize', env);
+		return Token.stringify(_.util.encode(env.tokens), env.language);
+	},
+
+	tokenize: function(text, grammar) {
+		var rest = grammar.rest;
+		if (rest) {
+			for (var token in rest) {
+				grammar[token] = rest[token];
+			}
+
+			delete grammar.rest;
+		}
+
+		var tokenList = new LinkedList();
+		addAfter(tokenList, tokenList.head, text);
+
+		matchGrammar(text, tokenList, grammar, tokenList.head, 0);
+
+		return toArray(tokenList);
+	},
+
+	hooks: {
+		all: {},
+
+		add: function (name, callback) {
+			var hooks = _.hooks.all;
+
+			hooks[name] = hooks[name] || [];
+
+			hooks[name].push(callback);
+		},
+
+		run: function (name, env) {
+			var callbacks = _.hooks.all[name];
+
+			if (!callbacks || !callbacks.length) {
+				return;
+			}
+
+			for (var i=0, callback; callback = callbacks[i++];) {
+				callback(env);
+			}
+		}
+	},
+
+	Token: Token
+};
+
+_self.Prism = _;
+
+function Token(type, content, alias, matchedStr, greedy) {
+	this.type = type;
+	this.content = content;
+	this.alias = alias;
+	// Copy of the full string this token was created from
+	this.length = (matchedStr || '').length|0;
+	this.greedy = !!greedy;
+}
+
+Token.stringify = function stringify(o, language) {
+	if (typeof o == 'string') {
+		return o;
+	}
+	if (Array.isArray(o)) {
+		var s = '';
+		o.forEach(function (e) {
+			s += stringify(e, language);
+		});
+		return s;
+	}
+
+	var env = {
+		type: o.type,
+		content: stringify(o.content, language),
+		tag: 'span',
+		classes: ['token', o.type],
+		attributes: {},
+		language: language
+	};
+
+	var aliases = o.alias;
+	if (aliases) {
+		if (Array.isArray(aliases)) {
+			Array.prototype.push.apply(env.classes, aliases);
+		} else {
+			env.classes.push(aliases);
+		}
+	}
+
+	_.hooks.run('wrap', env);
+
+	var attributes = '';
+	for (var name in env.attributes) {
+		attributes += ' ' + name + '="' + (env.attributes[name] || '').replace(/"/g, '&quot;') + '"';
+	}
+
+	return '<' + env.tag + ' class="' + env.classes.join(' ') + '"' + attributes + '>' + env.content + '</' + env.tag + '>';
+};
+
+/**
+ * @param {string} text
+ * @param {LinkedList<string | Token>} tokenList
+ * @param {any} grammar
+ * @param {LinkedListNode<string | Token>} startNode
+ * @param {number} startPos
+ * @param {boolean} [oneshot=false]
+ * @param {string} [target]
+ */
+function matchGrammar(text, tokenList, grammar, startNode, startPos, oneshot, target) {
+	for (var token in grammar) {
+		if (!grammar.hasOwnProperty(token) || !grammar[token]) {
+			continue;
+		}
+
+		var patterns = grammar[token];
+		patterns = Array.isArray(patterns) ? patterns : [patterns];
+
+		for (var j = 0; j < patterns.length; ++j) {
+			if (target && target == token + ',' + j) {
+				return;
+			}
+
+			var pattern = patterns[j],
+				inside = pattern.inside,
+				lookbehind = !!pattern.lookbehind,
+				greedy = !!pattern.greedy,
+				lookbehindLength = 0,
+				alias = pattern.alias;
+
+			if (greedy && !pattern.pattern.global) {
+				// Without the global flag, lastIndex won't work
+				var flags = pattern.pattern.toString().match(/[imsuy]*$/)[0];
+				pattern.pattern = RegExp(pattern.pattern.source, flags + 'g');
+			}
+
+			pattern = pattern.pattern || pattern;
+
+			for ( // iterate the token list and keep track of the current token/string position
+				var currentNode = startNode.next, pos = startPos;
+				currentNode !== tokenList.tail;
+				pos += currentNode.value.length, currentNode = currentNode.next
+			) {
+
+				var str = currentNode.value;
+
+				if (tokenList.length > text.length) {
+					// Something went terribly wrong, ABORT, ABORT!
+					return;
+				}
+
+				if (str instanceof Token) {
+					continue;
+				}
+
+				var removeCount = 1; // this is the to parameter of removeBetween
+
+				if (greedy && currentNode != tokenList.tail.prev) {
+					pattern.lastIndex = pos;
+					var match = pattern.exec(text);
+					if (!match) {
+						break;
+					}
+
+					var from = match.index + (lookbehind && match[1] ? match[1].length : 0);
+					var to = match.index + match[0].length;
+					var p = pos;
+
+					// find the node that contains the match
+					p += currentNode.value.length;
+					while (from >= p) {
+						currentNode = currentNode.next;
+						p += currentNode.value.length;
+					}
+					// adjust pos (and p)
+					p -= currentNode.value.length;
+					pos = p;
+
+					// the current node is a Token, then the match starts inside another Token, which is invalid
+					if (currentNode.value instanceof Token) {
+						continue;
+					}
+
+					// find the last node which is affected by this match
+					for (
+						var k = currentNode;
+						k !== tokenList.tail && (p < to || (typeof k.value === 'string' && !k.prev.value.greedy));
+						k = k.next
+					) {
+						removeCount++;
+						p += k.value.length;
+					}
+					removeCount--;
+
+					// replace with the new match
+					str = text.slice(pos, p);
+					match.index -= pos;
+				} else {
+					pattern.lastIndex = 0;
+
+					var match = pattern.exec(str);
+				}
+
+				if (!match) {
+					if (oneshot) {
+						break;
+					}
+
+					continue;
+				}
+
+				if (lookbehind) {
+					lookbehindLength = match[1] ? match[1].length : 0;
+				}
+
+				var from = match.index + lookbehindLength,
+					match = match[0].slice(lookbehindLength),
+					to = from + match.length,
+					before = str.slice(0, from),
+					after = str.slice(to);
+
+				var removeFrom = currentNode.prev;
+
+				if (before) {
+					removeFrom = addAfter(tokenList, removeFrom, before);
+					pos += before.length;
+				}
+
+				removeRange(tokenList, removeFrom, removeCount);
+
+				var wrapped = new Token(token, inside ? _.tokenize(match, inside) : match, alias, match, greedy);
+				currentNode = addAfter(tokenList, removeFrom, wrapped);
+
+				if (after) {
+					addAfter(tokenList, currentNode, after);
+				}
+
+
+				if (removeCount > 1)
+					matchGrammar(text, tokenList, grammar, currentNode.prev, pos, true, token + ',' + j);
+
+				if (oneshot)
+					break;
+			}
+		}
+	}
+}
+
+/**
+ * @typedef LinkedListNode
+ * @property {T} value
+ * @property {LinkedListNode<T> | null} prev The previous node.
+ * @property {LinkedListNode<T> | null} next The next node.
+ * @template T
+ */
+
+/**
+ * @template T
+ */
+function LinkedList() {
+	/** @type {LinkedListNode<T>} */
+	var head = { value: null, prev: null, next: null };
+	/** @type {LinkedListNode<T>} */
+	var tail = { value: null, prev: head, next: null };
+	head.next = tail;
+
+	/** @type {LinkedListNode<T>} */
+	this.head = head;
+	/** @type {LinkedListNode<T>} */
+	this.tail = tail;
+	this.length = 0;
+}
+
+/**
+ * Adds a new node with the given value to the list.
+ * @param {LinkedList<T>} list
+ * @param {LinkedListNode<T>} node
+ * @param {T} value
+ * @returns {LinkedListNode<T>} The added node.
+ * @template T
+ */
+function addAfter(list, node, value) {
+	// assumes that node != list.tail && values.length >= 0
+	var next = node.next;
+
+	var newNode = { value: value, prev: node, next: next };
+	node.next = newNode;
+	next.prev = newNode;
+	list.length++;
+
+	return newNode;
+}
+/**
+ * Removes `count` nodes after the given node. The given node will not be removed.
+ * @param {LinkedList<T>} list
+ * @param {LinkedListNode<T>} node
+ * @param {number} count
+ * @template T
+ */
+function removeRange(list, node, count) {
+	var next = node.next;
+	for (var i = 0; i < count && next !== list.tail; i++) {
+		next = next.next;
+	}
+	node.next = next;
+	next.prev = node;
+	list.length -= i;
+}
+/**
+ * @param {LinkedList<T>} list
+ * @returns {T[]}
+ * @template T
+ */
+function toArray(list) {
+	var array = [];
+	var node = list.head.next;
+	while (node !== list.tail) {
+		array.push(node.value);
+		node = node.next;
+	}
+	return array;
+}
+
+
+if (!_self.document) {
+	if (!_self.addEventListener) {
+		// in Node.js
+		return _;
+	}
+
+	if (!_.disableWorkerMessageHandler) {
+		// In worker
+		_self.addEventListener('message', function (evt) {
+			var message = JSON.parse(evt.data),
+				lang = message.language,
+				code = message.code,
+				immediateClose = message.immediateClose;
+
+			_self.postMessage(_.highlight(code, _.languages[lang], lang));
+			if (immediateClose) {
+				_self.close();
+			}
+		}, false);
+	}
+
+	return _;
+}
+
+//Get current script and highlight
+var script = _.util.currentScript();
+
+if (script) {
+	_.filename = script.src;
+
+	if (script.hasAttribute('data-manual')) {
+		_.manual = true;
+	}
+}
+
+function highlightAutomaticallyCallback() {
+	if (!_.manual) {
+		_.highlightAll();
+	}
+}
+
+if (!_.manual) {
+	// If the document state is "loading", then we'll use DOMContentLoaded.
+	// If the document state is "interactive" and the prism.js script is deferred, then we'll also use the
+	// DOMContentLoaded event because there might be some plugins or languages which have also been deferred and they
+	// might take longer one animation frame to execute which can create a race condition where only some plugins have
+	// been loaded when Prism.highlightAll() is executed, depending on how fast resources are loaded.
+	// See https://github.com/PrismJS/prism/issues/2102
+	var readyState = document.readyState;
+	if (readyState === 'loading' || readyState === 'interactive' && script && script.defer) {
+		document.addEventListener('DOMContentLoaded', highlightAutomaticallyCallback);
+	} else {
+		if (window.requestAnimationFrame) {
+			window.requestAnimationFrame(highlightAutomaticallyCallback);
+		} else {
+			window.setTimeout(highlightAutomaticallyCallback, 16);
+		}
+	}
+}
+
+return _;
+
+})(_self);
+
+if (typeof module !== 'undefined' && module.exports) {
+	module.exports = Prism;
+}
+
+// hack for components to work correctly in node.js
+if (typeof global !== 'undefined') {
+	global.Prism = Prism;
+}
+
+
+/* **********************************************
+     Begin prism-markup.js
+********************************************** */
+
+Prism.languages.markup = {
+	'comment': /<!--[\s\S]*?-->/,
+	'prolog': /<\?[\s\S]+?\?>/,
+	'doctype': {
+		pattern: /<!DOCTYPE(?:[^>"'[\]]|"[^"]*"|'[^']*')+(?:\[(?:(?!<!--)[^"'\]]|"[^"]*"|'[^']*'|<!--[\s\S]*?-->)*\]\s*)?>/i,
+		greedy: true
+	},
+	'cdata': /<!\[CDATA\[[\s\S]*?]]>/i,
+	'tag': {
+		pattern: /<\/?(?!\d)[^\s>\/=$<%]+(?:\s(?:\s*[^\s>\/=]+(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s'">=]+(?=[\s>]))|(?=[\s/>])))+)?\s*\/?>/i,
+		greedy: true,
+		inside: {
+			'tag': {
+				pattern: /^<\/?[^\s>\/]+/i,
+				inside: {
+					'punctuation': /^<\/?/,
+					'namespace': /^[^\s>\/:]+:/
+				}
+			},
+			'attr-value': {
+				pattern: /=\s*(?:"[^"]*"|'[^']*'|[^\s'">=]+)/i,
+				inside: {
+					'punctuation': [
+						/^=/,
+						{
+							pattern: /^(\s*)["']|["']$/,
+							lookbehind: true
+						}
+					]
+				}
+			},
+			'punctuation': /\/?>/,
+			'attr-name': {
+				pattern: /[^\s>\/]+/,
+				inside: {
+					'namespace': /^[^\s>\/:]+:/
+				}
+			}
+
+		}
+	},
+	'entity': /&#?[\da-z]{1,8};/i
+};
+
+Prism.languages.markup['tag'].inside['attr-value'].inside['entity'] =
+	Prism.languages.markup['entity'];
+
+// Plugin to make entity title show the real entity, idea by Roman Komarov
+Prism.hooks.add('wrap', function(env) {
+
+	if (env.type === 'entity') {
+		env.attributes['title'] = env.content.replace(/&amp;/, '&');
+	}
+});
+
+Object.defineProperty(Prism.languages.markup.tag, 'addInlined', {
+	/**
+	 * Adds an inlined language to markup.
+	 *
+	 * An example of an inlined language is CSS with `<style>` tags.
+	 *
+	 * @param {string} tagName The name of the tag that contains the inlined language. This name will be treated as
+	 * case insensitive.
+	 * @param {string} lang The language key.
+	 * @example
+	 * addInlined('style', 'css');
+	 */
+	value: function addInlined(tagName, lang) {
+		var includedCdataInside = {};
+		includedCdataInside['language-' + lang] = {
+			pattern: /(^<!\[CDATA\[)[\s\S]+?(?=\]\]>$)/i,
+			lookbehind: true,
+			inside: Prism.languages[lang]
+		};
+		includedCdataInside['cdata'] = /^<!\[CDATA\[|\]\]>$/i;
+
+		var inside = {
+			'included-cdata': {
+				pattern: /<!\[CDATA\[[\s\S]*?\]\]>/i,
+				inside: includedCdataInside
+			}
+		};
+		inside['language-' + lang] = {
+			pattern: /[\s\S]+/,
+			inside: Prism.languages[lang]
+		};
+
+		var def = {};
+		def[tagName] = {
+			pattern: RegExp(/(<__[\s\S]*?>)(?:<!\[CDATA\[[\s\S]*?\]\]>\s*|[\s\S])*?(?=<\/__>)/.source.replace(/__/g, function () { return tagName; }), 'i'),
+			lookbehind: true,
+			greedy: true,
+			inside: inside
+		};
+
+		Prism.languages.insertBefore('markup', 'cdata', def);
+	}
+});
+
+Prism.languages.xml = Prism.languages.extend('markup', {});
+Prism.languages.html = Prism.languages.markup;
+Prism.languages.mathml = Prism.languages.markup;
+Prism.languages.svg = Prism.languages.markup;
+
+
+/* **********************************************
+     Begin prism-css.js
+********************************************** */
+
+(function (Prism) {
+
+	var string = /("|')(?:\\(?:\r\n|[\s\S])|(?!\1)[^\\\r\n])*\1/;
+
+	Prism.languages.css = {
+		'comment': /\/\*[\s\S]*?\*\//,
+		'atrule': {
+			pattern: /@[\w-]+[\s\S]*?(?:;|(?=\s*\{))/,
+			inside: {
+				'rule': /^@[\w-]+/,
+				'selector-function-argument': {
+					pattern: /(\bselector\s*\((?!\s*\))\s*)(?:[^()]|\((?:[^()]|\([^()]*\))*\))+?(?=\s*\))/,
+					lookbehind: true,
+					alias: 'selector'
+				}
+				// See rest below
+			}
+		},
+		'url': {
+			pattern: RegExp('url\\((?:' + string.source + '|[^\n\r()]*)\\)', 'i'),
+			greedy: true,
+			inside: {
+				'function': /^url/i,
+				'punctuation': /^\(|\)$/
+			}
+		},
+		'selector': RegExp('[^{}\\s](?:[^{};"\']|' + string.source + ')*?(?=\\s*\\{)'),
+		'string': {
+			pattern: string,
+			greedy: true
+		},
+		'property': /[-_a-z\xA0-\uFFFF][-\w\xA0-\uFFFF]*(?=\s*:)/i,
+		'important': /!important\b/i,
+		'function': /[-a-z0-9]+(?=\()/i,
+		'punctuation': /[(){};:,]/
+	};
+
+	Prism.languages.css['atrule'].inside.rest = Prism.languages.css;
+
+	var markup = Prism.languages.markup;
+	if (markup) {
+		markup.tag.addInlined('style', 'css');
+
+		Prism.languages.insertBefore('inside', 'attr-value', {
+			'style-attr': {
+				pattern: /\s*style=("|')(?:\\[\s\S]|(?!\1)[^\\])*\1/i,
+				inside: {
+					'attr-name': {
+						pattern: /^\s*style/i,
+						inside: markup.tag.inside
+					},
+					'punctuation': /^\s*=\s*['"]|['"]\s*$/,
+					'attr-value': {
+						pattern: /.+/i,
+						inside: Prism.languages.css
+					}
+				},
+				alias: 'language-css'
+			}
+		}, markup.tag);
+	}
+
+}(Prism));
+
+
+/* **********************************************
+     Begin prism-clike.js
+********************************************** */
+
+Prism.languages.clike = {
+	'comment': [
+		{
+			pattern: /(^|[^\\])\/\*[\s\S]*?(?:\*\/|$)/,
+			lookbehind: true
+		},
+		{
+			pattern: /(^|[^\\:])\/\/.*/,
+			lookbehind: true,
+			greedy: true
+		}
+	],
+	'string': {
+		pattern: /(["'])(?:\\(?:\r\n|[\s\S])|(?!\1)[^\\\r\n])*\1/,
+		greedy: true
+	},
+	'class-name': {
+		pattern: /(\b(?:class|interface|extends|implements|trait|instanceof|new)\s+|\bcatch\s+\()[\w.\\]+/i,
+		lookbehind: true,
+		inside: {
+			'punctuation': /[.\\]/
+		}
+	},
+	'keyword': /\b(?:if|else|while|do|for|return|in|instanceof|function|new|try|throw|catch|finally|null|break|continue)\b/,
+	'boolean': /\b(?:true|false)\b/,
+	'function': /\w+(?=\()/,
+	'number': /\b0x[\da-f]+\b|(?:\b\d+\.?\d*|\B\.\d+)(?:e[+-]?\d+)?/i,
+	'operator': /[<>]=?|[!=]=?=?|--?|\+\+?|&&?|\|\|?|[?*/~^%]/,
+	'punctuation': /[{}[\];(),.:]/
+};
+
+
+/* **********************************************
+     Begin prism-javascript.js
+********************************************** */
+
+Prism.languages.javascript = Prism.languages.extend('clike', {
+	'class-name': [
+		Prism.languages.clike['class-name'],
+		{
+			pattern: /(^|[^$\w\xA0-\uFFFF])[_$A-Z\xA0-\uFFFF][$\w\xA0-\uFFFF]*(?=\.(?:prototype|constructor))/,
+			lookbehind: true
+		}
+	],
+	'keyword': [
+		{
+			pattern: /((?:^|})\s*)(?:catch|finally)\b/,
+			lookbehind: true
+		},
+		{
+			pattern: /(^|[^.]|\.\.\.\s*)\b(?:as|async(?=\s*(?:function\b|\(|[$\w\xA0-\uFFFF]|$))|await|break|case|class|const|continue|debugger|default|delete|do|else|enum|export|extends|for|from|function|get|if|implements|import|in|instanceof|interface|let|new|null|of|package|private|protected|public|return|set|static|super|switch|this|throw|try|typeof|undefined|var|void|while|with|yield)\b/,
+			lookbehind: true
+		},
+	],
+	'number': /\b(?:(?:0[xX](?:[\dA-Fa-f](?:_[\dA-Fa-f])?)+|0[bB](?:[01](?:_[01])?)+|0[oO](?:[0-7](?:_[0-7])?)+)n?|(?:\d(?:_\d)?)+n|NaN|Infinity)\b|(?:\b(?:\d(?:_\d)?)+\.?(?:\d(?:_\d)?)*|\B\.(?:\d(?:_\d)?)+)(?:[Ee][+-]?(?:\d(?:_\d)?)+)?/,
+	// Allow for all non-ASCII characters (See http://stackoverflow.com/a/2008444)
+	'function': /#?[_$a-zA-Z\xA0-\uFFFF][$\w\xA0-\uFFFF]*(?=\s*(?:\.\s*(?:apply|bind|call)\s*)?\()/,
+	'operator': /--|\+\+|\*\*=?|=>|&&|\|\||[!=]==|<<=?|>>>?=?|[-+*/%&|^!=<>]=?|\.{3}|\?[.?]?|[~:]/
+});
+
+Prism.languages.javascript['class-name'][0].pattern = /(\b(?:class|interface|extends|implements|instanceof|new)\s+)[\w.\\]+/;
+
+Prism.languages.insertBefore('javascript', 'keyword', {
+	'regex': {
+		pattern: /((?:^|[^$\w\xA0-\uFFFF."'\])\s])\s*)\/(?:\[(?:[^\]\\\r\n]|\\.)*]|\\.|[^/\\\[\r\n])+\/[gimyus]{0,6}(?=(?:\s|\/\*[\s\S]*?\*\/)*(?:$|[\r\n,.;:})\]]|\/\/))/,
+		lookbehind: true,
+		greedy: true
+	},
+	// This must be declared before keyword because we use "function" inside the look-forward
+	'function-variable': {
+		pattern: /#?[_$a-zA-Z\xA0-\uFFFF][$\w\xA0-\uFFFF]*(?=\s*[=:]\s*(?:async\s*)?(?:\bfunction\b|(?:\((?:[^()]|\([^()]*\))*\)|[_$a-zA-Z\xA0-\uFFFF][$\w\xA0-\uFFFF]*)\s*=>))/,
+		alias: 'function'
+	},
+	'parameter': [
+		{
+			pattern: /(function(?:\s+[_$A-Za-z\xA0-\uFFFF][$\w\xA0-\uFFFF]*)?\s*\(\s*)(?!\s)(?:[^()]|\([^()]*\))+?(?=\s*\))/,
+			lookbehind: true,
+			inside: Prism.languages.javascript
+		},
+		{
+			pattern: /[_$a-z\xA0-\uFFFF][$\w\xA0-\uFFFF]*(?=\s*=>)/i,
+			inside: Prism.languages.javascript
+		},
+		{
+			pattern: /(\(\s*)(?!\s)(?:[^()]|\([^()]*\))+?(?=\s*\)\s*=>)/,
+			lookbehind: true,
+			inside: Prism.languages.javascript
+		},
+		{
+			pattern: /((?:\b|\s|^)(?!(?:as|async|await|break|case|catch|class|const|continue|debugger|default|delete|do|else|enum|export|extends|finally|for|from|function|get|if|implements|import|in|instanceof|interface|let|new|null|of|package|private|protected|public|return|set|static|super|switch|this|throw|try|typeof|undefined|var|void|while|with|yield)(?![$\w\xA0-\uFFFF]))(?:[_$A-Za-z\xA0-\uFFFF][$\w\xA0-\uFFFF]*\s*)\(\s*)(?!\s)(?:[^()]|\([^()]*\))+?(?=\s*\)\s*\{)/,
+			lookbehind: true,
+			inside: Prism.languages.javascript
+		}
+	],
+	'constant': /\b[A-Z](?:[A-Z_]|\dx?)*\b/
+});
+
+Prism.languages.insertBefore('javascript', 'string', {
+	'template-string': {
+		pattern: /`(?:\\[\s\S]|\${(?:[^{}]|{(?:[^{}]|{[^}]*})*})+}|(?!\${)[^\\`])*`/,
+		greedy: true,
+		inside: {
+			'template-punctuation': {
+				pattern: /^`|`$/,
+				alias: 'string'
+			},
+			'interpolation': {
+				pattern: /((?:^|[^\\])(?:\\{2})*)\${(?:[^{}]|{(?:[^{}]|{[^}]*})*})+}/,
+				lookbehind: true,
+				inside: {
+					'interpolation-punctuation': {
+						pattern: /^\${|}$/,
+						alias: 'punctuation'
+					},
+					rest: Prism.languages.javascript
+				}
+			},
+			'string': /[\s\S]+/
+		}
+	}
+});
+
+if (Prism.languages.markup) {
+	Prism.languages.markup.tag.addInlined('script', 'javascript');
+}
+
+Prism.languages.js = Prism.languages.javascript;
+
+
+/* **********************************************
+     Begin prism-file-highlight.js
+********************************************** */
+
+(function () {
+	if (typeof self === 'undefined' || !self.Prism || !self.document || !document.querySelector) {
+		return;
+	}
+
+	/**
+	 * @param {Element} [container=document]
+	 */
+	self.Prism.fileHighlight = function(container) {
+		container = container || document;
+
+		var Extensions = {
+			'js': 'javascript',
+			'py': 'python',
+			'rb': 'ruby',
+			'ps1': 'powershell',
+			'psm1': 'powershell',
+			'sh': 'bash',
+			'bat': 'batch',
+			'h': 'c',
+			'tex': 'latex'
+		};
+
+		Array.prototype.slice.call(container.querySelectorAll('pre[data-src]')).forEach(function (pre) {
+			// ignore if already loaded
+			if (pre.hasAttribute('data-src-loaded')) {
+				return;
+			}
+
+			// load current
+			var src = pre.getAttribute('data-src');
+
+			var language, parent = pre;
+			var lang = /\blang(?:uage)?-([\w-]+)\b/i;
+			while (parent && !lang.test(parent.className)) {
+				parent = parent.parentNode;
+			}
+
+			if (parent) {
+				language = (pre.className.match(lang) || [, ''])[1];
+			}
+
+			if (!language) {
+				var extension = (src.match(/\.(\w+)$/) || [, ''])[1];
+				language = Extensions[extension] || extension;
+			}
+
+			var code = document.createElement('code');
+			code.className = 'language-' + language;
+
+			pre.textContent = '';
+
+			code.textContent = 'Loading…';
+
+			pre.appendChild(code);
+
+			var xhr = new XMLHttpRequest();
+
+			xhr.open('GET', src, true);
+
+			xhr.onreadystatechange = function () {
+				if (xhr.readyState == 4) {
+
+					if (xhr.status < 400 && xhr.responseText) {
+						code.textContent = xhr.responseText;
+
+						Prism.highlightElement(code);
+						// mark as loaded
+						pre.setAttribute('data-src-loaded', '');
+					}
+					else if (xhr.status >= 400) {
+						code.textContent = '✖ Error ' + xhr.status + ' while fetching file: ' + xhr.statusText;
+					}
+					else {
+						code.textContent = '✖ Error: File does not exist or is empty';
+					}
+				}
+			};
+
+			xhr.send(null);
+		});
+	};
+
+	document.addEventListener('DOMContentLoaded', function () {
+		// execute inside handler, for dropping Event as argument
+		self.Prism.fileHighlight();
+	});
+
+})();
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],102:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -13351,7 +15213,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],98:[function(require,module,exports){
+},{}],103:[function(require,module,exports){
 /*jshint node:true*/
 'use strict';
 
@@ -13409,14 +15271,14 @@ module.exports = function (input, options) {
   return sanitize(output, '');
 };
 
-},{"truncate-utf8-bytes":99}],99:[function(require,module,exports){
+},{"truncate-utf8-bytes":104}],104:[function(require,module,exports){
 'use strict';
 
 var truncate = require("./lib/truncate");
 var getLength = require("utf8-byte-length/browser");
 module.exports = truncate.bind(null, getLength);
 
-},{"./lib/truncate":100,"utf8-byte-length/browser":102}],100:[function(require,module,exports){
+},{"./lib/truncate":105,"utf8-byte-length/browser":107}],105:[function(require,module,exports){
 'use strict';
 
 function isHighSurrogate(codePoint) {
@@ -13461,7 +15323,7 @@ module.exports = function truncate(getLength, string, byteLength) {
 };
 
 
-},{}],101:[function(require,module,exports){
+},{}],106:[function(require,module,exports){
 //     Underscore.js 1.8.3
 //     http://underscorejs.org
 //     (c) 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -15011,7 +16873,7 @@ module.exports = function truncate(getLength, string, byteLength) {
   }
 }.call(this));
 
-},{}],102:[function(require,module,exports){
+},{}],107:[function(require,module,exports){
 'use strict';
 
 function isHighSurrogate(codePoint) {
@@ -15060,7 +16922,7 @@ module.exports = function getByteLength(string) {
   return byteLength;
 };
 
-},{}],103:[function(require,module,exports){
+},{}],108:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -15085,14 +16947,14 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],104:[function(require,module,exports){
+},{}],109:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],105:[function(require,module,exports){
+},{}],110:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -15682,7 +17544,7 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":104,"_process":97,"inherits":103}],106:[function(require,module,exports){
+},{"./support/isBuffer":109,"_process":102,"inherits":108}],111:[function(require,module,exports){
 'use strict';
 
 /*eslint-env browser*/
@@ -15887,8 +17749,8 @@ function usePlugins(md) {
   .use(require('@gerhobbelt/markdown-it-modify-token'))
 
   .use(pick(
-    //require('@gerhobbelt/markdown-it-prism'),
-    require('@gerhobbelt/markdown-it-highlighted').default
+    require('@gerhobbelt/markdown-it-prism'),
+    require('@gerhobbelt/markdown-it-highlighted')
     //require('@gerhobbelt/markdown-it-highlightjs')
   ))
 
@@ -15997,7 +17859,6 @@ function updateResult() {
   // reset lines mapping cache on content update
   scrollMap = null;
 
-  debugger;
   try {
     if (source) {
       // serialize state - source and options
@@ -16240,9 +18101,7 @@ $(function () {
 
   setResultView(defaults._view);
 
-  debugger;
   mdInit();
-  debugger;
   permalink = document.getElementById('permalink');
 
   // Setup listeners
@@ -16282,4 +18141,4 @@ $(function () {
   updateResult();
 });
 
-},{"@gerhobbelt/markdown-it-abbr":1,"@gerhobbelt/markdown-it-attrs":2,"@gerhobbelt/markdown-it-checkbox":5,"@gerhobbelt/markdown-it-container":6,"@gerhobbelt/markdown-it-deflist":7,"@gerhobbelt/markdown-it-emoji":8,"@gerhobbelt/markdown-it-fontawesome":14,"@gerhobbelt/markdown-it-footnote":15,"@gerhobbelt/markdown-it-front-matter":16,"@gerhobbelt/markdown-it-hashtag":17,"@gerhobbelt/markdown-it-header-sections":18,"@gerhobbelt/markdown-it-headinganchor":19,"@gerhobbelt/markdown-it-highlighted":20,"@gerhobbelt/markdown-it-implicit-figures":21,"@gerhobbelt/markdown-it-ins":22,"@gerhobbelt/markdown-it-kbd":23,"@gerhobbelt/markdown-it-mark":24,"@gerhobbelt/markdown-it-mathjax":25,"@gerhobbelt/markdown-it-modify-token":26,"@gerhobbelt/markdown-it-samp":30,"@gerhobbelt/markdown-it-sanitizer":31,"@gerhobbelt/markdown-it-strikethrough-alt":32,"@gerhobbelt/markdown-it-sub":33,"@gerhobbelt/markdown-it-sup":34,"@gerhobbelt/markdown-it-table-of-contents":35,"@gerhobbelt/markdown-it-toc":36,"@gerhobbelt/markdown-it-wikilinks":37,"highlight.js/lib//languages/asciidoc":44,"highlight.js/lib/highlight.js":39,"highlight.js/lib/languages/actionscript":40,"highlight.js/lib/languages/apache":41,"highlight.js/lib/languages/arduino":42,"highlight.js/lib/languages/armasm":43,"highlight.js/lib/languages/avrasm":45,"highlight.js/lib/languages/bash":46,"highlight.js/lib/languages/clojure":47,"highlight.js/lib/languages/cmake":48,"highlight.js/lib/languages/coffeescript":49,"highlight.js/lib/languages/cpp":50,"highlight.js/lib/languages/css":51,"highlight.js/lib/languages/diff":52,"highlight.js/lib/languages/django":53,"highlight.js/lib/languages/dockerfile":54,"highlight.js/lib/languages/fortran":55,"highlight.js/lib/languages/glsl":56,"highlight.js/lib/languages/go":57,"highlight.js/lib/languages/groovy":58,"highlight.js/lib/languages/handlebars":59,"highlight.js/lib/languages/haskell":60,"highlight.js/lib/languages/ini":61,"highlight.js/lib/languages/java":62,"highlight.js/lib/languages/javascript":63,"highlight.js/lib/languages/json":64,"highlight.js/lib/languages/less":65,"highlight.js/lib/languages/lisp":66,"highlight.js/lib/languages/livescript":67,"highlight.js/lib/languages/lua":68,"highlight.js/lib/languages/makefile":69,"highlight.js/lib/languages/matlab":70,"highlight.js/lib/languages/mipsasm":71,"highlight.js/lib/languages/nginx":72,"highlight.js/lib/languages/objectivec":73,"highlight.js/lib/languages/perl":74,"highlight.js/lib/languages/php":75,"highlight.js/lib/languages/python":76,"highlight.js/lib/languages/ruby":77,"highlight.js/lib/languages/rust":78,"highlight.js/lib/languages/scala":79,"highlight.js/lib/languages/scheme":80,"highlight.js/lib/languages/scss":81,"highlight.js/lib/languages/smalltalk":82,"highlight.js/lib/languages/stylus":83,"highlight.js/lib/languages/swift":84,"highlight.js/lib/languages/tcl":85,"highlight.js/lib/languages/tex":86,"highlight.js/lib/languages/typescript":87,"highlight.js/lib/languages/verilog":88,"highlight.js/lib/languages/vhdl":89,"highlight.js/lib/languages/xml":90,"highlight.js/lib/languages/yaml":91,"mdurl":95}]},{},[106]);
+},{"@gerhobbelt/markdown-it-abbr":1,"@gerhobbelt/markdown-it-attrs":2,"@gerhobbelt/markdown-it-checkbox":5,"@gerhobbelt/markdown-it-container":6,"@gerhobbelt/markdown-it-deflist":7,"@gerhobbelt/markdown-it-emoji":8,"@gerhobbelt/markdown-it-fontawesome":14,"@gerhobbelt/markdown-it-footnote":15,"@gerhobbelt/markdown-it-front-matter":16,"@gerhobbelt/markdown-it-hashtag":17,"@gerhobbelt/markdown-it-header-sections":18,"@gerhobbelt/markdown-it-headinganchor":19,"@gerhobbelt/markdown-it-highlighted":20,"@gerhobbelt/markdown-it-implicit-figures":21,"@gerhobbelt/markdown-it-ins":22,"@gerhobbelt/markdown-it-kbd":23,"@gerhobbelt/markdown-it-mark":24,"@gerhobbelt/markdown-it-mathjax":25,"@gerhobbelt/markdown-it-modify-token":26,"@gerhobbelt/markdown-it-prism":27,"@gerhobbelt/markdown-it-samp":31,"@gerhobbelt/markdown-it-sanitizer":32,"@gerhobbelt/markdown-it-strikethrough-alt":33,"@gerhobbelt/markdown-it-sub":34,"@gerhobbelt/markdown-it-sup":35,"@gerhobbelt/markdown-it-table-of-contents":36,"@gerhobbelt/markdown-it-toc":37,"@gerhobbelt/markdown-it-wikilinks":38,"highlight.js/lib//languages/asciidoc":45,"highlight.js/lib/highlight.js":40,"highlight.js/lib/languages/actionscript":41,"highlight.js/lib/languages/apache":42,"highlight.js/lib/languages/arduino":43,"highlight.js/lib/languages/armasm":44,"highlight.js/lib/languages/avrasm":46,"highlight.js/lib/languages/bash":47,"highlight.js/lib/languages/clojure":48,"highlight.js/lib/languages/cmake":49,"highlight.js/lib/languages/coffeescript":50,"highlight.js/lib/languages/cpp":51,"highlight.js/lib/languages/css":52,"highlight.js/lib/languages/diff":53,"highlight.js/lib/languages/django":54,"highlight.js/lib/languages/dockerfile":55,"highlight.js/lib/languages/fortran":56,"highlight.js/lib/languages/glsl":57,"highlight.js/lib/languages/go":58,"highlight.js/lib/languages/groovy":59,"highlight.js/lib/languages/handlebars":60,"highlight.js/lib/languages/haskell":61,"highlight.js/lib/languages/ini":62,"highlight.js/lib/languages/java":63,"highlight.js/lib/languages/javascript":64,"highlight.js/lib/languages/json":65,"highlight.js/lib/languages/less":66,"highlight.js/lib/languages/lisp":67,"highlight.js/lib/languages/livescript":68,"highlight.js/lib/languages/lua":69,"highlight.js/lib/languages/makefile":70,"highlight.js/lib/languages/matlab":71,"highlight.js/lib/languages/mipsasm":72,"highlight.js/lib/languages/nginx":73,"highlight.js/lib/languages/objectivec":74,"highlight.js/lib/languages/perl":75,"highlight.js/lib/languages/php":76,"highlight.js/lib/languages/python":77,"highlight.js/lib/languages/ruby":78,"highlight.js/lib/languages/rust":79,"highlight.js/lib/languages/scala":80,"highlight.js/lib/languages/scheme":81,"highlight.js/lib/languages/scss":82,"highlight.js/lib/languages/smalltalk":83,"highlight.js/lib/languages/stylus":84,"highlight.js/lib/languages/swift":85,"highlight.js/lib/languages/tcl":86,"highlight.js/lib/languages/tex":87,"highlight.js/lib/languages/typescript":88,"highlight.js/lib/languages/verilog":89,"highlight.js/lib/languages/vhdl":90,"highlight.js/lib/languages/xml":91,"highlight.js/lib/languages/yaml":92,"mdurl":96}]},{},[111]);

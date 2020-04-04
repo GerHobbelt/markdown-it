@@ -202,8 +202,8 @@ function usePlugins(md) {
   .use(require('@gerhobbelt/markdown-it-modify-token'))
 
   .use(pick(
-    //require('@gerhobbelt/markdown-it-prism'),
-    require('@gerhobbelt/markdown-it-highlighted').default
+    require('@gerhobbelt/markdown-it-prism'),
+    require('@gerhobbelt/markdown-it-highlighted')
     //require('@gerhobbelt/markdown-it-highlightjs')
   ))
 
