@@ -120,6 +120,7 @@ module.exports.HTML_OPEN_CLOSE_TAG_RE = HTML_OPEN_CLOSE_TAG_RE;
 //
 'use strict';
 
+function isNil(v) { return v === null || typeof v === 'undefined'; }
 
 function _class(obj) { return Object.prototype.toString.call(obj); }
 
@@ -419,6 +420,7 @@ exports.lib                 = {};
 exports.lib.mdurl           = require('mdurl');
 exports.lib.ucmicro         = require('uc.micro');
 
+exports.isNil               = isNil;
 exports.assign              = assign;
 exports.isString            = isString;
 exports.has                 = has;
@@ -1853,6 +1855,7 @@ module.exports = {
 var assign          = require('./common/utils').assign;
 var unescapeAll     = require('./common/utils').unescapeAll;
 var escapeHtml      = require('./common/utils').escapeHtml;
+var isNil           = require('./common/utils').isNil;
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -2020,7 +2023,8 @@ Renderer.prototype.renderAttrs = function renderAttrs(token, options) {
   result = '';
 
   for (i = 0, l = token.attrs.length; i < l; i++) {
-    result += ' ' + escapeHtml(token.attrs[i][0]) + '="' + escapeHtml(token.attrs[i][1]) + '"';
+    var value = token.attrs[i][1];
+    result += ' ' + escapeHtml(token.attrs[i][0]) + (isNil(value) ? '' : '="' + escapeHtml(value) + '"');
   }
 
   return result;
@@ -4407,11 +4411,8 @@ function replace_scoped(inlineTokens) {
 function replace_rare(inlineTokens) {
   var i, token, inside_autolink = 0;
 
-  function replace_arrow(m, p1, p2, p3) {
-    console.error('replace?',
-      { m:m, p1:p1, p2:p2, p3:p3,
-        repl: ARROW_REPLACEMENTS[p2], out: (ARROW_REPLACEMENTS[p2] || p2) });
-    return p1 + (ARROW_REPLACEMENTS[p2] || p2) + p3;
+  function replace_arrow(m, p1, p2) {
+    return p1 + (ARROW_REPLACEMENTS[p2] || p2);
   }
 
   for (i = inlineTokens.length - 1; i >= 0; i--) {
@@ -4431,16 +4432,16 @@ function replace_rare(inlineTokens) {
           // <==>
           // ==>
           // -->
-          .replace(/(^|[^<=-])([<]?(?:==|--)[>]?)([^>=-]|$)/mg, replace_arrow)
+          .replace(/(^|[^<=-])([<]?(?:==|--)[>]?)(?=[^>=-]|$)/mg, replace_arrow)
           // and do it once more to catch input which overlaps in the detection
           // regex, e.g. `<--x-->` where the `-->` will not be detected by
           // the above `replace()` due to overlap at `x` in the rwuired match:
-          .replace(/(^|[^<=-])([<]?(?:==|--)[>]?)([^>=-]|$)/mg, replace_arrow)
+          .replace(/(^|[^<=-])([<]?(?:==|--)[>]?)(?=[^>=-]|$)/mg, replace_arrow)
           // em-dash
-          .replace(/(^|[^-])---([^-]|$)/mg, '$1\u2014$2')
+          .replace(/(^|[^-])---(?=[^-]|$)/mg, '$1\u2014')
           // en-dash
-          .replace(/(^|\s)--(\s|$)/mg, '$1\u2013$2')
-          .replace(/(^|[^-\s,\/])--([^-\s,\/]|$)/mg, '$1\u2013$2');
+          .replace(/(^|\s)--(?=\s|$)/mg, '$1\u2013')
+          .replace(/(^|[^-\s])--(?=[^-\s]|$)/mg, '$1\u2013');
       }
     }
 
@@ -4592,8 +4593,14 @@ function process_inlines(tokens, state) {
       }
 
       if (canOpen && canClose) {
-        // treat this as the middle of the word
-        canOpen = false;
+        // Replace quotes in the middle of punctuation sequence, but not
+        // in the middle of the words, i.e.:
+        //
+        // 1. foo " bar " baz - not replaced
+        // 2. foo-"-bar-"-baz - replaced
+        // 3. foo"bar"baz     - not replaced
+        //
+        canOpen = isLastPunctChar;
         canClose = isNextPunctChar;
       }
 

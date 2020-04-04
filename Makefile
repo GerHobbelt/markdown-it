@@ -26,6 +26,8 @@ demo: lint
 		> ./demo/index.css
 	rm -rf ./support/demo_template/sample.json
 	browserify ./index.js -s markdownit > ./demo/markdown-it.js
+	# process ./support/demo_template/index.js:
+	#rollup -c ./rollup.config4demo_template.js
 	browserify ./support/demo_template/index.js > ./demo/index.js
 	cp ./support/demo_template/README.md ./demo/
 	cp ./support/demo_template/test.html ./demo/

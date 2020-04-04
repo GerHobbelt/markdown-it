@@ -6956,6 +6956,7 @@ var uc_micro = {
 
 var utils = createCommonjsModule(function (module, exports) {
 
+function isNil(v) { return v === null || typeof v === 'undefined'; }
 
 function _class(obj) { return Object.prototype.toString.call(obj); }
 
@@ -7255,6 +7256,7 @@ exports.lib                 = {};
 exports.lib.mdurl           = mdurl;
 exports.lib.ucmicro         = uc_micro;
 
+exports.isNil               = isNil;
 exports.assign              = assign;
 exports.isString            = isString;
 exports.has                 = has;
@@ -7273,21 +7275,22 @@ exports.escapeRE            = escapeRE;
 exports.normalizeReference  = normalizeReference;
 });
 var utils_1 = utils.lib;
-var utils_2 = utils.assign;
-var utils_3 = utils.isString;
-var utils_4 = utils.has;
-var utils_5 = utils.unescapeMd;
-var utils_6 = utils.unescapeAll;
-var utils_7 = utils.isValidEntityCode;
-var utils_8 = utils.fromCodePoint;
-var utils_9 = utils.escapeHtml;
-var utils_10 = utils.arrayReplaceAt;
-var utils_11 = utils.isSpace;
-var utils_12 = utils.isWhiteSpace;
-var utils_13 = utils.isMdAsciiPunct;
-var utils_14 = utils.isPunctChar;
-var utils_15 = utils.escapeRE;
-var utils_16 = utils.normalizeReference;
+var utils_2 = utils.isNil;
+var utils_3 = utils.assign;
+var utils_4 = utils.isString;
+var utils_5 = utils.has;
+var utils_6 = utils.unescapeMd;
+var utils_7 = utils.unescapeAll;
+var utils_8 = utils.isValidEntityCode;
+var utils_9 = utils.fromCodePoint;
+var utils_10 = utils.escapeHtml;
+var utils_11 = utils.arrayReplaceAt;
+var utils_12 = utils.isSpace;
+var utils_13 = utils.isWhiteSpace;
+var utils_14 = utils.isMdAsciiPunct;
+var utils_15 = utils.isPunctChar;
+var utils_16 = utils.escapeRE;
+var utils_17 = utils.normalizeReference;
 
 // Parse link label
 
@@ -7470,6 +7473,7 @@ var helpers = {
 var assign          = utils.assign;
 var unescapeAll$2     = utils.unescapeAll;
 var escapeHtml      = utils.escapeHtml;
+var isNil           = utils.isNil;
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -7637,7 +7641,8 @@ Renderer.prototype.renderAttrs = function renderAttrs(token, options) {
   result = '';
 
   for (i = 0, l = token.attrs.length; i < l; i++) {
-    result += ' ' + escapeHtml(token.attrs[i][0]) + '="' + escapeHtml(token.attrs[i][1]) + '"';
+    var value = token.attrs[i][1];
+    result += ' ' + escapeHtml(token.attrs[i][0]) + (isNil(value) ? '' : '="' + escapeHtml(value) + '"');
   }
 
   return result;
@@ -8257,11 +8262,8 @@ function replace_scoped(inlineTokens) {
 function replace_rare(inlineTokens) {
   var i, token, inside_autolink = 0;
 
-  function replace_arrow(m, p1, p2, p3) {
-    console.error('replace?',
-      { m:m, p1:p1, p2:p2, p3:p3,
-        repl: ARROW_REPLACEMENTS[p2], out: (ARROW_REPLACEMENTS[p2] || p2) });
-    return p1 + (ARROW_REPLACEMENTS[p2] || p2) + p3;
+  function replace_arrow(m, p1, p2) {
+    return p1 + (ARROW_REPLACEMENTS[p2] || p2);
   }
 
   for (i = inlineTokens.length - 1; i >= 0; i--) {
@@ -8281,16 +8283,16 @@ function replace_rare(inlineTokens) {
           // <==>
           // ==>
           // -->
-          .replace(/(^|[^<=-])([<]?(?:==|--)[>]?)([^>=-]|$)/mg, replace_arrow)
+          .replace(/(^|[^<=-])([<]?(?:==|--)[>]?)(?=[^>=-]|$)/mg, replace_arrow)
           // and do it once more to catch input which overlaps in the detection
           // regex, e.g. `<--x-->` where the `-->` will not be detected by
           // the above `replace()` due to overlap at `x` in the rwuired match:
-          .replace(/(^|[^<=-])([<]?(?:==|--)[>]?)([^>=-]|$)/mg, replace_arrow)
+          .replace(/(^|[^<=-])([<]?(?:==|--)[>]?)(?=[^>=-]|$)/mg, replace_arrow)
           // em-dash
-          .replace(/(^|[^-])---([^-]|$)/mg, '$1\u2014$2')
+          .replace(/(^|[^-])---(?=[^-]|$)/mg, '$1\u2014')
           // en-dash
-          .replace(/(^|\s)--(\s|$)/mg, '$1\u2013$2')
-          .replace(/(^|[^-\s,\/])--([^-\s,\/]|$)/mg, '$1\u2013$2');
+          .replace(/(^|\s)--(?=\s|$)/mg, '$1\u2013')
+          .replace(/(^|[^-\s])--(?=[^-\s]|$)/mg, '$1\u2013');
       }
     }
 
@@ -8436,8 +8438,14 @@ function process_inlines(tokens, state) {
       }
 
       if (canOpen && canClose) {
-        // treat this as the middle of the word
-        canOpen = false;
+        // Replace quotes in the middle of punctuation sequence, but not
+        // in the middle of the words, i.e.:
+        //
+        // 1. foo " bar " baz - not replaced
+        // 2. foo-"-bar-"-baz - replaced
+        // 3. foo"bar"baz     - not replaced
+        //
+        canOpen = isLastPunctChar;
         canClose = isNextPunctChar;
       }
 

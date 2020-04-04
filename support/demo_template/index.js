@@ -194,7 +194,7 @@ function usePlugins(md) {
     // addHeadingAnchor: true,       // default: true
     // slugify: function(str, md) {} // default: 'My Heading' -> 'MyHeading'
   })
-  .use(require('@gerhobbelt/markdown-it-markdown-it-implicit-figures'))
+  .use(require('@gerhobbelt/markdown-it-implicit-figures'))
   .use(require('@gerhobbelt/markdown-it-ins'))
   .use(require('@gerhobbelt/markdown-it-kbd'))
   .use(require('@gerhobbelt/markdown-it-mark'))
@@ -202,12 +202,12 @@ function usePlugins(md) {
   .use(require('@gerhobbelt/markdown-it-modify-token'))
 
   .use(pick(
-    require('@gerhobbelt/markdown-it-prism'),
-    require('@gerhobbelt/markdown-it-highlighted'),
-    require('@gerhobbelt/markdown-it-highlightjs')
+    //require('@gerhobbelt/markdown-it-prism'),
+    require('@gerhobbelt/markdown-it-highlighted').default
+    //require('@gerhobbelt/markdown-it-highlightjs')
   ))
 
-  .use(require('@gerhobbelt/markdown-it-responsive'), {
+/*  .use(require('@gerhobbelt/markdown-it-responsive'), {
     responsive: {
       srcset: {
         'header-*': [ {
@@ -227,21 +227,21 @@ function usePlugins(md) {
       }
     }
   })
-
+*/
   .use(require('@gerhobbelt/markdown-it-samp'))
   .use(require('@gerhobbelt/markdown-it-sanitizer'))
-  .use(require('@gerhobbelt/markdown-it-smartarrows'))
+  //.use(require('@gerhobbelt/markdown-it-smartarrows'))
   .use(require('@gerhobbelt/markdown-it-strikethrough-alt'))
   .use(require('@gerhobbelt/markdown-it-sub'))
   .use(require('@gerhobbelt/markdown-it-sup'))
 
   .use(pick(
     require('@gerhobbelt/markdown-it-table-of-contents'),
-    require('@gerhobbelt/markdown-it-toc'),
-    require('@gerhobbelt/markdown-it-toc-and-anchor')
+    require('@gerhobbelt/markdown-it-toc')
+    //require('@gerhobbelt/markdown-it-toc-and-anchor')
   ))
 
-  .use(require('@gerhobbelt/markdown-it-title'))
+  //.use(require('@gerhobbelt/markdown-it-title'))
   .use(require('@gerhobbelt/markdown-it-wikilinks'));
 }
 
