@@ -63,7 +63,7 @@
     "@gerhobbelt/markdown-it-header-sections": "0.2.2-1",
     "@gerhobbelt/markdown-it-headinganchor": "1.2.1-1",
     "@gerhobbelt/markdown-it-highlighted": "1.0.1-2",
-    "@gerhobbelt/markdown-it-highlightjs": "2.0.0-4",
+    "@gerhobbelt/markdown-it-highlightjs": "3.1.0-6",
     "@gerhobbelt/markdown-it-implicit-figures": "0.9.0-3",
     "@gerhobbelt/markdown-it-ins": "2.0.1-1",
     "@gerhobbelt/markdown-it-kbd": "2.0.0-1",

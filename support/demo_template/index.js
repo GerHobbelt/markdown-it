@@ -69,6 +69,7 @@ var defaults = {
   xhtmlOut:     false,        // Use '/' to close single tags (<br />)
   breaks:       false,        // Convert '\n' in paragraphs into <br>
   langPrefix:   'language-',  // CSS language prefix for fenced blocks
+  pickNumber:   1,            // the chosen alternative from a set of similar plugins
   linkify:      true,         // autoconvert URL-like texts to links
 
   // highSecurity:
@@ -150,10 +151,10 @@ function setResultView(val) {
   defaults._view = val;
 }
 
-var pickNumber = 1;
 function pick(pckg1, pckg2, pckg3, pckg4) {
   var rv;
-  switch (pickNumber) {
+  console.log('PICK:', defaults.pickNumber, '-->', +defaults.pickNumber);
+  switch (+defaults.pickNumber) {
   case 1:
     rv = pckg1;
     break;
@@ -203,8 +204,8 @@ function usePlugins(md) {
 
   .use(pick(
     require('@gerhobbelt/markdown-it-prism'),
-    require('@gerhobbelt/markdown-it-highlighted')
-    //require('@gerhobbelt/markdown-it-highlightjs')
+    require('@gerhobbelt/markdown-it-highlighted'),
+    require('@gerhobbelt/markdown-it-highlightjs')
   ))
 
 /*  .use(require('@gerhobbelt/markdown-it-responsive'), {
@@ -229,7 +230,7 @@ function usePlugins(md) {
   })
 */
   .use(require('@gerhobbelt/markdown-it-samp'))
-  .use(require('@gerhobbelt/markdown-it-sanitizer'))
+  //.use(require('@gerhobbelt/markdown-it-sanitizer'))    <-- don't use this one when you want custom html to make it through to the output!
   //.use(require('@gerhobbelt/markdown-it-smartarrows'))
   .use(require('@gerhobbelt/markdown-it-strikethrough-alt'))
   .use(require('@gerhobbelt/markdown-it-sub'))
@@ -246,6 +247,7 @@ function usePlugins(md) {
 }
 
 function mdInit() {
+  console.log('SETTINGS:', defaults);
   if (defaults._strict) {
     mdHtml = window.markdownit('commonmark');
     mdSrc = window.markdownit('commonmark');

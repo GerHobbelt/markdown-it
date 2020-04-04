@@ -10137,7 +10137,7 @@ var lheading = function lheading(state, startLine, endLine/*, silent*/) {
   return true;
 };
 
-// List of valid html blocks names, accorting to commonmark spec
+// List of valid html blocks names, according to commonmark spec
 
 
 var html_blocks = [
@@ -10249,8 +10249,8 @@ var HTML_SEQUENCES = [
   [ /^<\?/,         /\?>/,   true ],
   [ /^<![A-Z]/,     />/,     true ],
   [ /^<!\[CDATA\[/, /\]\]>/, true ],
-  [ new RegExp('^</?(' + html_blocks.join('|') + ')(?=(\\s|/?>|$))', 'i'), /^$/, true ],
-  [ new RegExp(HTML_OPEN_CLOSE_TAG_RE$1.source + '\\s*$'),  /^$/, false ]
+  [ new RegExp('^</?(?:' + html_blocks.join('|') + ')(?=(\\s|/?>|$))', 'i'), /^$/, true ],
+  [ new RegExp(HTML_OPEN_CLOSE_TAG_RE$1.source + '\\s*$'), /^$/, false ]
 ];
 
 
