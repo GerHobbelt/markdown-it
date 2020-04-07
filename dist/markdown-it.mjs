@@ -8275,7 +8275,9 @@ function replace_rare(inlineTokens) {
           .replace(/\+-/g, '±')
           // ..., ....... -> …
           // but ?..... & !..... -> ?.. & !..
-          .replace(/\.{3,}/g, '…').replace(/([?!])…/g, '$1..')
+          .replace(/([?!])\.{4,}/g, '$1..')
+          .replace(/\.{3,}/g, '…')
+          .replace(/…\.+/g, '…')              // also remove superfluous periods after an ellipsis
           .replace(/([?!]){4,}/g, '$1$1$1').replace(/,{2,}/g, ',')
           // <-->
           // -->
