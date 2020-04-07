@@ -231,7 +231,7 @@ function usePlugins(md) {
 */
   .use(require('@gerhobbelt/markdown-it-samp'))
   //.use(require('@gerhobbelt/markdown-it-sanitizer'))    <-- don't use this one when you want custom html to make it through to the output!
-  //.use(require('@gerhobbelt/markdown-it-smartarrows'))
+  //.use(require('@gerhobbelt/markdown-it-smartarrows'))  <-- modern markdown-it `typographer` option has it all, and then some! :-)
   .use(require('@gerhobbelt/markdown-it-strikethrough-alt'))
   .use(require('@gerhobbelt/markdown-it-sub'))
   .use(require('@gerhobbelt/markdown-it-sup'))
