@@ -16,7 +16,7 @@ demo: lint
 	rm -rf ./demo
 	mkdir ./demo
 	./support/demodata.js > ./support/demo_template/sample.json
-	jade ./support/demo_template/index.jade --pretty \
+	pug ./support/demo_template/index.pug --pretty \
 		--obj ./support/demo_template/sample.json \
 		--out ./demo
 	stylus -u autoprefixer-stylus \
@@ -90,7 +90,7 @@ browserify:
 		browserify ./ -s markdownit \
 		) > dist/markdown-it.js
 	# Minify
-	uglifyjs dist/markdown-it.js -b beautify=false,ascii_only=true -c -m \
+	terser dist/markdown-it.js -b beautify=false,ascii_only=true -c -m \
 		--preamble "/*! ${NPM_PACKAGE} ${NPM_VERSION} ${GITHUB_PROJ} @license MIT */" \
 		> dist/markdown-it.min.js
 
