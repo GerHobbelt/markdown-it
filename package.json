@@ -30,7 +30,7 @@
     "lint": "make lint",
     "lintfix": "make lintfix",
     "cov": "make report-coverage",
-    "pub": "npm publish --access pu blic"
+    "pub": "npm publish --access public"
   },
   "files": [
     "index.js",
