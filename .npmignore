@@ -1,0 +1,4 @@
+# ignore documentation, etc. directories:
+./demo/
+./apidoc/
+

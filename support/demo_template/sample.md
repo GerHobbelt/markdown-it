@@ -33,7 +33,7 @@ Enable typographer option to see result.
 
 (c) (C) (r) (R) (tm) (TM) (p) (P) +-
 
-test.. test... test..... test?..... test!....
+test.. test... test..... test?.. test?.... test?.... test?..... test!.. test!... test!... test!....
 
 !!!!!! ???? ,,  -- ---
 
@@ -169,7 +169,7 @@ The killer feature of `markdown-it` is very effective support of
 >
 > Shortcuts (emoticons): :-) :-( 8-) ;)
 
-see [how to change output](https://github.com/markdown-it/markdown-it-emoji#change-output) with twemoji.
+see [how to change output](https://github.com/markdown-it/markdown-it-emoji#change-output) with [twemoji](https://twemoji.twitter.com/).
 
 
 ### [Subscript](https://github.com/markdown-it/markdown-it-sub) / [Superscript](https://github.com/markdown-it/markdown-it-sup)
@@ -243,3 +243,21 @@ It converts "HTML", but keep intact partial entries like "xxxHTMLyyy" and so on.
 ::: warning
 *here be dragons*
 :::
+
+
+### Custom HTML Chunks
+
+Some RAW HTML is rendered as-is when the `html` option has been turned **on**:
+
+<div attr="x" style="color: red">
+  Lorem ipsum et al...
+</div>
+
+<div attr="y" style="color: green; padding: 2em; border: 5px lightgreen solid; margin: 1em;">
+  A second custom DIV chunk. Is this perceived as a paragraph? Sure it is: Markdown is still recognized inside this custom HTML chunk!
+
+---
+
+  And here's a second para within that custom HTML block.
+</div>
+

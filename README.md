@@ -37,9 +37,8 @@ __Table of content__
 
 **node.js** & **bower**:
 
-```bash
-npm install markdown-it --save
-bower install markdown-it --save
+```sh
+npm install markdown-it
 ```
 
 **browser (CDN):**
@@ -114,6 +113,18 @@ var md = require('markdown-it')({
                               // useful for external highlighters.
   linkify:      false,        // Autoconvert URL-like text to links
 
+  // highSecurity:
+  // - false:           lower protection against XSS/Unicode-Homologue/etc. attacks via the input MarkDown.
+  //                    This setting assumes you own or at least trust the Markdown
+  //                    being fed to MarkDonw-It. The result is a nicer render.
+  // - true (default):  maximum protection against XSS/Unicode-Homologue/etc. attacks via the input MarkDown.
+  //                    This is the default setting and assumes you have no control or absolute trust in the Markdown
+  //                    being fed to MarkDonw-It. Use this setting when using markdown-it as part of a forum or other
+  //                    website where more-or-less arbitrary users can enter and feed any MarkDown to markdown-it.
+  //
+  // See https://en.wikipedia.org/wiki/Internationalized_domain_name for details on homograph attacks, for example.
+  highSecurity: true,
+
   // Enable some language-neutral replacement + quotes beautification
   typographer:  false,
 
@@ -127,7 +138,10 @@ var md = require('markdown-it')({
   // Highlighter function. Should return escaped HTML,
   // or '' if the source string is not changed and should be escaped externally.
   // If result starts with <pre... internal wrapper is skipped.
-  highlight: function (/*str, lang*/) { return ''; }
+  highlight: function (/*str, lang*/) { return ''; },
+  
+  // Configure default attributes for given tags
+  default_attributes:  { 'a': [['rel', 'nofollow']] }
 });
 ```
 
@@ -273,10 +287,11 @@ Slowdown of "full" version caused by additional features not available in
 other implementations.
 
 
-Support markdown-it
--------------------
+## markdown-it for enterprise
 
-You can support this project via [Tidelift subscription](https://tidelift.com/subscription/pkg/npm-markdown-it?utm_source=npm-markdown-it&utm_medium=referral&utm_campaign=readme).
+Available as part of the Tidelift Subscription.
+
+The maintainers of `markdown-it` and thousands of other packages are working with Tidelift to deliver commercial support and maintenance for the open source dependencies you use to build your applications. Save time, reduce risk, and improve code health, while paying the maintainers of the exact dependencies you use. [Learn more.](https://tidelift.com/subscription/pkg/npm-markdown-it?utm_source=npm-markdown-it&utm_medium=referral&utm_campaign=enterprise&utm_term=repo)
 
 
 ## Authors
@@ -304,3 +319,4 @@ during this project's development.
 **Ports**
 
 - [motion-markdown-it](https://github.com/digitalmoksha/motion-markdown-it) - Ruby/RubyMotion
+- [markdown-it-py](https://github.com/ExecutableBookProject/markdown-it-py)- Python

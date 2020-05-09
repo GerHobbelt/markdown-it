@@ -2,3 +2,6 @@ env:
   node:  true
   mocha: true
   es6:   true
+
+rules:
+  max-len:                [ 1, 140, 1000 ]

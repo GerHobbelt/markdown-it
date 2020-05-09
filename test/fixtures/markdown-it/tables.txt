@@ -168,11 +168,11 @@ bar|bar
 Second line should not contain symbols except "-", ":", "|" and " ":
 .
 foo|foo
----|---s
+-----|-----s
 bar|bar
 .
 <p>foo|foo
-—|---s
+-----|-----s
 bar|bar</p>
 .
 
@@ -180,11 +180,11 @@ bar|bar</p>
 Second line should contain "|" symbol:
 .
 foo|foo
----:---
+-----:-----
 bar|bar
 .
 <p>foo|foo
-—:---
+-----:-----
 bar|bar</p>
 .
 
@@ -192,11 +192,11 @@ bar|bar</p>
 Second line should not have empty columns in the middle:
 .
 foo|foo
----||---
+-----||-----
 bar|bar
 .
 <p>foo|foo
-—||—
+-----||-----
 bar|bar</p>
 .
 
@@ -204,11 +204,11 @@ bar|bar</p>
 Wrong alignment symbol position:
 .
 foo|foo
----|-::-
+-----|-::-
 bar|bar
 .
 <p>foo|foo
-—|-::-
+-----|-::-
 bar|bar</p>
 .
 
@@ -216,11 +216,11 @@ bar|bar</p>
 Title line should contain "|" symbol:
 .
 foo
----|---
+-----|-----
 bar|bar
 .
 <p>foo
-—|---
+-----|-----
 bar|bar</p>
 .
 
@@ -449,7 +449,7 @@ x | \`\` | `x`
 .
 
 
-An amount of rows might be different across the table (issue #171):
+Allow tables with extra cells in a row outside of thead:
 .
 | 1 | 2 |
 | :-----: |  :-----: |  :-----: |
@@ -466,6 +466,8 @@ An amount of rows might be different across the table (issue #171):
 <tr>
 <td style="text-align:center">3</td>
 <td style="text-align:center">4</td>
+<td style="text-align:center">5</td>
+<td>6</td>
 </tr>
 </tbody>
 </table>
