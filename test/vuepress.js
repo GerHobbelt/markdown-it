@@ -311,8 +311,16 @@ describe('vuepress with vanilla markdown-it', function () {
     return markdownit({ html: true });
   }
 
+
+  var md;
+
+  before(function (done) {
+    md = getMd();
+    done();
+  });
+
   it('vue tags should make it through unscathed', function () {
-    var md = getMd();
+    //var md = getMd();
 
     let input = `
 <ClientOnly>
@@ -333,7 +341,7 @@ describe('vuepress with vanilla markdown-it', function () {
   });
 
   it('vue template interpolation expressions should make it through unscathed', function () {
-    var md = getMd();
+    //var md = getMd();
 
     let input = '{{ 1 + 1 }}';
     let sollwert = `<p>${input}</p>\n`;
@@ -341,7 +349,7 @@ describe('vuepress with vanilla markdown-it', function () {
   });
 
   it('vue template directives should make it through unscathed', function () {
-    var md = getMd();
+    //var md = getMd();
 
     let input = '<span v-for="i in 3">{{ i }} </span>';
     let sollwert = `<p>${input}</p>\n`;
@@ -349,7 +357,7 @@ describe('vuepress with vanilla markdown-it', function () {
   });
 
   it('vue template data should make it through unscathed', function () {
-    var md = getMd();
+    //var md = getMd();
 
     let input = '{{ $page }}';
     let sollwert = `<p>${input}</p>\n`;
@@ -357,7 +365,7 @@ describe('vuepress with vanilla markdown-it', function () {
   });
 
   it('vue built-in components should make it through unscathed', function () {
-    var md = getMd();
+    //var md = getMd();
 
     let input = `
 <Content/>
@@ -554,8 +562,16 @@ describe('vuepress with fully pimped markdown-it', function () {
     return md;
   }
 
+
+  var md;
+
+  before(function (done) {
+    md = getMd();
+    done();
+  });
+
   it('vue tags should make it through unscathed', function () {
-    var md = getMd();
+    //var md = getMd();
 
     let input = `
 <ClientOnly>
@@ -576,7 +592,7 @@ describe('vuepress with fully pimped markdown-it', function () {
   });
 
   it('vue template interpolation expressions should make it through unscathed', function () {
-    var md = getMd();
+    //var md = getMd();
 
     let input = '{{ 1 + 1 }}';
     let sollwert = `<p>${input}</p>\n`;
@@ -584,7 +600,7 @@ describe('vuepress with fully pimped markdown-it', function () {
   });
 
   it('vue template directives should make it through unscathed', function () {
-    var md = getMd();
+    //var md = getMd();
 
     let input = '<span v-for="i in 3">{{ i }} </span>';
     let sollwert = `<p>${input}</p>\n`;
@@ -592,7 +608,7 @@ describe('vuepress with fully pimped markdown-it', function () {
   });
 
   it('vue template data should make it through unscathed', function () {
-    var md = getMd();
+    //var md = getMd();
 
     let input = '{{ $page }}';
     let sollwert = `<p>${input}</p>\n`;
@@ -600,7 +616,7 @@ describe('vuepress with fully pimped markdown-it', function () {
   });
 
   it('vue built-in components should make it through unscathed', function () {
-    var md = getMd();
+    //var md = getMd();
 
     let input = `
 <Content/>
