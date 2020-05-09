@@ -6,60 +6,65 @@
 var mdurl = require('mdurl');
 
 
-var hljs = require('highlight.js/lib/highlight.js');
+var hljs = require('@gerhobbelt/highlight.js');
 
-hljs.registerLanguage('actionscript', require('highlight.js/lib/languages/actionscript'));
-hljs.registerLanguage('apache',       require('highlight.js/lib/languages/apache'));
-hljs.registerLanguage('armasm',       require('highlight.js/lib/languages/armasm'));
-hljs.registerLanguage('xml',          require('highlight.js/lib/languages/xml'));
-hljs.registerLanguage('asciidoc',     require('highlight.js/lib//languages/asciidoc'));
-hljs.registerLanguage('avrasm',       require('highlight.js/lib/languages/avrasm'));
-hljs.registerLanguage('bash',         require('highlight.js/lib/languages/bash'));
-hljs.registerLanguage('clojure',      require('highlight.js/lib/languages/clojure'));
-hljs.registerLanguage('cmake',        require('highlight.js/lib/languages/cmake'));
-hljs.registerLanguage('coffeescript', require('highlight.js/lib/languages/coffeescript'));
-hljs.registerLanguage('cpp',          require('highlight.js/lib/languages/cpp'));
-hljs.registerLanguage('arduino',      require('highlight.js/lib/languages/arduino'));
-hljs.registerLanguage('css',          require('highlight.js/lib/languages/css'));
-hljs.registerLanguage('diff',         require('highlight.js/lib/languages/diff'));
-hljs.registerLanguage('django',       require('highlight.js/lib/languages/django'));
-hljs.registerLanguage('dockerfile',   require('highlight.js/lib/languages/dockerfile'));
-hljs.registerLanguage('ruby',         require('highlight.js/lib/languages/ruby'));
-hljs.registerLanguage('fortran',      require('highlight.js/lib/languages/fortran'));
-hljs.registerLanguage('glsl',         require('highlight.js/lib/languages/glsl'));
-hljs.registerLanguage('go',           require('highlight.js/lib/languages/go'));
-hljs.registerLanguage('groovy',       require('highlight.js/lib/languages/groovy'));
-hljs.registerLanguage('handlebars',   require('highlight.js/lib/languages/handlebars'));
-hljs.registerLanguage('haskell',      require('highlight.js/lib/languages/haskell'));
-hljs.registerLanguage('ini',          require('highlight.js/lib/languages/ini'));
-hljs.registerLanguage('java',         require('highlight.js/lib/languages/java'));
-hljs.registerLanguage('javascript',   require('highlight.js/lib/languages/javascript'));
-hljs.registerLanguage('json',         require('highlight.js/lib/languages/json'));
-hljs.registerLanguage('less',         require('highlight.js/lib/languages/less'));
-hljs.registerLanguage('lisp',         require('highlight.js/lib/languages/lisp'));
-hljs.registerLanguage('livescript',   require('highlight.js/lib/languages/livescript'));
-hljs.registerLanguage('lua',          require('highlight.js/lib/languages/lua'));
-hljs.registerLanguage('makefile',     require('highlight.js/lib/languages/makefile'));
-hljs.registerLanguage('matlab',       require('highlight.js/lib/languages/matlab'));
-hljs.registerLanguage('mipsasm',      require('highlight.js/lib/languages/mipsasm'));
-hljs.registerLanguage('perl',         require('highlight.js/lib/languages/perl'));
-hljs.registerLanguage('nginx',        require('highlight.js/lib/languages/nginx'));
-hljs.registerLanguage('objectivec',   require('highlight.js/lib/languages/objectivec'));
-hljs.registerLanguage('php',          require('highlight.js/lib/languages/php'));
-hljs.registerLanguage('python',       require('highlight.js/lib/languages/python'));
-hljs.registerLanguage('rust',         require('highlight.js/lib/languages/rust'));
-hljs.registerLanguage('scala',        require('highlight.js/lib/languages/scala'));
-hljs.registerLanguage('scheme',       require('highlight.js/lib/languages/scheme'));
-hljs.registerLanguage('scss',         require('highlight.js/lib/languages/scss'));
-hljs.registerLanguage('smalltalk',    require('highlight.js/lib/languages/smalltalk'));
-hljs.registerLanguage('stylus',       require('highlight.js/lib/languages/stylus'));
-hljs.registerLanguage('swift',        require('highlight.js/lib/languages/swift'));
-hljs.registerLanguage('tcl',          require('highlight.js/lib/languages/tcl'));
-hljs.registerLanguage('tex',          require('highlight.js/lib/languages/tex'));
-hljs.registerLanguage('typescript',   require('highlight.js/lib/languages/typescript'));
-hljs.registerLanguage('verilog',      require('highlight.js/lib/languages/verilog'));
-hljs.registerLanguage('vhdl',         require('highlight.js/lib/languages/vhdl'));
-hljs.registerLanguage('yaml',         require('highlight.js/lib/languages/yaml'));
+hljs.registerLanguage('actionscript', require('@gerhobbelt/highlight.js/lib/languages/actionscript'));
+hljs.registerLanguage('apache',       require('@gerhobbelt/highlight.js/lib/languages/apache'));
+hljs.registerLanguage('armasm',       require('@gerhobbelt/highlight.js/lib/languages/armasm'));
+hljs.registerLanguage('xml',          require('@gerhobbelt/highlight.js/lib/languages/xml'));
+hljs.registerLanguage('asciidoc',     require('@gerhobbelt/highlight.js/lib//languages/asciidoc'));
+hljs.registerLanguage('avrasm',       require('@gerhobbelt/highlight.js/lib/languages/avrasm'));
+hljs.registerLanguage('bash',         require('@gerhobbelt/highlight.js/lib/languages/bash'));
+hljs.registerLanguage('clojure',      require('@gerhobbelt/highlight.js/lib/languages/clojure'));
+hljs.registerLanguage('cmake',        require('@gerhobbelt/highlight.js/lib/languages/cmake'));
+hljs.registerLanguage('coffeescript', require('@gerhobbelt/highlight.js/lib/languages/coffeescript'));
+hljs.registerLanguage('cpp',          require('@gerhobbelt/highlight.js/lib/languages/cpp'));
+hljs.registerLanguage('c',            require('@gerhobbelt/highlight.js/lib/languages/c'));
+hljs.registerLanguage('c-like',       require('@gerhobbelt/highlight.js/lib/languages/c-like'));
+hljs.registerLanguage('csharp',       require('@gerhobbelt/highlight.js/lib/languages/csharp'));
+hljs.registerLanguage('arduino',      require('@gerhobbelt/highlight.js/lib/languages/arduino'));
+hljs.registerLanguage('css',          require('@gerhobbelt/highlight.js/lib/languages/css'));
+hljs.registerLanguage('diff',         require('@gerhobbelt/highlight.js/lib/languages/diff'));
+hljs.registerLanguage('django',       require('@gerhobbelt/highlight.js/lib/languages/django'));
+hljs.registerLanguage('dockerfile',   require('@gerhobbelt/highlight.js/lib/languages/dockerfile'));
+hljs.registerLanguage('ruby',         require('@gerhobbelt/highlight.js/lib/languages/ruby'));
+hljs.registerLanguage('fortran',      require('@gerhobbelt/highlight.js/lib/languages/fortran'));
+hljs.registerLanguage('glsl',         require('@gerhobbelt/highlight.js/lib/languages/glsl'));
+hljs.registerLanguage('go',           require('@gerhobbelt/highlight.js/lib/languages/go'));
+hljs.registerLanguage('groovy',       require('@gerhobbelt/highlight.js/lib/languages/groovy'));
+hljs.registerLanguage('handlebars',   require('@gerhobbelt/highlight.js/lib/languages/handlebars'));
+hljs.registerLanguage('haskell',      require('@gerhobbelt/highlight.js/lib/languages/haskell'));
+hljs.registerLanguage('ini',          require('@gerhobbelt/highlight.js/lib/languages/ini'));
+hljs.registerLanguage('java',         require('@gerhobbelt/highlight.js/lib/languages/java'));
+hljs.registerLanguage('javascript',   require('@gerhobbelt/highlight.js/lib/languages/javascript'));
+hljs.registerLanguage('json',         require('@gerhobbelt/highlight.js/lib/languages/json'));
+hljs.registerLanguage('latex',        require('@gerhobbelt/highlight.js/lib/languages/latex'));
+hljs.registerLanguage('less',         require('@gerhobbelt/highlight.js/lib/languages/less'));
+hljs.registerLanguage('lisp',         require('@gerhobbelt/highlight.js/lib/languages/lisp'));
+hljs.registerLanguage('livescript',   require('@gerhobbelt/highlight.js/lib/languages/livescript'));
+hljs.registerLanguage('lua',          require('@gerhobbelt/highlight.js/lib/languages/lua'));
+hljs.registerLanguage('makefile',     require('@gerhobbelt/highlight.js/lib/languages/makefile'));
+hljs.registerLanguage('matlab',       require('@gerhobbelt/highlight.js/lib/languages/matlab'));
+hljs.registerLanguage('mipsasm',      require('@gerhobbelt/highlight.js/lib/languages/mipsasm'));
+hljs.registerLanguage('perl',         require('@gerhobbelt/highlight.js/lib/languages/perl'));
+hljs.registerLanguage('nginx',        require('@gerhobbelt/highlight.js/lib/languages/nginx'));
+hljs.registerLanguage('objectivec',   require('@gerhobbelt/highlight.js/lib/languages/objectivec'));
+hljs.registerLanguage('php',          require('@gerhobbelt/highlight.js/lib/languages/php'));
+//hljs.registerLanguage('phptemplate',  require('@gerhobbelt/highlight.js/lib/languages/phptemplate'));
+hljs.registerLanguage('python',       require('@gerhobbelt/highlight.js/lib/languages/python'));
+hljs.registerLanguage('python-repl',  require('@gerhobbelt/highlight.js/lib/languages/python-repl'));
+hljs.registerLanguage('rust',         require('@gerhobbelt/highlight.js/lib/languages/rust'));
+hljs.registerLanguage('scala',        require('@gerhobbelt/highlight.js/lib/languages/scala'));
+hljs.registerLanguage('scheme',       require('@gerhobbelt/highlight.js/lib/languages/scheme'));
+hljs.registerLanguage('scss',         require('@gerhobbelt/highlight.js/lib/languages/scss'));
+hljs.registerLanguage('smalltalk',    require('@gerhobbelt/highlight.js/lib/languages/smalltalk'));
+hljs.registerLanguage('stylus',       require('@gerhobbelt/highlight.js/lib/languages/stylus'));
+hljs.registerLanguage('swift',        require('@gerhobbelt/highlight.js/lib/languages/swift'));
+hljs.registerLanguage('tcl',          require('@gerhobbelt/highlight.js/lib/languages/tcl'));
+hljs.registerLanguage('typescript',   require('@gerhobbelt/highlight.js/lib/languages/typescript'));
+hljs.registerLanguage('verilog',      require('@gerhobbelt/highlight.js/lib/languages/verilog'));
+hljs.registerLanguage('vhdl',         require('@gerhobbelt/highlight.js/lib/languages/vhdl'));
+hljs.registerLanguage('yaml',         require('@gerhobbelt/highlight.js/lib/languages/yaml'));
 
 
 var mdHtml, mdSrc, permalink, scrollMap;
@@ -69,6 +74,7 @@ var defaults = {
   xhtmlOut:     false,        // Use '/' to close single tags (<br />)
   breaks:       false,        // Convert '\n' in paragraphs into <br>
   langPrefix:   'language-',  // CSS language prefix for fenced blocks
+  pickNumber:   1,            // the chosen alternative from a set of similar plugins
   linkify:      true,         // autoconvert URL-like texts to links
 
   // highSecurity:
@@ -150,10 +156,10 @@ function setResultView(val) {
   defaults._view = val;
 }
 
-var pickNumber = 1;
 function pick(pckg1, pckg2, pckg3, pckg4) {
   var rv;
-  switch (pickNumber) {
+  console.log('PICK:', defaults.pickNumber, '-->', +defaults.pickNumber);
+  switch (+defaults.pickNumber) {
   case 1:
     rv = pckg1;
     break;
@@ -202,9 +208,9 @@ function usePlugins(md) {
   .use(require('@gerhobbelt/markdown-it-modify-token'))
 
   .use(pick(
-    //require('@gerhobbelt/markdown-it-prism'),
-    require('@gerhobbelt/markdown-it-highlighted').default
-    //require('@gerhobbelt/markdown-it-highlightjs')
+    require('@gerhobbelt/markdown-it-prism'),
+    require('@gerhobbelt/markdown-it-highlighted'),
+    require('@gerhobbelt/markdown-it-highlightjs')
   ))
 
 /*  .use(require('@gerhobbelt/markdown-it-responsive'), {
@@ -229,8 +235,8 @@ function usePlugins(md) {
   })
 */
   .use(require('@gerhobbelt/markdown-it-samp'))
-  .use(require('@gerhobbelt/markdown-it-sanitizer'))
-  //.use(require('@gerhobbelt/markdown-it-smartarrows'))
+  //.use(require('@gerhobbelt/markdown-it-sanitizer'))    <-- don't use this one when you want custom html to make it through to the output!
+  //.use(require('@gerhobbelt/markdown-it-smartarrows'))  <-- modern markdown-it `typographer` option has it all, and then some! :-)
   .use(require('@gerhobbelt/markdown-it-strikethrough-alt'))
   .use(require('@gerhobbelt/markdown-it-sub'))
   .use(require('@gerhobbelt/markdown-it-sup'))
@@ -246,6 +252,7 @@ function usePlugins(md) {
 }
 
 function mdInit() {
+  console.log('SETTINGS:', defaults);
   if (defaults._strict) {
     mdHtml = window.markdownit('commonmark');
     mdSrc = window.markdownit('commonmark');

@@ -42,22 +42,22 @@ gh-demo: demo
 lint:
 	eslint .
 
-fix:
-	eslint . --fix
+lintfix:
+	eslint --fix .
 
 rollup:
 	-mkdir dist
 	# Rollup
 	rollup -c
 
-test: lint specsplit
+test: specsplit
 	mocha
 
 coverage:
 	-rm -rf coverage
-	node_modules/.bin/cross-env NODE_ENV=test node_modules/.bin/nyc node_modules/mocha/bin/_mocha
+	cross-env NODE_ENV=test nyc mocha
 
-report-coverage: coverage
+report-coverage: lint coverage
 
 doc:
 	-rm -rf ./apidoc
@@ -124,7 +124,7 @@ todo:
 	@echo "TODO list"
 	@echo "---------"
 	@echo ""
-	grep 'TODO' -n -r ./ --exclude-dir=node_modules --exclude-dir=dist --exclude-dir=coverage --exclude=Makefile 2>/dev/null || test true
+	grep 'TODO' -n -r ./ --exclude-dir=node_modules --exclude-dir=unicode-homographs --exclude-dir=dist --exclude-dir=coverage --exclude=Makefile 2>/dev/null || test true
 
 clean:
 	-rm -rf ./coverage/

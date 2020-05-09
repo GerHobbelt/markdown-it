@@ -13,7 +13,7 @@ module.exports = require('./lib/');
 module.exports = require('entities/lib/maps/entities.json');
 
 },{"entities/lib/maps/entities.json":54}],3:[function(require,module,exports){
-// List of valid html blocks names, accorting to commonmark spec
+// List of valid html blocks names, according to commonmark spec
 // http://jgm.github.io/CommonMark/spec.html#html-blocks
 
 'use strict';
@@ -3095,8 +3095,8 @@ var HTML_SEQUENCES = [
   [ /^<\?/,         /\?>/,   true ],
   [ /^<![A-Z]/,     />/,     true ],
   [ /^<!\[CDATA\[/, /\]\]>/, true ],
-  [ new RegExp('^</?(' + block_names.join('|') + ')(?=(\\s|/?>|$))', 'i'), /^$/, true ],
-  [ new RegExp(HTML_OPEN_CLOSE_TAG_RE.source + '\\s*$'),  /^$/, false ]
+  [ new RegExp('^</?(?:' + block_names.join('|') + ')(?=(\\s|/?>|$))', 'i'), /^$/, true ],
+  [ new RegExp(HTML_OPEN_CLOSE_TAG_RE.source + '\\s*$'), /^$/, false ]
 ];
 
 
@@ -4440,7 +4440,9 @@ function replace_rare(inlineTokens) {
           .replace(/\+-/g, '±')
           // ..., ....... -> …
           // but ?..... & !..... -> ?.. & !..
-          .replace(/\.{3,}/g, '…').replace(/([?!])…/g, '$1..')
+          .replace(/([?!])\.{4,}/g, '$1..')
+          .replace(/\.{3,}/g, '…')
+          .replace(/…\.+/g, '…')              // also remove superfluous periods after an ellipsis
           .replace(/([?!]){4,}/g, '$1$1$1').replace(/,{2,}/g, ',')
           // <-->
           // -->

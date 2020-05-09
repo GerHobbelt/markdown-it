@@ -23,7 +23,7 @@ describe('babelmark responder app', function () {
   });
 
 
-  it('ping root', function () {
+  it('ping root', async function () {
     return request
       .get('/')
       .expect(200)
@@ -31,7 +31,7 @@ describe('babelmark responder app', function () {
   });
 
 
-  it('do request', function () {
+  it('do request', async function () {
     return request
       .get('/?text=foo')
       .expect(200)

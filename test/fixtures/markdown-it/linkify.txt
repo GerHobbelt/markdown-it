@@ -69,3 +69,36 @@ http://delivery.acm.org/etc?__acm__=1234
 .
 <p><a href="http://delivery.acm.org/etc?__acm__=1234">http://delivery.acm.org/etc?__acm__=1234</a></p>
 .
+
+typographer should convert the ascii flavors of special symbols
+.
+(c) (C) (r) (R) (tm) (TM) (p) (P) +-
+.
+<p>© © ® ® ™ ™ § § ±</p>
+.
+
+typographer should convert most of these, but not those with an abundance of dots
+.
+test.. test... test..... test?.. test?.... test?.... test?..... test!.. test!... test!... test!....
+
+!!!!!! ???? ,,  -- ---
+.
+<p>test.. test… test… test?.. test?.. test?.. test?.. test!.. test!… test!… test!..</p>
+<p>!!! ??? ,  – —</p>
+.
+
+typographer should reduce dot series to a single sane ellipsis
+.
+.. ... .... ...... ...... ....... ........ .........
+.
+<p>.. … … … … … … …</p>
+.
+
+typographer should transform various ascii arrows to Unicode symbols
+.
+a --> b <-- c <--> d
+a ==> b <== c <==> d
+.
+<p>a → b ← c ↔ d
+a ⇒ b ⇐ c ⇔ d</p>
+.
