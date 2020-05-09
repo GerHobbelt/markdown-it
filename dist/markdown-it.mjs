@@ -7857,12 +7857,9 @@ function Ruler() {
 // Find rule index by name
 //
 Ruler.prototype.__find__ = function (name) {
-  for (var i = 0; i < this.__rules__.length; i++) {
-    if (this.__rules__[i].name === name) {
-      return i;
-    }
-  }
-  return -1;
+  return this.__rules__.findIndex(function (rule) {
+    return rule.name === name;
+  });
 };
 
 
@@ -8201,7 +8198,7 @@ var inline = function inline(state) {
   for (i = 0, l = tokens.length; i < l; i++) {
     tok = tokens[i];
     if (tok.type === 'inline') {
-      state.md.inline.parse(tok.content, state.md, state.env, tok.children);
+      state.md.inline.parse(tok.content, state.md, Object.assign({}, state.env, { parentToken: tok }), tok.children);
     }
   }
 };
@@ -8645,16 +8642,15 @@ function Token(type, tag, nesting) {
  * Search attribute index by name.
  **/
 Token.prototype.attrIndex = function attrIndex(name) {
-  var attrs, i, len;
+  var attrs;
 
   if (!this.attrs) { return -1; }
 
   attrs = this.attrs;
 
-  for (i = 0, len = attrs.length; i < len; i++) {
-    if (attrs[i][0] === name) { return i; }
-  }
-  return -1;
+  return attrs.findIndex(function (el) {
+    return el[0] === name;
+  });
 };
 
 
@@ -8987,6 +8983,7 @@ var table = function table(state, startLine, endLine, silent) {
       token          = state.push('inline', '', 0);
       token.content  = columns[i] ? columns[i].trim() : '';
       token.children = [];
+      token.map      = [ nextLine, nextLine + 1 ];
 
       token          = state.push('td_close', 'td', -1);
     }
@@ -10372,6 +10369,11 @@ function StateBlock(src, md, env, tokens) {
   this.md     = md;
 
   this.env = env;
+  if (env) {
+    env.state_block = this;
+  } else {
+    this.env = { state_block: this };
+  }
 
   //
   // Internal state vartiables
