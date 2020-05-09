@@ -42,8 +42,8 @@ gh-demo: demo
 lint:
 	eslint .
 
-fix:
-	eslint . --fix
+lintfix:
+	eslint --fix .
 
 rollup:
 	-mkdir dist
@@ -55,9 +55,9 @@ test: specsplit
 
 coverage:
 	-rm -rf coverage
-	node_modules/.bin/cross-env NODE_ENV=test node_modules/.bin/nyc node_modules/mocha/bin/_mocha
+	cross-env NODE_ENV=test nyc mocha
 
-report-coverage: coverage
+report-coverage: lint coverage
 
 doc:
 	-rm -rf ./apidoc

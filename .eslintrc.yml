@@ -1,8 +1,11 @@
 env:
   node:     true
   browser:  false
-  es6:      false
+  es6:      true
 
+parserOptions: 
+  ecmaVersion: 2018
+  
 rules:
   accessor-pairs:         2
   array-bracket-spacing:  [ 2, "always", { "singleValue": true, "objectsInArrays": true, "arraysInArrays": true } ]

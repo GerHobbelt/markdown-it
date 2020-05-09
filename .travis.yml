@@ -1,13 +1,12 @@
 language: node_js
 node_js:
  - 'lts/*'
- - 8
  - 10
  - 12
  - node
-script: make
+script: npm run build
 sudo: false
-after_success: npm run report_coverage
+after_success: npm run cov
 
 # Quick fix for TravisCI test failures:
 # 
