@@ -410,6 +410,25 @@ function normalizeReference(str) {
   return str.toLowerCase().toUpperCase();
 }
 
+function getLineOffset(state, tokenIdx) {
+  var blockState = state.env.state_block;
+  var parentToken = state.env.parentToken;
+  var tokensBefore = typeof tokenIdx !== 'undefined' ? state.tokens.slice(0, tokenIdx) : state.tokens;
+
+  var lineOffset = 0;
+  var linesBefore = tokensBefore.filter(function (t) { return t.type.includes('break'); }).length;
+  for (var i = 0; i < linesBefore; i++) {
+    var startLine = i + parentToken.map[0] + 1;
+    var beg = blockState.bMarks[startLine];
+    lineOffset += beg - blockState.src.slice(0, beg).lastIndexOf('\n') - 1;
+  }
+  return lineOffset;
+}
+
+function trimLeftOffset(str) {
+  return str.length - str.trimLeft().length;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 // Re-export libraries commonly used in both markdown-it and its plugins,
@@ -437,6 +456,8 @@ exports.isMdAsciiPunct      = isMdAsciiPunct;
 exports.isPunctChar         = isPunctChar;
 exports.escapeRE            = escapeRE;
 exports.normalizeReference  = normalizeReference;
+exports.getLineOffset       = getLineOffset;
+exports.trimLeftOffset      = trimLeftOffset;
 
 },{"./entities":2,"mdurl":60,"uc.micro":66,"uc.micro/categories/P/regex":64}],6:[function(require,module,exports){
 // Just a shortcut for bulk export
@@ -1589,9 +1610,9 @@ ParserInline.prototype.tokenize = function (state) {
  *
  * Process input string and push inline tokens into `outTokens`
  **/
-ParserInline.prototype.parse = function (str, md, env, outTokens, srcPos) {
+ParserInline.prototype.parse = function (str, md, env, outTokens) {
   var i, rules, len;
-  var state = new this.State(str, md, env, outTokens, srcPos);
+  var state = new this.State(str, md, env, outTokens);
 
   rules = this.ruler0.getRules('');
   len = rules.length;
@@ -2244,12 +2265,9 @@ function Ruler() {
 // Find rule index by name
 //
 Ruler.prototype.__find__ = function (name) {
-  for (var i = 0; i < this.__rules__.length; i++) {
-    if (this.__rules__[i].name === name) {
-      return i;
-    }
-  }
-  return -1;
+  return this.__rules__.findIndex(function (rule) {
+    return rule.name === name;
+  });
 };
 
 
@@ -2841,7 +2859,9 @@ module.exports = function blockquote(state, startLine, endLine, silent) {
 
 
 module.exports = function code(state, startLine, endLine/*, silent*/) {
-  var nextLine, last, token;
+  var nextLine, last, token,
+      pos = state.bMarks[startLine],
+      endPos;
 
   if (state.sCount[startLine] - state.blkIndent < 4) { return false; }
 
@@ -2861,11 +2881,14 @@ module.exports = function code(state, startLine, endLine/*, silent*/) {
     break;
   }
 
+  endPos = state.bMarks[last] + state.tShift[last];
   state.line = last;
 
   token         = state.push('code_block', 'code', 0);
   token.content = state.getLines(startLine, last, 4 + state.blkIndent, true);
   token.map     = [ startLine, state.line ];
+  token.position = pos;
+  token.size = endPos - pos;
 
   return true;
 };
@@ -2877,7 +2900,7 @@ module.exports = function code(state, startLine, endLine/*, silent*/) {
 
 
 module.exports = function fence(state, startLine, endLine, silent) {
-  var marker, len, params, nextLine, mem, token, markup,
+  var marker, len, params, nextLine, mem, token, markup, originalPos,
       haveEndMarker = false,
       pos = state.bMarks[startLine] + state.tShift[startLine],
       max = state.eMarks[startLine];
@@ -2901,6 +2924,7 @@ module.exports = function fence(state, startLine, endLine, silent) {
 
   if (len < 3) { return false; }
 
+  originalPos = mem;
   markup = state.src.slice(mem, pos);
   params = state.src.slice(pos, max);
 
@@ -2966,6 +2990,8 @@ module.exports = function fence(state, startLine, endLine, silent) {
   token.content = state.getLines(startLine + 1, nextLine, len, true);
   token.markup  = markup;
   token.map     = [ startLine, state.line ];
+  token.position = originalPos;
+  token.size = pos - originalPos;
 
   return true;
 };
@@ -2976,10 +3002,11 @@ module.exports = function fence(state, startLine, endLine, silent) {
 'use strict';
 
 var isSpace = require('../common/utils').isSpace;
+var trimLeftOffset = require('../common/utils').trimLeftOffset;
 
 
 module.exports = function heading(state, startLine, endLine, silent) {
-  var ch, level, tmp, token, content,
+  var ch, level, tmp, token, originalPos, originalMax,
       pos = state.bMarks[startLine] + state.tShift[startLine],
       max = state.eMarks[startLine];
 
@@ -2987,6 +3014,8 @@ module.exports = function heading(state, startLine, endLine, silent) {
   if (state.sCount[startLine] - state.blkIndent >= 4) { return false; }
 
   ch  = state.src.charCodeAt(pos);
+  originalPos = pos;
+  originalMax = max;
 
   if (ch !== 0x23/* # */ || pos >= max) { return false; }
 
@@ -3010,22 +3039,26 @@ module.exports = function heading(state, startLine, endLine, silent) {
     max = tmp;
   }
 
-  content = state.src.slice(pos, max);
-
   state.line = startLine + 1;
 
-  token        = state.push('heading_open', 'h' + String(level), 1);
-  token.markup = '########'.slice(0, level);
-  token.map    = [ startLine, state.line ];
-
-  token          = state.push('inline', '', 0);
-  token.content  = content.trim();
+  token          = state.push('heading_open', 'h' + String(level), 1);
+  token.markup   = '########'.slice(0, level);
   token.map      = [ startLine, state.line ];
-  token.srcPos   = pos + content.indexOf(content.trim());
-  token.children = [];
+  token.position = originalPos;
+  token.size     = pos - originalPos;
 
-  token        = state.push('heading_close', 'h' + String(level), -1);
-  token.markup = '########'.slice(0, level);
+  var originalContent = state.src.slice(pos, max);
+  token          = state.push('inline', '', 0);
+  token.content  = originalContent.trim();
+  token.map      = [ startLine, state.line ];
+  token.children = [];
+  token.position = pos + trimLeftOffset(originalContent);
+  token.size     = token.content.length;   // (max - pos) includes leading and trailing whitespace
+
+  token          = state.push('heading_close', 'h' + String(level), -1);
+  token.markup   = '########'.slice(0, level);
+  token.position = max;
+  token.size     = originalMax - max;
 
   return true;
 };
@@ -3039,13 +3072,14 @@ var isSpace = require('../common/utils').isSpace;
 
 
 module.exports = function hr(state, startLine, endLine, silent) {
-  var marker, cnt, ch, token,
+  var marker, cnt, ch, token, originalPos,
       pos = state.bMarks[startLine] + state.tShift[startLine],
       max = state.eMarks[startLine];
 
   // if it's indented more than 3 spaces, it should be a code block
   if (state.sCount[startLine] - state.blkIndent >= 4) { return false; }
 
+  originalPos = pos;
   marker = state.src.charCodeAt(pos++);
 
   // Check hr marker
@@ -3073,6 +3107,8 @@ module.exports = function hr(state, startLine, endLine, silent) {
   token        = state.push('hr', 'hr', 0);
   token.map    = [ startLine, state.line ];
   token.markup = Array(cnt + 1).join(String.fromCharCode(marker));
+  token.position = originalPos;
+  token.size = pos - originalPos;
 
   return true;
 };
@@ -3158,6 +3194,8 @@ module.exports = function html_block(state, startLine, endLine, silent) {
 
 'use strict';
 
+var trimLeftOffset = require('../common/utils').trimLeftOffset;
+
 
 module.exports = function lheading(state, startLine, endLine/*, silent*/) {
   var content, terminate, i, l, token, pos, max, level, marker,
@@ -3224,22 +3262,27 @@ module.exports = function lheading(state, startLine, endLine/*, silent*/) {
   token          = state.push('heading_open', 'h' + String(level), 1);
   token.markup   = String.fromCharCode(marker);
   token.map      = [ startLine, state.line ];
+  token.position = state.bMarks[startLine];
+  token.size     = 0;
 
   token          = state.push('inline', '', 0);
   token.content  = content.trim();
   token.map      = [ startLine, state.line - 1 ];
-  token.srcPos   = state.bMarks[startLine] + content.indexOf(content.trim());
   token.children = [];
+  token.position = state.bMarks[startLine] + trimLeftOffset(content);
+  token.size     = token.content.length;  // content.length includes leading and trailing whitespace
 
   token          = state.push('heading_close', 'h' + String(level), -1);
   token.markup   = String.fromCharCode(marker);
+  token.position = state.bMarks[state.line - 1];
+  token.size     = state.bMarks[state.line] - state.bMarks[state.line - 1];
 
   state.parentType = oldParentType;
 
   return true;
 };
 
-},{}],26:[function(require,module,exports){
+},{"../common/utils":5}],26:[function(require,module,exports){
 // Lists
 
 'use strict';
@@ -3443,6 +3486,8 @@ module.exports = function list(state, startLine, endLine, silent) {
 
   token.map    = listLines = [ startLine, 0 ];
   token.markup = String.fromCharCode(markerCharCode);
+  token.position = start;
+  token.size   = 0;
 
   //
   // Iterate list items
@@ -3496,6 +3541,7 @@ module.exports = function list(state, startLine, endLine, silent) {
     token        = state.push('list_item_open', 'li', 1);
     token.markup = String.fromCharCode(markerCharCode);
     token.map    = itemLines = [ startLine, 0 ];
+    token.position = contentStart;
 
     // change current state, then restore it after parser subcall
     oldTight = state.tight;
@@ -3606,12 +3652,15 @@ module.exports = function list(state, startLine, endLine, silent) {
 
 'use strict';
 
+var trimLeftOffset = require('../common/utils').trimLeftOffset;
+
 
 module.exports = function paragraph(state, startLine/*, endLine*/) {
   var content, terminate, i, l, token, oldParentType,
       nextLine = startLine + 1,
       terminatorRules = state.md.block.ruler.getRules('paragraph'),
-      endLine = state.lineMax;
+      endLine = state.lineMax,
+      pos = state.bMarks[startLine];
 
   oldParentType = state.parentType;
   state.parentType = 'paragraph';
@@ -3642,21 +3691,26 @@ module.exports = function paragraph(state, startLine/*, endLine*/) {
 
   token          = state.push('paragraph_open', 'p', 1);
   token.map      = [ startLine, state.line ];
+  token.position = pos;
+  token.size     = 0;
 
   token          = state.push('inline', '', 0);
   token.content  = content.trim();
   token.map      = [ startLine, state.line ];
-  token.srcPos   = state.bMarks[startLine] + content.indexOf(content.trim());
   token.children = [];
+  token.position = pos + state.sCount[startLine] + trimLeftOffset(content);
+  token.size     = token.content.length;
 
   token          = state.push('paragraph_close', 'p', -1);
+  token.size     = 0;
+  token.position = content.length + pos + state.sCount[startLine];
 
   state.parentType = oldParentType;
 
   return true;
 };
 
-},{}],28:[function(require,module,exports){
+},{"../common/utils":5}],28:[function(require,module,exports){
 'use strict';
 
 
@@ -3876,6 +3930,11 @@ function StateBlock(src, md, env, tokens) {
   this.md     = md;
 
   this.env = env;
+  if (env) {
+    env.state_block = this;
+  } else {
+    this.env = { state_block: this };
+  }
 
   //
   // Internal state vartiables
@@ -4097,6 +4156,7 @@ module.exports = StateBlock;
 'use strict';
 
 var isSpace = require('../common/utils').isSpace;
+var trimLeftOffset = require('../common/utils').trimLeftOffset;
 
 
 function getLine(state, line) {
@@ -4162,7 +4222,7 @@ function escapedSplit(str, positions) {
 
 module.exports = function table(state, startLine, endLine, silent) {
   var ch, lineText, lineTextReplaced, pos, i, nextLine, columns, columnCount, token,
-      aligns, t, tableLines, tbodyLines, positions, len;
+      aligns, t, tableLines, tbodyLines, positions, len, columnVIndex;
 
   // should have at least two lines
   if (startLine + 2 > endLine) { return false; }
@@ -4233,18 +4293,29 @@ module.exports = function table(state, startLine, endLine, silent) {
 
   if (silent) { return true; }
 
-  token     = state.push('table_open', 'table', 1);
-  token.map = tableLines = [ startLine, 0 ];
+  token          = state.push('table_open', 'table', 1);
+  token.map      = tableLines = [ startLine, 0 ];
+  token.size     = 0;
+  token.position = state.bMarks[startLine];
 
-  token     = state.push('thead_open', 'thead', 1);
-  token.map = [ startLine, startLine + 1 ];
+  token          = state.push('thead_open', 'thead', 1);
+  token.map      = [ startLine, startLine + 1 ];
+  token.size     = 0;
+  token.position = state.bMarks[startLine];
 
-  token     = state.push('tr_open', 'tr', 1);
-  token.map = [ startLine, startLine + 1 ];
+  token          = state.push('tr_open', 'tr', 1);
+  token.map      = [ startLine, startLine + 1 ];
+  token.size     = 0;
+  token.position = state.bMarks[startLine];
 
+  columnVIndex = state.bMarks[startLine] + state.tShift[startLine];
   for (i = 0; i < columns.length; i++) {
     token          = state.push('th_open', 'th', 1);
     token.map      = [ startLine, startLine + 1 ];
+    token.size     = 1;
+    token.position = columnVIndex;
+    columnVIndex  += 1;
+
     if (aligns[i]) {
       token.attrs  = [ [ 'style', 'text-align:' + aligns[i] ] ];
     }
@@ -4252,17 +4323,33 @@ module.exports = function table(state, startLine, endLine, silent) {
     token          = state.push('inline', '', 0);
     token.content  = columns[i].trim();
     token.map      = [ startLine, startLine + 1 ];
-    token.srcPos   = pos + positions[i] + columns[i].indexOf(columns[i].trim());
     token.children = [];
+    token.position = columnVIndex + trimLeftOffset(columns[i]);
+    token.size     = token.content.length;
+    columnVIndex  += columns[i].length;
 
     token          = state.push('th_close', 'th', -1);
+    token.position = columnVIndex;
+
+    // Last column?
+    if (i === (columns.length - 1)) {
+      token.size     = 1;
+      columnVIndex  += 1;
+    }
   }
 
-  token     = state.push('tr_close', 'tr', -1);
-  token     = state.push('thead_close', 'thead', -1);
+  token          = state.push('tr_close', 'tr', -1);
+  token.size     = 0;
+  token.position = state.eMarks[startLine];
+
+  token          = state.push('thead_close', 'thead', -1);
+  token.size     = state.eMarks[startLine + 1] - state.bMarks[startLine + 1];
+  token.position = state.bMarks[startLine + 1];
 
   token     = state.push('tbody_open', 'tbody', 1);
   token.map = tbodyLines = [ startLine + 2, 0 ];
+  token.size     = 0;
+  token.position = state.bMarks[startLine + 2];
 
   for (nextLine = startLine + 2; nextLine < endLine; nextLine++) {
     if (state.sCount[nextLine] < state.blkIndent) { break; }
@@ -4276,24 +4363,50 @@ module.exports = function table(state, startLine, endLine, silent) {
     columns = escapedSplit(lineTextReplaced, positions);
 
     token = state.push('tr_open', 'tr', 1);
+    token.size     = 0;
+    token.position = state.bMarks[nextLine];
+
+    columnVIndex = state.bMarks[nextLine] + state.tShift[nextLine];
     len = Math.max(columns.length, columnCount);
     for (i = 0; i < len; i++) {
       token          = state.push('td_open', 'td', 1);
+      token.size     = 1;
+      token.position = columnVIndex;
+      columnVIndex++;
+
       if (aligns[i]) {
         token.attrs  = [ [ 'style', 'text-align:' + aligns[i] ] ];
       }
 
+      var originalContent = columns[i] || '';
+
       token          = state.push('inline', '', 0);
-      token.content  = columns[i] ? columns[i].trim() : '';
-      token.srcPos   = pos + positions[i] + (columns[i] ? columns[i].indexOf(columns[i].trim()) : 0);
+      token.content  = originalContent.trim();
       token.children = [];
+      token.size     = token.content.length;
+      token.position = columnVIndex + trimLeftOffset(originalContent);
+      columnVIndex  += originalContent.length;
+      token.map      = [ nextLine, nextLine + 1 ];
 
       token          = state.push('td_close', 'td', -1);
+      token.position = columnVIndex;
+
+      // Last column?
+      if (i === (columns.length - 1)) {
+        token.size     = 1;
+      }
     }
     token = state.push('tr_close', 'tr', -1);
+    token.size     = 0;
+    token.position = state.eMarks[nextLine];
   }
   token = state.push('tbody_close', 'tbody', -1);
+  token.size     = 0;
+  token.position = state.eMarks[nextLine];
+
   token = state.push('table_close', 'table', -1);
+  token.size     = 0;
+  token.position = state.eMarks[nextLine];
 
   tableLines[1] = tbodyLines[1] = nextLine;
   state.line = nextLine;
@@ -4311,7 +4424,6 @@ module.exports = function block(state) {
     token          = new state.Token('inline', '', 0);
     token.content  = state.src;
     token.map      = [ 0, 1 ];
-    token.srcPos   = 0;
     token.children = [];
     state.tokens.push(token);
   } else {
@@ -4329,7 +4441,12 @@ module.exports = function inline(state) {
   for (i = 0, l = tokens.length; i < l; i++) {
     tok = tokens[i];
     if (tok.type === 'inline') {
-      state.md.inline.parse(tok.content, state.md, state.env, tok.children, tok.srcPos ? tok.srcPos : 0);
+      state.md.inline.parse(tok.content, state.md, Object.assign({}, state.env, { parentToken: tok }), tok.children);
+
+      // Update position of all children to be absolute
+      for (var child = 0; child < tok.children.length; child++) {
+        tok.children[child].position += tok.position;
+      }
     }
   }
 };
@@ -4824,9 +4941,12 @@ module.exports = function backtick(state, silent) {
       if (!silent) {
         token         = state.push('code_inline', 'code', 0);
         token.markup  = marker;
-        token.content = state.src.slice(pos, matchStart)
+        let originalContent = state.src.slice(pos, matchStart);
+        token.content = originalContent
           .replace(/\n/g, ' ')
           .replace(/^ (.+) $/, '$1');
+        token.position = pos + (originalContent.length - token.content.length) / 2;
+        token.size = token.content.length;
       }
       state.pos = matchEnd;
       return true;
@@ -4953,6 +5073,8 @@ module.exports = function link_pairs(state) {
 //
 'use strict';
 
+var getLineOffset  = require('../common/utils').getLineOffset;
+
 
 // Insert each marker as a separate text token, and add it to delimiter list
 //
@@ -4972,6 +5094,8 @@ module.exports.tokenize = function emphasis(state, silent) {
     token.content = String.fromCharCode(marker);
 
     state.delimiters.push({
+      position: state.pos,
+
       // Char code of the starting marker (number).
       //
       marker: marker,
@@ -5054,6 +5178,7 @@ function postProcess(state, delimiters) {
     token.nesting = 1;
     token.markup  = isStrong ? ch + ch : ch;
     token.content = '';
+    token.position = startDelim.position + getLineOffset(state, startDelim.token);
 
     token         = state.tokens[endDelim.token];
     token.type    = isStrong ? 'strong_close' : 'em_close';
@@ -5087,7 +5212,7 @@ module.exports.postProcess = function emphasis(state) {
   }
 };
 
-},{}],41:[function(require,module,exports){
+},{"../common/utils":5}],41:[function(require,module,exports){
 // Process html entity - &#123;, &#xAF;, &quot;, ...
 
 'use strict';
@@ -5265,7 +5390,8 @@ module.exports = function image(state, silent) {
       start,
       href = '',
       oldPos = state.pos,
-      max = state.posMax;
+      max = state.posMax,
+      endPos = state.pos;
 
   if (state.src.charCodeAt(state.pos) !== 0x21/* ! */) { return false; }
   if (state.src.charCodeAt(state.pos + 1) !== 0x5B/* [ */) { return false; }
@@ -5275,6 +5401,10 @@ module.exports = function image(state, silent) {
 
   // parser failed to find ']', so it's not a valid link
   if (labelEnd < 0) { return false; }
+
+  if (state.pending) {
+    state.pushPending();
+  }
 
   pos = labelEnd + 1;
   if (pos < max && state.src.charCodeAt(pos) === 0x28/* ( */) {
@@ -5333,6 +5463,7 @@ module.exports = function image(state, silent) {
       state.pos = oldPos;
       return false;
     }
+    endPos = pos;
     pos++;
   } else {
     //
@@ -5344,12 +5475,15 @@ module.exports = function image(state, silent) {
       start = pos + 1;
       pos = state.md.helpers.parseLinkLabel(state, pos);
       if (pos >= 0) {
+        endPos = pos;
         label = state.src.slice(start, pos++);
       } else {
         pos = labelEnd + 1;
+        endPos = pos;
       }
     } else {
       pos = labelEnd + 1;
+      endPos = pos;
     }
 
     // covers label === '' and label === undefined
@@ -5383,6 +5517,9 @@ module.exports = function image(state, silent) {
     token.attrs    = attrs = [ [ 'src', href ], [ 'alt', '' ] ];
     token.children = tokens;
     token.content  = content;
+
+    token.position = oldPos;
+    token.size = endPos - oldPos + 1;
 
     if (title) {
       attrs.push([ 'title', title ]);
@@ -5715,14 +5852,14 @@ var Token          = require('../token');
 var isWhiteSpace   = require('../common/utils').isWhiteSpace;
 var isPunctChar    = require('../common/utils').isPunctChar;
 var isMdAsciiPunct = require('../common/utils').isMdAsciiPunct;
+var getLineOffset  = require('../common/utils').getLineOffset;
 
 
-function StateInline(src, md, env, outTokens, srcPos) {
+function StateInline(src, md, env, outTokens) {
   this.src = src;
   this.env = env;
   this.md = md;
   this.tokens = outTokens;
-  this.srcPos = srcPos;
   this.tokens_meta = Array(outTokens.length);
 
   this.links = null;
@@ -5749,8 +5886,11 @@ function StateInline(src, md, env, outTokens, srcPos) {
 StateInline.prototype.pushPending = function () {
   var token = new Token('text', '', 0);
   token.content = this.pending;
-  token.srcPos = this.srcPos + this.pos - this.pending.length;
   token.level = this.pendingLevel;
+
+  token.size = token.content.length;
+  token.position = this.pos - token.size + getLineOffset(this);
+
   this.tokens.push(token);
   this.pending = '';
   return token;
@@ -5865,6 +6005,7 @@ module.exports = StateInline;
 //
 'use strict';
 
+var getLineOffset  = require('../common/utils').getLineOffset;
 
 // Insert each marker as a separate text token, and add it to delimiter list
 //
@@ -5895,6 +6036,7 @@ module.exports.tokenize = function strikethrough(state, silent) {
 
     state.delimiters.push({
       marker: marker,
+      position: start,
       length: 0, // disable "rule of 3" length checks meant for emphasis
       jump:   i,
       token:  state.tokens.length - 1,
@@ -5937,6 +6079,7 @@ function postProcess(state, delimiters) {
     token.nesting = 1;
     token.markup  = '~~';
     token.content = '';
+    token.position = startDelim.position + getLineOffset(state, startDelim.token);
 
     token         = state.tokens[endDelim.token];
     token.type    = 's_close';
@@ -5993,7 +6136,7 @@ module.exports.postProcess = function strikethrough(state) {
   }
 };
 
-},{}],50:[function(require,module,exports){
+},{"../common/utils":5}],50:[function(require,module,exports){
 // Skip text characters for text token, place those to pending buffer
 // and increment current pos
 
@@ -6117,8 +6260,9 @@ module.exports = function text_collapse(state) {
 
       // collapse two adjacent text nodes
       tokens[curr + 1].content = tokens[curr].content + tokens[curr + 1].content;
-      if (typeof tokens[curr].srcPos !== 'undefined') {
-        tokens[curr + 1].srcPos = tokens[curr].srcPos;
+      if (typeof tokens[curr].position !== 'undefined') {
+        tokens[curr + 1].size += tokens[curr + 1].position - tokens[curr].position;
+        tokens[curr + 1].position = tokens[curr].position;
       }
     } else {
       if (curr !== last) { tokens[last] = tokens[curr]; }
@@ -6245,6 +6389,20 @@ function Token(type, tag, nesting) {
    * to hide paragraphs.
    **/
   this.hidden   = false;
+
+  /**
+   * Token#position -> Number
+   *
+   * Position in the original string
+   **/
+  this.position = 0;
+
+  /**
+   * Token#size -> Number
+   *
+   * Size of the token
+   **/
+  this.size     = 0;
 }
 
 
@@ -6254,16 +6412,15 @@ function Token(type, tag, nesting) {
  * Search attribute index by name.
  **/
 Token.prototype.attrIndex = function attrIndex(name) {
-  var attrs, i, len;
+  var attrs;
 
   if (!this.attrs) { return -1; }
 
   attrs = this.attrs;
 
-  for (i = 0, len = attrs.length; i < len; i++) {
-    if (attrs[i][0] === name) { return i; }
-  }
-  return -1;
+  return attrs.findIndex(function (el) {
+    return el[0] === name;
+  });
 };
 
 

@@ -8207,7 +8207,6 @@ var block$1 = function block(state) {
     token          = new state.Token('inline', '', 0);
     token.content  = state.src;
     token.map      = [ 0, 1 ];
-    token.srcPos   = 0;
     token.children = [];
     state.tokens.push(token);
   } else {
@@ -8222,7 +8221,7 @@ var inline = function inline(state) {
   for (i = 0, l = tokens.length; i < l; i++) {
     tok = tokens[i];
     if (tok.type === 'inline') {
-      state.md.inline.parse(tok.content, state.md, Object.assign({}, state.env, { parentToken: tok }), tok.children, tok.srcPos || 0);
+      state.md.inline.parse(tok.content, state.md, Object.assign({}, state.env, { parentToken: tok }), tok.children);
 
       // Update position of all children to be absolute
       for (var child = 0; child < tok.children.length; child++) {
@@ -9013,7 +9012,6 @@ var table = function table(state, startLine, endLine, silent) {
     token          = state.push('inline', '', 0);
     token.content  = columns[i].trim();
     token.map      = [ startLine, startLine + 1 ];
-    token.srcPos   = pos + positions[i] + columns[i].indexOf(token.content);
     token.children = [];
     token.position = columnVIndex + trimLeftOffset(columns[i]);
     token.size     = token.content.length;
@@ -9072,8 +9070,7 @@ var table = function table(state, startLine, endLine, silent) {
       var originalContent = columns[i] || '';
 
       token          = state.push('inline', '', 0);
-      token.content  = columns[i] ? columns[i].trim() : '';
-      token.srcPos   = pos + positions[i] + (columns[i] ? columns[i].indexOf(token.content) : 0);
+      token.content  = originalContent.trim();
       token.children = [];
       token.size     = token.content.length;
       token.position = columnVIndex + trimLeftOffset(originalContent);
@@ -9258,7 +9255,7 @@ var blockquote = function blockquote(state, startLine, endLine, silent) {
       offset,
       oldBMarks,
       oldBSCount,
-      // oldIndent,
+      oldIndent,
       oldParentType,
       oldSCount,
       oldTShift,
@@ -9496,7 +9493,7 @@ var blockquote = function blockquote(state, startLine, endLine, silent) {
     state.sCount[nextLine] = -1;
   }
 
-  // oldIndent = state.blkIndent;
+  oldIndent = state.blkIndent;
   state.blkIndent = 0;
 
   token        = state.push('blockquote_open', 'blockquote', 1);
@@ -9512,7 +9509,6 @@ var blockquote = function blockquote(state, startLine, endLine, silent) {
   state.parentType = oldParentType;
   lines[1] = state.line;
 
-  /*
   // Restore original tShift; this might not be necessary since the parser
   // has already been here, but just to make sure we can do that.
   for (i = 0; i < oldTShift.length; i++) {
@@ -9522,7 +9518,6 @@ var blockquote = function blockquote(state, startLine, endLine, silent) {
     state.bsCount[i + startLine] = oldBSCount[i];
   }
   state.blkIndent = oldIndent;
-  */
 
   return true;
 };
@@ -10176,10 +10171,9 @@ var heading = function heading(state, startLine, endLine, silent) {
   token          = state.push('inline', '', 0);
   token.content  = originalContent.trim();
   token.map      = [ startLine, state.line ];
-  token.srcPos   = pos + originalContent.indexOf(token.content);
   token.children = [];
   token.position = pos + trimLeftOffset$1(originalContent);
-  token.size     = max - pos;
+  token.size     = token.content.length;   // (max - pos) includes leading and trailing whitespace
 
   token          = state.push('heading_close', 'h' + String(level), -1);
   token.markup   = '########'.slice(0, level);
@@ -10189,7 +10183,7 @@ var heading = function heading(state, startLine, endLine, silent) {
   return true;
 };
 
-// lheading (---, ===)
+var trimLeftOffset$2 = utils.trimLeftOffset;
 
 
 var lheading = function lheading(state, startLine, endLine/*, silent*/) {
@@ -10263,10 +10257,9 @@ var lheading = function lheading(state, startLine, endLine/*, silent*/) {
   token          = state.push('inline', '', 0);
   token.content  = content.trim();
   token.map      = [ startLine, state.line - 1 ];
-  token.srcPos   = state.bMarks[startLine] + content.indexOf(token.content);
   token.children = [];
-  token.position = state.bMarks[startLine];
-  token.size     = content.length;
+  token.position = state.bMarks[startLine] + trimLeftOffset$2(content);
+  token.size     = token.content.length;  // content.length includes leading and trailing whitespace
 
   token          = state.push('heading_close', 'h' + String(level), -1);
   token.markup   = String.fromCharCode(marker);
@@ -10448,7 +10441,7 @@ var html_block = function html_block(state, startLine, endLine, silent) {
   return true;
 };
 
-// Paragraph
+var trimLeftOffset$3 = utils.trimLeftOffset;
 
 
 var paragraph = function paragraph(state, startLine/*, endLine*/) {
@@ -10493,10 +10486,9 @@ var paragraph = function paragraph(state, startLine/*, endLine*/) {
   token          = state.push('inline', '', 0);
   token.content  = content.trim();
   token.map      = [ startLine, state.line ];
-  token.srcPos   = state.bMarks[startLine] + content.indexOf(token.content);
   token.children = [];
-  token.position = pos + state.sCount[startLine];
-  token.size     = content.length;
+  token.position = pos + state.sCount[startLine] + trimLeftOffset$3(content);
+  token.size     = token.content.length;
 
   token          = state.push('paragraph_close', 'p', -1);
   token.size     = 0;
@@ -11143,10 +11135,11 @@ var backticks = function backtick(state, silent) {
       if (!silent) {
         token         = state.push('code_inline', 'code', 0);
         token.markup  = marker;
-        token.content = state.src.slice(pos, matchStart)
+        let originalContent = state.src.slice(pos, matchStart);
+        token.content = originalContent
           .replace(/\n/g, ' ')
           .replace(/^ (.+) $/, '$1');
-        token.position = pos;
+        token.position = pos + (originalContent.length - token.content.length) / 2;
         token.size = token.content.length;
       }
       state.pos = matchEnd;
@@ -12034,8 +12027,9 @@ var text_collapse = function text_collapse(state) {
 
       // collapse two adjacent text nodes
       tokens[curr + 1].content = tokens[curr].content + tokens[curr + 1].content;
-      if (typeof tokens[curr].srcPos !== 'undefined') {
-        tokens[curr + 1].srcPos = tokens[curr].srcPos;
+      if (typeof tokens[curr].position !== 'undefined') {
+        tokens[curr + 1].size += tokens[curr + 1].position - tokens[curr].position;
+        tokens[curr + 1].position = tokens[curr].position;
       }
     } else {
       if (curr !== last) { tokens[last] = tokens[curr]; }
@@ -12055,12 +12049,11 @@ var isMdAsciiPunct$1 = utils.isMdAsciiPunct;
 var getLineOffset$2  = utils.getLineOffset;
 
 
-function StateInline(src, md, env, outTokens, srcPos) {
+function StateInline(src, md, env, outTokens) {
   this.src = src;
   this.env = env;
   this.md = md;
   this.tokens = outTokens;
-  this.srcPos = srcPos;
   this.tokens_meta = Array(outTokens.length);
 
   this.links = null;
@@ -12087,7 +12080,6 @@ function StateInline(src, md, env, outTokens, srcPos) {
 StateInline.prototype.pushPending = function () {
   var token$1 = new token('text', '', 0);
   token$1.content = this.pending;
-  token$1.srcPos = this.srcPos + this.pos - this.pending.length;
   token$1.level = this.pendingLevel;
 
   token$1.size = token$1.content.length;
@@ -12367,9 +12359,9 @@ ParserInline.prototype.tokenize = function (state) {
  *
  * Process input string and push inline tokens into `outTokens`
  **/
-ParserInline.prototype.parse = function (str, md, env, outTokens, srcPos) {
+ParserInline.prototype.parse = function (str, md, env, outTokens) {
   var i, rules, len;
-  var state = new this.State(str, md, env, outTokens, srcPos);
+  var state = new this.State(str, md, env, outTokens);
 
   rules = this.ruler0.getRules('');
   len = rules.length;
