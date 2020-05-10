@@ -1,7 +1,9 @@
 PATH        := ./node_modules/.bin:${PATH}
 
-NPM_PACKAGE := $(shell node -e 'process.stdout.write(require("./package.json").name.replace(/^.*?\//, ""))')
-NPM_VERSION := $(shell node -e 'process.stdout.write(require("./package.json").version)')
+NPM_PACKAGE := $(shell support/getGlobalName.js package)
+NPM_VERSION := $(shell support/getGlobalName.js version)
+
+GLOBAL_NAME := $(shell support/getGlobalName.js global)
 
 TMP_PATH    := /tmp/${NPM_PACKAGE}-$(shell date +%s)
 
@@ -91,7 +93,7 @@ browserify:
 	mkdir dist
 	# Browserify
 	( printf "/*! ${NPM_PACKAGE} ${NPM_VERSION} ${GITHUB_PROJ} @license MIT */" ; \
-		browserify ./index.js -s markdownit \
+		browserify ./index.js -s ${GLOBAL_NAME} \
 		) > dist/${NPM_PACKAGE}.js
 
 minify: browserify
