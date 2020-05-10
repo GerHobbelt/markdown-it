@@ -305,6 +305,7 @@ const tocPlugin = require('@gerhobbelt/markdown-it-table-of-contents');
 
 
 describe('vuepress with vanilla markdown-it', function () {
+  this.timeout(10000);
 
   // return a (simplified) vuepress-default markdown-it vanilla instance:
   function getMd() {
