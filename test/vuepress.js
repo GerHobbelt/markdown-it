@@ -278,8 +278,8 @@ Using Components In Headers
 
 'use strict';
 
-var assert = require('chai').assert;
-var markdownit = require('../');
+let assert = require('chai').assert;
+let markdownit = require('../');
 
 
 
@@ -313,7 +313,7 @@ describe('vuepress with vanilla markdown-it', function () {
   }
 
 
-  var md;
+  let md;
 
   before(function (done) {
     md = getMd();
@@ -399,7 +399,7 @@ describe('vuepress with fully pimped markdown-it', function () {
   const pickNumber = 2;
 
   function pick(pckg1, pckg2, pckg3, pckg4) {
-    var rv;
+    let rv;
     //console.log('PICK:', pickNumber);
     switch (pickNumber) {
     case 1:
@@ -564,7 +564,7 @@ describe('vuepress with fully pimped markdown-it', function () {
   }
 
 
-  var md;
+  let md;
 
   before(function (done) {
     md = getMd();
@@ -616,7 +616,7 @@ describe('vuepress with fully pimped markdown-it', function () {
     assert.strictEqual(md.render(input), sollwert);
   });
 
-  it('vue built-in components should make it through unscathed', function () {
+  xit('vue built-in components should make it through unscathed', function () {
     //var md = getMd();
 
     let input = `
