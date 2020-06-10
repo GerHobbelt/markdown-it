@@ -1,4 +1,7 @@
 # ignore documentation, etc. directories:
 ./demo/
 ./apidoc/
-
+support/
+test/
+Makefile
+.*

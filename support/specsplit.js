@@ -100,7 +100,7 @@ readFile(options.spec, 'utf8', function (error, input) {
           bad.push(result);
         }
       } catch (___) {
-        // bad.push(result);
+        bad.push(result);
         throw ___;
       }
     });

@@ -7194,7 +7194,7 @@ function isMdAsciiPunct(ch) {
   }
 }
 
-// Hepler to unify [reference labels].
+// Helper to unify [reference labels].
 //
 function normalizeReference(str) {
   // Trim and collapse whitespace
@@ -7205,7 +7205,8 @@ function normalizeReference(str) {
   // fixed in v12 (couldn't find any details).
   //
   // So treat this one as a special case
-  // (remove this when node v10 is no longer supported).
+  // 
+  // TODO: remove this when node v10 is no longer supported.
   //
   if ('ẞ'.toLowerCase() === 'Ṿ') {
     str = str.replace(/ẞ/g, 'ß');
@@ -11043,7 +11044,6 @@ var newline = function newline(state, silent) {
         state.pending = state.pending.slice(0, -1);
         state.push('softbreak', 'br', 0);
       }
-
     } else {
       state.push('softbreak', 'br', 0);
     }
@@ -11920,7 +11920,7 @@ function processDelimiters(state, delimiters) {
 
     // Previously calculated lower bounds (previous fails)
     // for each marker and each delimiter length modulo 3.
-    if (!openersBottom.hasOwnProperty(closer.marker)) {
+    if (!Object.prototype.hasOwnProperty.call(openersBottom, closer.marker)) {
       openersBottom[closer.marker] = [ -1, -1, -1 ];
     }
 
@@ -12441,12 +12441,13 @@ var re = function (opts) {
           '\\"(?:(?!' + re.src_ZCc + '|["]).)+\\"|' +
           "\\'(?:(?!" + re.src_ZCc + "|[']).)+\\'|" +
           "\\'(?=" + re.src_pseudo_letter + '|[-]).|' +  // allow `I'm_king` if no pair found
-          '\\.{2,4}[a-zA-Z0-9%/]|' + // github has ... in commit range links,
-                                     // google has .... in links (issue #66)
+          '\\.{2,}[a-zA-Z0-9%/&]|' + // google has many dots in "google search" links (#66, #81).
+                                     // github has ... in commit range links,
                                      // Restrict to
                                      // - english
                                      // - percent-encoded
                                      // - parts of file path
+                                     // - params separator
                                      // until more examples found.
           '\\.(?!' + re.src_ZCc + '|[.]).|' +
           (opts && opts['---'] ?
@@ -12454,8 +12455,8 @@ var re = function (opts) {
             :
             '\\-+|'
           ) +
-          '\\,(?!' + re.src_ZCc + ').|' +      // allow `,,,` in paths
-          '\\!(?!' + re.src_ZCc + '|[!]).|' +
+          '\\,(?!' + re.src_ZCc + ').|' +       // allow `,,,` in paths
+          '\\!+(?!' + re.src_ZCc + '|[!]).|' +  // allow `!!!` in paths, but not at the end
           '\\?(?!' + re.src_ZCc + '|[?]).' +
         ')+' +
       '|\\/' +

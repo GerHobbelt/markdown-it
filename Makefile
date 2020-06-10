@@ -4,6 +4,7 @@ NPM_PACKAGE := $(shell support/getGlobalName.js package)
 NPM_VERSION := $(shell support/getGlobalName.js version)
 
 GLOBAL_NAME := $(shell support/getGlobalName.js global)
+BUNDLE_NAME := $(shell support/getGlobalName.js microbundle)
 
 TMP_PATH    := /tmp/${NPM_PACKAGE}-$(shell date +%s)
 
@@ -57,6 +58,7 @@ test: specsplit
 
 coverage:
 	-rm -rf coverage
+	-rm -rf .nyc_output
 	cross-env NODE_ENV=test nyc mocha
 
 report-coverage: lint coverage
@@ -133,6 +135,7 @@ clean:
 	-rm -rf ./demo/
 	-rm -rf ./apidoc/
 	-rm -rf ./dist/
+	-rm -rf ./.nyc_output/
 
 superclean: clean
 	-rm -rf ./node_modules/
@@ -141,7 +144,8 @@ superclean: clean
 prep: superclean
 	-ncu -a --packageFile=package.json
 	-npm install
+	-npm audit fix
 
 
-.PHONY: clean superclean prep publish lint fix test todo demo coverage report-coverage doc build browserify minify gh-demo gh-doc specsplit rollup
+.PHONY: clean superclean prep publish lint lintfix test todo demo coverage report-coverage doc build browserify minify gh-demo gh-doc specsplit rollup
 .SILENT: help lint test todo
