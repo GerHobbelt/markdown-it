@@ -1,14 +1,14 @@
 'use strict';
 
 
-var path = require('path');
+let path = require('path');
 
 
-var generate = require('@gerhobbelt/markdown-it-testgen');
+let generate = require('@gerhobbelt/markdown-it-testgen');
 
 
 describe('markdown-it', function () {
-  var md = require('../')({
+  let md = require('../')({
     html: true,
     langPrefix: '',
     typographer: true,

@@ -4,13 +4,13 @@
 'use strict';
 
 
-var fs = require('fs');
-var argparse = require('argparse');
+let fs = require('fs');
+let argparse = require('argparse');
 
 
 ////////////////////////////////////////////////////////////////////////////////
 
-var cli = new argparse.ArgumentParser({
+let cli = new argparse.ArgumentParser({
   prog: 'markdown-it.js',
   version: require('../package.json').version,
   addHelp: true
@@ -22,14 +22,14 @@ cli.addArgument([ 'file' ], {
   defaultValue: '-'
 });
 
-var options = cli.parseArgs();
+let options = cli.parseArgs();
 
 
 function readFile(filename, encoding, callback) {
   if (options.file === '-') {
     // read from stdin
 
-    var chunks = [];
+    let chunks = [];
 
     process.stdin.on('data', function (chunk) {
       chunks.push(chunk);
@@ -47,7 +47,7 @@ function readFile(filename, encoding, callback) {
 ////////////////////////////////////////////////////////////////////////////////
 
 readFile(options.file, 'utf8', function (err, input) {
-  var output, md;
+  let output, md;
 
   if (err) {
     if (err.code === 'ENOENT') {

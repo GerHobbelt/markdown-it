@@ -3,10 +3,10 @@
 /*eslint-env browser*/
 /*global $, _*/
 
-var mdurl = require('mdurl');
+let mdurl = require('mdurl');
 
 
-var hljs = require('@gerhobbelt/highlight.js');
+let hljs = require('@gerhobbelt/highlight.js');
 
 hljs.registerLanguage('actionscript', require('@gerhobbelt/highlight.js/lib/languages/actionscript'));
 hljs.registerLanguage('apache',       require('@gerhobbelt/highlight.js/lib/languages/apache'));
@@ -67,9 +67,9 @@ hljs.registerLanguage('vhdl',         require('@gerhobbelt/highlight.js/lib/lang
 hljs.registerLanguage('yaml',         require('@gerhobbelt/highlight.js/lib/languages/yaml'));
 
 
-var mdHtml, mdSrc, permalink, scrollMap;
+let mdHtml, mdSrc, permalink, scrollMap;
 
-var defaults = {
+let defaults = {
   html:         false,        // Enable HTML tags in source
   xhtmlOut:     false,        // Use '/' to close single tags (<br />)
   breaks:       false,        // Convert '\n' in paragraphs into <br>
@@ -111,7 +111,7 @@ var defaults = {
 };
 
 defaults.highlight = function (str, lang) {
-  var esc = mdHtml.utils.escapeHtml;
+  let esc = mdHtml.utils.escapeHtml;
 
   try {
     if (!defaults._highlight) {
@@ -126,7 +126,7 @@ defaults.highlight = function (str, lang) {
 
     } else if (lang === 'auto') {
 
-      var result = hljs.highlightAuto(str);
+      let result = hljs.highlightAuto(str);
 
       /*eslint-disable no-console*/
       console.log('highlight language: ' + result.language + ', relevance: ' + result.relevance);
@@ -157,7 +157,7 @@ function setResultView(val) {
 }
 
 function pick(pckg1, pckg2, pckg3, pckg4) {
-  var rv;
+  let rv;
   console.log('PICK:', defaults.pickNumber, '-->', +defaults.pickNumber);
   switch (+defaults.pickNumber) {
   case 1:
@@ -277,7 +277,7 @@ function mdInit() {
   // - We track only headings and paragraphs on first level. That's enough.
   // - Footnotes content causes jumps. Level limit filter it automatically.
   function injectLineNumbers(tokens, idx, options, env, slf) {
-    var line;
+    let line;
     if (tokens[idx].map && tokens[idx].level === 0) {
       line = tokens[idx].map[0];
       tokens[idx].attrJoin('class', 'line');
@@ -298,7 +298,7 @@ function setHighlightedlContent(selector, content, lang) {
 }
 
 function updateResult() {
-  var source = $('.source').val();
+  let source = $('.source').val();
 
   // Update only active view to avoid slowdowns
   // (debug & src view with highlighting are a bit slow)
@@ -338,7 +338,7 @@ function updateResult() {
 // That's a bit dirty to process each line everytime, but ok for demo.
 // Optimizations are required only for big texts.
 function buildScrollMap() {
-  var i, offset, nonEmptyList, pos, a, b, lineHeightMap, linesCount,
+  let i, offset, nonEmptyList, pos, a, b, lineHeightMap, linesCount,
       acc, sourceLikeDiv, textarea = $('.source'),
       _scrollMap;
 
@@ -360,7 +360,7 @@ function buildScrollMap() {
 
   acc = 0;
   textarea.val().split('\n').forEach(function (str) {
-    var h, lh;
+    let h, lh;
 
     lineHeightMap.push(acc);
 
@@ -384,7 +384,7 @@ function buildScrollMap() {
   _scrollMap[0] = 0;
 
   $('.line').each(function (n, el) {
-    var $el = $(el), t = $el.data('line');
+    let $el = $(el), t = $el.data('line');
     if (t === '') { return; }
     t = lineHeightMap[t];
     if (t !== 0) { nonEmptyList.push(t); }
@@ -410,8 +410,8 @@ function buildScrollMap() {
 }
 
 // Synchronize scroll position from source to result
-var syncResultScroll = _.debounce(function () {
-  var textarea   = $('.source'),
+let syncResultScroll = _.debounce(function () {
+  let textarea   = $('.source'),
       lineHeight = parseFloat(textarea.css('line-height')),
       lineNo, posTo;
 
@@ -424,8 +424,8 @@ var syncResultScroll = _.debounce(function () {
 }, 50, { maxWait: 50 });
 
 // Synchronize scroll position from result to source
-var syncSrcScroll = _.debounce(function () {
-  var resultHtml = $('.result-html'),
+let syncSrcScroll = _.debounce(function () {
+  let resultHtml = $('.result-html'),
       scrollTop  = resultHtml.scrollTop(),
       textarea   = $('.source'),
       lineHeight = parseFloat(textarea.css('line-height')),
@@ -462,7 +462,7 @@ function loadPermalink() {
 
   if (!location.hash) { return; }
 
-  var cfg, opts;
+  let cfg, opts;
 
   try {
 
@@ -532,16 +532,16 @@ $(function () {
   _.forOwn(defaults, function (val, key) {
     if (key === 'highlight') { return; }
 
-    var el = document.getElementById(key);
+    let el = document.getElementById(key);
 
     if (!el) { return; }
 
-    var $el = $(el);
+    let $el = $(el);
 
     if (_.isBoolean(val)) {
       $el.prop('checked', val);
       $el.on('change', function () {
-        var value = Boolean($el.prop('checked'));
+        let value = Boolean($el.prop('checked'));
         setOptionClass(key, value);
         defaults[key] = value;
         mdInit();
@@ -584,7 +584,7 @@ $(function () {
   });
 
   $(document).on('click', '[data-result-as]', function (event) {
-    var view = $(this).data('resultAs');
+    let view = $(this).data('resultAs');
     if (view) {
       setResultView(view);
       // only to update permalink

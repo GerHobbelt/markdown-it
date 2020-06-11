@@ -90,27 +90,27 @@ module.exports = [
 
 'use strict';
 
-var attr_name     = '[a-zA-Z_:@][a-zA-Z0-9:._-]*';
+let attr_name     = '[a-zA-Z_:@][a-zA-Z0-9:._-]*';
 
-var unquoted      = '[^"\'=<>`\\x00-\\x20]+';
-var single_quoted = "'[^']*'";
-var double_quoted = '"[^"]*"';
+let unquoted      = '[^"\'=<>`\\x00-\\x20]+';
+let single_quoted = "'[^']*'";
+let double_quoted = '"[^"]*"';
 
-var attr_value  = '(?:' + unquoted + '|' + single_quoted + '|' + double_quoted + ')';
+let attr_value  = '(?:' + unquoted + '|' + single_quoted + '|' + double_quoted + ')';
 
-var attribute   = '(?:\\s+' + attr_name + '(?:\\s*=\\s*' + attr_value + ')?)';
+let attribute   = '(?:\\s+' + attr_name + '(?:\\s*=\\s*' + attr_value + ')?)';
 
-var open_tag    = '<[A-Za-z][A-Za-z0-9\\-]*' + attribute + '*\\s*\\/?>';
+let open_tag    = '<[A-Za-z][A-Za-z0-9\\-]*' + attribute + '*\\s*\\/?>';
 
-var close_tag   = '<\\/[A-Za-z][A-Za-z0-9\\-]*\\s*>';
-var comment     = '<!---->|<!--(?:-?[^>-])(?:-?[^-])*-->';
-var processing  = '<[?].*?[?]>';
-var declaration = '<![A-Z]+\\s+[^>]*>';
-var cdata       = '<!\\[CDATA\\[[\\s\\S]*?\\]\\]>';
+let close_tag   = '<\\/[A-Za-z][A-Za-z0-9\\-]*\\s*>';
+let comment     = '<!---->|<!--(?:-?[^>-])(?:-?[^-])*-->';
+let processing  = '<[?].*?[?]>';
+let declaration = '<![A-Z]+\\s+[^>]*>';
+let cdata       = '<!\\[CDATA\\[[\\s\\S]*?\\]\\]>';
 
-var HTML_TAG_RE = new RegExp('^(?:' + open_tag + '|' + close_tag + '|' + comment +
+let HTML_TAG_RE = new RegExp('^(?:' + open_tag + '|' + close_tag + '|' + comment +
                         '|' + processing + '|' + declaration + '|' + cdata + ')');
-var HTML_OPEN_CLOSE_TAG_RE = new RegExp('^(?:' + open_tag + '|' + close_tag + ')');
+let HTML_OPEN_CLOSE_TAG_RE = new RegExp('^(?:' + open_tag + '|' + close_tag + ')');
 
 module.exports.HTML_TAG_RE = HTML_TAG_RE;
 module.exports.HTML_OPEN_CLOSE_TAG_RE = HTML_OPEN_CLOSE_TAG_RE;
@@ -126,7 +126,7 @@ function _class(obj) { return Object.prototype.toString.call(obj); }
 
 function isString(obj) { return _class(obj) === '[object String]'; }
 
-var _hasOwnProperty = Object.prototype.hasOwnProperty;
+let _hasOwnProperty = Object.prototype.hasOwnProperty;
 
 function has(object, key) {
   return _hasOwnProperty.call(object, key);
@@ -135,7 +135,7 @@ function has(object, key) {
 // Merge objects
 //
 function assign(obj /*from1, from2, from3, ...*/) {
-  var sources = Array.prototype.slice.call(arguments, 1);
+  let sources = Array.prototype.slice.call(arguments, 1);
 
   sources.forEach(function (source) {
     if (!source) { return; }
@@ -181,7 +181,7 @@ function fromCodePoint(c) {
   /*eslint no-bitwise:0*/
   if (c > 0xffff) {
     c -= 0x10000;
-    var surrogate1 = 0xd800 + (c >> 10),
+    let surrogate1 = 0xd800 + (c >> 10),
         surrogate2 = 0xdc00 + (c & 0x3ff);
 
     return String.fromCharCode(surrogate1, surrogate2);
@@ -190,16 +190,16 @@ function fromCodePoint(c) {
 }
 
 
-var UNESCAPE_MD_RE  = /\\([!"#$%&'()*+,\-.\/:;<=>?@[\\\]^_`{|}~])/g;
-var ENTITY_RE       = /&([a-z#][a-z0-9]{1,31});/gi;
-var UNESCAPE_ALL_RE = new RegExp(UNESCAPE_MD_RE.source + '|' + ENTITY_RE.source, 'gi');
+let UNESCAPE_MD_RE  = /\\([!"#$%&'()*+,\-.\/:;<=>?@[\\\]^_`{|}~])/g;
+let ENTITY_RE       = /&([a-z#][a-z0-9]{1,31});/gi;
+let UNESCAPE_ALL_RE = new RegExp(UNESCAPE_MD_RE.source + '|' + ENTITY_RE.source, 'gi');
 
-var DIGITAL_ENTITY_TEST_RE = /^#((?:x[a-f0-9]{1,8}|[0-9]{1,8}))/i;
+let DIGITAL_ENTITY_TEST_RE = /^#((?:x[a-f0-9]{1,8}|[0-9]{1,8}))/i;
 
-var entities = require('./entities');
+let entities = require('./entities');
 
 function replaceEntityPattern(match, name) {
-  var code = 0;
+  let code = 0;
 
   if (has(entities, name)) {
     return entities[name];
@@ -239,9 +239,9 @@ function unescapeAll(str) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-var HTML_ESCAPE_TEST_RE = /[&<>"]/;
-var HTML_ESCAPE_REPLACE_RE = /[&<>"]/g;
-var HTML_REPLACEMENTS = {
+let HTML_ESCAPE_TEST_RE = /[&<>"]/;
+let HTML_ESCAPE_REPLACE_RE = /[&<>"]/g;
+let HTML_REPLACEMENTS = {
   '&': '&amp;',
   '<': '&lt;',
   '>': '&gt;',
@@ -263,7 +263,7 @@ function escapeHtml(str) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-var REGEXP_ESCAPE_RE = /[.?*+^$[\]\\(){}|-]/g;
+let REGEXP_ESCAPE_RE = /[.?*+^$[\]\\(){}|-]/g;
 
 function escapeRE(str) {
   return str.replace(REGEXP_ESCAPE_RE, '\\$&');
@@ -303,7 +303,7 @@ function isWhiteSpace(code) {
 ////////////////////////////////////////////////////////////////////////////////
 
 /*eslint-disable max-len*/
-var UNICODE_PUNCT_RE = require('uc.micro/categories/P/regex');
+let UNICODE_PUNCT_RE = require('uc.micro/categories/P/regex');
 
 // Currently without astral characters support.
 function isPunctChar(ch) {
@@ -358,7 +358,7 @@ function isMdAsciiPunct(ch) {
   }
 }
 
-// Hepler to unify [reference labels].
+// Helper to unify [reference labels].
 //
 function normalizeReference(str) {
   // Trim and collapse whitespace
@@ -369,7 +369,8 @@ function normalizeReference(str) {
   // fixed in v12 (couldn't find any details).
   //
   // So treat this one as a special case
-  // (remove this when node v10 is no longer supported).
+  //
+  // TODO: remove this when node v10 is no longer supported.
   //
   if ('ẞ'.toLowerCase() === 'Ṿ') {
     str = str.replace(/ẞ/g, 'ß');
@@ -411,16 +412,15 @@ function normalizeReference(str) {
 }
 
 function getLineOffset(state, tokenIdx) {
-  var blockState = state.env.state_block;
-  var parentToken = state.env.parentToken;
-  var tokensBefore = typeof tokenIdx !== 'undefined' ? state.tokens.slice(0, tokenIdx) : state.tokens;
+  let blockState = state.env.state_block;
+  let parentToken = state.env.parentToken;
+  let tokensBefore = typeof tokenIdx !== 'undefined' ? state.tokens.slice(0, tokenIdx) : state.tokens;
 
-  var lineOffset = 0;
-  var linesBefore = tokensBefore.filter(function (t) { return t.type.includes('break'); }).length;
-  for (var i = 0; i < linesBefore; i++) {
-    var startLine = i + parentToken.map[0] + 1;
-    var beg = blockState.bMarks[startLine];
-    lineOffset += beg - blockState.src.slice(0, beg).lastIndexOf('\n') - 1;
+  let lineOffset = 0;
+  let linesBefore = tokensBefore.filter(function (t) { return t.type.includes('break'); }).length;
+  for (let i = 0; i < linesBefore; i++) {
+    let startLine = i + parentToken.map[0] + 1;
+    lineOffset += blockState.tShift[startLine];
   }
   return lineOffset;
 }
@@ -474,11 +474,11 @@ exports.parseLinkTitle       = require('./parse_link_title');
 'use strict';
 
 
-var unescapeAll = require('../common/utils').unescapeAll;
+let unescapeAll = require('../common/utils').unescapeAll;
 
 
 module.exports = function parseLinkDestination(str, pos, max) {
-  var code, level,
+  let code, level,
       lines = 0,
       start = pos,
       result = {
@@ -558,7 +558,7 @@ module.exports = function parseLinkDestination(str, pos, max) {
 'use strict';
 
 module.exports = function parseLinkLabel(state, start, disableNested) {
-  var level, found, marker, prevPos,
+  let level, found, marker, prevPos,
       labelEnd = -1,
       max = state.posMax,
       oldPos = state.pos;
@@ -605,11 +605,11 @@ module.exports = function parseLinkLabel(state, start, disableNested) {
 'use strict';
 
 
-var unescapeAll = require('../common/utils').unescapeAll;
+let unescapeAll = require('../common/utils').unescapeAll;
 
 
 module.exports = function parseLinkTitle(str, pos, max) {
-  var code,
+  let code,
       marker,
       lines = 0,
       start = pos,
@@ -660,18 +660,18 @@ module.exports = function parseLinkTitle(str, pos, max) {
 'use strict';
 
 
-var utils        = require('./common/utils');
-var helpers      = require('./helpers');
-var Renderer     = require('./renderer');
-var ParserCore   = require('./parser_core');
-var ParserBlock  = require('./parser_block');
-var ParserInline = require('./parser_inline');
-var LinkifyIt    = require('linkify-it');
-var mdurl        = require('mdurl');
-var punycode     = require('punycode');
+let utils        = require('./common/utils');
+let helpers      = require('./helpers');
+let Renderer     = require('./renderer');
+let ParserCore   = require('./parser_core');
+let ParserBlock  = require('./parser_block');
+let ParserInline = require('./parser_inline');
+let LinkifyIt    = require('linkify-it');
+let mdurl        = require('mdurl');
+let punycode     = require('punycode');
 
 
-var config = {
+let config = {
   'default': require('./presets/default'),
   zero: require('./presets/zero'),
   commonmark: require('./presets/commonmark')
@@ -686,12 +686,12 @@ var config = {
 // replace it with dummy function and use external sanitizer.
 //
 
-var BAD_PROTO_RE = /^(vbscript|javascript|file|data):/;
-var GOOD_DATA_RE = /^data:image\/(gif|png|jpeg|webp);/;
+let BAD_PROTO_RE = /^(vbscript|javascript|file|data):/;
+let GOOD_DATA_RE = /^data:image\/(gif|png|jpeg|webp);/;
 
 function validateLink(url) {
   // url should be normalized at this point, and existing entities are decoded
-  var str = url.trim().toLowerCase();
+  let str = url.trim().toLowerCase();
 
   return BAD_PROTO_RE.test(str) ? (GOOD_DATA_RE.test(str) ? true : false) : true;
 }
@@ -699,10 +699,10 @@ function validateLink(url) {
 ////////////////////////////////////////////////////////////////////////////////
 
 
-var RECODE_HOSTNAME_FOR = [ 'http:', 'https:', 'mailto:' ];
+let RECODE_HOSTNAME_FOR = [ 'http:', 'https:', 'mailto:' ];
 
 function normalizeLink(url) {
-  var parsed = mdurl.parse(url, true);
+  let parsed = mdurl.parse(url, true);
 
   if (parsed.hostname) {
     // Encode hostnames in urls like:
@@ -722,7 +722,7 @@ function normalizeLink(url) {
 }
 
 function normalizeLinkText(url) {
-  var parsed = mdurl.parse(url, true);
+  let parsed = mdurl.parse(url, true);
 
   if (parsed.hostname) {
     // Encode hostnames in urls like:
@@ -1050,7 +1050,7 @@ MarkdownIt.prototype.set = function (options) {
  * will give better compatibility with next versions.
  **/
 MarkdownIt.prototype.configure = function (presets) {
-  var self = this, presetName;
+  let self = this, presetName;
 
   if (utils.isString(presets)) {
     presetName = presets;
@@ -1097,7 +1097,7 @@ MarkdownIt.prototype.configure = function (presets) {
  * ```
  **/
 MarkdownIt.prototype.enable = function (list, ignoreInvalid) {
-  var result = [];
+  let result = [];
 
   if (!Array.isArray(list)) { list = [ list ]; }
 
@@ -1108,7 +1108,7 @@ MarkdownIt.prototype.enable = function (list, ignoreInvalid) {
   result = result.concat(this.inline.ruler2.enable(list, true));
   result = result.concat(this.inline.ruler0.enable(list, true));
 
-  var missed = list.filter(function (name) { return result.indexOf(name) < 0; });
+  let missed = list.filter(function (name) { return result.indexOf(name) < 0; });
 
   if (missed.length && !ignoreInvalid) {
     throw new Error('MarkdownIt. Failed to enable unknown rule(s): ' + missed);
@@ -1126,7 +1126,7 @@ MarkdownIt.prototype.enable = function (list, ignoreInvalid) {
  * The same as [[MarkdownIt.enable]], but turn specified rules off.
  **/
 MarkdownIt.prototype.disable = function (list, ignoreInvalid) {
-  var result = [];
+  let result = [];
 
   if (!Array.isArray(list)) { list = [ list ]; }
 
@@ -1137,7 +1137,7 @@ MarkdownIt.prototype.disable = function (list, ignoreInvalid) {
   result = result.concat(this.inline.ruler2.disable(list, true));
   result = result.concat(this.inline.ruler0.disable(list, true));
 
-  var missed = list.filter(function (name) { return result.indexOf(name) < 0; });
+  let missed = list.filter(function (name) { return result.indexOf(name) < 0; });
 
   if (missed.length && !ignoreInvalid) {
     throw new Error('MarkdownIt. Failed to disable unknown rule(s): ' + missed);
@@ -1163,7 +1163,7 @@ MarkdownIt.prototype.disable = function (list, ignoreInvalid) {
  * ```
  **/
 MarkdownIt.prototype.use = function (plugin /*, params, ... */) {
-  var args = [ this ].concat(Array.prototype.slice.call(arguments, 1));
+  let args = [ this ].concat(Array.prototype.slice.call(arguments, 1));
   plugin.apply(plugin, args);
   return this;
 };
@@ -1188,7 +1188,7 @@ MarkdownIt.prototype.parse = function (src, env) {
   if (typeof src !== 'string') {
     throw new Error('Input data should be a String');
   }
-  var state = new this.core.State(src, this, env || {});
+  let state = new this.core.State(src, this, env || {});
 
   this.core.process(state);
 
@@ -1224,7 +1224,7 @@ MarkdownIt.prototype.render = function (src, env) {
  * tokens in `children` property. Also updates `env` object.
  **/
 MarkdownIt.prototype.parseInline = function (src, env) {
-  var state = new this.core.State(src, this, env);
+  let state = new this.core.State(src, this, env);
 
   state.inlineMode = true;
   this.core.process(state);
@@ -1259,10 +1259,10 @@ module.exports = MarkdownIt;
 'use strict';
 
 
-var Ruler           = require('./ruler');
+let Ruler           = require('./ruler');
 
 
-var _rules = [
+let _rules = [
   // First 2 params - rule name & source. Secondary array - list of rules,
   // which can be terminated by this one.
   [ 'table',      require('./rules_block/table'),      [ 'paragraph', 'reference' ] ],
@@ -1290,7 +1290,7 @@ function ParserBlock() {
    **/
   this.ruler = new Ruler();
 
-  for (var i = 0; i < _rules.length; i++) {
+  for (let i = 0; i < _rules.length; i++) {
     this.ruler.push(_rules[i][0], _rules[i][1], { alt: (_rules[i][2] || []).slice() });
   }
 }
@@ -1299,7 +1299,7 @@ function ParserBlock() {
 // Generate tokens for input range
 //
 ParserBlock.prototype.tokenize = function (state, startLine, endLine) {
-  var ok, i,
+  let ok, i,
       rules = this.ruler.getRules(''),
       len = rules.length,
       line = startLine,
@@ -1359,7 +1359,7 @@ ParserBlock.prototype.tokenize = function (state, startLine, endLine) {
  * Process input string and push block tokens into `outTokens`
  **/
 ParserBlock.prototype.parse = function (src, md, env, outTokens) {
-  var state;
+  let state;
 
   if (!src) { return; }
 
@@ -1384,10 +1384,10 @@ module.exports = ParserBlock;
 'use strict';
 
 
-var Ruler  = require('./ruler');
+let Ruler  = require('./ruler');
 
 
-var _rules = [
+let _rules = [
   [ 'normalize',      require('./rules_core/normalize')      ],
   [ 'block',          require('./rules_core/block')          ],
   [ 'inline',         require('./rules_core/inline')         ],
@@ -1407,7 +1407,7 @@ function Core() {
    **/
   this.ruler = new Ruler();
 
-  for (var i = 0; i < _rules.length; i++) {
+  for (let i = 0; i < _rules.length; i++) {
     this.ruler.push(_rules[i][0], _rules[i][1]);
   }
 }
@@ -1419,7 +1419,7 @@ function Core() {
  * Executes core chain rules.
  **/
 Core.prototype.process = function (state) {
-  var i, l, rules;
+  let i, l, rules;
 
   rules = this.ruler.getRules('');
 
@@ -1442,17 +1442,17 @@ module.exports = Core;
 'use strict';
 
 
-var Ruler           = require('./ruler');
+let Ruler           = require('./ruler');
 
 
 ////////////////////////////////////////////////////////////////////////////////
 // Parser rules
 
-var _rules0 = [
+let _rules0 = [
   [ 'linkify',         require('./rules_inline/linkify').preProcess ]
 ];
 
-var _rules = [
+let _rules = [
   [ 'linkify',         require('./rules_inline/linkify').tokenize ],
   [ 'text',            require('./rules_inline/text') ],
   [ 'newline',         require('./rules_inline/newline') ],
@@ -1467,7 +1467,7 @@ var _rules = [
   [ 'entity',          require('./rules_inline/entity') ]
 ];
 
-var _rules2 = [
+let _rules2 = [
   [ 'balance_pairs',   require('./rules_inline/balance_pairs') ],
   [ 'strikethrough',   require('./rules_inline/strikethrough').postProcess ],
   [ 'emphasis',        require('./rules_inline/emphasis').postProcess ],
@@ -1480,7 +1480,7 @@ var _rules2 = [
  * new ParserInline()
  **/
 function ParserInline() {
-  var i;
+  let i;
 
   /**
    * ParserInline#ruler -> Ruler
@@ -1523,7 +1523,7 @@ function ParserInline() {
 // returns `true` if any rule reported success
 //
 ParserInline.prototype.skipToken = function (state) {
-  var ok, i, pos = state.pos,
+  let ok, i, pos = state.pos,
       rules = this.ruler.getRules(''),
       len = rules.length,
       maxNesting = state.md.options.maxNesting,
@@ -1570,7 +1570,7 @@ ParserInline.prototype.skipToken = function (state) {
 // Generate tokens for input range
 //
 ParserInline.prototype.tokenize = function (state) {
-  var ok, i,
+  let ok, i,
       rules = this.ruler.getRules(''),
       len = rules.length,
       end = state.posMax,
@@ -1611,8 +1611,8 @@ ParserInline.prototype.tokenize = function (state) {
  * Process input string and push inline tokens into `outTokens`
  **/
 ParserInline.prototype.parse = function (str, md, env, outTokens) {
-  var i, rules, len;
-  var state = new this.State(str, md, env, outTokens);
+  let i, rules, len;
+  let state = new this.State(str, md, env, outTokens);
 
   rules = this.ruler0.getRules('');
   len = rules.length;
@@ -1873,19 +1873,19 @@ module.exports = {
 'use strict';
 
 
-var assign          = require('./common/utils').assign;
-var unescapeAll     = require('./common/utils').unescapeAll;
-var escapeHtml      = require('./common/utils').escapeHtml;
-var isNil           = require('./common/utils').isNil;
+let assign          = require('./common/utils').assign;
+let unescapeAll     = require('./common/utils').unescapeAll;
+let escapeHtml      = require('./common/utils').escapeHtml;
+let isNil           = require('./common/utils').isNil;
 
 
 ////////////////////////////////////////////////////////////////////////////////
 
-var default_rules = {};
+let default_rules = {};
 
 
 default_rules.code_inline = function (tokens, idx, options, env, slf) {
-  var token = tokens[idx];
+  let token = tokens[idx];
 
   return  '<code' + slf.renderAttrs(token) + '>' +
           escapeHtml(tokens[idx].content) +
@@ -1894,7 +1894,7 @@ default_rules.code_inline = function (tokens, idx, options, env, slf) {
 
 
 default_rules.code_block = function (tokens, idx, options, env, slf) {
-  var token = tokens[idx];
+  let token = tokens[idx];
 
   return  '<pre' + slf.renderAttrs(token) + '><code>' +
           escapeHtml(tokens[idx].content) +
@@ -1903,7 +1903,7 @@ default_rules.code_block = function (tokens, idx, options, env, slf) {
 
 
 default_rules.fence = function (tokens, idx, options, env, slf) {
-  var token = tokens[idx],
+  let token = tokens[idx],
       info = token.info ? unescapeAll(token.info).trim() : '',
       langName = '',
       highlighted, i, tmpAttrs, tmpToken;
@@ -1953,7 +1953,7 @@ default_rules.fence = function (tokens, idx, options, env, slf) {
 
 
 default_rules.image = function (tokens, idx, options, env, slf) {
-  var token = tokens[idx];
+  let token = tokens[idx];
 
   // "alt" attr MUST be set, even if empty. Because it's mandatory and
   // should be placed on proper position for tests.
@@ -2033,7 +2033,7 @@ function Renderer() {
  * Render token attributes to string.
  **/
 Renderer.prototype.renderAttrs = function renderAttrs(token, options) {
-  var i, l, result;
+  let i, l, result;
 
   if (options && options.default_attributes && options.default_attributes[token.tag]) {
     token.attrs = (token.attrs || []).concat(options.default_attributes[token.tag]);
@@ -2044,7 +2044,7 @@ Renderer.prototype.renderAttrs = function renderAttrs(token, options) {
   result = '';
 
   for (i = 0, l = token.attrs.length; i < l; i++) {
-    var value = token.attrs[i][1];
+    let value = token.attrs[i][1];
     result += ' ' + escapeHtml(token.attrs[i][0]) + (isNil(value) ? '' : '="' + escapeHtml(value) + '"');
   }
 
@@ -2062,7 +2062,7 @@ Renderer.prototype.renderAttrs = function renderAttrs(token, options) {
  * in [[Renderer#rules]].
  **/
 Renderer.prototype.renderToken = function renderToken(tokens, idx, options) {
-  var nextToken,
+  let nextToken,
       result = '',
       needLf = false,
       token = tokens[idx];
@@ -2134,12 +2134,12 @@ Renderer.prototype.renderToken = function renderToken(tokens, idx, options) {
  * The same as [[Renderer.render]], but for single token of `inline` type.
  **/
 Renderer.prototype.renderInline = function (tokens, options, env) {
-  var type,
+  let type,
       result = '',
       rules = this.rules;
 
   if (tokens) {
-    for (var i = 0, len = tokens.length; i < len; i++) {
+    for (let i = 0, len = tokens.length; i < len; i++) {
       type = tokens[i].type;
 
       if (typeof rules[type] !== 'undefined') {
@@ -2165,10 +2165,10 @@ Renderer.prototype.renderInline = function (tokens, options, env) {
  * instead of simple escaping.
  **/
 Renderer.prototype.renderInlineAsText = function (tokens, options, env) {
-  var result = '';
+  let result = '';
 
   if (tokens) {
-    for (var i = 0, len = tokens.length; i < len; i++) {
+    for (let i = 0, len = tokens.length; i < len; i++) {
       if (tokens[i].type === 'text') {
         result += tokens[i].content;
       } else if (tokens[i].type === 'image') {
@@ -2193,7 +2193,7 @@ Renderer.prototype.renderInlineAsText = function (tokens, options, env) {
 Renderer.prototype.render = function (tokens, options, env) {
   if (options.ast) return tokens;
 
-  var i, len, type,
+  let i, len, type,
       result = '',
       rules = this.rules;
 
@@ -2274,8 +2274,8 @@ Ruler.prototype.__find__ = function (name) {
 // Build rules lookup cache
 //
 Ruler.prototype.__compile__ = function () {
-  var self = this;
-  var chains = [ '' ];
+  let self = this;
+  let chains = [ '' ];
 
   // collect unique names
   self.__rules__.forEach(function (rule) {
@@ -2329,8 +2329,8 @@ Ruler.prototype.__compile__ = function () {
  * ```
  **/
 Ruler.prototype.at = function (name, fn, options) {
-  var index = this.__find__(name);
-  var opt = options || {};
+  let index = this.__find__(name);
+  let opt = options || {};
 
   if (index === -1) { throw new Error('Parser rule not found: ' + name); }
 
@@ -2365,8 +2365,8 @@ Ruler.prototype.at = function (name, fn, options) {
  * ```
  **/
 Ruler.prototype.before = function (beforeName, ruleName, fn, options) {
-  var index = this.__find__(beforeName);
-  var opt = options || {};
+  let index = this.__find__(beforeName);
+  let opt = options || {};
 
   if (index === -1) { throw new Error('Parser rule not found: ' + beforeName); }
 
@@ -2406,8 +2406,8 @@ Ruler.prototype.before = function (beforeName, ruleName, fn, options) {
  * ```
  **/
 Ruler.prototype.after = function (afterName, ruleName, fn, options) {
-  var index = this.__find__(afterName);
-  var opt = options || {};
+  let index = this.__find__(afterName);
+  let opt = options || {};
 
   if (index === -1) { throw new Error('Parser rule not found: ' + afterName); }
 
@@ -2445,7 +2445,7 @@ Ruler.prototype.after = function (afterName, ruleName, fn, options) {
  * ```
  **/
 Ruler.prototype.push = function (ruleName, fn, options) {
-  var opt = options || {};
+  let opt = options || {};
 
   this.__rules__.push({
     name: ruleName,
@@ -2473,11 +2473,11 @@ Ruler.prototype.push = function (ruleName, fn, options) {
 Ruler.prototype.enable = function (list, ignoreInvalid) {
   if (!Array.isArray(list)) { list = [ list ]; }
 
-  var result = [];
+  let result = [];
 
   // Search by name and enable
   list.forEach(function (name) {
-    var idx = this.__find__(name);
+    let idx = this.__find__(name);
 
     if (idx < 0) {
       if (ignoreInvalid) { return; }
@@ -2526,11 +2526,11 @@ Ruler.prototype.enableOnly = function (list, ignoreInvalid) {
 Ruler.prototype.disable = function (list, ignoreInvalid) {
   if (!Array.isArray(list)) { list = [ list ]; }
 
-  var result = [];
+  let result = [];
 
   // Search by name and disable
   list.forEach(function (name) {
-    var idx = this.__find__(name);
+    let idx = this.__find__(name);
 
     if (idx < 0) {
       if (ignoreInvalid) { return; }
@@ -2570,11 +2570,11 @@ module.exports = Ruler;
 
 'use strict';
 
-var isSpace = require('../common/utils').isSpace;
+let isSpace = require('../common/utils').isSpace;
 
 
 module.exports = function blockquote(state, startLine, endLine, silent) {
-  var adjustTab,
+  let adjustTab,
       ch,
       i,
       initial,
@@ -2859,7 +2859,7 @@ module.exports = function blockquote(state, startLine, endLine, silent) {
 
 
 module.exports = function code(state, startLine, endLine/*, silent*/) {
-  var nextLine, last, token,
+  let nextLine, last, token,
       pos = state.bMarks[startLine],
       endPos;
 
@@ -2900,7 +2900,7 @@ module.exports = function code(state, startLine, endLine/*, silent*/) {
 
 
 module.exports = function fence(state, startLine, endLine, silent) {
-  var marker, len, params, nextLine, mem, token, markup, originalPos,
+  let marker, len, params, nextLine, mem, token, markup, originalPos,
       haveEndMarker = false,
       pos = state.bMarks[startLine] + state.tShift[startLine],
       max = state.eMarks[startLine];
@@ -3001,12 +3001,12 @@ module.exports = function fence(state, startLine, endLine, silent) {
 
 'use strict';
 
-var isSpace = require('../common/utils').isSpace;
-var trimLeftOffset = require('../common/utils').trimLeftOffset;
+let isSpace = require('../common/utils').isSpace;
+let trimLeftOffset = require('../common/utils').trimLeftOffset;
 
 
 module.exports = function heading(state, startLine, endLine, silent) {
-  var ch, level, tmp, token, originalPos, originalMax,
+  let ch, level, tmp, token, originalPos, originalMax,
       pos = state.bMarks[startLine] + state.tShift[startLine],
       max = state.eMarks[startLine];
 
@@ -3047,7 +3047,7 @@ module.exports = function heading(state, startLine, endLine, silent) {
   token.position = originalPos;
   token.size     = pos - originalPos;
 
-  var originalContent = state.src.slice(pos, max);
+  let originalContent = state.src.slice(pos, max);
   token          = state.push('inline', '', 0);
   token.content  = originalContent.trim();
   token.map      = [ startLine, state.line ];
@@ -3068,11 +3068,11 @@ module.exports = function heading(state, startLine, endLine, silent) {
 
 'use strict';
 
-var isSpace = require('../common/utils').isSpace;
+let isSpace = require('../common/utils').isSpace;
 
 
 module.exports = function hr(state, startLine, endLine, silent) {
-  var marker, cnt, ch, token, originalPos,
+  let marker, cnt, ch, token, originalPos,
       pos = state.bMarks[startLine] + state.tShift[startLine],
       max = state.eMarks[startLine];
 
@@ -3119,13 +3119,13 @@ module.exports = function hr(state, startLine, endLine, silent) {
 'use strict';
 
 
-var block_names = require('../common/html_blocks');
-var HTML_OPEN_CLOSE_TAG_RE = require('../common/html_re').HTML_OPEN_CLOSE_TAG_RE;
+let block_names = require('../common/html_blocks');
+let HTML_OPEN_CLOSE_TAG_RE = require('../common/html_re').HTML_OPEN_CLOSE_TAG_RE;
 
 // An array of opening and corresponding closing sequences for html tags,
 // last argument defines whether it can terminate a paragraph or not
 //
-var HTML_SEQUENCES = [
+let HTML_SEQUENCES = [
   [ /^<(script|pre|style)(?=(\s|>|$))/i, /<\/(script|pre|style)>/i, true ],
   [ /^<!--/,        /-->/,   true ],
   [ /^<\?/,         /\?>/,   true ],
@@ -3137,7 +3137,7 @@ var HTML_SEQUENCES = [
 
 
 module.exports = function html_block(state, startLine, endLine, silent) {
-  var i, nextLine, token, lineText,
+  let i, nextLine, token, lineText,
       pos = state.bMarks[startLine] + state.tShift[startLine],
       max = state.eMarks[startLine];
 
@@ -3194,11 +3194,11 @@ module.exports = function html_block(state, startLine, endLine, silent) {
 
 'use strict';
 
-var trimLeftOffset = require('../common/utils').trimLeftOffset;
+let trimLeftOffset = require('../common/utils').trimLeftOffset;
 
 
 module.exports = function lheading(state, startLine, endLine/*, silent*/) {
-  var content, terminate, i, l, token, pos, max, level, marker,
+  let content, terminate, i, l, token, pos, max, level, marker,
       nextLine = startLine + 1, oldParentType,
       terminatorRules = state.md.block.ruler.getRules('paragraph');
 
@@ -3287,13 +3287,13 @@ module.exports = function lheading(state, startLine, endLine/*, silent*/) {
 
 'use strict';
 
-var isSpace = require('../common/utils').isSpace;
+let isSpace = require('../common/utils').isSpace;
 
 
 // Search `[-+*][\n ]`, returns next pos after marker on success
 // or -1 on fail.
 function skipBulletListMarker(state, startLine) {
-  var marker, pos, max, ch;
+  let marker, pos, max, ch;
 
   pos = state.bMarks[startLine] + state.tShift[startLine];
   max = state.eMarks[startLine];
@@ -3321,7 +3321,7 @@ function skipBulletListMarker(state, startLine) {
 // Search `\d+[.)][\n ]`, returns next pos after marker on success
 // or -1 on fail.
 function skipOrderedListMarker(state, startLine) {
-  var ch,
+  let ch,
       start = state.bMarks[startLine] + state.tShift[startLine],
       pos = start,
       max = state.eMarks[startLine];
@@ -3369,7 +3369,7 @@ function skipOrderedListMarker(state, startLine) {
 }
 
 function markTightParagraphs(state, idx) {
-  var i, l,
+  let i, l,
       level = state.level + 2;
 
   for (i = idx + 2, l = state.tokens.length - 2; i < l; i++) {
@@ -3383,7 +3383,7 @@ function markTightParagraphs(state, idx) {
 
 
 module.exports = function list(state, startLine, endLine, silent) {
-  var ch,
+  let ch,
       contentStart,
       i,
       indent,
@@ -3652,11 +3652,11 @@ module.exports = function list(state, startLine, endLine, silent) {
 
 'use strict';
 
-var trimLeftOffset = require('../common/utils').trimLeftOffset;
+let trimLeftOffset = require('../common/utils').trimLeftOffset;
 
 
 module.exports = function paragraph(state, startLine/*, endLine*/) {
-  var content, terminate, i, l, token, oldParentType,
+  let content, terminate, i, l, token, oldParentType,
       nextLine = startLine + 1,
       terminatorRules = state.md.block.ruler.getRules('paragraph'),
       endLine = state.lineMax,
@@ -3698,12 +3698,12 @@ module.exports = function paragraph(state, startLine/*, endLine*/) {
   token.content  = content.trim();
   token.map      = [ startLine, state.line ];
   token.children = [];
-  token.position = pos + state.sCount[startLine] + trimLeftOffset(content);
+  token.position = pos + state.tShift[startLine] + trimLeftOffset(content);
   token.size     = token.content.length;
 
   token          = state.push('paragraph_close', 'p', -1);
   token.size     = 0;
-  token.position = content.length + pos + state.sCount[startLine];
+  token.position = content.length + pos + state.tShift[startLine];
 
   state.parentType = oldParentType;
 
@@ -3714,12 +3714,12 @@ module.exports = function paragraph(state, startLine/*, endLine*/) {
 'use strict';
 
 
-var normalizeReference   = require('../common/utils').normalizeReference;
-var isSpace              = require('../common/utils').isSpace;
+let normalizeReference   = require('../common/utils').normalizeReference;
+let isSpace              = require('../common/utils').isSpace;
 
 
 module.exports = function reference(state, startLine, _endLine, silent) {
-  var ch,
+  let ch,
       destEndPos,
       destEndLineNo,
       endLine,
@@ -3917,12 +3917,12 @@ module.exports = function reference(state, startLine, _endLine, silent) {
 
 'use strict';
 
-var Token = require('../token');
-var isSpace = require('../common/utils').isSpace;
+let Token = require('../token');
+let isSpace = require('../common/utils').isSpace;
 
 
 function StateBlock(src, md, env, tokens) {
-  var ch, s, start, pos, len, indent, offset, indent_found;
+  let ch, s, start, pos, len, indent, offset, indent_found;
 
   this.src = src;
 
@@ -4028,7 +4028,7 @@ function StateBlock(src, md, env, tokens) {
 // Push new token to "stream".
 //
 StateBlock.prototype.push = function (type, tag, nesting) {
-  var token = new Token(type, tag, nesting);
+  let token = new Token(type, tag, nesting);
   token.block = true;
 
   if (nesting < 0) this.level--; // closing tag
@@ -4044,7 +4044,7 @@ StateBlock.prototype.isEmpty = function isEmpty(line) {
 };
 
 StateBlock.prototype.skipEmptyLines = function skipEmptyLines(from) {
-  for (var max = this.lineMax; from < max; from++) {
+  for (let max = this.lineMax; from < max; from++) {
     if (this.bMarks[from] + this.tShift[from] < this.eMarks[from]) {
       break;
     }
@@ -4054,9 +4054,9 @@ StateBlock.prototype.skipEmptyLines = function skipEmptyLines(from) {
 
 // Skip spaces from given position.
 StateBlock.prototype.skipSpaces = function skipSpaces(pos) {
-  var ch;
+  let ch;
 
-  for (var max = this.src.length; pos < max; pos++) {
+  for (let max = this.src.length; pos < max; pos++) {
     ch = this.src.charCodeAt(pos);
     if (!isSpace(ch)) { break; }
   }
@@ -4075,7 +4075,7 @@ StateBlock.prototype.skipSpacesBack = function skipSpacesBack(pos, min) {
 
 // Skip char codes from given position
 StateBlock.prototype.skipChars = function skipChars(pos, code) {
-  for (var max = this.src.length; pos < max; pos++) {
+  for (let max = this.src.length; pos < max; pos++) {
     if (this.src.charCodeAt(pos) !== code) { break; }
   }
   return pos;
@@ -4093,7 +4093,7 @@ StateBlock.prototype.skipCharsBack = function skipCharsBack(pos, code, min) {
 
 // cut lines range from source.
 StateBlock.prototype.getLines = function getLines(begin, end, indent, keepLastLF) {
-  var i, lineIndent, ch, first, last, queue, lineStart,
+  let i, lineIndent, ch, first, last, queue, lineStart,
       line = begin;
 
   if (begin >= end) {
@@ -4155,19 +4155,19 @@ module.exports = StateBlock;
 
 'use strict';
 
-var isSpace = require('../common/utils').isSpace;
-var trimLeftOffset = require('../common/utils').trimLeftOffset;
+let isSpace = require('../common/utils').isSpace;
+let trimLeftOffset = require('../common/utils').trimLeftOffset;
 
 
 function getLine(state, line) {
-  var pos = state.bMarks[line] + state.blkIndent,
+  let pos = state.bMarks[line] + state.blkIndent,
       max = state.eMarks[line];
 
   return state.src.substr(pos, max - pos);
 }
 
 function escapedSplit(str, positions) {
-  var result = [],
+  let result = [],
       pos = 0,
       max = str.length,
       ch,
@@ -4221,7 +4221,7 @@ function escapedSplit(str, positions) {
 
 
 module.exports = function table(state, startLine, endLine, silent) {
-  var ch, lineText, lineTextReplaced, pos, i, nextLine, columns, columnCount, token,
+  let ch, lineText, lineTextReplaced, pos, i, nextLine, columns, columnCount, token,
       aligns, t, tableLines, tbodyLines, positions, len, columnVIndex;
 
   // should have at least two lines
@@ -4378,7 +4378,7 @@ module.exports = function table(state, startLine, endLine, silent) {
         token.attrs  = [ [ 'style', 'text-align:' + aligns[i] ] ];
       }
 
-      var originalContent = columns[i] || '';
+      let originalContent = columns[i] || '';
 
       token          = state.push('inline', '', 0);
       token.content  = originalContent.trim();
@@ -4418,7 +4418,7 @@ module.exports = function table(state, startLine, endLine, silent) {
 
 
 module.exports = function block(state) {
-  var token;
+  let token;
 
   if (state.inlineMode) {
     token          = new state.Token('inline', '', 0);
@@ -4434,17 +4434,25 @@ module.exports = function block(state) {
 },{}],32:[function(require,module,exports){
 'use strict';
 
-module.exports = function inline(state) {
-  var tokens = state.tokens, tok, i, l;
+module.exports = function inline(state, positionOffset) {
+  let tokens = state.tokens, tok, i, l;
 
   // Parse inlines
   for (i = 0, l = tokens.length; i < l; i++) {
     tok = tokens[i];
+    tok.position += positionOffset || 0;
+
     if (tok.type === 'inline') {
-      state.md.inline.parse(tok.content, state.md, Object.assign({}, state.env, { parentToken: tok }), tok.children);
+      state.md.inline.parse(tok.content, state.md,
+        Object.assign(
+          {},
+          state.env,
+          { parentToken: tok, parentState: state, parentTokenIndex: i }
+        ),
+        tok.children);
 
       // Update position of all children to be absolute
-      for (var child = 0; child < tok.children.length; child++) {
+      for (let child = 0; child < tok.children.length; child++) {
         tok.children[child].position += tok.position;
       }
     }
@@ -4458,12 +4466,12 @@ module.exports = function inline(state) {
 
 
 // https://spec.commonmark.org/0.29/#line-ending
-var NEWLINES_RE  = /\r\n?|\n/g;
-var NULL_RE      = /\0/g;
+let NEWLINES_RE  = /\r\n?|\n/g;
+let NULL_RE      = /\0/g;
 
 
 module.exports = function normalize(state) {
-  var str;
+  let str;
 
   // Normalize newlines
   str = state.src.replace(NEWLINES_RE, '\n');
@@ -4494,9 +4502,9 @@ module.exports = function normalize(state) {
 // - fractionals 1/2, 1/4, 3/4 -> ½, ¼, ¾
 // - miltiplication 2 x 4 -> 2 × 4
 
-var RARE_RE = /\+-|\.\.|\?\?\?\?|!!!!|,,|--|==/;
+let RARE_RE = /\+-|\.\.|\?\?\?\?|!!!!|,,|--|==/;
 
-var ARROW_REPLACEMENTS = {
+let ARROW_REPLACEMENTS = {
   '<-->': '\u2194',
   '-->': '\u2192',
   '<--': '\u2190',
@@ -4507,10 +4515,10 @@ var ARROW_REPLACEMENTS = {
 
 // Workaround for phantomjs - need regex without /g flag,
 // or root check will fail every second time
-var SCOPED_ABBR_TEST_RE = /\((c|tm|r|p)\)/i;
+let SCOPED_ABBR_TEST_RE = /\((c|tm|r|p)\)/i;
 
-var SCOPED_ABBR_RE = /\((c|tm|r|p)\)/ig;
-var SCOPED_ABBR = {
+let SCOPED_ABBR_RE = /\((c|tm|r|p)\)/ig;
+let SCOPED_ABBR = {
   c: '©',
   r: '®',
   p: '§',
@@ -4522,7 +4530,7 @@ function replaceFn(match, name) {
 }
 
 function replace_scoped(inlineTokens) {
-  var i, token, inside_autolink = 0;
+  let i, token, inside_autolink = 0;
 
   for (i = inlineTokens.length - 1; i >= 0; i--) {
     token = inlineTokens[i];
@@ -4542,7 +4550,7 @@ function replace_scoped(inlineTokens) {
 }
 
 function replace_rare(inlineTokens) {
-  var i, token, inside_autolink = 0;
+  let i, token, inside_autolink = 0;
 
   function replace_arrow(m, p1, p2) {
     return p1 + (ARROW_REPLACEMENTS[p2] || p2);
@@ -4592,7 +4600,7 @@ function replace_rare(inlineTokens) {
 
 
 module.exports = function replace(state) {
-  var blkIdx;
+  let blkIdx;
 
   if (!state.md.options.typographer) { return; }
 
@@ -4617,13 +4625,13 @@ module.exports = function replace(state) {
 'use strict';
 
 
-var isWhiteSpace   = require('../common/utils').isWhiteSpace;
-var isPunctChar    = require('../common/utils').isPunctChar;
-var isMdAsciiPunct = require('../common/utils').isMdAsciiPunct;
+let isWhiteSpace   = require('../common/utils').isWhiteSpace;
+let isPunctChar    = require('../common/utils').isPunctChar;
+let isMdAsciiPunct = require('../common/utils').isMdAsciiPunct;
 
-var QUOTE_TEST_RE = /['"]/;
-var QUOTE_RE = /['"]/g;
-var APOSTROPHE = '\u2019'; /* ’ */
+let QUOTE_TEST_RE = /['"]/;
+let QUOTE_RE = /['"]/g;
+let APOSTROPHE = '\u2019'; /* ’ */
 
 
 function replaceAt(str, index, ch) {
@@ -4631,7 +4639,7 @@ function replaceAt(str, index, ch) {
 }
 
 function process_inlines(tokens, state) {
-  var i, token, text, t, pos, max, thisLevel, item, lastChar, nextChar,
+  let i, token, text, t, pos, max, thisLevel, item, lastChar, nextChar,
       isLastPunctChar, isNextPunctChar, isLastWhiteSpace, isNextWhiteSpace,
       canOpen, canClose, j, isSingle, stack, openQuote, closeQuote;
 
@@ -4799,7 +4807,7 @@ function process_inlines(tokens, state) {
 
 module.exports = function smartquotes(state) {
   /*eslint max-depth:0*/
-  var blkIdx;
+  let blkIdx;
 
   if (!state.md.options.typographer) { return; }
 
@@ -4819,7 +4827,7 @@ module.exports = function smartquotes(state) {
 //
 'use strict';
 
-var Token = require('../token');
+let Token = require('../token');
 
 
 function StateCore(src, md, env) {
@@ -4843,12 +4851,12 @@ module.exports = StateCore;
 
 
 /*eslint max-len:0*/
-var EMAIL_RE    = /^<([a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*)>/;
-var AUTOLINK_RE = /^<([a-zA-Z][a-zA-Z0-9+.\-]{1,31}):([^<>\x00-\x20]*)>/;
+let EMAIL_RE    = /^<([a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*)>/;
+let AUTOLINK_RE = /^<([a-zA-Z][a-zA-Z0-9+.\-]{1,31}):([^<>\x00-\x20]*)>/;
 
 
 module.exports = function autolink(state, silent) {
-  var tail, linkMatch, emailMatch, url, fullUrl, token,
+  let tail, linkMatch, emailMatch, url, fullUrl, token,
       pos = state.pos;
 
   if (state.src.charCodeAt(pos) !== 0x3C/* < */) { return false; }
@@ -4872,6 +4880,8 @@ module.exports = function autolink(state, silent) {
 
       token         = state.push('text', '', 0);
       token.content = state.md.normalizeLinkText(url);
+      token.position = pos;
+      token.size = token.content.length;
 
       token         = state.push('link_close', 'a', -1);
       token.markup  = 'autolink';
@@ -4897,6 +4907,8 @@ module.exports = function autolink(state, silent) {
 
       token         = state.push('text', '', 0);
       token.content = state.md.normalizeLinkText(url);
+      token.position = pos;
+      token.size = token.content.length;
 
       token         = state.push('link_close', 'a', -1);
       token.markup  = 'autolink';
@@ -4916,7 +4928,7 @@ module.exports = function autolink(state, silent) {
 'use strict';
 
 module.exports = function backtick(state, silent) {
-  var start, max, marker, matchStart, matchEnd, token,
+  let start, max, marker, matchStart, matchEnd, token,
       pos = state.pos,
       ch = state.src.charCodeAt(pos);
 
@@ -4965,7 +4977,7 @@ module.exports = function backtick(state, silent) {
 
 
 function processDelimiters(state, delimiters) {
-  var closerIdx, openerIdx, closer, opener, minOpenerIdx, newMinOpenerIdx,
+  let closerIdx, openerIdx, closer, opener, minOpenerIdx, newMinOpenerIdx,
       isOddMatch, lastJump,
       openersBottom = {},
       max = delimiters.length;
@@ -4983,7 +4995,7 @@ function processDelimiters(state, delimiters) {
 
     // Previously calculated lower bounds (previous fails)
     // for each marker and each delimiter length modulo 3.
-    if (!openersBottom.hasOwnProperty(closer.marker)) {
+    if (!Object.prototype.hasOwnProperty.call(openersBottom, closer.marker)) {
       openersBottom[closer.marker] = [ -1, -1, -1 ];
     }
 
@@ -5055,7 +5067,7 @@ function processDelimiters(state, delimiters) {
 
 
 module.exports = function link_pairs(state) {
-  var curr,
+  let curr,
       tokens_meta = state.tokens_meta,
       max = state.tokens_meta.length;
 
@@ -5073,13 +5085,13 @@ module.exports = function link_pairs(state) {
 //
 'use strict';
 
-var getLineOffset  = require('../common/utils').getLineOffset;
+let getLineOffset  = require('../common/utils').getLineOffset;
 
 
 // Insert each marker as a separate text token, and add it to delimiter list
 //
 module.exports.tokenize = function emphasis(state, silent) {
-  var i, scanned, token,
+  let i, scanned, token,
       start = state.pos,
       marker = state.src.charCodeAt(start);
 
@@ -5137,7 +5149,7 @@ module.exports.tokenize = function emphasis(state, silent) {
 
 
 function postProcess(state, delimiters) {
-  var i,
+  let i,
       startDelim,
       endDelim,
       token,
@@ -5199,7 +5211,7 @@ function postProcess(state, delimiters) {
 // Walk through delimiter list and replace text tokens with tags
 //
 module.exports.postProcess = function emphasis(state) {
-  var curr,
+  let curr,
       tokens_meta = state.tokens_meta,
       max = state.tokens_meta.length;
 
@@ -5217,18 +5229,18 @@ module.exports.postProcess = function emphasis(state) {
 
 'use strict';
 
-var entities          = require('../common/entities');
-var has               = require('../common/utils').has;
-var isValidEntityCode = require('../common/utils').isValidEntityCode;
-var fromCodePoint     = require('../common/utils').fromCodePoint;
+let entities          = require('../common/entities');
+let has               = require('../common/utils').has;
+let isValidEntityCode = require('../common/utils').isValidEntityCode;
+let fromCodePoint     = require('../common/utils').fromCodePoint;
 
 
-var DIGITAL_RE = /^&#((?:x[a-f0-9]{1,6}|[0-9]{1,7}));/i;
-var NAMED_RE   = /^&([a-z][a-z0-9]{1,31});/i;
+let DIGITAL_RE = /^&#((?:x[a-f0-9]{1,6}|[0-9]{1,7}));/i;
+let NAMED_RE   = /^&([a-z][a-z0-9]{1,31});/i;
 
 
 module.exports = function entity(state, silent) {
-  var ch, code, match, pos = state.pos, max = state.posMax;
+  let ch, code, match, pos = state.pos, max = state.posMax;
 
   if (state.src.charCodeAt(pos) !== 0x26/* & */) { return false; }
 
@@ -5267,18 +5279,18 @@ module.exports = function entity(state, silent) {
 
 'use strict';
 
-var isSpace = require('../common/utils').isSpace;
+let isSpace = require('../common/utils').isSpace;
 
-var ESCAPED = [];
+let ESCAPED = [];
 
-for (var i = 0; i < 256; i++) { ESCAPED.push(0); }
+for (let i = 0; i < 256; i++) { ESCAPED.push(0); }
 
 '\\!"#$%&\'()*+,./:;<=>?@[]^_`{|}~-'
   .split('').forEach(function (ch) { ESCAPED[ch.charCodeAt(0)] = 1; });
 
 
 module.exports = function escape(state, silent) {
-  var ch, pos = state.pos, max = state.posMax;
+  let ch, pos = state.pos, max = state.posMax;
 
   if (state.src.charCodeAt(pos) !== 0x5C/* \ */) { return false; }
 
@@ -5322,18 +5334,18 @@ module.exports = function escape(state, silent) {
 'use strict';
 
 
-var HTML_TAG_RE = require('../common/html_re').HTML_TAG_RE;
+let HTML_TAG_RE = require('../common/html_re').HTML_TAG_RE;
 
 
 function isLetter(ch) {
   /*eslint no-bitwise:0*/
-  var lc = ch | 0x20; // to lower case
+  let lc = ch | 0x20; // to lower case
   return (lc >= 0x61/* a */) && (lc <= 0x7a/* z */);
 }
 
 
 module.exports = function html_inline(state, silent) {
-  var ch, match, max, token,
+  let ch, match, max, token,
       pos = state.pos;
 
   if (!state.md.options.html) { return false; }
@@ -5370,12 +5382,12 @@ module.exports = function html_inline(state, silent) {
 
 'use strict';
 
-var normalizeReference   = require('../common/utils').normalizeReference;
-var isSpace              = require('../common/utils').isSpace;
+let normalizeReference   = require('../common/utils').normalizeReference;
+let isSpace              = require('../common/utils').isSpace;
 
 
 module.exports = function image(state, silent) {
-  var attrs,
+  let attrs,
       code,
       content,
       label,
@@ -5536,12 +5548,12 @@ module.exports = function image(state, silent) {
 
 'use strict';
 
-var normalizeReference   = require('../common/utils').normalizeReference;
-var isSpace              = require('../common/utils').isSpace;
+let normalizeReference   = require('../common/utils').normalizeReference;
+let isSpace              = require('../common/utils').isSpace;
 
 
 module.exports = function link(state, silent) {
-  var attrs,
+  let attrs,
       code,
       label,
       labelEnd,
@@ -5673,7 +5685,7 @@ module.exports = function link(state, silent) {
       attrs.push([ 'title', title ]);
     }
 
-    state.md.inline.tokenize(state);
+    state.md.inline.tokenize(state, labelStart);
 
     token        = state.push('link_close', 'a', -1);
   }
@@ -5690,7 +5702,7 @@ module.exports = function link(state, silent) {
 'use strict';
 
 module.exports.tokenize = function linkify(state, silent) {
-  var link, url, fullUrl, urlText, token;
+  let link, url, fullUrl, urlText, token;
 
   if (state.links) {
     link = state.links[state.pos];
@@ -5736,7 +5748,7 @@ module.exports.tokenize = function linkify(state, silent) {
 
 // Set state.links to an index from position to links, if links found
 module.exports.preProcess = function linkify(state) {
-  var links, i;
+  let links, i;
   if (!state.md.options.linkify || !state.md.linkify.pretest(state.src)) {
     return;
   }
@@ -5759,7 +5771,7 @@ function isLinkClose(str) {
 
 // Remove linkify links if already inside
 module.exports.postProcess = function linkify(state) {
-  var i, len, token, linkLevel = 0, htmlLinkLevel = 0;
+  let i, len, token, linkLevel = 0, htmlLinkLevel = 0;
 
   len = state.tokens.length;
   for (i = 0; i < len; i++) {
@@ -5803,11 +5815,11 @@ module.exports.postProcess = function linkify(state) {
 
 'use strict';
 
-var isSpace = require('../common/utils').isSpace;
+let isSpace = require('../common/utils').isSpace;
 
 
 module.exports = function newline(state, silent) {
-  var pmax, max, pos = state.pos;
+  let pmax, max, pos = state.pos;
 
   if (state.src.charCodeAt(pos) !== 0x0A/* \n */) { return false; }
 
@@ -5827,7 +5839,6 @@ module.exports = function newline(state, silent) {
         state.pending = state.pending.slice(0, -1);
         state.push('softbreak', 'br', 0);
       }
-
     } else {
       state.push('softbreak', 'br', 0);
     }
@@ -5848,11 +5859,11 @@ module.exports = function newline(state, silent) {
 'use strict';
 
 
-var Token          = require('../token');
-var isWhiteSpace   = require('../common/utils').isWhiteSpace;
-var isPunctChar    = require('../common/utils').isPunctChar;
-var isMdAsciiPunct = require('../common/utils').isMdAsciiPunct;
-var getLineOffset  = require('../common/utils').getLineOffset;
+let Token          = require('../token');
+let isWhiteSpace   = require('../common/utils').isWhiteSpace;
+let isPunctChar    = require('../common/utils').isPunctChar;
+let isMdAsciiPunct = require('../common/utils').isMdAsciiPunct;
+let getLineOffset  = require('../common/utils').getLineOffset;
 
 
 function StateInline(src, md, env, outTokens) {
@@ -5884,7 +5895,7 @@ function StateInline(src, md, env, outTokens) {
 // Flush pending text
 //
 StateInline.prototype.pushPending = function () {
-  var token = new Token('text', '', 0);
+  let token = new Token('text', '', 0);
   token.content = this.pending;
   token.level = this.pendingLevel;
 
@@ -5905,8 +5916,8 @@ StateInline.prototype.push = function (type, tag, nesting) {
     this.pushPending();
   }
 
-  var token = new Token(type, tag, nesting);
-  var token_meta = null;
+  let token = new Token(type, tag, nesting);
+  let token_meta = null;
 
   if (nesting < 0) {
     // closing tag
@@ -5938,7 +5949,7 @@ StateInline.prototype.push = function (type, tag, nesting) {
 //  - canSplitWord - determine if these markers can be found inside a word
 //
 StateInline.prototype.scanDelims = function (start, canSplitWord) {
-  var pos = start, lastChar, nextChar, count, can_open, can_close,
+  let pos = start, lastChar, nextChar, count, can_open, can_close,
       isLastWhiteSpace, isLastPunctChar,
       isNextWhiteSpace, isNextPunctChar,
       left_flanking = true,
@@ -6005,12 +6016,12 @@ module.exports = StateInline;
 //
 'use strict';
 
-var getLineOffset  = require('../common/utils').getLineOffset;
+let getLineOffset  = require('../common/utils').getLineOffset;
 
 // Insert each marker as a separate text token, and add it to delimiter list
 //
 module.exports.tokenize = function strikethrough(state, silent) {
-  var i, scanned, token, len, ch,
+  let i, scanned, token, len, ch,
       start = state.pos,
       marker = state.src.charCodeAt(start);
 
@@ -6053,7 +6064,7 @@ module.exports.tokenize = function strikethrough(state, silent) {
 
 
 function postProcess(state, delimiters) {
-  var i, j,
+  let i, j,
       startDelim,
       endDelim,
       token,
@@ -6123,7 +6134,7 @@ function postProcess(state, delimiters) {
 // Walk through delimiter list and replace text tokens with tags
 //
 module.exports.postProcess = function strikethrough(state) {
-  var curr,
+  let curr,
       tokens_meta = state.tokens_meta,
       max = state.tokens_meta.length;
 
@@ -6183,7 +6194,7 @@ function isTerminatorChar(ch) {
 }
 
 module.exports = function text(state, silent) {
-  var pos = state.pos;
+  let pos = state.pos;
 
   while (pos < state.posMax && !isTerminatorChar(state.src.charCodeAt(pos)) &&
          (!state.links || !state.links[pos])) {
@@ -6242,7 +6253,7 @@ module.exports = function text(state, silent) {
 
 
 module.exports = function text_collapse(state) {
-  var curr, last,
+  let curr, last,
       level = 0,
       tokens = state.tokens,
       max = state.tokens.length;
@@ -6260,10 +6271,13 @@ module.exports = function text_collapse(state) {
 
       // collapse two adjacent text nodes
       tokens[curr + 1].content = tokens[curr].content + tokens[curr + 1].content;
-      if (typeof tokens[curr].position !== 'undefined') {
-        tokens[curr + 1].size += tokens[curr + 1].position - tokens[curr].position;
+
+      // only move foward position when it has content
+      if (tokens[curr].content) {
         tokens[curr + 1].position = tokens[curr].position;
       }
+      // add up size
+      tokens[curr + 1].size = tokens[curr].size + tokens[curr + 1].size;
     } else {
       if (curr !== last) { tokens[last] = tokens[curr]; }
 
@@ -6412,7 +6426,7 @@ function Token(type, tag, nesting) {
  * Search attribute index by name.
  **/
 Token.prototype.attrIndex = function attrIndex(name) {
-  var attrs;
+  let attrs;
 
   if (!this.attrs) { return -1; }
 
@@ -6444,7 +6458,7 @@ Token.prototype.attrPush = function attrPush(attrData) {
  * Set `name` attribute to `value`. Override old value if exists.
  **/
 Token.prototype.attrSet = function attrSet(name, value) {
-  var idx = this.attrIndex(name),
+  let idx = this.attrIndex(name),
       attrData = [ name, value ];
 
   if (idx < 0) {
@@ -6461,7 +6475,7 @@ Token.prototype.attrSet = function attrSet(name, value) {
  * Get the value of attribute `name`, or null if it does not exist.
  **/
 Token.prototype.attrGet = function attrGet(name) {
-  var idx = this.attrIndex(name), value = null;
+  let idx = this.attrIndex(name), value = null;
   if (idx >= 0) {
     value = this.attrs[idx][1];
   }
@@ -6476,7 +6490,7 @@ Token.prototype.attrGet = function attrGet(name) {
  * exists. Useful to operate with token classes.
  **/
 Token.prototype.attrJoin = function attrJoin(name, value) {
-  var idx = this.attrIndex(name);
+  let idx = this.attrIndex(name);
 
   if (idx < 0) {
     this.attrPush([ name, value ]);
@@ -6494,7 +6508,7 @@ Token.prototype.attrJoin = function attrJoin(name, value) {
  **/
 
 Token.prototype.clone = function clone() {
-  var token = new Token(this.type, this.tag, this.nesting);
+  let token = new Token(this.type, this.tag, this.nesting);
 
   token.attrs = this.attrs;
   token.level = this.level;
@@ -7749,12 +7763,13 @@ module.exports = function (opts) {
           '\\"(?:(?!' + re.src_ZCc + '|["]).)+\\"|' +
           "\\'(?:(?!" + re.src_ZCc + "|[']).)+\\'|" +
           "\\'(?=" + re.src_pseudo_letter + '|[-]).|' +  // allow `I'm_king` if no pair found
-          '\\.{2,4}[a-zA-Z0-9%/]|' + // github has ... in commit range links,
-                                     // google has .... in links (issue #66)
+          '\\.{2,}[a-zA-Z0-9%/&]|' + // google has many dots in "google search" links (#66, #81).
+                                     // github has ... in commit range links,
                                      // Restrict to
                                      // - english
                                      // - percent-encoded
                                      // - parts of file path
+                                     // - params separator
                                      // until more examples found.
           '\\.(?!' + re.src_ZCc + '|[.]).|' +
           (opts && opts['---'] ?
@@ -7762,8 +7777,8 @@ module.exports = function (opts) {
             :
             '\\-+|'
           ) +
-          '\\,(?!' + re.src_ZCc + ').|' +      // allow `,,,` in paths
-          '\\!(?!' + re.src_ZCc + '|[!]).|' +
+          '\\,(?!' + re.src_ZCc + ').|' +       // allow `,,,` in paths
+          '\\!+(?!' + re.src_ZCc + '|[!]).|' +  // allow `!!!` in paths, but not at the end
           '\\?(?!' + re.src_ZCc + '|[?]).' +
         ')+' +
       '|\\/' +
