@@ -20,6 +20,7 @@ build: lint browserify rollup doc test coverage demo todo
 demo: lint
 	-rm -rf ./demo
 	mkdir ./demo
+	#node support/build_demo.js
 	./support/demodata.js > ./support/demo_template/sample.json
 	pug ./support/demo_template/index.pug --pretty \
 		--obj ./support/demo_template/sample.json \
@@ -39,6 +40,7 @@ demo: lint
 gh-demo: demo
 	git add ./demo/
 	touch ./demo/.nojekyll
+	npx gh-pages -d demo -f -b master -r git@github.com:GerHobbelt/markdown-it.github.io.git
 	git commit -m "Auto-generate demo"
 	#rm -rf ./demo
 
@@ -65,12 +67,14 @@ report-coverage: lint coverage
 
 doc:
 	-rm -rf ./apidoc
+	#node support/build_doc.js
 	ndoc --link-format "https://github.com/{package.repository}/blob/${CURR_HEAD}/{file}#L{line}"
 	touch ./apidoc/.nojekyll
 
 gh-doc: doc
 	git add ./apidoc/
 	touch ./demo/.nojekyll
+	npx gh-pages -d apidoc -f
 	git commit -m "Auto-generate API doc"
 	#rm -rf ./apidoc
 
