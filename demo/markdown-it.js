@@ -1,5 +1,5 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.markdownit = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
-'use strict';
+
 
 
 module.exports = require('./lib/');
@@ -7,7 +7,7 @@ module.exports = require('./lib/');
 },{"./lib/":10}],2:[function(require,module,exports){
 // HTML5 entities map: { name -> utf16string }
 //
-'use strict';
+
 
 /*eslint quotes:0*/
 module.exports = require('entities/lib/maps/entities.json');
@@ -16,7 +16,7 @@ module.exports = require('entities/lib/maps/entities.json');
 // List of valid html blocks names, according to commonmark spec
 // http://jgm.github.io/CommonMark/spec.html#html-blocks
 
-'use strict';
+
 
 
 module.exports = [
@@ -88,7 +88,7 @@ module.exports = [
 },{}],4:[function(require,module,exports){
 // Regexps to match html elements
 
-'use strict';
+
 
 let attr_name     = '[a-zA-Z_:@][a-zA-Z0-9:._-]*';
 
@@ -118,7 +118,7 @@ module.exports.HTML_OPEN_CLOSE_TAG_RE = HTML_OPEN_CLOSE_TAG_RE;
 },{}],5:[function(require,module,exports){
 // Utilities
 //
-'use strict';
+
 
 function isNil(v) { return v === null || typeof v === 'undefined'; }
 
@@ -461,7 +461,7 @@ exports.trimLeftOffset      = trimLeftOffset;
 
 },{"./entities":2,"mdurl":60,"uc.micro":66,"uc.micro/categories/P/regex":64}],6:[function(require,module,exports){
 // Just a shortcut for bulk export
-'use strict';
+
 
 
 exports.parseLinkLabel       = require('./parse_link_label');
@@ -471,7 +471,7 @@ exports.parseLinkTitle       = require('./parse_link_title');
 },{"./parse_link_destination":7,"./parse_link_label":8,"./parse_link_title":9}],7:[function(require,module,exports){
 // Parse link destination
 //
-'use strict';
+
 
 
 let unescapeAll = require('../common/utils').unescapeAll;
@@ -555,7 +555,7 @@ module.exports = function parseLinkDestination(str, pos, max) {
 // this function assumes that first character ("[") already matches;
 // returns the end of the label
 //
-'use strict';
+
 
 module.exports = function parseLinkLabel(state, start, disableNested) {
   let level, found, marker, prevPos,
@@ -602,7 +602,7 @@ module.exports = function parseLinkLabel(state, start, disableNested) {
 },{}],9:[function(require,module,exports){
 // Parse link title
 //
-'use strict';
+
 
 
 let unescapeAll = require('../common/utils').unescapeAll;
@@ -657,7 +657,7 @@ module.exports = function parseLinkTitle(str, pos, max) {
 },{"../common/utils":5}],10:[function(require,module,exports){
 // Main parser class
 
-'use strict';
+
 
 
 let utils        = require('./common/utils');
@@ -1256,7 +1256,7 @@ module.exports = MarkdownIt;
  *
  * Block-level tokenizer.
  **/
-'use strict';
+
 
 
 let Ruler           = require('./ruler');
@@ -1381,7 +1381,7 @@ module.exports = ParserBlock;
  * Top-level rules executor. Glues block/inline parsers and does intermediate
  * transformations.
  **/
-'use strict';
+
 
 
 let Ruler  = require('./ruler');
@@ -1439,7 +1439,7 @@ module.exports = Core;
  *
  * Tokenizes paragraph content.
  **/
-'use strict';
+
 
 
 let Ruler           = require('./ruler');
@@ -1640,7 +1640,7 @@ module.exports = ParserInline;
 },{"./ruler":18,"./rules_inline/autolink":37,"./rules_inline/backticks":38,"./rules_inline/balance_pairs":39,"./rules_inline/emphasis":40,"./rules_inline/entity":41,"./rules_inline/escape":42,"./rules_inline/html_inline":43,"./rules_inline/image":44,"./rules_inline/link":45,"./rules_inline/linkify":46,"./rules_inline/newline":47,"./rules_inline/state_inline":48,"./rules_inline/strikethrough":49,"./rules_inline/text":50,"./rules_inline/text_collapse":51}],14:[function(require,module,exports){
 // Commonmark default options
 
-'use strict';
+
 
 
 module.exports = {
@@ -1734,7 +1734,7 @@ module.exports = {
 },{}],15:[function(require,module,exports){
 // markdown-it default options
 
-'use strict';
+
 
 
 module.exports = {
@@ -1790,7 +1790,7 @@ module.exports = {
 // "Zero" preset, with nothing enabled. Useful for manual configuring of simple
 // modes. For example, to parse bold/italic only.
 
-'use strict';
+
 
 
 module.exports = {
@@ -1870,7 +1870,7 @@ module.exports = {
  * copy of rules. Those can be rewritten with ease. Also, you can add new
  * rules if you create plugin and adds new token types.
  **/
-'use strict';
+
 
 
 let assign          = require('./common/utils').assign;
@@ -2232,7 +2232,7 @@ module.exports = Renderer;
  * rules control use [[MarkdownIt.disable]], [[MarkdownIt.enable]] and
  * [[MarkdownIt.use]].
  **/
-'use strict';
+
 
 
 /**
@@ -2568,7 +2568,7 @@ module.exports = Ruler;
 },{}],19:[function(require,module,exports){
 // Block quotes
 
-'use strict';
+
 
 let isSpace = require('../common/utils').isSpace;
 
@@ -2855,7 +2855,7 @@ module.exports = function blockquote(state, startLine, endLine, silent) {
 },{"../common/utils":5}],20:[function(require,module,exports){
 // Code block (4 spaces padded)
 
-'use strict';
+
 
 
 module.exports = function code(state, startLine, endLine/*, silent*/) {
@@ -2896,7 +2896,7 @@ module.exports = function code(state, startLine, endLine/*, silent*/) {
 },{}],21:[function(require,module,exports){
 // fences (``` lang, ~~~ lang)
 
-'use strict';
+
 
 
 module.exports = function fence(state, startLine, endLine, silent) {
@@ -2999,7 +2999,7 @@ module.exports = function fence(state, startLine, endLine, silent) {
 },{}],22:[function(require,module,exports){
 // heading (#, ##, ...)
 
-'use strict';
+
 
 let isSpace = require('../common/utils').isSpace;
 let trimLeftOffset = require('../common/utils').trimLeftOffset;
@@ -3066,7 +3066,7 @@ module.exports = function heading(state, startLine, endLine, silent) {
 },{"../common/utils":5}],23:[function(require,module,exports){
 // Horizontal rule
 
-'use strict';
+
 
 let isSpace = require('../common/utils').isSpace;
 
@@ -3116,7 +3116,7 @@ module.exports = function hr(state, startLine, endLine, silent) {
 },{"../common/utils":5}],24:[function(require,module,exports){
 // HTML block
 
-'use strict';
+
 
 
 let block_names = require('../common/html_blocks');
@@ -3192,7 +3192,7 @@ module.exports = function html_block(state, startLine, endLine, silent) {
 },{"../common/html_blocks":3,"../common/html_re":4}],25:[function(require,module,exports){
 // lheading (---, ===)
 
-'use strict';
+
 
 let trimLeftOffset = require('../common/utils').trimLeftOffset;
 
@@ -3285,7 +3285,7 @@ module.exports = function lheading(state, startLine, endLine/*, silent*/) {
 },{"../common/utils":5}],26:[function(require,module,exports){
 // Lists
 
-'use strict';
+
 
 let isSpace = require('../common/utils').isSpace;
 
@@ -3650,7 +3650,7 @@ module.exports = function list(state, startLine, endLine, silent) {
 },{"../common/utils":5}],27:[function(require,module,exports){
 // Paragraph
 
-'use strict';
+
 
 let trimLeftOffset = require('../common/utils').trimLeftOffset;
 
@@ -3711,7 +3711,7 @@ module.exports = function paragraph(state, startLine/*, endLine*/) {
 };
 
 },{"../common/utils":5}],28:[function(require,module,exports){
-'use strict';
+
 
 
 let normalizeReference   = require('../common/utils').normalizeReference;
@@ -3915,7 +3915,7 @@ module.exports = function reference(state, startLine, _endLine, silent) {
 },{"../common/utils":5}],29:[function(require,module,exports){
 // Parser state class
 
-'use strict';
+
 
 let Token = require('../token');
 let isSpace = require('../common/utils').isSpace;
@@ -4153,7 +4153,7 @@ module.exports = StateBlock;
 },{"../common/utils":5,"../token":52}],30:[function(require,module,exports){
 // GFM table, non-standard
 
-'use strict';
+
 
 let isSpace = require('../common/utils').isSpace;
 let trimLeftOffset = require('../common/utils').trimLeftOffset;
@@ -4414,7 +4414,7 @@ module.exports = function table(state, startLine, endLine, silent) {
 };
 
 },{"../common/utils":5}],31:[function(require,module,exports){
-'use strict';
+
 
 
 module.exports = function block(state) {
@@ -4432,7 +4432,7 @@ module.exports = function block(state) {
 };
 
 },{}],32:[function(require,module,exports){
-'use strict';
+
 
 module.exports = function inline(state, positionOffset) {
   let tokens = state.tokens, tok, i, l;
@@ -4462,7 +4462,7 @@ module.exports = function inline(state, positionOffset) {
 },{}],33:[function(require,module,exports){
 // Normalize input string
 
-'use strict';
+
 
 
 // https://spec.commonmark.org/0.29/#line-ending
@@ -4496,7 +4496,7 @@ module.exports = function normalize(state) {
 // --> → →; <-- → ←; <--> → ↔
 // ==> → ⇒; <== → ⇐; <==> → ⇔
 //
-'use strict';
+
 
 // TODO:
 // - fractionals 1/2, 1/4, 3/4 -> ½, ¼, ¾
@@ -4622,7 +4622,7 @@ module.exports = function replace(state) {
 },{}],35:[function(require,module,exports){
 // Convert straight quotation marks to typographic ones
 //
-'use strict';
+
 
 
 let isWhiteSpace   = require('../common/utils').isWhiteSpace;
@@ -4825,7 +4825,7 @@ module.exports = function smartquotes(state) {
 },{"../common/utils":5}],36:[function(require,module,exports){
 // Core state object
 //
-'use strict';
+
 
 let Token = require('../token');
 
@@ -4847,7 +4847,7 @@ module.exports = StateCore;
 },{"../token":52}],37:[function(require,module,exports){
 // Process autolinks '<protocol:...>'
 
-'use strict';
+
 
 
 /*eslint max-len:0*/
@@ -4925,7 +4925,7 @@ module.exports = function autolink(state, silent) {
 },{}],38:[function(require,module,exports){
 // Parse backticks
 
-'use strict';
+
 
 module.exports = function backtick(state, silent) {
   let start, max, marker, matchStart, matchEnd, token,
@@ -4973,7 +4973,7 @@ module.exports = function backtick(state, silent) {
 },{}],39:[function(require,module,exports){
 // For each opening emphasis-like marker find a matching closing one
 //
-'use strict';
+
 
 
 function processDelimiters(state, delimiters) {
@@ -5083,7 +5083,7 @@ module.exports = function link_pairs(state) {
 },{}],40:[function(require,module,exports){
 // Process *this* and _that_
 //
-'use strict';
+
 
 let getLineOffset  = require('../common/utils').getLineOffset;
 
@@ -5227,7 +5227,7 @@ module.exports.postProcess = function emphasis(state) {
 },{"../common/utils":5}],41:[function(require,module,exports){
 // Process html entity - &#123;, &#xAF;, &quot;, ...
 
-'use strict';
+
 
 let entities          = require('../common/entities');
 let has               = require('../common/utils').has;
@@ -5277,7 +5277,7 @@ module.exports = function entity(state, silent) {
 },{"../common/entities":2,"../common/utils":5}],42:[function(require,module,exports){
 // Process escaped chars and hardbreaks
 
-'use strict';
+
 
 let isSpace = require('../common/utils').isSpace;
 
@@ -5331,7 +5331,7 @@ module.exports = function escape(state, silent) {
 },{"../common/utils":5}],43:[function(require,module,exports){
 // Process html tags
 
-'use strict';
+
 
 
 let HTML_TAG_RE = require('../common/html_re').HTML_TAG_RE;
@@ -5380,7 +5380,7 @@ module.exports = function html_inline(state, silent) {
 },{"../common/html_re":4}],44:[function(require,module,exports){
 // Process ![image](<src> "title")
 
-'use strict';
+
 
 let normalizeReference   = require('../common/utils').normalizeReference;
 let isSpace              = require('../common/utils').isSpace;
@@ -5546,7 +5546,7 @@ module.exports = function image(state, silent) {
 },{"../common/utils":5}],45:[function(require,module,exports){
 // Process [link](<to> "stuff")
 
-'use strict';
+
 
 let normalizeReference   = require('../common/utils').normalizeReference;
 let isSpace              = require('../common/utils').isSpace;
@@ -5699,7 +5699,7 @@ module.exports = function link(state, silent) {
 // Handle implicit links found by rules_core/linkify that were not yet
 // subsumed by other inline rules (backticks, link, etc.)
 
-'use strict';
+
 
 module.exports.tokenize = function linkify(state, silent) {
   let link, url, fullUrl, urlText, token;
@@ -5813,7 +5813,7 @@ module.exports.postProcess = function linkify(state) {
 },{}],47:[function(require,module,exports){
 // Proceess '\n'
 
-'use strict';
+
 
 let isSpace = require('../common/utils').isSpace;
 
@@ -5856,7 +5856,7 @@ module.exports = function newline(state, silent) {
 },{"../common/utils":5}],48:[function(require,module,exports){
 // Inline parser state
 
-'use strict';
+
 
 
 let Token          = require('../token');
@@ -6014,7 +6014,7 @@ module.exports = StateInline;
 },{"../common/utils":5,"../token":52}],49:[function(require,module,exports){
 // ~~strike through~~
 //
-'use strict';
+
 
 let getLineOffset  = require('../common/utils').getLineOffset;
 
@@ -6151,7 +6151,7 @@ module.exports.postProcess = function strikethrough(state) {
 // Skip text characters for text token, place those to pending buffer
 // and increment current pos
 
-'use strict';
+
 
 
 // Rule to skip pure text
@@ -6249,7 +6249,7 @@ module.exports = function text(state, silent) {
 // leaves them as text (needed to merge with adjacent text) or turns them
 // into opening/closing tags (which messes up levels inside).
 //
-'use strict';
+
 
 
 module.exports = function text_collapse(state) {
@@ -6293,7 +6293,7 @@ module.exports = function text_collapse(state) {
 },{}],52:[function(require,module,exports){
 // Token class
 
-'use strict';
+
 
 
 /**

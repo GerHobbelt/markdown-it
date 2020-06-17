@@ -1,4 +1,4 @@
-'use strict';
+
 
 let commonmark = require('../../extra/lib/node_modules/commonmark');
 let parser = new commonmark.Parser();

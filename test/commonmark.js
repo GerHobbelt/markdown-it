@@ -1,4 +1,4 @@
-'use strict';
+
 
 
 let p      = require('path');

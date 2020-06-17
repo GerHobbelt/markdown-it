@@ -6387,6 +6387,10 @@ var entities$1 = /*#__PURE__*/Object.freeze({
 
 var require$$0 = getCjsExportFromNamespace(entities$1);
 
+// HTML5 entities map: { name -> utf16string }
+//
+
+
 /*eslint quotes:0*/
 var entities$2 = require$$0;
 
@@ -6955,6 +6959,9 @@ var uc_micro = {
 };
 
 var utils = createCommonjsModule(function (module, exports) {
+// Utilities
+//
+
 
 function isNil(v) { return v === null || typeof v === 'undefined'; }
 
@@ -7316,6 +7323,11 @@ var utils_18 = utils.getLineOffset;
 var utils_19 = utils.trimLeftOffset;
 
 // Parse link label
+//
+// this function assumes that first character ("[") already matches;
+// returns the end of the label
+//
+
 
 var parse_link_label = function parseLinkLabel(state, start, disableNested) {
   let level, found, marker, prevPos,
@@ -7358,6 +7370,11 @@ var parse_link_label = function parseLinkLabel(state, start, disableNested) {
 
   return labelEnd;
 };
+
+// Parse link destination
+//
+
+
 
 let unescapeAll = utils.unescapeAll;
 
@@ -7434,6 +7451,11 @@ var parse_link_destination = function parseLinkDestination(str, pos, max) {
   return result;
 };
 
+// Parse link title
+//
+
+
+
 let unescapeAll$1 = utils.unescapeAll;
 
 
@@ -7483,6 +7505,10 @@ var parse_link_title = function parseLinkTitle(str, pos, max) {
   return result;
 };
 
+// Just a shortcut for bulk export
+
+
+
 var parseLinkLabel       = parse_link_label;
 var parseLinkDestination = parse_link_destination;
 var parseLinkTitle       = parse_link_title;
@@ -7492,6 +7518,16 @@ var helpers = {
 	parseLinkDestination: parseLinkDestination,
 	parseLinkTitle: parseLinkTitle
 };
+
+/**
+ * class Renderer
+ *
+ * Generates HTML from parsed token stream. Each instance has independent
+ * copy of rules. Those can be rewritten with ease. Also, you can add new
+ * rules if you create plugin and adds new token types.
+ **/
+
+
 
 let assign          = utils.assign;
 let unescapeAll$2     = utils.unescapeAll;
@@ -7850,6 +7886,7 @@ var renderer = Renderer;
  **/
 
 
+
 /**
  * new Ruler()
  **/
@@ -8183,6 +8220,8 @@ var ruler = Ruler;
 // Normalize input string
 
 
+
+
 // https://spec.commonmark.org/0.29/#line-ending
 let NEWLINES_RE  = /\r\n?|\n/g;
 let NULL_RE      = /\0/g;
@@ -8240,6 +8279,19 @@ var inline = function inline(state, positionOffset) {
 };
 
 // Simple typographic replacements
+//
+// (c) (C) → ©
+// (tm) (TM) → ™
+// (r) (R) → ®
+// +- → ±
+// (p) (P) -> §
+// ... → … (also ?.... → ?.., !.... → !..)
+// ???????? → ???, !!!!! → !!!, `,,` → `,`
+// -- → &ndash;, --- → &mdash;
+// --> → →; <-- → ←; <--> → ↔
+// ==> → ⇒; <== → ⇐; <==> → ⇔
+//
+
 
 // TODO:
 // - fractionals 1/2, 1/4, 3/4 -> ½, ¼, ¾
@@ -8361,6 +8413,11 @@ var replacements = function replace(state) {
 
   }
 };
+
+// Convert straight quotation marks to typographic ones
+//
+
+
 
 let isWhiteSpace   = utils.isWhiteSpace;
 let isPunctChar    = utils.isPunctChar;
@@ -8560,6 +8617,8 @@ var smartquotes = function smartquotes(state) {
 };
 
 // Token class
+
+
 
 
 /**
@@ -8792,6 +8851,13 @@ Token.prototype.clone = function clone() {
 
 var token = Token;
 
+// Core state object
+//
+
+
+
+
+
 function StateCore(src, md, env) {
   this.src = src;
   this.env = env;
@@ -8805,6 +8871,18 @@ StateCore.prototype.Token = token;
 
 
 var state_core = StateCore;
+
+/** internal
+ * class Core
+ *
+ * Top-level rules executor. Glues block/inline parsers and does intermediate
+ * transformations.
+ **/
+
+
+
+
+
 
 let _rules = [
   [ 'normalize',      normalize      ],
@@ -8851,6 +8929,10 @@ Core.prototype.State = state_core;
 
 
 var parser_core = Core;
+
+// GFM table, non-standard
+
+
 
 let isSpace = utils.isSpace;
 let trimLeftOffset = utils.trimLeftOffset;
@@ -9113,6 +9195,8 @@ var table = function table(state, startLine, endLine, silent) {
 // Code block (4 spaces padded)
 
 
+
+
 var code = function code(state, startLine, endLine/*, silent*/) {
   let nextLine, last, token,
       pos = state.bMarks[startLine],
@@ -9149,6 +9233,8 @@ var code = function code(state, startLine, endLine/*, silent*/) {
 };
 
 // fences (``` lang, ~~~ lang)
+
+
 
 
 var fence = function fence(state, startLine, endLine, silent) {
@@ -9247,6 +9333,10 @@ var fence = function fence(state, startLine, endLine, silent) {
 
   return true;
 };
+
+// Block quotes
+
+
 
 let isSpace$1 = utils.isSpace;
 
@@ -9530,6 +9620,10 @@ var blockquote = function blockquote(state, startLine, endLine, silent) {
   return true;
 };
 
+// Horizontal rule
+
+
+
 let isSpace$2 = utils.isSpace;
 
 
@@ -9574,6 +9668,10 @@ var hr = function hr(state, startLine, endLine, silent) {
 
   return true;
 };
+
+// Lists
+
+
 
 let isSpace$3 = utils.isSpace;
 
@@ -10129,6 +10227,10 @@ var reference = function reference(state, startLine, _endLine, silent) {
   return true;
 };
 
+// heading (#, ##, ...)
+
+
+
 let isSpace$5 = utils.isSpace;
 let trimLeftOffset$1 = utils.trimLeftOffset;
 
@@ -10190,6 +10292,10 @@ var heading = function heading(state, startLine, endLine, silent) {
 
   return true;
 };
+
+// lheading (---, ===)
+
+
 
 let trimLeftOffset$2 = utils.trimLeftOffset;
 
@@ -10280,6 +10386,9 @@ var lheading = function lheading(state, startLine, endLine/*, silent*/) {
 };
 
 // List of valid html blocks names, according to commonmark spec
+// http://jgm.github.io/CommonMark/spec.html#html-blocks
+
+
 
 
 var html_blocks = [
@@ -10350,6 +10459,8 @@ var html_blocks = [
 
 // Regexps to match html elements
 
+
+
 let attr_name     = '[a-zA-Z_:@][a-zA-Z0-9:._-]*';
 
 let unquoted      = '[^"\'=<>`\\x00-\\x20]+';
@@ -10379,6 +10490,12 @@ var html_re = {
 	HTML_TAG_RE: HTML_TAG_RE_1,
 	HTML_OPEN_CLOSE_TAG_RE: HTML_OPEN_CLOSE_TAG_RE_1
 };
+
+// HTML block
+
+
+
+
 
 let HTML_OPEN_CLOSE_TAG_RE$1 = html_re.HTML_OPEN_CLOSE_TAG_RE;
 
@@ -10449,6 +10566,10 @@ var html_block = function html_block(state, startLine, endLine, silent) {
   return true;
 };
 
+// Paragraph
+
+
+
 let trimLeftOffset$3 = utils.trimLeftOffset;
 
 
@@ -10506,6 +10627,11 @@ var paragraph = function paragraph(state, startLine/*, endLine*/) {
 
   return true;
 };
+
+// Parser state class
+
+
+
 
 let isSpace$6 = utils.isSpace;
 
@@ -10739,6 +10865,17 @@ StateBlock.prototype.Token = token;
 
 var state_block = StateBlock;
 
+/** internal
+ * class ParserBlock
+ *
+ * Block-level tokenizer.
+ **/
+
+
+
+
+
+
 let _rules$1 = [
   // First 2 params - rule name & source. Secondary array - list of rules,
   // which can be terminated by this one.
@@ -10852,6 +10989,9 @@ ParserBlock.prototype.State = state_block;
 var parser_block = ParserBlock;
 
 // Handle implicit links found by rules_core/linkify that were not yet
+// subsumed by other inline rules (backticks, link, etc.)
+
+
 
 var tokenize = function linkify(state, silent) {
   let link, url, fullUrl, urlText, token;
@@ -10969,6 +11109,9 @@ var linkify = {
 };
 
 // Skip text characters for text token, place those to pending buffer
+// and increment current pos
+
+
 
 
 // Rule to skip pure text
@@ -11027,6 +11170,10 @@ var text = function text(state, silent) {
   return true;
 };
 
+// Proceess '\n'
+
+
+
 let isSpace$7 = utils.isSpace;
 
 
@@ -11064,6 +11211,10 @@ var newline = function newline(state, silent) {
   state.pos = pos;
   return true;
 };
+
+// Process escaped chars and hardbreaks
+
+
 
 let isSpace$8 = utils.isSpace;
 
@@ -11116,6 +11267,8 @@ var _escape = function escape(state, silent) {
 
 // Parse backticks
 
+
+
 var backticks = function backtick(state, silent) {
   let start, max, marker, matchStart, matchEnd, token,
       pos = state.pos,
@@ -11158,6 +11311,10 @@ var backticks = function backtick(state, silent) {
   state.pos += marker.length;
   return true;
 };
+
+// ~~strike through~~
+//
+
 
 let getLineOffset  = utils.getLineOffset;
 
@@ -11294,6 +11451,10 @@ var strikethrough = {
 	tokenize: tokenize$1,
 	postProcess: postProcess_1
 };
+
+// Process *this* and _that_
+//
+
 
 let getLineOffset$1  = utils.getLineOffset;
 
@@ -11438,6 +11599,10 @@ var emphasis = {
 	tokenize: tokenize$2,
 	postProcess: postProcess_1$1
 };
+
+// Process [link](<to> "stuff")
+
+
 
 let normalizeReference$1   = utils.normalizeReference;
 let isSpace$9              = utils.isSpace;
@@ -11585,6 +11750,10 @@ var link = function link(state, silent) {
   state.posMax = max;
   return true;
 };
+
+// Process ![image](<src> "title")
+
+
 
 let normalizeReference$2   = utils.normalizeReference;
 let isSpace$a              = utils.isSpace;
@@ -11750,6 +11919,8 @@ var image$1 = function image(state, silent) {
 // Process autolinks '<protocol:...>'
 
 
+
+
 /*eslint max-len:0*/
 let EMAIL_RE    = /^<([a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*)>/;
 let AUTOLINK_RE = /^<([a-zA-Z][a-zA-Z0-9+.\-]{1,31}):([^<>\x00-\x20]*)>/;
@@ -11822,6 +11993,11 @@ var autolink = function autolink(state, silent) {
   return false;
 };
 
+// Process html tags
+
+
+
+
 let HTML_TAG_RE$1 = html_re.HTML_TAG_RE;
 
 
@@ -11864,6 +12040,11 @@ var html_inline = function html_inline(state, silent) {
   state.pos += match[0].length;
   return true;
 };
+
+// Process html entity - &#123;, &#xAF;, &quot;, ...
+
+
+
 
 let has               = utils.has;
 let isValidEntityCode = utils.isValidEntityCode;
@@ -11910,6 +12091,8 @@ var entity = function entity(state, silent) {
 };
 
 // For each opening emphasis-like marker find a matching closing one
+//
+
 
 
 function processDelimiters(state, delimiters) {
@@ -12017,6 +12200,14 @@ var balance_pairs = function link_pairs(state) {
 };
 
 // Clean up tokens after emphasis and strikethrough postprocessing:
+// merge adjacent text nodes into one and re-calculate all token levels
+//
+// This is necessary because initially emphasis delimiter markers (*, _, ~)
+// are treated as their own separate text tokens. Then emphasis rule either
+// leaves them as text (needed to merge with adjacent text) or turns them
+// into opening/closing tags (which messes up levels inside).
+//
+
 
 
 var text_collapse = function text_collapse(state) {
@@ -12056,6 +12247,12 @@ var text_collapse = function text_collapse(state) {
     tokens.length = last;
   }
 };
+
+// Inline parser state
+
+
+
+
 
 let isWhiteSpace$1   = utils.isWhiteSpace;
 let isPunctChar$1    = utils.isPunctChar;
@@ -12207,6 +12404,17 @@ StateInline.prototype.Token = token;
 
 
 var state_inline = StateInline;
+
+/** internal
+ * class ParserInline
+ *
+ * Tokenizes paragraph content.
+ **/
+
+
+
+
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // Parser rules
@@ -13652,6 +13860,8 @@ const punycode = {
 // markdown-it default options
 
 
+
+
 var _default = {
   options: {
     html:         false,        // Enable HTML tags in source
@@ -13702,6 +13912,9 @@ var _default = {
 };
 
 // "Zero" preset, with nothing enabled. Useful for manual configuring of simple
+// modes. For example, to parse bold/italic only.
+
+
 
 
 var zero = {
@@ -13774,6 +13987,8 @@ var zero = {
 };
 
 // Commonmark default options
+
+
 
 
 var commonmark = {
@@ -13863,6 +14078,22 @@ var commonmark = {
     }
   }
 };
+
+// Main parser class
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 let config = {
   'default': _default,

@@ -4,7 +4,7 @@
 // Fixtures generator from commonmark specs. Split spec to working / not working
 // examples, or show total stat.
 
-'use strict';
+
 
 
 let fs        = require('fs');

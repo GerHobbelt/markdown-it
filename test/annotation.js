@@ -1,4 +1,4 @@
-'use strict';
+
 // Implemented originally in https://github.com/markdown-it/markdown-it/pull/204
 
 let assert = require('chai').assert;

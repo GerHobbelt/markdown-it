@@ -1,4 +1,4 @@
-'use strict';
+
 
 
 let assert     = require('chai').assert;
