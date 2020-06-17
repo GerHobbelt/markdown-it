@@ -11145,6 +11145,7 @@ function isTerminatorChar(ch) {
   case 0x5F/* _ */:
   case 0x60/* ` */:
   case 0x7B/* { */:
+  case 0x7C/* | */:
   case 0x7D/* } */:
   case 0x7E/* ~ */:
     return true;

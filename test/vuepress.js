@@ -392,7 +392,7 @@ You can use this component in header to add some status for some API:
 
 
 
-describe('vuepress with fully pimped markdown-it', function () {
+xdescribe('vuepress with fully pimped markdown-it', function () {
 
   // chunks of this testcode have been ripped from @vuepress/markdown and ../support/demo-template/index.js:
 
