@@ -11157,9 +11157,17 @@ function isTerminatorChar(ch) {
 var text = function text(state, silent) {
   let pos = state.pos;
 
-  while (pos < state.posMax && !isTerminatorChar(state.src.charCodeAt(pos)) &&
-         (!state.links || !state.links[pos])) {
-    pos++;
+  let terminatorRe = state.md.options.inlineTokenTerminatorsRe;
+  if (!terminatorRe) {
+    while (pos < state.posMax && !isTerminatorChar(state.src.charCodeAt(pos)) &&
+           (!state.links || !state.links[pos])) {
+      pos++;
+    }
+  } else {
+    while (pos < state.posMax && !isTerminatorChar(state.src.charCodeAt(pos)) && !terminatorRe.test(state.src[pos]) &&
+           (!state.links || !state.links[pos])) {
+      pos++;
+    }
   }
 
   if (pos === state.pos) { return false; }
@@ -13901,11 +13909,22 @@ var _default = {
     //
     highlight: null,
 
-    maxNesting:   100            // Internal protection, recursion limit
+    // A regex which matches *additional* characters in an inline text string which may serve
+    // as the start of a special word, i.e. the start of anything that might be matched
+    // by a markdown-it parse rule / plugin.
+    //
+    // Using this option will slow markdown-it, hence you should only use it when you need it,
+    // e.g. when writing custom plugins which are not looking for words which start with one
+    // of the default set of sentinel characters as specified in rules_inline/text.js:
+    //
+    // !, ", #, $, %, &, ', (, ), *, +, ,, -, ., /, :, ;, <, =, >, ?, @, [, \, ], ^, _, `, {, |, }, or ~
+    inlineTokenTerminatorsRe: null,
+
+    // Internal protection, recursion limit
+    maxNesting: 100
   },
 
   components: {
-
     core: {},
     block: {},
     inline: {}
@@ -13956,11 +13975,22 @@ var zero = {
     //
     highlight: null,
 
-    maxNesting:   20            // Internal protection, recursion limit
+    // A regex which matches *additional* characters in an inline text string which may serve
+    // as the start of a special word, i.e. the start of anything that might be matched
+    // by a markdown-it parse rule / plugin.
+    //
+    // Using this option will slow markdown-it, hence you should only use it when you need it,
+    // e.g. when writing custom plugins which are not looking for words which start with one
+    // of the default set of sentinel characters as specified in rules_inline/text.js:
+    //
+    // !, ", #, $, %, &, ', (, ), *, +, ,, -, ., /, :, ;, <, =, >, ?, @, [, \, ], ^, _, `, {, |, }, or ~
+    inlineTokenTerminatorsRe: null,
+
+    // Internal protection, recursion limit
+    maxNesting: 20
   },
 
   components: {
-
     core: {
       rules: [
         'normalize',
@@ -14030,11 +14060,22 @@ var commonmark = {
     //
     highlight: null,
 
-    maxNesting:   20            // Internal protection, recursion limit
+    // A regex which matches *additional* characters in an inline text string which may serve
+    // as the start of a special word, i.e. the start of anything that might be matched
+    // by a markdown-it parse rule / plugin.
+    //
+    // Using this option will slow markdown-it, hence you should only use it when you need it,
+    // e.g. when writing custom plugins which are not looking for words which start with one
+    // of the default set of sentinel characters as specified in rules_inline/text.js:
+    //
+    // !, ", #, $, %, &, ', (, ), *, +, ,, -, ., /, :, ;, <, =, >, ?, @, [, \, ], ^, _, `, {, |, }, or ~
+    inlineTokenTerminatorsRe: null,
+
+    // Internal protection, recursion limit
+    maxNesting: 20
   },
 
   components: {
-
     core: {
       rules: [
         'normalize',
