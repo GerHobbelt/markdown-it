@@ -1,0 +1,56 @@
+<html>
+<head>
+	<style>
+		pre, .pre {
+			background-color: #EEFFEE;
+		}
+
+		pre {
+			margin-left: 4em;
+		}
+
+		body {
+			margin: 0 auto;
+			padding: 2em 0.5em 1em 0.5em;
+			width: 60em;
+			background: white;
+
+			font-family: "Trebuchet MS", Helvetica, sans-serif;
+		}
+
+		html {
+			background: #DDDDDD;
+		}
+
+		li {
+			margin-top: 0.5em;
+		}
+
+		blockquote {
+			background: #FFFFEE;
+			padding: 1em 2em;
+			margin: 0;
+		}
+	</style>
+</head>
+<body>
+	<h1>Profiling NodeJs JavaScript</h1>
+	<p>Your last profile run using <code>node</code> has been stored in this file:</p>
+
+	<pre>W:\Projects\sites\library.visyond.gov\80\lib\js\markdown-it\CPU.20200627.171808.8788.0.001.cpuprofile</pre>
+
+	<h2>How to view this file in Chrome DevTools</h2>
+
+	<ul>
+		<li>Open Chrome browser (if you loaded this HTML file via the <code>make profile2chrome</code> command, then you already have it open!)</li>
+		<li>Hit <kbd>F12</kbd> key to open DevTools</li>
+		<li>Make sure the <strong>JavaScript Profiling</strong> tab is open in DevTools <br>(use the triple-dot <strong>⋮</strong> dropdown menu to go <strong>More Tools ➟ JavaScript Profiler</strong>)</li>
+		<li>Hit the <strong>Load</strong> button at the bottom of the panel or <strong>Richt-Click in the left side panel</strong> to open a file selector box: <br>point that one to the <code>*.cpuprofile</code> file you wish to inspect.
+
+		<blockquote>(Tip: you can copy-paste the path to the latest <code>*.cpuprofile</code> from the <span class="pre">&lt;pre&gt; block above</span> into the file selector!)</blockquote>
+		</li>
+		<li>Profit!</li>
+	</ul>
+</body>
+</html>
+

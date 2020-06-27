@@ -1,6 +1,6 @@
 
 
-let commonmark = require('../../extra/lib/node_modules/commonmark');
+let commonmark = require('commonmark');
 let parser = new commonmark.Parser();
 let renderer = new commonmark.HtmlRenderer();
 

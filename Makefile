@@ -111,6 +111,30 @@ minify: browserify
 benchmark-deps:
 	npm install --prefix benchmark/extra/ -g marked@0.3.6 commonmark@0.26.0 markdown-it/markdown-it.git#2.2.1
 
+benchmark: benchmark-deps
+	node benchmark/benchmark.js
+
+profile:
+	# kill all old node profile dump files
+	rm isolate*.log
+	# WARNING NOTE: this is the old way of profiling...
+	# Use make target `profile2chrome` for thee new way.
+	node --prof benchmark/profile.js 30
+	node --prof-process  ./isolate*.log > ./cpu-profile.log
+	cat ./cpu-profile.log
+
+profile2chrome:
+	# kill all old node profile dump files
+	rm *.cpuprofile
+	# extra options for node are: --cpu-prof-dir=DIR and --cpu-prof-name=FILE
+	node --cpu-prof benchmark/profile.js 30
+	# now open this file in Chrome DevTools (after we've edited the HTML page that we use to ease this process)
+	# 
+	# wait 1 to ensure the FS has updated; seems we don't always get the latest file when we don't wait for a bit
+	sleep 1
+	node support/mk-profile-devtools.js
+	start chrome support/profile-devtools.html
+
 specsplit: 											\
 			./test/fixtures/commonmark/good.txt     \
 			./test/fixtures/commonmark/bad.txt
@@ -140,6 +164,8 @@ clean:
 	-rm -rf ./apidoc/
 	-rm -rf ./dist/
 	-rm -rf ./.nyc_output/
+	-rm *.cpuprofile
+	-rm *.log
 
 superclean: clean
 	-rm -rf ./node_modules/
@@ -159,5 +185,5 @@ report-config:
 	-echo "NPM_PACKAGE=${NPM_PACKAGE} NPM_VERSION=${NPM_VERSION} GLOBAL_NAME=${GLOBAL_NAME} BUNDLE_NAME=${BUNDLE_NAME} TMP_PATH=${TMP_PATH} REMOTE_NAME=${REMOTE_NAME} REMOTE_REPO=${REMOTE_REPO} CURR_HEAD=${CURR_HEAD}"
 
 
-.PHONY: clean superclean prep prep-ci report-config publish lint lintfix test todo demo coverage report-coverage doc build browserify minify gh-demo gh-doc specsplit rollup
+.PHONY: clean superclean prep prep-ci report-config publish lint lintfix test todo demo coverage report-coverage doc build browserify minify gh-demo gh-doc specsplit rollup benchmark-deps benchmark profile profile2chrome
 .SILENT: help todo report-config

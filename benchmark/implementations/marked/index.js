@@ -1,6 +1,6 @@
 
 
-let marked = require('../../extra/lib/node_modules/marked');
+let marked = require('marked');
 
 exports.run = function (data) {
   return marked(data);
