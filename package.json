@@ -32,6 +32,7 @@
     "cov": "make report-coverage",
     "prof": "make profile2chrome",
     "prof-1": "make profile",
+    "bench": "make benchmark",
     "pub": "npm publish --access public"
   },
   "files": [

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* eslint no-console:0 no-bitwise: 0 */
+/* eslint no-console:0 no-bitwise:0 */
 
 
 let fs = require('fs');
