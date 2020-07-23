@@ -9804,7 +9804,7 @@ var list = function list(state, startLine, endLine, silent) {
       posAfterMarker,
       prevEmptyEnd,
       start,
-      blockStart = state.pos,
+      blockStart,
       terminate,
       terminatorRules,
       token,
@@ -9838,6 +9838,8 @@ var list = function list(state, startLine, endLine, silent) {
       isTerminatingParagraph = true;
     }
   }
+
+  blockStart = state.bMarks[startLine] + state.tShift[startLine];
 
   // Detect list type and position after marker
   if ((posAfterMarker = skipOrderedListMarker(state, startLine)) >= 0) {
@@ -9883,7 +9885,7 @@ var list = function list(state, startLine, endLine, silent) {
   token.map    = listLines = [ startLine, 0 ];
   token.markup = String.fromCharCode(markerCharCode);
   token.position = blockStart;
-  token.size   = 0;
+  token.size   = state.eMarks[endLine] - blockStart;
 
   //
   // Iterate list items
@@ -9986,7 +9988,7 @@ var list = function list(state, startLine, endLine, silent) {
 
     token        = state.push('list_item_close', 'li', -1);
     token.markup = String.fromCharCode(markerCharCode);
-    token.position = state.pos;
+    token.position = state.bMarks[state.line];
     token.size = 0;
 
     nextLine = startLine = state.line;
@@ -10032,7 +10034,7 @@ var list = function list(state, startLine, endLine, silent) {
     token = state.push('bullet_list_close', 'ul', -1);
   }
   token.markup = String.fromCharCode(markerCharCode);
-  token.position = state.pos;
+  token.position = state.bMarks[nextLine];
   token.size = 0;
 
   listLines[1] = nextLine;
@@ -10530,8 +10532,8 @@ let HTML_SEQUENCES = [
 
 var html_block = function html_block(state, startLine, endLine, silent) {
   let i, nextLine, token, lineText,
-      blockStart = state.pos,
-      pos = state.bMarks[startLine] + state.tShift[startLine],
+      blockStart,
+      pos = blockStart = state.bMarks[startLine] + state.tShift[startLine],
       max = state.eMarks[startLine];
 
   // if it's indented more than 3 spaces, it should be a code block
@@ -10579,7 +10581,7 @@ var html_block = function html_block(state, startLine, endLine, silent) {
   token.map     = [ startLine, nextLine ];
   token.content = state.getLines(startLine, nextLine, state.blkIndent, true);
   token.position = blockStart;
-  token.size = state.pos - blockStart;
+  token.size = state.bMarks[nextLine] - blockStart;
 
   return true;
 };
