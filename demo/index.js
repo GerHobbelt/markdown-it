@@ -37667,13 +37667,18 @@ function zephir(hljs) {
 module.exports = zephir;
 
 },{}],248:[function(require,module,exports){
-/*! markdown-it-abbr 1.0.4-16 https://github.com//GerHobbelt/markdown-it-abbr @license MIT */
+/*! markdown-it-abbr 1.0.4-20 https://github.com//GerHobbelt/markdown-it-abbr @license MIT */
 
 'use strict';
 
+// Enclose abbreviations in <abbr> tags
+//
 module.exports = function sub_plugin(md) {
   const escapeRE = md.utils.escapeRE;
-  const arrayReplaceAt = md.utils.arrayReplaceAt;
+  const arrayReplaceAt = md.utils.arrayReplaceAt; // ASCII characters in Cc, Sc, Sm, Sk categories we should terminate on;
+  // you can check character classes here:
+  // http://www.unicode.org/Public/UNIDATA/UnicodeData.txt
+
   const OTHER_CHARS = ' \r\n$+<=>^`|~';
   const UNICODE_PUNCT_RE = md.utils.lib.ucmicro.P.source;
   const UNICODE_SPACE_RE = md.utils.lib.ucmicro.Z.source;
@@ -37691,11 +37696,15 @@ module.exports = function sub_plugin(md) {
       return false;
     }
 
-    if (state.src.charCodeAt(pos++) !== 0x2A) {
+    if (state.src.charCodeAt(pos++) !== 0x2A
+    /* * */
+    ) {
         return false;
       }
 
-    if (state.src.charCodeAt(pos++) !== 0x5B) {
+    if (state.src.charCodeAt(pos++) !== 0x5B
+    /* [ */
+    ) {
         return false;
       }
 
@@ -37704,17 +37713,25 @@ module.exports = function sub_plugin(md) {
     for (; pos < max; pos++) {
       ch = state.src.charCodeAt(pos);
 
-      if (ch === 0x5B) {
+      if (ch === 0x5B
+      /* [ */
+      ) {
           return false;
-        } else if (ch === 0x5D) {
+        } else if (ch === 0x5D
+      /* ] */
+      ) {
           labelEnd = pos;
           break;
-        } else if (ch === 0x5C) {
+        } else if (ch === 0x5C
+      /* \ */
+      ) {
           pos++;
         }
     }
 
-    if (labelEnd < 0 || state.src.charCodeAt(labelEnd + 1) !== 0x3A) {
+    if (labelEnd < 0 || state.src.charCodeAt(labelEnd + 1) !== 0x3A
+    /* : */
+    ) {
         return false;
       }
 
@@ -37735,7 +37752,8 @@ module.exports = function sub_plugin(md) {
 
     if (!state.env.abbreviations) {
       state.env.abbreviations = {};
-    }
+    } // prepend ':' to avoid conflict with Object.prototype members
+
 
     if (typeof state.env.abbreviations[':' + label] === 'undefined') {
       state.env.abbreviations[':' + label] = title;
@@ -37771,10 +37789,12 @@ module.exports = function sub_plugin(md) {
       return b.length - a.length;
     }).map(escapeRE).join('|') + ')');
     regText = '(^|' + UNICODE_PUNCT_RE + '|' + UNICODE_SPACE_RE + '|[' + OTHER_CHARS.split('').map(escapeRE).join('') + '])' + '(' + Object.keys(state.env.abbreviations).map(function (x) {
-      return x.substr(1);
+      return x.substr(1); // eslint-disable-line
     }).sort(function (a, b) {
-      return b.length - a.length;
-    }).map(escapeRE).join('|') + ')' + '($|' + UNICODE_PUNCT_RE + '|' + UNICODE_SPACE_RE + '|[' + OTHER_CHARS.split('').map(escapeRE).join('') + '])';
+      // eslint-disable-line
+      return b.length - a.length; // eslint-disable-line
+    }).map(escapeRE).join('|') + ')' // eslint-disable-line
+    + '($|' + UNICODE_PUNCT_RE + '|' + UNICODE_SPACE_RE + '|[' + OTHER_CHARS.split('').map(escapeRE).join('') + '])';
     reg = new RegExp(regText, 'g');
 
     for (j = 0, l = blockTokens.length; j < l; j++) {
@@ -37782,7 +37802,7 @@ module.exports = function sub_plugin(md) {
         continue;
       }
 
-      tokens = blockTokens[j].children;
+      tokens = blockTokens[j].children; // We scan from the end, to keep position when new tags added.
 
       for (i = tokens.length - 1; i >= 0; i--) {
         currentToken = tokens[i];
@@ -37794,7 +37814,8 @@ module.exports = function sub_plugin(md) {
         pos = 0;
         text = currentToken.content;
         reg.lastIndex = 0;
-        nodes = [];
+        nodes = []; // fast regexp run to determine whether there are any abbreviated words
+        // in the current token
 
         if (!regSimple.test(text)) {
           continue;
@@ -37832,7 +37853,8 @@ module.exports = function sub_plugin(md) {
           token = new state.Token('text', '', 0);
           token.content = text.slice(pos);
           nodes.push(token);
-        }
+        } // replace current node
+
 
         blockTokens[j].children = tokens = arrayReplaceAt(tokens, i, nodes);
       }
@@ -37847,539 +37869,48 @@ module.exports = function sub_plugin(md) {
 
 
 },{}],249:[function(require,module,exports){
+/*! markdown-it-attrs 3.0.3-19 https://github.com//GerHobbelt/markdown-it-attrs @license MIT */
+
 'use strict';
 
-const patternsConfig = require('./patterns.js');
-
-const defaultOptions = {
-  leftDelimiter: '{',
-  rightDelimiter: '}',
-  allowedAttributes: [],
-  ignore: null            // callback(token)
-};
-
-module.exports = function attributes(md, options_) {
-  let options = Object.assign({}, defaultOptions);
-  options = Object.assign(options, options_);
-
-  const patterns = patternsConfig(options);
-
-  function curlyAttrs(state) {
-    let tokens = state.tokens;
-
-    for (let i = 0; i < tokens.length; i++) {
-      for (let p = 0; p < patterns.length; p++) {
-        let pattern = patterns[p];
-        let j = null; // position of child with offset 0
-        let match = pattern.tests.every(t => {
-          let res = test(tokens, i, t, options);
-          if (res.j !== null) { j = res.j; }
-          return res.match;
-        });
-        if (match) {
-          pattern.transform(tokens, i, j);
-          if (pattern.name === 'inline attributes' || pattern.name === 'inline nesting 0') {
-            // retry, may be several inline attributes
-            p--;
-          }
-        }
-      }
-    }
-  }
-
-  md.core.ruler.after('inline', 'curly_attributes', curlyAttrs);
-};
-
-/**
- * Test if t matches token stream.
- *
- * @param {array} tokens
- * @param {number} i
- * @param {object} t Test to match.
- * @return {object} { match: true|false, j: null|number }
- */
-function test(tokens, i, t, options) {
-  let res = {
-    match: false,
-    j: null  // position of child
-  };
-
-  let ii = t.shift !== undefined
-    ? i + t.shift
-    : t.position;
-  let token = get(tokens, ii);  // supports negative ii
-
-  // supports ignore token
-  if (token === undefined || (options.ignore && options.ignore(token))) {
-    return res;
-  }
-
-  for (let key in t) {
-    if (key === 'shift' || key === 'position') { continue; }
-
-    if (token[key] === undefined) { return res; }
-
-    if (key === 'children' && isArrayOfObjects(t.children)) {
-      if (token.children.length === 0) {
-        return res;
-      }
-      let match;
-      let childTests = t.children;
-      let children = token.children;
-      if (childTests.every(tt => tt.position !== undefined)) {
-        // positions instead of shifts, do not loop all children
-        match = childTests.every(tt => test(children, tt.position, tt, options).match);
-        if (match) {
-          // we may need position of child in transform
-          let j = last(childTests).position;
-          res.j = j >= 0 ? j : children.length + j;
-        }
-      } else {
-        for (let j = 0; j < children.length; j++) {
-          match = childTests.every(tt => test(children, j, tt, options).match);
-          if (match) {
-            res.j = j;
-            // all tests true, continue with next key of pattern t
-            break;
-          }
-        }
-      }
-
-      if (match === false) { return res; }
-
-      continue;
-    }
-
-    switch (typeof t[key]) {
-    case 'boolean':
-    case 'number':
-    case 'string':
-      if (token[key] !== t[key]) { return res; }
-      break;
-    case 'function':
-      if (!t[key](token[key])) { return res; }
-      break;
-    case 'object':
-      if (isArrayOfFunctions(t[key])) {
-        let r = t[key].every(tt => tt(token[key]));
-        if (r === false) { return res; }
-        break;
-      }
-    // fall through for objects !== arrays of functions
-    default:
-      throw new Error(`Unknown type of pattern test (key: ${key}). Test should be of type boolean, number, string, function or array of functions.`);
-    }
-  }
-
-  // no tests returned false -> all tests returns true
-  res.match = true;
-  return res;
-}
-
-function isArrayOfObjects(arr) {
-  return Array.isArray(arr) && arr.length && arr.every(i => typeof i === 'object');
-}
-
-function isArrayOfFunctions(arr) {
-  return Array.isArray(arr) && arr.length && arr.every(i => typeof i === 'function');
-}
-
-/**
- * Get n item of array. Supports negative n, where -1 is last
- * element in array.
- * @param {array} arr
- * @param {number} n
- */
-function get(arr, n) {
-  return n >= 0 ? arr[n] : arr[arr.length + n];
-}
-
-// get last element of array, safe - returns {} if not found
-function last(arr) {
-  return arr.slice(-1)[0] || {};
-}
-
-},{"./patterns.js":250}],250:[function(require,module,exports){
-'use strict';
-
-/**
- * If a pattern matches the token stream,
- * then run transform.
- */
-
-const utils = require('./utils.js');
-
-module.exports = options => {
-  const __hr = new RegExp('^ {0,3}[-*_]{3,} ?'
-                          + utils.escapeRegExp(options.leftDelimiter)
-                          + '[^' + utils.escapeRegExp(options.rightDelimiter) + ']');
-
-  return ([
-    {
-      /**
-       * ```python {.cls}
-       * for i in range(10):
-       *     print(i)
-       * ```
-       */
-      name: 'fenced code blocks',
-      tests: [
-        {
-          shift: 0,
-          block: true,
-          info: utils.hasDelimiters('end', options)
-        }
-      ],
-      transform: (tokens, i) => {
-        let token = tokens[i];
-        let start = token.info.lastIndexOf(options.leftDelimiter);
-        let attrs = utils.getAttrs(token.info, start, options);
-        utils.addAttrs(attrs, token);
-        token.info = utils.removeDelimiter(token.info, options);
-      }
-    }, {
-      /**
-       * bla `click()`{.c} ![](img.png){.d}
-       *
-       * differs from 'inline attributes' as it does
-       * not have a closing tag (nesting: -1)
-       */
-      name: 'inline nesting 0',
-      tests: [
-        {
-          shift: 0,
-          type: 'inline',
-          children: [
-            {
-              shift: -1,
-              type: (str) => str === 'image' || str === 'code_inline'
-            }, {
-              shift: 0,
-              type: 'text',
-              content: utils.hasDelimiters('start', options)
-            }
-          ]
-        }
-      ],
-      transform: (tokens, i, j) => {
-        let token = tokens[i].children[j];
-        let endChar = token.content.indexOf(options.rightDelimiter);
-        let attrToken = tokens[i].children[j - 1];
-        let attrs = utils.getAttrs(token.content, 0, options);
-        utils.addAttrs(attrs, attrToken);
-        if (token.content.length === (endChar + options.rightDelimiter.length)) {
-          tokens[i].children.splice(j, 1);
-        } else {
-          token.content = token.content.slice(endChar + options.rightDelimiter.length);
-        }
-      }
-    }, {
-      /**
-       * | h1 |
-       * | -- |
-       * | c1 |
-       * {.c}
-       */
-      name: 'tables',
-      tests: [
-        {
-          // let this token be i, such that for-loop continues at
-          // next token after tokens.splice
-          shift: 0,
-          type: 'table_close'
-        }, {
-          shift: 1,
-          type: 'paragraph_open'
-        }, {
-          shift: 2,
-          type: 'inline',
-          content: utils.hasDelimiters('only', options)
-        }
-      ],
-      transform: (tokens, i) => {
-        let token = tokens[i + 2];
-        let tableOpen = utils.getMatchingOpeningToken(tokens, i);
-        let attrs = utils.getAttrs(token.content, 0, options);
-        // add attributes
-        utils.addAttrs(attrs, tableOpen);
-        // remove <p>{.c}</p>
-        tokens.splice(i + 1, 3);
-      }
-    }, {
-      /**
-       * *emphasis*{.with attrs=1}
-       */
-      name: 'inline attributes',
-      tests: [
-        {
-          shift: 0,
-          type: 'inline',
-          children: [
-            {
-              shift: -1,
-              nesting: -1  // closing inline tag, </em>{.a}
-            }, {
-              shift: 0,
-              type: 'text',
-              content: utils.hasDelimiters('start', options)
-            }
-          ]
-        }
-      ],
-      transform: (tokens, i, j) => {
-        let token = tokens[i].children[j];
-        let content = token.content;
-        let attrs = utils.getAttrs(content, 0, options);
-        let openingToken = utils.getMatchingOpeningToken(tokens[i].children, j - 1);
-        utils.addAttrs(attrs, openingToken);
-        token.content = content.slice(content.indexOf(options.rightDelimiter) + options.rightDelimiter.length);
-      }
-    }, {
-      /**
-       * - item
-       * {.a}
-       */
-      name: 'list softbreak',
-      tests: [
-        {
-          shift: -2,
-          type: 'list_item_open'
-        }, {
-          shift: 0,
-          type: 'inline',
-          children: [
-            {
-              position: -2,
-              type: 'softbreak'
-            }, {
-              position: -1,
-              type: 'text',
-              content: utils.hasDelimiters('only', options)
-            }
-          ]
-        }
-      ],
-      transform: (tokens, i, j) => {
-        let token = tokens[i].children[j];
-        let content = token.content;
-        let attrs = utils.getAttrs(content, 0, options);
-        let ii = i - 2;
-        while (tokens[ii - 1] &&
-          tokens[ii - 1].type !== 'ordered_list_open' &&
-          tokens[ii - 1].type !== 'bullet_list_open') { ii--; }
-        utils.addAttrs(attrs, tokens[ii - 1]);
-        tokens[i].children = tokens[i].children.slice(0, -2);
-      }
-    }, {
-      /**
-       * - nested list
-       *   - with double \n
-       *   {.a} <-- apply to nested ul
-       *
-       * {.b} <-- apply to root <ul>
-       */
-      name: 'list double softbreak',
-      tests: [
-        {
-          // let this token be i = 0 so that we can erase
-          // the <p>{.a}</p> tokens below
-          shift: 0,
-          type: (str) =>
-            str === 'bullet_list_close' ||
-            str === 'ordered_list_close'
-        }, {
-          shift: 1,
-          type: 'paragraph_open'
-        }, {
-          shift: 2,
-          type: 'inline',
-          content: utils.hasDelimiters('only', options),
-          children: (arr) => arr.length === 1
-        }, {
-          shift: 3,
-          type: 'paragraph_close'
-        }
-      ],
-      transform: (tokens, i) => {
-        let token = tokens[i + 2];
-        let content = token.content;
-        let attrs = utils.getAttrs(content, 0, options);
-        let openingToken = utils.getMatchingOpeningToken(tokens, i);
-        utils.addAttrs(attrs, openingToken);
-        tokens.splice(i + 1, 3);
-      }
-    }, {
-      /**
-       * - end of {.list-item}
-       */
-      name: 'list item end',
-      tests: [
-        {
-          shift: -2,
-          type: 'list_item_open'
-        }, {
-          shift: 0,
-          type: 'inline',
-          children: [
-            {
-              position: -1,
-              type: 'text',
-              content: utils.hasDelimiters('end', options)
-            }
-          ]
-        }
-      ],
-      transform: (tokens, i, j) => {
-        let token = tokens[i].children[j];
-        let content = token.content;
-        let attrs = utils.getAttrs(content, content.lastIndexOf(options.leftDelimiter), options);
-        utils.addAttrs(attrs, tokens[i - 2]);
-        let trimmed = content.slice(0, content.lastIndexOf(options.leftDelimiter));
-        token.content = last(trimmed) !== ' ' ?
-          trimmed : trimmed.slice(0, -1);
-      }
-    }, {
-      /**
-       * something with softbreak
-       * {.cls}
-       */
-      name: '\n{.a} softbreak then curly in start',
-      tests: [
-        {
-          shift: 0,
-          type: 'inline',
-          children: [
-            {
-              position: -2,
-              type: 'softbreak'
-            }, {
-              position: -1,
-              type: 'text',
-              content: utils.hasDelimiters('only', options)
-            }
-          ]
-        }
-      ],
-      transform: (tokens, i, j) => {
-        let token = tokens[i].children[j];
-        let attrs = utils.getAttrs(token.content, 0, options);
-        // find last closing tag
-        let ii = i + 1;
-        while (tokens[ii + 1] && tokens[ii + 1].nesting === -1) { ii++; }
-        let openingToken = utils.getMatchingOpeningToken(tokens, ii);
-        utils.addAttrs(attrs, openingToken);
-        tokens[i].children = tokens[i].children.slice(0, -2);
-      }
-    }, {
-      /**
-       * horizontal rule --- {#id}
-       */
-      name: 'horizontal rule',
-      tests: [
-        {
-          shift: 0,
-          type: 'paragraph_open'
-        },
-        {
-          shift: 1,
-          type: 'inline',
-          children: (arr) => arr.length === 1,
-          content: (str) => str.match(__hr) !== null
-        },
-        {
-          shift: 2,
-          type: 'paragraph_close'
-        }
-      ],
-      transform: (tokens, i) => {
-        let token = tokens[i];
-        token.type = 'hr';
-        token.tag = 'hr';
-        token.nesting = 0;
-        let content = tokens[i + 1].content;
-        let start = content.lastIndexOf(options.leftDelimiter);
-        token.attrs = utils.getAttrs(content, start, options);
-        token.markup = content;
-        tokens.splice(i + 1, 2);
-      }
-    }, {
-      /**
-       * end of {.block}
-       */
-      name: 'end of block',
-      tests: [
-        {
-          shift: 0,
-          type: 'inline',
-          children: [
-            {
-              position: -1,
-              content: utils.hasDelimiters('end', options),
-              type: (t) => t !== 'code_inline'
-            }
-          ]
-        }
-      ],
-      transform: (tokens, i, j) => {
-        let token = tokens[i].children[j];
-        let content = token.content;
-        let attrs = utils.getAttrs(content, content.lastIndexOf(options.leftDelimiter), options);
-        let ii = i + 1;
-        while (tokens[ii + 1] && tokens[ii + 1].nesting === -1) { ii++; }
-        let openingToken = utils.getMatchingOpeningToken(tokens, ii);
-        utils.addAttrs(attrs, openingToken);
-        let trimmed = content.slice(0, content.lastIndexOf(options.leftDelimiter));
-        token.content = last(trimmed) !== ' ' ?
-          trimmed : trimmed.slice(0, -1);
-      }
-    }
-  ]);
-};
-
-// get last element of array or string
-function last(arr) {
-  return arr.slice(-1)[0];
-}
-
-},{"./utils.js":251}],251:[function(require,module,exports){
-'use strict';
 /**
  * parse {.class #id key=val} strings
  * @param {string} str: string to parse
  * @param {int} start: where to start parsing (including {)
  * @returns {2d array}: [['key', 'val'], ['class', 'red']]
  */
-exports.getAttrs = function (str, start, options) {
+function getAttrs(str, start, options) {
   // not tab, line feed, form feed, space, solidus, greater than sign, quotation mark, apostrophe and equals sign
   const allowedKeyChars = /[^\t\n\f />"'=]/;
   const pairSeparator = ' ';
   const keySeparator = '=';
   const classChar = '.';
   const idChar = '#';
-
   const attrs = [];
   let key = '';
   let value = '';
   let parsingKey = true;
-  let valueInsideQuotes = false;
-
-  // read inside {}
+  let valueInsideQuotes = false; // read inside {}
   // start + left delimiter length to avoid beginning {
   // breaks when } is found or end of string
+
   for (let i = start + options.leftDelimiter.length; i < str.length; i++) {
     if (str.slice(i, i + options.rightDelimiter.length) === options.rightDelimiter) {
-      if (key !== '') { attrs.push([ key, value ]); }
+      if (key !== '') {
+        attrs.push([key, value]);
+      }
+
       break;
     }
-    let char_ = str.charAt(i);
 
-    // switch to reading value if equal sign
+    let char_ = str.charAt(i); // switch to reading value if equal sign
+
     if (char_ === keySeparator && parsingKey) {
       parsingKey = false;
       continue;
-    }
+    } // {.class} {..css-module}
 
-    // {.class} {..css-module}
+
     if (char_ === classChar && key === '') {
       if (str.charAt(i + 1) === classChar) {
         key = 'css-module';
@@ -38387,82 +37918,84 @@ exports.getAttrs = function (str, start, options) {
       } else {
         key = 'class';
       }
+
       parsingKey = false;
       continue;
-    }
+    } // {#id}
 
-    // {#id}
+
     if (char_ === idChar && key === '') {
       key = 'id';
       parsingKey = false;
       continue;
-    }
+    } // {value="inside quotes"}
 
-    // {value="inside quotes"}
+
     if (char_ === '"' && value === '') {
       valueInsideQuotes = true;
       continue;
     }
+
     if (char_ === '"' && valueInsideQuotes) {
       valueInsideQuotes = false;
       continue;
-    }
+    } // read next key/value pair
 
-    // read next key/value pair
-    if ((char_ === pairSeparator && !valueInsideQuotes)) {
+
+    if (char_ === pairSeparator && !valueInsideQuotes) {
       if (key === '') {
         // beginning or ending space: { .red } vs {.red}
         continue;
       }
-      attrs.push([ key, value ]);
+
+      attrs.push([key, value]);
       key = '';
       value = '';
       parsingKey = true;
       continue;
-    }
+    } // continue if character not allowed
 
-    // continue if character not allowed
+
     if (parsingKey && char_.search(allowedKeyChars) === -1) {
       continue;
-    }
+    } // no other conditions met; append to key/value
 
-    // no other conditions met; append to key/value
+
     if (parsingKey) {
       key += char_;
       continue;
     }
+
     value += char_;
   }
 
   if (options.allowedAttributes && options.allowedAttributes.length) {
     let allowedAttributes = options.allowedAttributes;
-
     return attrs.filter(function (attrPair) {
       let attr = attrPair[0];
 
       function isAllowedAttribute(allowedAttribute) {
-        return (attr === allowedAttribute
-          || (allowedAttribute instanceof RegExp && allowedAttribute.test(attr))
-        );
+        return attr === allowedAttribute || allowedAttribute instanceof RegExp && allowedAttribute.test(attr);
       }
 
       return allowedAttributes.some(isAllowedAttribute);
     });
-
   }
+
   return attrs;
-
-};
-
+}
 /**
  * add attributes from [['key', 'val']] list
  * @param {array} attrs: [['key', 'val']]
  * @param {token} token: which token to add attributes
  * @returns token
  */
-exports.addAttrs = function (attrs, token) {
+
+
+function addAttrs(attrs, token) {
   for (let j = 0, l = attrs.length; j < l; ++j) {
     let key = attrs[j][0];
+
     if (key === 'class') {
       token.attrJoin('class', attrs[j][1]);
     } else if (key === 'css-module') {
@@ -38471,9 +38004,9 @@ exports.addAttrs = function (attrs, token) {
       token.attrPush(attrs[j]);
     }
   }
-  return token;
-};
 
+  return token;
+}
 /**
  * Does string have properly formatted curly?
  *
@@ -38485,19 +38018,22 @@ exports.addAttrs = function (attrs, token) {
  * @param {string} where to expect {} curly. start, middle, end or only.
  * @return {function(string)} Function which testes if string has curly.
  */
-exports.hasDelimiters = function (where, options) {
 
+
+function hasDelimiters(where, options) {
   if (!where) {
     throw new Error('Parameter `where` not passed. Should be "start", "middle", "end" or "only".');
   }
-
   /**
    * @param {string} str
    * @return {boolean}
    */
+
+
   return function (str) {
     // we need minimum three chars, for example {b}
     let minCurlyLength = options.leftDelimiter.length + 1 + options.rightDelimiter.length;
+
     if (!str || typeof str !== 'string' || str.length < minCurlyLength) {
       return false;
     }
@@ -38505,61 +38041,58 @@ exports.hasDelimiters = function (where, options) {
     function validCurlyLength(curly) {
       let isClass = curly.charAt(options.leftDelimiter.length) === '.';
       let isId = curly.charAt(options.leftDelimiter.length) === '#';
-      return (isClass || isId)
-        ? curly.length >= (minCurlyLength + 1)
-        : curly.length >= minCurlyLength;
+      return isClass || isId ? curly.length >= minCurlyLength + 1 : curly.length >= minCurlyLength;
     }
 
     let start, end, slice, nextChar;
     let rightDelimiterMinimumShift = minCurlyLength - options.rightDelimiter.length;
+
     switch (where) {
-    case 'start':
-      // first char should be {, } found in char 2 or more
-      slice = str.slice(0, options.leftDelimiter.length);
-      start = slice === options.leftDelimiter ? 0 : -1;
-      end = start === -1 ? -1 : str.indexOf(options.rightDelimiter, rightDelimiterMinimumShift);
-      // check if next character is not one of the delimiters
-      nextChar = str.charAt(end + options.rightDelimiter.length);
-      if (nextChar && options.rightDelimiter.indexOf(nextChar) !== -1) {
-        end = -1;
-      }
-      break;
+      case 'start':
+        // first char should be {, } found in char 2 or more
+        slice = str.slice(0, options.leftDelimiter.length);
+        start = slice === options.leftDelimiter ? 0 : -1;
+        end = start === -1 ? -1 : str.indexOf(options.rightDelimiter, rightDelimiterMinimumShift); // check if next character is not one of the delimiters
 
-    case 'end':
-      // last char should be }
-      start = str.lastIndexOf(options.leftDelimiter);
-      end = start === -1 ? -1 : str.indexOf(options.rightDelimiter, start + rightDelimiterMinimumShift);
-      end = end === str.length - options.rightDelimiter.length ? end : -1;
-      break;
+        nextChar = str.charAt(end + options.rightDelimiter.length);
 
-    case 'only':
-      // '{.a}'
-      slice = str.slice(0, options.leftDelimiter.length);
-      start = slice === options.leftDelimiter ? 0 : -1;
-      slice = str.slice(str.length - options.rightDelimiter.length);
-      end = slice === options.rightDelimiter ? str.length - options.rightDelimiter.length : -1;
-      break;
+        if (nextChar && options.rightDelimiter.indexOf(nextChar) !== -1) {
+          end = -1;
+        }
+
+        break;
+
+      case 'end':
+        // last char should be }
+        start = str.lastIndexOf(options.leftDelimiter);
+        end = start === -1 ? -1 : str.indexOf(options.rightDelimiter, start + rightDelimiterMinimumShift);
+        end = end === str.length - options.rightDelimiter.length ? end : -1;
+        break;
+
+      case 'only':
+        // '{.a}'
+        slice = str.slice(0, options.leftDelimiter.length);
+        start = slice === options.leftDelimiter ? 0 : -1;
+        slice = str.slice(str.length - options.rightDelimiter.length);
+        end = slice === options.rightDelimiter ? str.length - options.rightDelimiter.length : -1;
+        break;
     }
 
     return start !== -1 && end !== -1 && validCurlyLength(str.substring(start, end + options.rightDelimiter.length));
   };
-};
-
+}
 /**
  * Removes last curly from string.
  */
-exports.removeDelimiter = function (str, options) {
+
+
+function removeDelimiter(str, options) {
   const start = escapeRegExp(options.leftDelimiter);
   const end = escapeRegExp(options.rightDelimiter);
-
-  let curly = new RegExp(
-    '[ \\n]?' + start + '[^' + start + end + ']+' + end + '$'
-  );
+  let curly = new RegExp('[ \\n]?' + start + '[^' + start + end + ']+' + end + '$');
   let pos = str.search(curly);
-
   return pos !== -1 ? str.slice(0, pos) : str;
-};
-
+}
 /**
  * Escapes special characters in string s such that the string
  * can be used in `new RegExp`. For example "[" becomes "\\[".
@@ -38567,19 +38100,22 @@ exports.removeDelimiter = function (str, options) {
  * @param {string} s Regex string.
  * @return {string} Escaped string.
  */
+
+
 function escapeRegExp(s) {
   return s.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
 }
-exports.escapeRegExp = escapeRegExp;
-
 /**
  * find corresponding opening block
  */
-exports.getMatchingOpeningToken = function (tokens, i) {
+
+
+function getMatchingOpeningToken(tokens, i) {
   if (tokens[i].type === 'softbreak') {
     return false;
-  }
-  // non closing blocks, example img
+  } // non closing blocks, example img
+
+
   if (tokens[i].nesting === 0) {
     return tokens[i];
   }
@@ -38592,34 +38128,500 @@ exports.getMatchingOpeningToken = function (tokens, i) {
       return tokens[i];
     }
   }
+
   return false;
-};
-
-
-/**
- * from https://github.com/markdown-it/markdown-it/blob/master/lib/common/utils.js
- */
-let HTML_ESCAPE_TEST_RE = /[&<>"]/;
-let HTML_ESCAPE_REPLACE_RE = /[&<>"]/g;
-let HTML_REPLACEMENTS = {
-  '&': '&amp;',
-  '<': '&lt;',
-  '>': '&gt;',
-  '"': '&quot;'
-};
-
-function replaceUnsafeChar(ch) {
-  return HTML_REPLACEMENTS[ch];
 }
 
-exports.escapeHtml = function (str) {
-  if (HTML_ESCAPE_TEST_RE.test(str)) {
-    return str.replace(HTML_ESCAPE_REPLACE_RE, replaceUnsafeChar);
-  }
-  return str;
+/**
+ * If a pattern matches the token stream,
+ * then run transform.
+ */
+
+function patternsConfig(options) {
+  const __hr = new RegExp('^ {0,3}[-*_]{3,} ?' + escapeRegExp(options.leftDelimiter) + '[^' + escapeRegExp(options.rightDelimiter) + ']');
+
+  return [{
+    /**
+     * ```python {.cls}
+     * for i in range(10):
+     *     print(i)
+     * ```
+     */
+    name: 'fenced code blocks',
+    tests: [{
+      shift: 0,
+      block: true,
+      info: hasDelimiters('end', options)
+    }],
+    transform: (tokens, i) => {
+      let token = tokens[i];
+      let start = token.info.lastIndexOf(options.leftDelimiter);
+      let attrs = getAttrs(token.info, start, options);
+      addAttrs(attrs, token);
+      token.info = removeDelimiter(token.info, options);
+    }
+  }, {
+    /**
+     * bla `click()`{.c} ![](img.png){.d}
+     *
+     * differs from 'inline attributes' as it does
+     * not have a closing tag (nesting: -1)
+     */
+    name: 'inline nesting 0',
+    tests: [{
+      shift: 0,
+      type: 'inline',
+      children: [{
+        shift: -1,
+        type: str => str === 'image' || str === 'code_inline'
+      }, {
+        shift: 0,
+        type: 'text',
+        content: hasDelimiters('start', options)
+      }]
+    }],
+    transform: (tokens, i, j) => {
+      let token = tokens[i].children[j];
+      let endChar = token.content.indexOf(options.rightDelimiter);
+      let attrToken = tokens[i].children[j - 1];
+      let attrs = getAttrs(token.content, 0, options);
+      addAttrs(attrs, attrToken);
+
+      if (token.content.length === endChar + options.rightDelimiter.length) {
+        tokens[i].children.splice(j, 1);
+      } else {
+        token.content = token.content.slice(endChar + options.rightDelimiter.length);
+      }
+    }
+  }, {
+    /**
+     * | h1 |
+     * | -- |
+     * | c1 |
+     * {.c}
+     */
+    name: 'tables',
+    tests: [{
+      // let this token be i, such that for-loop continues at
+      // next token after tokens.splice
+      shift: 0,
+      type: 'table_close'
+    }, {
+      shift: 1,
+      type: 'paragraph_open'
+    }, {
+      shift: 2,
+      type: 'inline',
+      content: hasDelimiters('only', options)
+    }],
+    transform: (tokens, i) => {
+      let token = tokens[i + 2];
+      let tableOpen = getMatchingOpeningToken(tokens, i);
+      let attrs = getAttrs(token.content, 0, options); // add attributes
+
+      addAttrs(attrs, tableOpen); // remove <p>{.c}</p>
+
+      tokens.splice(i + 1, 3);
+    }
+  }, {
+    /**
+     * *emphasis*{.with attrs=1}
+     */
+    name: 'inline attributes',
+    tests: [{
+      shift: 0,
+      type: 'inline',
+      children: [{
+        shift: -1,
+        nesting: -1 // closing inline tag, </em>{.a}
+
+      }, {
+        shift: 0,
+        type: 'text',
+        content: hasDelimiters('start', options)
+      }]
+    }],
+    transform: (tokens, i, j) => {
+      let token = tokens[i].children[j];
+      let content = token.content;
+      let attrs = getAttrs(content, 0, options);
+      let openingToken = getMatchingOpeningToken(tokens[i].children, j - 1);
+      addAttrs(attrs, openingToken);
+      token.content = content.slice(content.indexOf(options.rightDelimiter) + options.rightDelimiter.length);
+    }
+  }, {
+    /**
+     * - item
+     * {.a}
+     */
+    name: 'list softbreak',
+    tests: [{
+      shift: -2,
+      type: 'list_item_open'
+    }, {
+      shift: 0,
+      type: 'inline',
+      children: [{
+        position: -2,
+        type: 'softbreak'
+      }, {
+        position: -1,
+        type: 'text',
+        content: hasDelimiters('only', options)
+      }]
+    }],
+    transform: (tokens, i, j) => {
+      let token = tokens[i].children[j];
+      let content = token.content;
+      let attrs = getAttrs(content, 0, options);
+      let ii = i - 2;
+
+      while (tokens[ii - 1] && tokens[ii - 1].type !== 'ordered_list_open' && tokens[ii - 1].type !== 'bullet_list_open') {
+        ii--;
+      }
+
+      addAttrs(attrs, tokens[ii - 1]);
+      tokens[i].children = tokens[i].children.slice(0, -2);
+    }
+  }, {
+    /**
+     * - nested list
+     *   - with double \n
+     *   {.a} <-- apply to nested ul
+     *
+     * {.b} <-- apply to root <ul>
+     */
+    name: 'list double softbreak',
+    tests: [{
+      // let this token be i = 0 so that we can erase
+      // the <p>{.a}</p> tokens below
+      shift: 0,
+      type: str => str === 'bullet_list_close' || str === 'ordered_list_close'
+    }, {
+      shift: 1,
+      type: 'paragraph_open'
+    }, {
+      shift: 2,
+      type: 'inline',
+      content: hasDelimiters('only', options),
+      children: arr => arr.length === 1
+    }, {
+      shift: 3,
+      type: 'paragraph_close'
+    }],
+    transform: (tokens, i) => {
+      let token = tokens[i + 2];
+      let content = token.content;
+      let attrs = getAttrs(content, 0, options);
+      let openingToken = getMatchingOpeningToken(tokens, i);
+      addAttrs(attrs, openingToken);
+      tokens.splice(i + 1, 3);
+    }
+  }, {
+    /**
+     * - end of {.list-item}
+     */
+    name: 'list item end',
+    tests: [{
+      shift: -2,
+      type: 'list_item_open'
+    }, {
+      shift: 0,
+      type: 'inline',
+      children: [{
+        position: -1,
+        type: 'text',
+        content: hasDelimiters('end', options)
+      }]
+    }],
+    transform: (tokens, i, j) => {
+      let token = tokens[i].children[j];
+      let content = token.content;
+      let attrs = getAttrs(content, content.lastIndexOf(options.leftDelimiter), options);
+      addAttrs(attrs, tokens[i - 2]);
+      let trimmed = content.slice(0, content.lastIndexOf(options.leftDelimiter));
+      token.content = last(trimmed) !== ' ' ? trimmed : trimmed.slice(0, -1);
+    }
+  }, {
+    /**
+     * something with softbreak
+     * {.cls}
+     */
+    name: '\n{.a} softbreak then curly in start',
+    tests: [{
+      shift: 0,
+      type: 'inline',
+      children: [{
+        position: -2,
+        type: 'softbreak'
+      }, {
+        position: -1,
+        type: 'text',
+        content: hasDelimiters('only', options)
+      }]
+    }],
+    transform: (tokens, i, j) => {
+      let token = tokens[i].children[j];
+      let attrs = getAttrs(token.content, 0, options); // find last closing tag
+
+      let ii = i + 1;
+
+      while (tokens[ii + 1] && tokens[ii + 1].nesting === -1) {
+        ii++;
+      }
+
+      let openingToken = getMatchingOpeningToken(tokens, ii);
+      addAttrs(attrs, openingToken);
+      tokens[i].children = tokens[i].children.slice(0, -2);
+    }
+  }, {
+    /**
+     * horizontal rule --- {#id}
+     */
+    name: 'horizontal rule',
+    tests: [{
+      shift: 0,
+      type: 'paragraph_open'
+    }, {
+      shift: 1,
+      type: 'inline',
+      children: arr => arr.length === 1,
+      content: str => str.match(__hr) !== null
+    }, {
+      shift: 2,
+      type: 'paragraph_close'
+    }],
+    transform: (tokens, i) => {
+      let token = tokens[i];
+      token.type = 'hr';
+      token.tag = 'hr';
+      token.nesting = 0;
+      let content = tokens[i + 1].content;
+      let start = content.lastIndexOf(options.leftDelimiter);
+      token.attrs = getAttrs(content, start, options);
+      token.markup = content;
+      tokens.splice(i + 1, 2);
+    }
+  }, {
+    /**
+     * end of {.block}
+     */
+    name: 'end of block',
+    tests: [{
+      shift: 0,
+      type: 'inline',
+      children: [{
+        position: -1,
+        content: hasDelimiters('end', options),
+        type: t => t !== 'code_inline'
+      }]
+    }],
+    transform: (tokens, i, j) => {
+      let token = tokens[i].children[j];
+      let content = token.content;
+      let attrs = getAttrs(content, content.lastIndexOf(options.leftDelimiter), options);
+      let ii = i + 1;
+
+      while (tokens[ii + 1] && tokens[ii + 1].nesting === -1) {
+        ii++;
+      }
+
+      let openingToken = getMatchingOpeningToken(tokens, ii);
+      addAttrs(attrs, openingToken);
+      let trimmed = content.slice(0, content.lastIndexOf(options.leftDelimiter));
+      token.content = last(trimmed) !== ' ' ? trimmed : trimmed.slice(0, -1);
+    }
+  }];
+} // get last element of array or string
+
+
+function last(arr) {
+  return arr.slice(-1)[0];
+}
+
+const defaultOptions = {
+  leftDelimiter: '{',
+  rightDelimiter: '}',
+  allowedAttributes: [],
+  ignore: null // callback(token)
+
 };
 
-},{}],252:[function(require,module,exports){
+function attributes(md, options_) {
+  let options = Object.assign({}, defaultOptions);
+  options = Object.assign(options, options_);
+  const patterns = patternsConfig(options);
+
+  function curlyAttrs(state) {
+    let tokens = state.tokens;
+
+    for (let i = 0; i < tokens.length; i++) {
+      for (let p = 0; p < patterns.length; p++) {
+        let pattern = patterns[p];
+        let j = null; // position of child with offset 0
+
+        let match = pattern.tests.every(t => {
+          let res = test(tokens, i, t, options);
+
+          if (res.j !== null) {
+            j = res.j;
+          }
+
+          return res.match;
+        });
+
+        if (match) {
+          pattern.transform(tokens, i, j);
+
+          if (pattern.name === 'inline attributes' || pattern.name === 'inline nesting 0') {
+            // retry, may be several inline attributes
+            p--;
+          }
+        }
+      }
+    }
+  }
+
+  md.core.ruler.after('inline', 'curly_attributes', curlyAttrs);
+}
+/**
+ * Test if t matches token stream.
+ *
+ * @param {array} tokens
+ * @param {number} i
+ * @param {object} t Test to match.
+ * @return {object} { match: true|false, j: null|number }
+ */
+
+
+function test(tokens, i, t, options) {
+  let res = {
+    match: false,
+    j: null // position of child
+
+  };
+  let ii = t.shift !== undefined ? i + t.shift : t.position;
+  let token = get(tokens, ii); // supports negative ii
+  // supports ignore token
+
+  if (token === undefined || options.ignore && options.ignore(token)) {
+    return res;
+  }
+
+  for (let key in t) {
+    if (key === 'shift' || key === 'position') {
+      continue;
+    }
+
+    if (token[key] === undefined) {
+      return res;
+    }
+
+    if (key === 'children' && isArrayOfObjects(t.children)) {
+      if (token.children.length === 0) {
+        return res;
+      }
+
+      let match;
+      let childTests = t.children;
+      let children = token.children;
+
+      if (childTests.every(tt => tt.position !== undefined)) {
+        // positions instead of shifts, do not loop all children
+        match = childTests.every(tt => test(children, tt.position, tt, options).match);
+
+        if (match) {
+          // we may need position of child in transform
+          let j = last$1(childTests).position;
+          res.j = j >= 0 ? j : children.length + j;
+        }
+      } else {
+        for (let j = 0; j < children.length; j++) {
+          match = childTests.every(tt => test(children, j, tt, options).match);
+
+          if (match) {
+            res.j = j; // all tests true, continue with next key of pattern t
+
+            break;
+          }
+        }
+      }
+
+      if (match === false) {
+        return res;
+      }
+
+      continue;
+    }
+
+    switch (typeof t[key]) {
+      case 'boolean':
+      case 'number':
+      case 'string':
+        if (token[key] !== t[key]) {
+          return res;
+        }
+
+        break;
+
+      case 'function':
+        if (!t[key](token[key])) {
+          return res;
+        }
+
+        break;
+
+      case 'object':
+        if (isArrayOfFunctions(t[key])) {
+          let r = t[key].every(tt => tt(token[key]));
+
+          if (r === false) {
+            return res;
+          }
+
+          break;
+        }
+
+      // fall through for objects !== arrays of functions
+
+      default:
+        throw new Error(`Unknown type of pattern test (key: ${key}). Test should be of type boolean, number, string, function or array of functions.`);
+    }
+  } // no tests returned false -> all tests returns true
+
+
+  res.match = true;
+  return res;
+}
+
+function isArrayOfObjects(arr) {
+  return Array.isArray(arr) && arr.length && arr.every(i => typeof i === 'object');
+}
+
+function isArrayOfFunctions(arr) {
+  return Array.isArray(arr) && arr.length && arr.every(i => typeof i === 'function');
+}
+/**
+ * Get n item of array. Supports negative n, where -1 is last
+ * element in array.
+ * @param {array} arr
+ * @param {number} n
+ */
+
+
+function get(arr, n) {
+  return n >= 0 ? arr[n] : arr[arr.length + n];
+} // get last element of array, safe - returns {} if not found
+
+
+function last$1(arr) {
+  return arr.slice(-1)[0] || {};
+} //module.exports = attributes;
+
+module.exports = attributes;
+
+
+},{}],250:[function(require,module,exports){
 var _, checkboxReplace;
 
 _ = require('underscore');
@@ -38729,51 +38731,64 @@ module.exports = function(md, options) {
   md.core.ruler.push("checkbox", checkboxReplace(md, options));
 };
 
-},{"underscore":300}],253:[function(require,module,exports){
-// Process block-level custom containers
-//
+},{"underscore":290}],251:[function(require,module,exports){
+/*! markdown-it-container 3.0.0-4 https://github.com//GerHobbelt/markdown-it-container @license MIT */
+
 'use strict';
 
-
+// Process block-level custom containers
+//
 module.exports = function container_plugin(md, name, options) {
-
-  function validateDefault(params) {
+  // Second param may be useful if you decide
+  // to increase minimal allowed marker length
+  function validateDefault(params
+  /*, markup*/
+  ) {
     return params.trim().split(' ', 2)[0] === name;
   }
 
-  function renderDefault(tokens, idx, _options, env, _self) {
-
+  function renderDefault(tokens, idx, _options, env, slf) {
     // add a class to the opening tag
     if (tokens[idx].nesting === 1) {
-      tokens[idx].attrPush([ 'class', name ]);
+      tokens[idx].attrJoin('class', name);
     }
 
-    return _self.renderToken(tokens, idx, _options, env, _self);
+    return slf.renderToken(tokens, idx, _options, env, slf);
   }
 
   options = options || {};
-
-  var min_markers = 3,
-      marker_str  = options.marker || ':',
+  let min_markers = options.minMarkerCount || 3,
+      marker_str = options.marker || ':',
+      end_marker_str = options.endMarker || marker_str,
+      end_marker_len = end_marker_str.length,
       marker_char = marker_str.charCodeAt(0),
-      marker_len  = marker_str.length,
-      validate    = options.validate || validateDefault,
-      render      = options.render || renderDefault;
+      marker_len = marker_str.length,
+      validate = options.validate || validateDefault,
+      render = options.render || renderDefault,
+      customContent = !!options.content;
 
   function container(state, startLine, endLine, silent) {
-    var pos, nextLine, marker_count, markup, params, token,
-        old_parent, old_line_max,
+    let pos,
+        nextLine,
+        marker_count,
+        markup,
+        params,
+        token,
+        old_parent,
+        old_line_max,
+        blockStart,
         auto_closed = false,
-        start = state.bMarks[startLine] + state.tShift[startLine],
-        max = state.eMarks[startLine];
-
-    // Check out the first character quickly,
+        start = blockStart = state.bMarks[startLine] + state.tShift[startLine],
+        max = state.eMarks[startLine]; // Check out the first character quickly,
     // this should filter out most of non-containers
     //
-    if (marker_char !== state.src.charCodeAt(start)) { return false; }
 
-    // Check out the rest of the marker string
+    if (marker_char !== state.src.charCodeAt(start)) {
+      return false;
+    } // Check out the rest of the marker string
     //
+
+
     for (pos = start + 1; pos <= max; pos++) {
       if (marker_str[(pos - start) % marker_len] !== state.src[pos]) {
         break;
@@ -38781,23 +38796,33 @@ module.exports = function container_plugin(md, name, options) {
     }
 
     marker_count = Math.floor((pos - start) / marker_len);
-    if (marker_count < min_markers) { return false; }
-    pos -= (pos - start) % marker_len;
 
+    if (marker_count < min_markers) {
+      return false;
+    }
+
+    pos -= (pos - start) % marker_len;
     markup = state.src.slice(start, pos);
     params = state.src.slice(pos, max);
-    if (!validate(params)) { return false; }
 
-    // Since start is found, we can report success here in validation mode
+    if (!validate(params, markup)) {
+      return false;
+    } // Since start is found, we can report success here in validation mode
     //
-    if (silent) { return true; }
 
-    // Search for the end of the block
+
+    if (silent) {
+      return true;
+    }
+
+    let contentStart = max; // Search for the end of the block
     //
+
     nextLine = startLine;
 
     for (;;) {
       nextLine++;
+
       if (nextLine >= endLine) {
         // unclosed block should be autoclosed by end of document.
         // also block seems to be autoclosed by end of parent
@@ -38814,7 +38839,9 @@ module.exports = function container_plugin(md, name, options) {
         break;
       }
 
-      if (marker_char !== state.src.charCodeAt(start)) { continue; }
+      if (marker_char !== state.src.charCodeAt(start)) {
+        continue;
+      }
 
       if (state.sCount[nextLine] - state.blkIndent >= 4) {
         // closing fence should be indented less than 4 spaces
@@ -38822,93 +38849,125 @@ module.exports = function container_plugin(md, name, options) {
       }
 
       for (pos = start + 1; pos <= max; pos++) {
-        if (marker_str[(pos - start) % marker_len] !== state.src[pos]) {
+        if (end_marker_str[(pos - start) % end_marker_len] !== state.src[pos]) {
           break;
         }
-      }
+      } // closing code fence must be at least as long as the opening one
 
-      // closing code fence must be at least as long as the opening one
-      if (Math.floor((pos - start) / marker_len) < marker_count) { continue; }
 
-      // make sure tail has spaces only
-      pos -= (pos - start) % marker_len;
+      if (Math.floor((pos - start) / end_marker_len) < marker_count) {
+        continue;
+      } // make sure tail has spaces only
+
+
+      pos -= (pos - start) % end_marker_len;
       pos = state.skipSpaces(pos);
 
-      if (pos < max) { continue; }
+      if (pos < max) {
+        continue;
+      } // found!
 
-      // found!
+
       auto_closed = true;
       break;
     }
 
     old_parent = state.parentType;
     old_line_max = state.lineMax;
-    state.parentType = 'container';
+    state.parentType = 'container'; // this will prevent lazy continuations from ever going past our end marker
 
-    // this will prevent lazy continuations from ever going past our end marker
     state.lineMax = nextLine;
-
-    token        = state.push('container_' + name + '_open', 'div', 1);
+    token = state.push('container_' + name + '_open', 'div', 1);
     token.markup = markup;
-    token.block  = true;
-    token.info   = params;
-    token.map    = [ startLine, nextLine ];
+    token.block = true;
+    token.info = params;
+    token.map = [startLine, nextLine];
+    token.position = blockStart;
+    token.size = state.eMarks[nextLine] - blockStart;
 
-    state.md.block.tokenize(state, startLine + 1, nextLine);
+    if (customContent) {
+      token = state.push('container_' + name + '_content', 'div', 0);
+      token.markup = state.src.slice(contentStart, start);
+      token.block = true;
+      token.position = contentStart;
+      token.size = token.markup.length;
+    } else {
+      state.md.block.tokenize(state, startLine + 1, nextLine);
+    }
 
-    token        = state.push('container_' + name + '_close', 'div', -1);
+    token = state.push('container_' + name + '_close', 'div', -1);
     token.markup = state.src.slice(start, pos);
-    token.block  = true;
-
+    token.block = true;
+    token.position = pos;
+    token.size = 0;
     state.parentType = old_parent;
     state.lineMax = old_line_max;
     state.line = nextLine + (auto_closed ? 1 : 0);
-
     return true;
   }
 
   md.block.ruler.before('fence', 'container_' + name, container, {
-    alt: [ 'paragraph', 'reference', 'blockquote', 'list' ]
+    alt: ['paragraph', 'reference', 'blockquote', 'list']
   });
   md.renderer.rules['container_' + name + '_open'] = render;
+
+  if (customContent) {
+    md.renderer.rules['container_' + name + '_content'] = options.content;
+  }
+
   md.renderer.rules['container_' + name + '_close'] = render;
 };
 
-},{}],254:[function(require,module,exports){
-// Process definition lists
-//
+
+},{}],252:[function(require,module,exports){
+/*! markdown-it-deflist 2.0.4-2 https://github.com//GerHobbelt/markdown-it-deflist @license MIT */
+
 'use strict';
 
-
+// Process definition lists
+//
 module.exports = function deflist_plugin(md) {
-  var isSpace = md.utils.isSpace;
-
-  // Search `[:~][\n ]`, returns next pos after marker on success
+  let isSpace = md.utils.isSpace; // Search `[:~][\n ]`, returns next pos after marker on success
   // or -1 on fail.
+
   function skipMarker(state, line) {
-    var pos, marker,
+    let pos,
+        marker,
         start = state.bMarks[line] + state.tShift[line],
         max = state.eMarks[line];
 
-    if (start >= max) { return -1; }
+    if (start >= max) {
+      return -1;
+    } // Check bullet
 
-    // Check bullet
+
     marker = state.src.charCodeAt(start++);
-    if (marker !== 0x7E/* ~ */ && marker !== 0x3A/* : */) { return -1; }
 
-    pos = state.skipSpaces(start);
+    if (marker !== 0x7E
+    /* ~ */
+    && marker !== 0x3A
+    /* : */
+    ) {
+        return -1;
+      }
 
-    // require space after ":"
-    if (start === pos) { return -1; }
+    pos = state.skipSpaces(start); // require space after ":"
 
-    // no empty definitions, e.g. "  : "
-    if (pos >= max) { return -1; }
+    if (start === pos) {
+      return -1;
+    } // no empty definitions, e.g. "  : "
+
+
+    if (pos >= max) {
+      return -1;
+    }
 
     return start;
   }
 
   function markTightParagraphs(state, idx) {
-    var i, l,
+    let i,
+        l,
         level = state.level + 2;
 
     for (i = idx + 2, l = state.tokens.length - 2; i < l; i++) {
@@ -38921,84 +38980,72 @@ module.exports = function deflist_plugin(md) {
   }
 
   function deflist(state, startLine, endLine, silent) {
-    var ch,
-        contentStart,
-        ddLine,
-        dtLine,
-        itemLines,
-        listLines,
-        listTokIdx,
-        max,
-        nextLine,
-        offset,
-        oldDDIndent,
-        oldIndent,
-        oldParentType,
-        oldSCount,
-        oldTShift,
-        oldTight,
-        pos,
-        prevEmptyEnd,
-        tight,
-        token;
+    let ch, contentStart, ddLine, dtLine, itemLines, listLines, listTokIdx, max, nextLine, offset, oldDDIndent, oldIndent, oldParentType, oldSCount, oldTShift, oldTight, pos, prevEmptyEnd, tight, token;
 
     if (silent) {
       // quirk: validation mode validates a dd block only, not a whole deflist
-      if (state.ddIndent < 0) { return false; }
+      if (state.ddIndent < 0) {
+        return false;
+      }
+
       return skipMarker(state, startLine) >= 0;
     }
 
     nextLine = startLine + 1;
-    if (nextLine >= endLine) { return false; }
+
+    if (nextLine >= endLine) {
+      return false;
+    }
 
     if (state.isEmpty(nextLine)) {
       nextLine++;
-      if (nextLine >= endLine) { return false; }
+
+      if (nextLine >= endLine) {
+        return false;
+      }
     }
 
-    if (state.sCount[nextLine] < state.blkIndent) { return false; }
-    contentStart = skipMarker(state, nextLine);
-    if (contentStart < 0) { return false; }
+    if (state.sCount[nextLine] < state.blkIndent) {
+      return false;
+    }
 
-    // Start list
+    contentStart = skipMarker(state, nextLine);
+
+    if (contentStart < 0) {
+      return false;
+    } // Start list
+
+
     listTokIdx = state.tokens.length;
     tight = true;
-
-    token     = state.push('dl_open', 'dl', 1);
-    token.map = listLines = [ startLine, 0 ];
-
-    //
+    token = state.push('dl_open', 'dl', 1);
+    token.map = listLines = [startLine, 0]; //
     // Iterate list items
     //
 
     dtLine = startLine;
-    ddLine = nextLine;
-
-    // One definition list can contain multiple DTs,
+    ddLine = nextLine; // One definition list can contain multiple DTs,
     // and one DT can be followed by multiple DDs.
     //
     // Thus, there is two loops here, and label is
     // needed to break out of the second one
     //
+
     /*eslint no-labels:0,block-scoped-var:0*/
-    OUTER:
-    for (;;) {
+
+    OUTER: for (;;) {
       prevEmptyEnd = false;
-
-      token          = state.push('dt_open', 'dt', 1);
-      token.map      = [ dtLine, dtLine ];
-
-      token          = state.push('inline', '', 0);
-      token.map      = [ dtLine, dtLine ];
-      token.content  = state.getLines(dtLine, dtLine + 1, state.blkIndent, false).trim();
+      token = state.push('dt_open', 'dt', 1);
+      token.map = [dtLine, dtLine];
+      token = state.push('inline', '', 0);
+      token.map = [dtLine, dtLine];
+      token.content = state.getLines(dtLine, dtLine + 1, state.blkIndent, false).trim();
       token.children = [];
-
-      token          = state.push('dt_close', 'dt', -1);
+      token = state.push('dt_close', 'dt', -1);
 
       for (;;) {
-        token     = state.push('dd_open', 'dd', 1);
-        token.map = itemLines = [ nextLine, 0 ];
-
+        token = state.push('dd_open', 'dd', 1);
+        token.map = itemLines = [nextLine, 0];
         pos = contentStart;
         max = state.eMarks[ddLine];
         offset = state.sCount[ddLine] + contentStart - (state.bMarks[ddLine] + state.tShift[ddLine]);
@@ -39020,7 +39067,6 @@ module.exports = function deflist_plugin(md) {
         }
 
         contentStart = pos;
-
         oldTight = state.tight;
         oldDDIndent = state.ddIndent;
         oldIndent = state.blkIndent;
@@ -39032,67 +39078,88 @@ module.exports = function deflist_plugin(md) {
         state.sCount[ddLine] = offset;
         state.tight = true;
         state.parentType = 'deflist';
+        state.md.block.tokenize(state, ddLine, endLine, true); // If any of list item is tight, mark list as tight
 
-        state.md.block.tokenize(state, ddLine, endLine, true);
-
-        // If any of list item is tight, mark list as tight
         if (!state.tight || prevEmptyEnd) {
           tight = false;
-        }
-        // Item become loose if finish with empty line,
+        } // Item become loose if finish with empty line,
         // but we should filter last element, because it means list finish
-        prevEmptyEnd = (state.line - ddLine) > 1 && state.isEmpty(state.line - 1);
 
+
+        prevEmptyEnd = state.line - ddLine > 1 && state.isEmpty(state.line - 1);
         state.tShift[ddLine] = oldTShift;
         state.sCount[ddLine] = oldSCount;
         state.tight = oldTight;
         state.parentType = oldParentType;
         state.blkIndent = oldIndent;
         state.ddIndent = oldDDIndent;
-
         token = state.push('dd_close', 'dd', -1);
-
         itemLines[1] = nextLine = state.line;
 
-        if (nextLine >= endLine) { break OUTER; }
+        if (nextLine >= endLine) {
+          break OUTER;
+        }
 
-        if (state.sCount[nextLine] < state.blkIndent) { break OUTER; }
+        if (state.sCount[nextLine] < state.blkIndent) {
+          break OUTER;
+        }
+
         contentStart = skipMarker(state, nextLine);
-        if (contentStart < 0) { break; }
 
-        ddLine = nextLine;
+        if (contentStart < 0) {
+          break;
+        }
 
-        // go to the next loop iteration:
+        ddLine = nextLine; // go to the next loop iteration:
         // insert DD tag and repeat checking
       }
 
-      if (nextLine >= endLine) { break; }
+      if (nextLine >= endLine) {
+        break;
+      }
+
       dtLine = nextLine;
 
-      if (state.isEmpty(dtLine)) { break; }
-      if (state.sCount[dtLine] < state.blkIndent) { break; }
+      if (state.isEmpty(dtLine)) {
+        break;
+      }
+
+      if (state.sCount[dtLine] < state.blkIndent) {
+        break;
+      }
 
       ddLine = dtLine + 1;
-      if (ddLine >= endLine) { break; }
-      if (state.isEmpty(ddLine)) { ddLine++; }
-      if (ddLine >= endLine) { break; }
 
-      if (state.sCount[ddLine] < state.blkIndent) { break; }
+      if (ddLine >= endLine) {
+        break;
+      }
+
+      if (state.isEmpty(ddLine)) {
+        ddLine++;
+      }
+
+      if (ddLine >= endLine) {
+        break;
+      }
+
+      if (state.sCount[ddLine] < state.blkIndent) {
+        break;
+      }
+
       contentStart = skipMarker(state, ddLine);
-      if (contentStart < 0) { break; }
 
-      // go to the next loop iteration:
+      if (contentStart < 0) {
+        break;
+      } // go to the next loop iteration:
       // insert DT and DD tags and repeat checking
-    }
 
-    // Finilize list
+    } // Finilize list
+
+
     token = state.push('dl_close', 'dl', -1);
-
     listLines[1] = nextLine;
+    state.line = nextLine; // mark paragraphs tight if needed
 
-    state.line = nextLine;
-
-    // mark paragraphs tight if needed
     if (tight) {
       markTightParagraphs(state, listTokIdx);
     }
@@ -39100,1529 +39167,3683 @@ module.exports = function deflist_plugin(md) {
     return true;
   }
 
-
-  md.block.ruler.before('paragraph', 'deflist', deflist, { alt: [ 'paragraph', 'reference' ] });
+  md.block.ruler.before('paragraph', 'deflist', deflist, {
+    alt: ['paragraph', 'reference']
+  });
 };
 
-},{}],255:[function(require,module,exports){
+
+},{}],253:[function(require,module,exports){
+/*! markdown-it-emoji 1.4.0-6 https://github.com//GerHobbelt/markdown-it-emoji @license MIT */
+
 'use strict';
 
-
-var emojies_defs      = require('./lib/data/full.json');
-var emojies_shortcuts = require('./lib/data/shortcuts');
-var emoji_html        = require('./lib/render');
-var emoji_replace     = require('./lib/replace');
-var normalize_opts    = require('./lib/normalize_opts');
-
-
-module.exports = function emoji_plugin(md, options) {
-  var defaults = {
-    defs: emojies_defs,
-    shortcuts: emojies_shortcuts,
-    enabled: []
-  };
-
-  var opts = normalize_opts(md.utils.assign({}, defaults, options || {}));
-
-  md.renderer.rules.emoji = emoji_html;
-
-  md.core.ruler.push('emoji', emoji_replace(md, opts.defs, opts.shortcuts, opts.scanRE, opts.replaceRE));
+var grinning = "😀";
+var smiley = "😃";
+var smile = "😄";
+var grin = "😁";
+var laughing = "😆";
+var satisfied = "😆";
+var sweat_smile = "😅";
+var rofl = "🤣";
+var joy = "😂";
+var slightly_smiling_face = "🙂";
+var upside_down_face = "🙃";
+var wink = "😉";
+var blush = "😊";
+var innocent = "😇";
+var smiling_face_with_three_hearts = "🥰";
+var heart_eyes = "😍";
+var star_struck = "🤩";
+var kissing_heart = "😘";
+var kissing = "😗";
+var relaxed = "☺️";
+var kissing_closed_eyes = "😚";
+var kissing_smiling_eyes = "😙";
+var smiling_face_with_tear = "🥲";
+var yum = "😋";
+var stuck_out_tongue = "😛";
+var stuck_out_tongue_winking_eye = "😜";
+var zany_face = "🤪";
+var stuck_out_tongue_closed_eyes = "😝";
+var money_mouth_face = "🤑";
+var hugs = "🤗";
+var hand_over_mouth = "🤭";
+var shushing_face = "🤫";
+var thinking = "🤔";
+var zipper_mouth_face = "🤐";
+var raised_eyebrow = "🤨";
+var neutral_face = "😐";
+var expressionless = "😑";
+var no_mouth = "😶";
+var smirk = "😏";
+var unamused = "😒";
+var roll_eyes = "🙄";
+var grimacing = "😬";
+var lying_face = "🤥";
+var relieved = "😌";
+var pensive = "😔";
+var sleepy = "😪";
+var drooling_face = "🤤";
+var sleeping = "😴";
+var mask = "😷";
+var face_with_thermometer = "🤒";
+var face_with_head_bandage = "🤕";
+var nauseated_face = "🤢";
+var vomiting_face = "🤮";
+var sneezing_face = "🤧";
+var hot_face = "🥵";
+var cold_face = "🥶";
+var woozy_face = "🥴";
+var dizzy_face = "😵";
+var exploding_head = "🤯";
+var cowboy_hat_face = "🤠";
+var partying_face = "🥳";
+var disguised_face = "🥸";
+var sunglasses = "😎";
+var nerd_face = "🤓";
+var monocle_face = "🧐";
+var confused = "😕";
+var worried = "😟";
+var slightly_frowning_face = "🙁";
+var frowning_face = "☹️";
+var open_mouth = "😮";
+var hushed = "😯";
+var astonished = "😲";
+var flushed = "😳";
+var pleading_face = "🥺";
+var frowning = "😦";
+var anguished = "😧";
+var fearful = "😨";
+var cold_sweat = "😰";
+var disappointed_relieved = "😥";
+var cry = "😢";
+var sob = "😭";
+var scream = "😱";
+var confounded = "😖";
+var persevere = "😣";
+var disappointed = "😞";
+var sweat = "😓";
+var weary = "😩";
+var tired_face = "😫";
+var yawning_face = "🥱";
+var triumph = "😤";
+var rage = "😡";
+var pout = "😡";
+var angry = "😠";
+var cursing_face = "🤬";
+var smiling_imp = "😈";
+var imp = "👿";
+var skull = "💀";
+var skull_and_crossbones = "☠️";
+var hankey = "💩";
+var poop = "💩";
+var shit = "💩";
+var clown_face = "🤡";
+var japanese_ogre = "👹";
+var japanese_goblin = "👺";
+var ghost = "👻";
+var alien = "👽";
+var space_invader = "👾";
+var robot = "🤖";
+var smiley_cat = "😺";
+var smile_cat = "😸";
+var joy_cat = "😹";
+var heart_eyes_cat = "😻";
+var smirk_cat = "😼";
+var kissing_cat = "😽";
+var scream_cat = "🙀";
+var crying_cat_face = "😿";
+var pouting_cat = "😾";
+var see_no_evil = "🙈";
+var hear_no_evil = "🙉";
+var speak_no_evil = "🙊";
+var kiss = "💋";
+var love_letter = "💌";
+var cupid = "💘";
+var gift_heart = "💝";
+var sparkling_heart = "💖";
+var heartpulse = "💗";
+var heartbeat = "💓";
+var revolving_hearts = "💞";
+var two_hearts = "💕";
+var heart_decoration = "💟";
+var heavy_heart_exclamation = "❣️";
+var broken_heart = "💔";
+var heart = "❤️";
+var orange_heart = "🧡";
+var yellow_heart = "💛";
+var green_heart = "💚";
+var blue_heart = "💙";
+var purple_heart = "💜";
+var brown_heart = "🤎";
+var black_heart = "🖤";
+var white_heart = "🤍";
+var anger = "💢";
+var boom = "💥";
+var collision = "💥";
+var dizzy = "💫";
+var sweat_drops = "💦";
+var dash = "💨";
+var hole = "🕳️";
+var bomb = "💣";
+var speech_balloon = "💬";
+var eye_speech_bubble = "👁️‍🗨️";
+var left_speech_bubble = "🗨️";
+var right_anger_bubble = "🗯️";
+var thought_balloon = "💭";
+var zzz = "💤";
+var wave = "👋";
+var raised_back_of_hand = "🤚";
+var raised_hand_with_fingers_splayed = "🖐️";
+var hand = "✋";
+var raised_hand = "✋";
+var vulcan_salute = "🖖";
+var ok_hand = "👌";
+var pinched_fingers = "🤌";
+var pinching_hand = "🤏";
+var v = "✌️";
+var crossed_fingers = "🤞";
+var love_you_gesture = "🤟";
+var metal = "🤘";
+var call_me_hand = "🤙";
+var point_left = "👈";
+var point_right = "👉";
+var point_up_2 = "👆";
+var middle_finger = "🖕";
+var fu = "🖕";
+var point_down = "👇";
+var point_up = "☝️";
+var thumbsup = "👍";
+var thumbsdown = "👎";
+var fist_raised = "✊";
+var fist = "✊";
+var fist_oncoming = "👊";
+var facepunch = "👊";
+var punch = "👊";
+var fist_left = "🤛";
+var fist_right = "🤜";
+var clap = "👏";
+var raised_hands = "🙌";
+var open_hands = "👐";
+var palms_up_together = "🤲";
+var handshake = "🤝";
+var pray = "🙏";
+var writing_hand = "✍️";
+var nail_care = "💅";
+var selfie = "🤳";
+var muscle = "💪";
+var mechanical_arm = "🦾";
+var mechanical_leg = "🦿";
+var leg = "🦵";
+var foot = "🦶";
+var ear = "👂";
+var ear_with_hearing_aid = "🦻";
+var nose = "👃";
+var brain = "🧠";
+var anatomical_heart = "🫀";
+var lungs = "🫁";
+var tooth = "🦷";
+var bone = "🦴";
+var eyes = "👀";
+var eye = "👁️";
+var tongue = "👅";
+var lips = "👄";
+var baby = "👶";
+var child = "🧒";
+var boy = "👦";
+var girl = "👧";
+var adult = "🧑";
+var blond_haired_person = "👱";
+var man = "👨";
+var bearded_person = "🧔";
+var red_haired_man = "👨‍🦰";
+var curly_haired_man = "👨‍🦱";
+var white_haired_man = "👨‍🦳";
+var bald_man = "👨‍🦲";
+var woman = "👩";
+var red_haired_woman = "👩‍🦰";
+var person_red_hair = "🧑‍🦰";
+var curly_haired_woman = "👩‍🦱";
+var person_curly_hair = "🧑‍🦱";
+var white_haired_woman = "👩‍🦳";
+var person_white_hair = "🧑‍🦳";
+var bald_woman = "👩‍🦲";
+var person_bald = "🧑‍🦲";
+var blond_haired_woman = "👱‍♀️";
+var blonde_woman = "👱‍♀️";
+var blond_haired_man = "👱‍♂️";
+var older_adult = "🧓";
+var older_man = "👴";
+var older_woman = "👵";
+var frowning_person = "🙍";
+var frowning_man = "🙍‍♂️";
+var frowning_woman = "🙍‍♀️";
+var pouting_face = "🙎";
+var pouting_man = "🙎‍♂️";
+var pouting_woman = "🙎‍♀️";
+var no_good = "🙅";
+var no_good_man = "🙅‍♂️";
+var ng_man = "🙅‍♂️";
+var no_good_woman = "🙅‍♀️";
+var ng_woman = "🙅‍♀️";
+var ok_person = "🙆";
+var ok_man = "🙆‍♂️";
+var ok_woman = "🙆‍♀️";
+var tipping_hand_person = "💁";
+var information_desk_person = "💁";
+var tipping_hand_man = "💁‍♂️";
+var sassy_man = "💁‍♂️";
+var tipping_hand_woman = "💁‍♀️";
+var sassy_woman = "💁‍♀️";
+var raising_hand = "🙋";
+var raising_hand_man = "🙋‍♂️";
+var raising_hand_woman = "🙋‍♀️";
+var deaf_person = "🧏";
+var deaf_man = "🧏‍♂️";
+var deaf_woman = "🧏‍♀️";
+var bow = "🙇";
+var bowing_man = "🙇‍♂️";
+var bowing_woman = "🙇‍♀️";
+var facepalm = "🤦";
+var man_facepalming = "🤦‍♂️";
+var woman_facepalming = "🤦‍♀️";
+var shrug = "🤷";
+var man_shrugging = "🤷‍♂️";
+var woman_shrugging = "🤷‍♀️";
+var health_worker = "🧑‍⚕️";
+var man_health_worker = "👨‍⚕️";
+var woman_health_worker = "👩‍⚕️";
+var student = "🧑‍🎓";
+var man_student = "👨‍🎓";
+var woman_student = "👩‍🎓";
+var teacher = "🧑‍🏫";
+var man_teacher = "👨‍🏫";
+var woman_teacher = "👩‍🏫";
+var judge = "🧑‍⚖️";
+var man_judge = "👨‍⚖️";
+var woman_judge = "👩‍⚖️";
+var farmer = "🧑‍🌾";
+var man_farmer = "👨‍🌾";
+var woman_farmer = "👩‍🌾";
+var cook = "🧑‍🍳";
+var man_cook = "👨‍🍳";
+var woman_cook = "👩‍🍳";
+var mechanic = "🧑‍🔧";
+var man_mechanic = "👨‍🔧";
+var woman_mechanic = "👩‍🔧";
+var factory_worker = "🧑‍🏭";
+var man_factory_worker = "👨‍🏭";
+var woman_factory_worker = "👩‍🏭";
+var office_worker = "🧑‍💼";
+var man_office_worker = "👨‍💼";
+var woman_office_worker = "👩‍💼";
+var scientist = "🧑‍🔬";
+var man_scientist = "👨‍🔬";
+var woman_scientist = "👩‍🔬";
+var technologist = "🧑‍💻";
+var man_technologist = "👨‍💻";
+var woman_technologist = "👩‍💻";
+var singer = "🧑‍🎤";
+var man_singer = "👨‍🎤";
+var woman_singer = "👩‍🎤";
+var artist = "🧑‍🎨";
+var man_artist = "👨‍🎨";
+var woman_artist = "👩‍🎨";
+var pilot = "🧑‍✈️";
+var man_pilot = "👨‍✈️";
+var woman_pilot = "👩‍✈️";
+var astronaut = "🧑‍🚀";
+var man_astronaut = "👨‍🚀";
+var woman_astronaut = "👩‍🚀";
+var firefighter = "🧑‍🚒";
+var man_firefighter = "👨‍🚒";
+var woman_firefighter = "👩‍🚒";
+var police_officer = "👮";
+var cop = "👮";
+var policeman = "👮‍♂️";
+var policewoman = "👮‍♀️";
+var detective = "🕵️";
+var male_detective = "🕵️‍♂️";
+var female_detective = "🕵️‍♀️";
+var guard = "💂";
+var guardsman = "💂‍♂️";
+var guardswoman = "💂‍♀️";
+var ninja = "🥷";
+var construction_worker = "👷";
+var construction_worker_man = "👷‍♂️";
+var construction_worker_woman = "👷‍♀️";
+var prince = "🤴";
+var princess = "👸";
+var person_with_turban = "👳";
+var man_with_turban = "👳‍♂️";
+var woman_with_turban = "👳‍♀️";
+var man_with_gua_pi_mao = "👲";
+var woman_with_headscarf = "🧕";
+var person_in_tuxedo = "🤵";
+var man_in_tuxedo = "🤵‍♂️";
+var woman_in_tuxedo = "🤵‍♀️";
+var person_with_veil = "👰";
+var man_with_veil = "👰‍♂️";
+var woman_with_veil = "👰‍♀️";
+var bride_with_veil = "👰‍♀️";
+var pregnant_woman = "🤰";
+var breast_feeding = "🤱";
+var woman_feeding_baby = "👩‍🍼";
+var man_feeding_baby = "👨‍🍼";
+var person_feeding_baby = "🧑‍🍼";
+var angel = "👼";
+var santa = "🎅";
+var mrs_claus = "🤶";
+var mx_claus = "🧑‍🎄";
+var superhero = "🦸";
+var superhero_man = "🦸‍♂️";
+var superhero_woman = "🦸‍♀️";
+var supervillain = "🦹";
+var supervillain_man = "🦹‍♂️";
+var supervillain_woman = "🦹‍♀️";
+var mage = "🧙";
+var mage_man = "🧙‍♂️";
+var mage_woman = "🧙‍♀️";
+var fairy = "🧚";
+var fairy_man = "🧚‍♂️";
+var fairy_woman = "🧚‍♀️";
+var vampire = "🧛";
+var vampire_man = "🧛‍♂️";
+var vampire_woman = "🧛‍♀️";
+var merperson = "🧜";
+var merman = "🧜‍♂️";
+var mermaid = "🧜‍♀️";
+var elf = "🧝";
+var elf_man = "🧝‍♂️";
+var elf_woman = "🧝‍♀️";
+var genie = "🧞";
+var genie_man = "🧞‍♂️";
+var genie_woman = "🧞‍♀️";
+var zombie = "🧟";
+var zombie_man = "🧟‍♂️";
+var zombie_woman = "🧟‍♀️";
+var massage = "💆";
+var massage_man = "💆‍♂️";
+var massage_woman = "💆‍♀️";
+var haircut = "💇";
+var haircut_man = "💇‍♂️";
+var haircut_woman = "💇‍♀️";
+var walking = "🚶";
+var walking_man = "🚶‍♂️";
+var walking_woman = "🚶‍♀️";
+var standing_person = "🧍";
+var standing_man = "🧍‍♂️";
+var standing_woman = "🧍‍♀️";
+var kneeling_person = "🧎";
+var kneeling_man = "🧎‍♂️";
+var kneeling_woman = "🧎‍♀️";
+var person_with_probing_cane = "🧑‍🦯";
+var man_with_probing_cane = "👨‍🦯";
+var woman_with_probing_cane = "👩‍🦯";
+var person_in_motorized_wheelchair = "🧑‍🦼";
+var man_in_motorized_wheelchair = "👨‍🦼";
+var woman_in_motorized_wheelchair = "👩‍🦼";
+var person_in_manual_wheelchair = "🧑‍🦽";
+var man_in_manual_wheelchair = "👨‍🦽";
+var woman_in_manual_wheelchair = "👩‍🦽";
+var runner = "🏃";
+var running = "🏃";
+var running_man = "🏃‍♂️";
+var running_woman = "🏃‍♀️";
+var woman_dancing = "💃";
+var dancer = "💃";
+var man_dancing = "🕺";
+var business_suit_levitating = "🕴️";
+var dancers = "👯";
+var dancing_men = "👯‍♂️";
+var dancing_women = "👯‍♀️";
+var sauna_person = "🧖";
+var sauna_man = "🧖‍♂️";
+var sauna_woman = "🧖‍♀️";
+var climbing = "🧗";
+var climbing_man = "🧗‍♂️";
+var climbing_woman = "🧗‍♀️";
+var person_fencing = "🤺";
+var horse_racing = "🏇";
+var skier = "⛷️";
+var snowboarder = "🏂";
+var golfing = "🏌️";
+var golfing_man = "🏌️‍♂️";
+var golfing_woman = "🏌️‍♀️";
+var surfer = "🏄";
+var surfing_man = "🏄‍♂️";
+var surfing_woman = "🏄‍♀️";
+var rowboat = "🚣";
+var rowing_man = "🚣‍♂️";
+var rowing_woman = "🚣‍♀️";
+var swimmer = "🏊";
+var swimming_man = "🏊‍♂️";
+var swimming_woman = "🏊‍♀️";
+var bouncing_ball_person = "⛹️";
+var bouncing_ball_man = "⛹️‍♂️";
+var basketball_man = "⛹️‍♂️";
+var bouncing_ball_woman = "⛹️‍♀️";
+var basketball_woman = "⛹️‍♀️";
+var weight_lifting = "🏋️";
+var weight_lifting_man = "🏋️‍♂️";
+var weight_lifting_woman = "🏋️‍♀️";
+var bicyclist = "🚴";
+var biking_man = "🚴‍♂️";
+var biking_woman = "🚴‍♀️";
+var mountain_bicyclist = "🚵";
+var mountain_biking_man = "🚵‍♂️";
+var mountain_biking_woman = "🚵‍♀️";
+var cartwheeling = "🤸";
+var man_cartwheeling = "🤸‍♂️";
+var woman_cartwheeling = "🤸‍♀️";
+var wrestling = "🤼";
+var men_wrestling = "🤼‍♂️";
+var women_wrestling = "🤼‍♀️";
+var water_polo = "🤽";
+var man_playing_water_polo = "🤽‍♂️";
+var woman_playing_water_polo = "🤽‍♀️";
+var handball_person = "🤾";
+var man_playing_handball = "🤾‍♂️";
+var woman_playing_handball = "🤾‍♀️";
+var juggling_person = "🤹";
+var man_juggling = "🤹‍♂️";
+var woman_juggling = "🤹‍♀️";
+var lotus_position = "🧘";
+var lotus_position_man = "🧘‍♂️";
+var lotus_position_woman = "🧘‍♀️";
+var bath = "🛀";
+var sleeping_bed = "🛌";
+var people_holding_hands = "🧑‍🤝‍🧑";
+var two_women_holding_hands = "👭";
+var couple = "👫";
+var two_men_holding_hands = "👬";
+var couplekiss = "💏";
+var couplekiss_man_woman = "👩‍❤️‍💋‍👨";
+var couplekiss_man_man = "👨‍❤️‍💋‍👨";
+var couplekiss_woman_woman = "👩‍❤️‍💋‍👩";
+var couple_with_heart = "💑";
+var couple_with_heart_woman_man = "👩‍❤️‍👨";
+var couple_with_heart_man_man = "👨‍❤️‍👨";
+var couple_with_heart_woman_woman = "👩‍❤️‍👩";
+var family = "👪";
+var family_man_woman_boy = "👨‍👩‍👦";
+var family_man_woman_girl = "👨‍👩‍👧";
+var family_man_woman_girl_boy = "👨‍👩‍👧‍👦";
+var family_man_woman_boy_boy = "👨‍👩‍👦‍👦";
+var family_man_woman_girl_girl = "👨‍👩‍👧‍👧";
+var family_man_man_boy = "👨‍👨‍👦";
+var family_man_man_girl = "👨‍👨‍👧";
+var family_man_man_girl_boy = "👨‍👨‍👧‍👦";
+var family_man_man_boy_boy = "👨‍👨‍👦‍👦";
+var family_man_man_girl_girl = "👨‍👨‍👧‍👧";
+var family_woman_woman_boy = "👩‍👩‍👦";
+var family_woman_woman_girl = "👩‍👩‍👧";
+var family_woman_woman_girl_boy = "👩‍👩‍👧‍👦";
+var family_woman_woman_boy_boy = "👩‍👩‍👦‍👦";
+var family_woman_woman_girl_girl = "👩‍👩‍👧‍👧";
+var family_man_boy = "👨‍👦";
+var family_man_boy_boy = "👨‍👦‍👦";
+var family_man_girl = "👨‍👧";
+var family_man_girl_boy = "👨‍👧‍👦";
+var family_man_girl_girl = "👨‍👧‍👧";
+var family_woman_boy = "👩‍👦";
+var family_woman_boy_boy = "👩‍👦‍👦";
+var family_woman_girl = "👩‍👧";
+var family_woman_girl_boy = "👩‍👧‍👦";
+var family_woman_girl_girl = "👩‍👧‍👧";
+var speaking_head = "🗣️";
+var bust_in_silhouette = "👤";
+var busts_in_silhouette = "👥";
+var people_hugging = "🫂";
+var footprints = "👣";
+var monkey_face = "🐵";
+var monkey = "🐒";
+var gorilla = "🦍";
+var orangutan = "🦧";
+var dog = "🐶";
+var dog2 = "🐕";
+var guide_dog = "🦮";
+var service_dog = "🐕‍🦺";
+var poodle = "🐩";
+var wolf = "🐺";
+var fox_face = "🦊";
+var raccoon = "🦝";
+var cat = "🐱";
+var cat2 = "🐈";
+var black_cat = "🐈‍⬛";
+var lion = "🦁";
+var tiger = "🐯";
+var tiger2 = "🐅";
+var leopard = "🐆";
+var horse = "🐴";
+var racehorse = "🐎";
+var unicorn = "🦄";
+var zebra = "🦓";
+var deer = "🦌";
+var bison = "🦬";
+var cow = "🐮";
+var ox = "🐂";
+var water_buffalo = "🐃";
+var cow2 = "🐄";
+var pig = "🐷";
+var pig2 = "🐖";
+var boar = "🐗";
+var pig_nose = "🐽";
+var ram = "🐏";
+var sheep = "🐑";
+var goat = "🐐";
+var dromedary_camel = "🐪";
+var camel = "🐫";
+var llama = "🦙";
+var giraffe = "🦒";
+var elephant = "🐘";
+var mammoth = "🦣";
+var rhinoceros = "🦏";
+var hippopotamus = "🦛";
+var mouse = "🐭";
+var mouse2 = "🐁";
+var rat = "🐀";
+var hamster = "🐹";
+var rabbit = "🐰";
+var rabbit2 = "🐇";
+var chipmunk = "🐿️";
+var beaver = "🦫";
+var hedgehog = "🦔";
+var bat = "🦇";
+var bear = "🐻";
+var polar_bear = "🐻‍❄️";
+var koala = "🐨";
+var panda_face = "🐼";
+var sloth = "🦥";
+var otter = "🦦";
+var skunk = "🦨";
+var kangaroo = "🦘";
+var badger = "🦡";
+var feet = "🐾";
+var paw_prints = "🐾";
+var turkey = "🦃";
+var chicken = "🐔";
+var rooster = "🐓";
+var hatching_chick = "🐣";
+var baby_chick = "🐤";
+var hatched_chick = "🐥";
+var bird = "🐦";
+var penguin = "🐧";
+var dove = "🕊️";
+var eagle = "🦅";
+var duck = "🦆";
+var swan = "🦢";
+var owl = "🦉";
+var dodo = "🦤";
+var feather = "🪶";
+var flamingo = "🦩";
+var peacock = "🦚";
+var parrot = "🦜";
+var frog = "🐸";
+var crocodile = "🐊";
+var turtle = "🐢";
+var lizard = "🦎";
+var snake = "🐍";
+var dragon_face = "🐲";
+var dragon = "🐉";
+var sauropod = "🦕";
+var whale = "🐳";
+var whale2 = "🐋";
+var dolphin = "🐬";
+var flipper = "🐬";
+var seal = "🦭";
+var fish = "🐟";
+var tropical_fish = "🐠";
+var blowfish = "🐡";
+var shark = "🦈";
+var octopus = "🐙";
+var shell = "🐚";
+var snail = "🐌";
+var butterfly = "🦋";
+var bug = "🐛";
+var ant = "🐜";
+var bee = "🐝";
+var honeybee = "🐝";
+var beetle = "🪲";
+var lady_beetle = "🐞";
+var cricket = "🦗";
+var cockroach = "🪳";
+var spider = "🕷️";
+var spider_web = "🕸️";
+var scorpion = "🦂";
+var mosquito = "🦟";
+var fly = "🪰";
+var worm = "🪱";
+var microbe = "🦠";
+var bouquet = "💐";
+var cherry_blossom = "🌸";
+var white_flower = "💮";
+var rosette = "🏵️";
+var rose = "🌹";
+var wilted_flower = "🥀";
+var hibiscus = "🌺";
+var sunflower = "🌻";
+var blossom = "🌼";
+var tulip = "🌷";
+var seedling = "🌱";
+var potted_plant = "🪴";
+var evergreen_tree = "🌲";
+var deciduous_tree = "🌳";
+var palm_tree = "🌴";
+var cactus = "🌵";
+var ear_of_rice = "🌾";
+var herb = "🌿";
+var shamrock = "☘️";
+var four_leaf_clover = "🍀";
+var maple_leaf = "🍁";
+var fallen_leaf = "🍂";
+var leaves = "🍃";
+var grapes = "🍇";
+var melon = "🍈";
+var watermelon = "🍉";
+var tangerine = "🍊";
+var orange = "🍊";
+var mandarin = "🍊";
+var lemon = "🍋";
+var banana = "🍌";
+var pineapple = "🍍";
+var mango = "🥭";
+var apple = "🍎";
+var green_apple = "🍏";
+var pear = "🍐";
+var peach = "🍑";
+var cherries = "🍒";
+var strawberry = "🍓";
+var blueberries = "🫐";
+var kiwi_fruit = "🥝";
+var tomato = "🍅";
+var olive = "🫒";
+var coconut = "🥥";
+var avocado = "🥑";
+var eggplant = "🍆";
+var potato = "🥔";
+var carrot = "🥕";
+var corn = "🌽";
+var hot_pepper = "🌶️";
+var bell_pepper = "🫑";
+var cucumber = "🥒";
+var leafy_green = "🥬";
+var broccoli = "🥦";
+var garlic = "🧄";
+var onion = "🧅";
+var mushroom = "🍄";
+var peanuts = "🥜";
+var chestnut = "🌰";
+var bread = "🍞";
+var croissant = "🥐";
+var baguette_bread = "🥖";
+var flatbread = "🫓";
+var pretzel = "🥨";
+var bagel = "🥯";
+var pancakes = "🥞";
+var waffle = "🧇";
+var cheese = "🧀";
+var meat_on_bone = "🍖";
+var poultry_leg = "🍗";
+var cut_of_meat = "🥩";
+var bacon = "🥓";
+var hamburger = "🍔";
+var fries = "🍟";
+var pizza = "🍕";
+var hotdog = "🌭";
+var sandwich = "🥪";
+var taco = "🌮";
+var burrito = "🌯";
+var tamale = "🫔";
+var stuffed_flatbread = "🥙";
+var falafel = "🧆";
+var egg = "🥚";
+var fried_egg = "🍳";
+var shallow_pan_of_food = "🥘";
+var stew = "🍲";
+var fondue = "🫕";
+var bowl_with_spoon = "🥣";
+var green_salad = "🥗";
+var popcorn = "🍿";
+var butter = "🧈";
+var salt = "🧂";
+var canned_food = "🥫";
+var bento = "🍱";
+var rice_cracker = "🍘";
+var rice_ball = "🍙";
+var rice = "🍚";
+var curry = "🍛";
+var ramen = "🍜";
+var spaghetti = "🍝";
+var sweet_potato = "🍠";
+var oden = "🍢";
+var sushi = "🍣";
+var fried_shrimp = "🍤";
+var fish_cake = "🍥";
+var moon_cake = "🥮";
+var dango = "🍡";
+var dumpling = "🥟";
+var fortune_cookie = "🥠";
+var takeout_box = "🥡";
+var crab = "🦀";
+var lobster = "🦞";
+var shrimp = "🦐";
+var squid = "🦑";
+var oyster = "🦪";
+var icecream = "🍦";
+var shaved_ice = "🍧";
+var ice_cream = "🍨";
+var doughnut = "🍩";
+var cookie = "🍪";
+var birthday = "🎂";
+var cake = "🍰";
+var cupcake = "🧁";
+var pie = "🥧";
+var chocolate_bar = "🍫";
+var candy = "🍬";
+var lollipop = "🍭";
+var custard = "🍮";
+var honey_pot = "🍯";
+var baby_bottle = "🍼";
+var milk_glass = "🥛";
+var coffee = "☕";
+var teapot = "🫖";
+var tea = "🍵";
+var sake = "🍶";
+var champagne = "🍾";
+var wine_glass = "🍷";
+var cocktail = "🍸";
+var tropical_drink = "🍹";
+var beer = "🍺";
+var beers = "🍻";
+var clinking_glasses = "🥂";
+var tumbler_glass = "🥃";
+var cup_with_straw = "🥤";
+var bubble_tea = "🧋";
+var beverage_box = "🧃";
+var mate = "🧉";
+var ice_cube = "🧊";
+var chopsticks = "🥢";
+var plate_with_cutlery = "🍽️";
+var fork_and_knife = "🍴";
+var spoon = "🥄";
+var hocho = "🔪";
+var knife = "🔪";
+var amphora = "🏺";
+var earth_africa = "🌍";
+var earth_americas = "🌎";
+var earth_asia = "🌏";
+var globe_with_meridians = "🌐";
+var world_map = "🗺️";
+var japan = "🗾";
+var compass = "🧭";
+var mountain_snow = "🏔️";
+var mountain = "⛰️";
+var volcano = "🌋";
+var mount_fuji = "🗻";
+var camping = "🏕️";
+var beach_umbrella = "🏖️";
+var desert = "🏜️";
+var desert_island = "🏝️";
+var national_park = "🏞️";
+var stadium = "🏟️";
+var classical_building = "🏛️";
+var building_construction = "🏗️";
+var bricks = "🧱";
+var rock = "🪨";
+var wood = "🪵";
+var hut = "🛖";
+var houses = "🏘️";
+var derelict_house = "🏚️";
+var house = "🏠";
+var house_with_garden = "🏡";
+var office = "🏢";
+var post_office = "🏣";
+var european_post_office = "🏤";
+var hospital = "🏥";
+var bank = "🏦";
+var hotel = "🏨";
+var love_hotel = "🏩";
+var convenience_store = "🏪";
+var school = "🏫";
+var department_store = "🏬";
+var factory = "🏭";
+var japanese_castle = "🏯";
+var european_castle = "🏰";
+var wedding = "💒";
+var tokyo_tower = "🗼";
+var statue_of_liberty = "🗽";
+var church = "⛪";
+var mosque = "🕌";
+var hindu_temple = "🛕";
+var synagogue = "🕍";
+var shinto_shrine = "⛩️";
+var kaaba = "🕋";
+var fountain = "⛲";
+var tent = "⛺";
+var foggy = "🌁";
+var night_with_stars = "🌃";
+var cityscape = "🏙️";
+var sunrise_over_mountains = "🌄";
+var sunrise = "🌅";
+var city_sunset = "🌆";
+var city_sunrise = "🌇";
+var bridge_at_night = "🌉";
+var hotsprings = "♨️";
+var carousel_horse = "🎠";
+var ferris_wheel = "🎡";
+var roller_coaster = "🎢";
+var barber = "💈";
+var circus_tent = "🎪";
+var steam_locomotive = "🚂";
+var railway_car = "🚃";
+var bullettrain_side = "🚄";
+var bullettrain_front = "🚅";
+var train2 = "🚆";
+var metro = "🚇";
+var light_rail = "🚈";
+var station = "🚉";
+var tram = "🚊";
+var monorail = "🚝";
+var mountain_railway = "🚞";
+var train = "🚋";
+var bus = "🚌";
+var oncoming_bus = "🚍";
+var trolleybus = "🚎";
+var minibus = "🚐";
+var ambulance = "🚑";
+var fire_engine = "🚒";
+var police_car = "🚓";
+var oncoming_police_car = "🚔";
+var taxi = "🚕";
+var oncoming_taxi = "🚖";
+var car = "🚗";
+var red_car = "🚗";
+var oncoming_automobile = "🚘";
+var blue_car = "🚙";
+var pickup_truck = "🛻";
+var truck = "🚚";
+var articulated_lorry = "🚛";
+var tractor = "🚜";
+var racing_car = "🏎️";
+var motorcycle = "🏍️";
+var motor_scooter = "🛵";
+var manual_wheelchair = "🦽";
+var motorized_wheelchair = "🦼";
+var auto_rickshaw = "🛺";
+var bike = "🚲";
+var kick_scooter = "🛴";
+var skateboard = "🛹";
+var roller_skate = "🛼";
+var busstop = "🚏";
+var motorway = "🛣️";
+var railway_track = "🛤️";
+var oil_drum = "🛢️";
+var fuelpump = "⛽";
+var rotating_light = "🚨";
+var traffic_light = "🚥";
+var vertical_traffic_light = "🚦";
+var stop_sign = "🛑";
+var construction = "🚧";
+var anchor = "⚓";
+var boat = "⛵";
+var sailboat = "⛵";
+var canoe = "🛶";
+var speedboat = "🚤";
+var passenger_ship = "🛳️";
+var ferry = "⛴️";
+var motor_boat = "🛥️";
+var ship = "🚢";
+var airplane = "✈️";
+var small_airplane = "🛩️";
+var flight_departure = "🛫";
+var flight_arrival = "🛬";
+var parachute = "🪂";
+var seat = "💺";
+var helicopter = "🚁";
+var suspension_railway = "🚟";
+var mountain_cableway = "🚠";
+var aerial_tramway = "🚡";
+var artificial_satellite = "🛰️";
+var rocket = "🚀";
+var flying_saucer = "🛸";
+var bellhop_bell = "🛎️";
+var luggage = "🧳";
+var hourglass = "⌛";
+var hourglass_flowing_sand = "⏳";
+var watch = "⌚";
+var alarm_clock = "⏰";
+var stopwatch = "⏱️";
+var timer_clock = "⏲️";
+var mantelpiece_clock = "🕰️";
+var clock12 = "🕛";
+var clock1230 = "🕧";
+var clock1 = "🕐";
+var clock130 = "🕜";
+var clock2 = "🕑";
+var clock230 = "🕝";
+var clock3 = "🕒";
+var clock330 = "🕞";
+var clock4 = "🕓";
+var clock430 = "🕟";
+var clock5 = "🕔";
+var clock530 = "🕠";
+var clock6 = "🕕";
+var clock630 = "🕡";
+var clock7 = "🕖";
+var clock730 = "🕢";
+var clock8 = "🕗";
+var clock830 = "🕣";
+var clock9 = "🕘";
+var clock930 = "🕤";
+var clock10 = "🕙";
+var clock1030 = "🕥";
+var clock11 = "🕚";
+var clock1130 = "🕦";
+var new_moon = "🌑";
+var waxing_crescent_moon = "🌒";
+var first_quarter_moon = "🌓";
+var moon = "🌔";
+var waxing_gibbous_moon = "🌔";
+var full_moon = "🌕";
+var waning_gibbous_moon = "🌖";
+var last_quarter_moon = "🌗";
+var waning_crescent_moon = "🌘";
+var crescent_moon = "🌙";
+var new_moon_with_face = "🌚";
+var first_quarter_moon_with_face = "🌛";
+var last_quarter_moon_with_face = "🌜";
+var thermometer = "🌡️";
+var sunny = "☀️";
+var full_moon_with_face = "🌝";
+var sun_with_face = "🌞";
+var ringed_planet = "🪐";
+var star = "⭐";
+var star2 = "🌟";
+var stars = "🌠";
+var milky_way = "🌌";
+var cloud = "☁️";
+var partly_sunny = "⛅";
+var cloud_with_lightning_and_rain = "⛈️";
+var sun_behind_small_cloud = "🌤️";
+var sun_behind_large_cloud = "🌥️";
+var sun_behind_rain_cloud = "🌦️";
+var cloud_with_rain = "🌧️";
+var cloud_with_snow = "🌨️";
+var cloud_with_lightning = "🌩️";
+var tornado = "🌪️";
+var fog = "🌫️";
+var wind_face = "🌬️";
+var cyclone = "🌀";
+var rainbow = "🌈";
+var closed_umbrella = "🌂";
+var open_umbrella = "☂️";
+var umbrella = "☔";
+var parasol_on_ground = "⛱️";
+var zap = "⚡";
+var snowflake = "❄️";
+var snowman_with_snow = "☃️";
+var snowman = "⛄";
+var comet = "☄️";
+var fire = "🔥";
+var droplet = "💧";
+var ocean = "🌊";
+var jack_o_lantern = "🎃";
+var christmas_tree = "🎄";
+var fireworks = "🎆";
+var sparkler = "🎇";
+var firecracker = "🧨";
+var sparkles = "✨";
+var balloon = "🎈";
+var tada = "🎉";
+var confetti_ball = "🎊";
+var tanabata_tree = "🎋";
+var bamboo = "🎍";
+var dolls = "🎎";
+var flags = "🎏";
+var wind_chime = "🎐";
+var rice_scene = "🎑";
+var red_envelope = "🧧";
+var ribbon = "🎀";
+var gift = "🎁";
+var reminder_ribbon = "🎗️";
+var tickets = "🎟️";
+var ticket = "🎫";
+var medal_military = "🎖️";
+var trophy = "🏆";
+var medal_sports = "🏅";
+var soccer = "⚽";
+var baseball = "⚾";
+var softball = "🥎";
+var basketball = "🏀";
+var volleyball = "🏐";
+var football = "🏈";
+var rugby_football = "🏉";
+var tennis = "🎾";
+var flying_disc = "🥏";
+var bowling = "🎳";
+var cricket_game = "🏏";
+var field_hockey = "🏑";
+var ice_hockey = "🏒";
+var lacrosse = "🥍";
+var ping_pong = "🏓";
+var badminton = "🏸";
+var boxing_glove = "🥊";
+var martial_arts_uniform = "🥋";
+var goal_net = "🥅";
+var golf = "⛳";
+var ice_skate = "⛸️";
+var fishing_pole_and_fish = "🎣";
+var diving_mask = "🤿";
+var running_shirt_with_sash = "🎽";
+var ski = "🎿";
+var sled = "🛷";
+var curling_stone = "🥌";
+var dart = "🎯";
+var yo_yo = "🪀";
+var kite = "🪁";
+var crystal_ball = "🔮";
+var magic_wand = "🪄";
+var nazar_amulet = "🧿";
+var video_game = "🎮";
+var joystick = "🕹️";
+var slot_machine = "🎰";
+var game_die = "🎲";
+var jigsaw = "🧩";
+var teddy_bear = "🧸";
+var pi_ata = "🪅";
+var nesting_dolls = "🪆";
+var spades = "♠️";
+var hearts = "♥️";
+var diamonds = "♦️";
+var clubs = "♣️";
+var chess_pawn = "♟️";
+var black_joker = "🃏";
+var mahjong = "🀄";
+var flower_playing_cards = "🎴";
+var performing_arts = "🎭";
+var framed_picture = "🖼️";
+var art = "🎨";
+var thread = "🧵";
+var sewing_needle = "🪡";
+var yarn = "🧶";
+var knot = "🪢";
+var eyeglasses = "👓";
+var dark_sunglasses = "🕶️";
+var goggles = "🥽";
+var lab_coat = "🥼";
+var safety_vest = "🦺";
+var necktie = "👔";
+var shirt = "👕";
+var tshirt = "👕";
+var jeans = "👖";
+var scarf = "🧣";
+var gloves = "🧤";
+var coat = "🧥";
+var socks = "🧦";
+var dress = "👗";
+var kimono = "👘";
+var sari = "🥻";
+var one_piece_swimsuit = "🩱";
+var swim_brief = "🩲";
+var shorts = "🩳";
+var bikini = "👙";
+var womans_clothes = "👚";
+var purse = "👛";
+var handbag = "👜";
+var pouch = "👝";
+var shopping = "🛍️";
+var school_satchel = "🎒";
+var thong_sandal = "🩴";
+var mans_shoe = "👞";
+var shoe = "👞";
+var athletic_shoe = "👟";
+var hiking_boot = "🥾";
+var flat_shoe = "🥿";
+var high_heel = "👠";
+var sandal = "👡";
+var ballet_shoes = "🩰";
+var boot = "👢";
+var crown = "👑";
+var womans_hat = "👒";
+var tophat = "🎩";
+var mortar_board = "🎓";
+var billed_cap = "🧢";
+var military_helmet = "🪖";
+var rescue_worker_helmet = "⛑️";
+var prayer_beads = "📿";
+var lipstick = "💄";
+var ring = "💍";
+var gem = "💎";
+var mute = "🔇";
+var speaker = "🔈";
+var sound = "🔉";
+var loud_sound = "🔊";
+var loudspeaker = "📢";
+var mega = "📣";
+var postal_horn = "📯";
+var bell = "🔔";
+var no_bell = "🔕";
+var musical_score = "🎼";
+var musical_note = "🎵";
+var notes = "🎶";
+var studio_microphone = "🎙️";
+var level_slider = "🎚️";
+var control_knobs = "🎛️";
+var microphone = "🎤";
+var headphones = "🎧";
+var radio = "📻";
+var saxophone = "🎷";
+var accordion = "🪗";
+var guitar = "🎸";
+var musical_keyboard = "🎹";
+var trumpet = "🎺";
+var violin = "🎻";
+var banjo = "🪕";
+var drum = "🥁";
+var long_drum = "🪘";
+var iphone = "📱";
+var calling = "📲";
+var phone = "☎️";
+var telephone = "☎️";
+var telephone_receiver = "📞";
+var pager = "📟";
+var fax = "📠";
+var battery = "🔋";
+var electric_plug = "🔌";
+var computer = "💻";
+var desktop_computer = "🖥️";
+var printer = "🖨️";
+var keyboard = "⌨️";
+var computer_mouse = "🖱️";
+var trackball = "🖲️";
+var minidisc = "💽";
+var floppy_disk = "💾";
+var cd = "💿";
+var dvd = "📀";
+var abacus = "🧮";
+var movie_camera = "🎥";
+var film_strip = "🎞️";
+var film_projector = "📽️";
+var clapper = "🎬";
+var tv = "📺";
+var camera = "📷";
+var camera_flash = "📸";
+var video_camera = "📹";
+var vhs = "📼";
+var mag = "🔍";
+var mag_right = "🔎";
+var candle = "🕯️";
+var bulb = "💡";
+var flashlight = "🔦";
+var izakaya_lantern = "🏮";
+var lantern = "🏮";
+var diya_lamp = "🪔";
+var notebook_with_decorative_cover = "📔";
+var closed_book = "📕";
+var book = "📖";
+var open_book = "📖";
+var green_book = "📗";
+var blue_book = "📘";
+var orange_book = "📙";
+var books = "📚";
+var notebook = "📓";
+var ledger = "📒";
+var page_with_curl = "📃";
+var scroll = "📜";
+var page_facing_up = "📄";
+var newspaper = "📰";
+var newspaper_roll = "🗞️";
+var bookmark_tabs = "📑";
+var bookmark = "🔖";
+var label = "🏷️";
+var moneybag = "💰";
+var coin = "🪙";
+var yen = "💴";
+var dollar = "💵";
+var euro = "💶";
+var pound = "💷";
+var money_with_wings = "💸";
+var credit_card = "💳";
+var receipt = "🧾";
+var chart = "💹";
+var email = "✉️";
+var envelope = "✉️";
+var incoming_envelope = "📨";
+var envelope_with_arrow = "📩";
+var outbox_tray = "📤";
+var inbox_tray = "📥";
+var mailbox = "📫";
+var mailbox_closed = "📪";
+var mailbox_with_mail = "📬";
+var mailbox_with_no_mail = "📭";
+var postbox = "📮";
+var ballot_box = "🗳️";
+var pencil2 = "✏️";
+var black_nib = "✒️";
+var fountain_pen = "🖋️";
+var pen = "🖊️";
+var paintbrush = "🖌️";
+var crayon = "🖍️";
+var memo = "📝";
+var pencil = "📝";
+var briefcase = "💼";
+var file_folder = "📁";
+var open_file_folder = "📂";
+var card_index_dividers = "🗂️";
+var date = "📅";
+var calendar = "📆";
+var spiral_notepad = "🗒️";
+var spiral_calendar = "🗓️";
+var card_index = "📇";
+var chart_with_upwards_trend = "📈";
+var chart_with_downwards_trend = "📉";
+var bar_chart = "📊";
+var clipboard = "📋";
+var pushpin = "📌";
+var round_pushpin = "📍";
+var paperclip = "📎";
+var paperclips = "🖇️";
+var straight_ruler = "📏";
+var triangular_ruler = "📐";
+var scissors = "✂️";
+var card_file_box = "🗃️";
+var file_cabinet = "🗄️";
+var wastebasket = "🗑️";
+var lock = "🔒";
+var unlock = "🔓";
+var lock_with_ink_pen = "🔏";
+var closed_lock_with_key = "🔐";
+var key = "🔑";
+var old_key = "🗝️";
+var hammer = "🔨";
+var axe = "🪓";
+var pick = "⛏️";
+var hammer_and_pick = "⚒️";
+var hammer_and_wrench = "🛠️";
+var dagger = "🗡️";
+var crossed_swords = "⚔️";
+var gun = "🔫";
+var boomerang = "🪃";
+var bow_and_arrow = "🏹";
+var shield = "🛡️";
+var carpentry_saw = "🪚";
+var wrench = "🔧";
+var screwdriver = "🪛";
+var nut_and_bolt = "🔩";
+var gear = "⚙️";
+var clamp = "🗜️";
+var balance_scale = "⚖️";
+var probing_cane = "🦯";
+var link = "🔗";
+var chains = "⛓️";
+var hook = "🪝";
+var toolbox = "🧰";
+var magnet = "🧲";
+var ladder = "🪜";
+var alembic = "⚗️";
+var test_tube = "🧪";
+var petri_dish = "🧫";
+var dna = "🧬";
+var microscope = "🔬";
+var telescope = "🔭";
+var satellite = "📡";
+var syringe = "💉";
+var drop_of_blood = "🩸";
+var pill = "💊";
+var adhesive_bandage = "🩹";
+var stethoscope = "🩺";
+var door = "🚪";
+var elevator = "🛗";
+var mirror = "🪞";
+var window = "🪟";
+var bed = "🛏️";
+var couch_and_lamp = "🛋️";
+var chair = "🪑";
+var toilet = "🚽";
+var plunger = "🪠";
+var shower = "🚿";
+var bathtub = "🛁";
+var mouse_trap = "🪤";
+var razor = "🪒";
+var lotion_bottle = "🧴";
+var safety_pin = "🧷";
+var broom = "🧹";
+var basket = "🧺";
+var roll_of_paper = "🧻";
+var bucket = "🪣";
+var soap = "🧼";
+var toothbrush = "🪥";
+var sponge = "🧽";
+var fire_extinguisher = "🧯";
+var shopping_cart = "🛒";
+var smoking = "🚬";
+var coffin = "⚰️";
+var headstone = "🪦";
+var funeral_urn = "⚱️";
+var moyai = "🗿";
+var placard = "🪧";
+var atm = "🏧";
+var put_litter_in_its_place = "🚮";
+var potable_water = "🚰";
+var wheelchair = "♿";
+var mens = "🚹";
+var womens = "🚺";
+var restroom = "🚻";
+var baby_symbol = "🚼";
+var wc = "🚾";
+var passport_control = "🛂";
+var customs = "🛃";
+var baggage_claim = "🛄";
+var left_luggage = "🛅";
+var warning = "⚠️";
+var children_crossing = "🚸";
+var no_entry = "⛔";
+var no_entry_sign = "🚫";
+var no_bicycles = "🚳";
+var no_smoking = "🚭";
+var do_not_litter = "🚯";
+var no_pedestrians = "🚷";
+var no_mobile_phones = "📵";
+var underage = "🔞";
+var radioactive = "☢️";
+var biohazard = "☣️";
+var arrow_up = "⬆️";
+var arrow_upper_right = "↗️";
+var arrow_right = "➡️";
+var arrow_lower_right = "↘️";
+var arrow_down = "⬇️";
+var arrow_lower_left = "↙️";
+var arrow_left = "⬅️";
+var arrow_upper_left = "↖️";
+var arrow_up_down = "↕️";
+var left_right_arrow = "↔️";
+var leftwards_arrow_with_hook = "↩️";
+var arrow_right_hook = "↪️";
+var arrow_heading_up = "⤴️";
+var arrow_heading_down = "⤵️";
+var arrows_clockwise = "🔃";
+var arrows_counterclockwise = "🔄";
+var back = "🔙";
+var end = "🔚";
+var on = "🔛";
+var soon = "🔜";
+var top = "🔝";
+var place_of_worship = "🛐";
+var atom_symbol = "⚛️";
+var om = "🕉️";
+var star_of_david = "✡️";
+var wheel_of_dharma = "☸️";
+var yin_yang = "☯️";
+var latin_cross = "✝️";
+var orthodox_cross = "☦️";
+var star_and_crescent = "☪️";
+var peace_symbol = "☮️";
+var menorah = "🕎";
+var six_pointed_star = "🔯";
+var aries = "♈";
+var taurus = "♉";
+var gemini = "♊";
+var cancer = "♋";
+var leo = "♌";
+var virgo = "♍";
+var libra = "♎";
+var scorpius = "♏";
+var sagittarius = "♐";
+var capricorn = "♑";
+var aquarius = "♒";
+var pisces = "♓";
+var ophiuchus = "⛎";
+var twisted_rightwards_arrows = "🔀";
+var repeat = "🔁";
+var repeat_one = "🔂";
+var arrow_forward = "▶️";
+var fast_forward = "⏩";
+var next_track_button = "⏭️";
+var play_or_pause_button = "⏯️";
+var arrow_backward = "◀️";
+var rewind = "⏪";
+var previous_track_button = "⏮️";
+var arrow_up_small = "🔼";
+var arrow_double_up = "⏫";
+var arrow_down_small = "🔽";
+var arrow_double_down = "⏬";
+var pause_button = "⏸️";
+var stop_button = "⏹️";
+var record_button = "⏺️";
+var eject_button = "⏏️";
+var cinema = "🎦";
+var low_brightness = "🔅";
+var high_brightness = "🔆";
+var signal_strength = "📶";
+var vibration_mode = "📳";
+var mobile_phone_off = "📴";
+var female_sign = "♀️";
+var male_sign = "♂️";
+var transgender_symbol = "⚧️";
+var heavy_multiplication_x = "✖️";
+var heavy_plus_sign = "➕";
+var heavy_minus_sign = "➖";
+var heavy_division_sign = "➗";
+var infinity = "♾️";
+var bangbang = "‼️";
+var interrobang = "⁉️";
+var question = "❓";
+var grey_question = "❔";
+var grey_exclamation = "❕";
+var exclamation = "❗";
+var heavy_exclamation_mark = "❗";
+var wavy_dash = "〰️";
+var currency_exchange = "💱";
+var heavy_dollar_sign = "💲";
+var medical_symbol = "⚕️";
+var recycle = "♻️";
+var fleur_de_lis = "⚜️";
+var trident = "🔱";
+var name_badge = "📛";
+var beginner = "🔰";
+var o = "⭕";
+var white_check_mark = "✅";
+var ballot_box_with_check = "☑️";
+var heavy_check_mark = "✔️";
+var x = "❌";
+var negative_squared_cross_mark = "❎";
+var curly_loop = "➰";
+var loop = "➿";
+var part_alternation_mark = "〽️";
+var eight_spoked_asterisk = "✳️";
+var eight_pointed_black_star = "✴️";
+var sparkle = "❇️";
+var copyright = "©️";
+var registered = "®️";
+var tm = "™️";
+var hash = "#️⃣";
+var asterisk = "*️⃣";
+var zero = "0️⃣";
+var one = "1️⃣";
+var two = "2️⃣";
+var three = "3️⃣";
+var four = "4️⃣";
+var five = "5️⃣";
+var six = "6️⃣";
+var seven = "7️⃣";
+var eight = "8️⃣";
+var nine = "9️⃣";
+var keycap_ten = "🔟";
+var capital_abcd = "🔠";
+var abcd = "🔡";
+var symbols = "🔣";
+var abc = "🔤";
+var a = "🅰️";
+var ab = "🆎";
+var b = "🅱️";
+var cl = "🆑";
+var cool = "🆒";
+var free = "🆓";
+var information_source = "ℹ️";
+var id = "🆔";
+var m = "Ⓜ️";
+var ng = "🆖";
+var o2 = "🅾️";
+var ok = "🆗";
+var parking = "🅿️";
+var sos = "🆘";
+var up = "🆙";
+var vs = "🆚";
+var koko = "🈁";
+var sa = "🈂️";
+var ideograph_advantage = "🉐";
+var accept = "🉑";
+var congratulations = "㊗️";
+var secret = "㊙️";
+var u6e80 = "🈵";
+var red_circle = "🔴";
+var orange_circle = "🟠";
+var yellow_circle = "🟡";
+var green_circle = "🟢";
+var large_blue_circle = "🔵";
+var purple_circle = "🟣";
+var brown_circle = "🟤";
+var black_circle = "⚫";
+var white_circle = "⚪";
+var red_square = "🟥";
+var orange_square = "🟧";
+var yellow_square = "🟨";
+var green_square = "🟩";
+var blue_square = "🟦";
+var purple_square = "🟪";
+var brown_square = "🟫";
+var black_large_square = "⬛";
+var white_large_square = "⬜";
+var black_medium_square = "◼️";
+var white_medium_square = "◻️";
+var black_medium_small_square = "◾";
+var white_medium_small_square = "◽";
+var black_small_square = "▪️";
+var white_small_square = "▫️";
+var large_orange_diamond = "🔶";
+var large_blue_diamond = "🔷";
+var small_orange_diamond = "🔸";
+var small_blue_diamond = "🔹";
+var small_red_triangle = "🔺";
+var small_red_triangle_down = "🔻";
+var diamond_shape_with_a_dot_inside = "💠";
+var radio_button = "🔘";
+var white_square_button = "🔳";
+var black_square_button = "🔲";
+var checkered_flag = "🏁";
+var triangular_flag_on_post = "🚩";
+var crossed_flags = "🎌";
+var black_flag = "🏴";
+var white_flag = "🏳️";
+var rainbow_flag = "🏳️‍🌈";
+var transgender_flag = "🏳️‍⚧️";
+var pirate_flag = "🏴‍☠️";
+var ascension_island = "🇦🇨";
+var andorra = "🇦🇩";
+var united_arab_emirates = "🇦🇪";
+var afghanistan = "🇦🇫";
+var antigua_barbuda = "🇦🇬";
+var anguilla = "🇦🇮";
+var albania = "🇦🇱";
+var armenia = "🇦🇲";
+var angola = "🇦🇴";
+var antarctica = "🇦🇶";
+var argentina = "🇦🇷";
+var american_samoa = "🇦🇸";
+var austria = "🇦🇹";
+var australia = "🇦🇺";
+var aruba = "🇦🇼";
+var aland_islands = "🇦🇽";
+var azerbaijan = "🇦🇿";
+var bosnia_herzegovina = "🇧🇦";
+var barbados = "🇧🇧";
+var bangladesh = "🇧🇩";
+var belgium = "🇧🇪";
+var burkina_faso = "🇧🇫";
+var bulgaria = "🇧🇬";
+var bahrain = "🇧🇭";
+var burundi = "🇧🇮";
+var benin = "🇧🇯";
+var st_barthelemy = "🇧🇱";
+var bermuda = "🇧🇲";
+var brunei = "🇧🇳";
+var bolivia = "🇧🇴";
+var caribbean_netherlands = "🇧🇶";
+var brazil = "🇧🇷";
+var bahamas = "🇧🇸";
+var bhutan = "🇧🇹";
+var bouvet_island = "🇧🇻";
+var botswana = "🇧🇼";
+var belarus = "🇧🇾";
+var belize = "🇧🇿";
+var canada = "🇨🇦";
+var cocos_islands = "🇨🇨";
+var congo_kinshasa = "🇨🇩";
+var central_african_republic = "🇨🇫";
+var congo_brazzaville = "🇨🇬";
+var switzerland = "🇨🇭";
+var cote_divoire = "🇨🇮";
+var cook_islands = "🇨🇰";
+var chile = "🇨🇱";
+var cameroon = "🇨🇲";
+var cn = "🇨🇳";
+var colombia = "🇨🇴";
+var clipperton_island = "🇨🇵";
+var costa_rica = "🇨🇷";
+var cuba = "🇨🇺";
+var cape_verde = "🇨🇻";
+var curacao = "🇨🇼";
+var christmas_island = "🇨🇽";
+var cyprus = "🇨🇾";
+var czech_republic = "🇨🇿";
+var de = "🇩🇪";
+var diego_garcia = "🇩🇬";
+var djibouti = "🇩🇯";
+var denmark = "🇩🇰";
+var dominica = "🇩🇲";
+var dominican_republic = "🇩🇴";
+var algeria = "🇩🇿";
+var ceuta_melilla = "🇪🇦";
+var ecuador = "🇪🇨";
+var estonia = "🇪🇪";
+var egypt = "🇪🇬";
+var western_sahara = "🇪🇭";
+var eritrea = "🇪🇷";
+var es = "🇪🇸";
+var ethiopia = "🇪🇹";
+var eu = "🇪🇺";
+var european_union = "🇪🇺";
+var finland = "🇫🇮";
+var fiji = "🇫🇯";
+var falkland_islands = "🇫🇰";
+var micronesia = "🇫🇲";
+var faroe_islands = "🇫🇴";
+var fr = "🇫🇷";
+var gabon = "🇬🇦";
+var gb = "🇬🇧";
+var uk = "🇬🇧";
+var grenada = "🇬🇩";
+var georgia = "🇬🇪";
+var french_guiana = "🇬🇫";
+var guernsey = "🇬🇬";
+var ghana = "🇬🇭";
+var gibraltar = "🇬🇮";
+var greenland = "🇬🇱";
+var gambia = "🇬🇲";
+var guinea = "🇬🇳";
+var guadeloupe = "🇬🇵";
+var equatorial_guinea = "🇬🇶";
+var greece = "🇬🇷";
+var south_georgia_south_sandwich_islands = "🇬🇸";
+var guatemala = "🇬🇹";
+var guam = "🇬🇺";
+var guinea_bissau = "🇬🇼";
+var guyana = "🇬🇾";
+var hong_kong = "🇭🇰";
+var heard_mcdonald_islands = "🇭🇲";
+var honduras = "🇭🇳";
+var croatia = "🇭🇷";
+var haiti = "🇭🇹";
+var hungary = "🇭🇺";
+var canary_islands = "🇮🇨";
+var indonesia = "🇮🇩";
+var ireland = "🇮🇪";
+var israel = "🇮🇱";
+var isle_of_man = "🇮🇲";
+var india = "🇮🇳";
+var british_indian_ocean_territory = "🇮🇴";
+var iraq = "🇮🇶";
+var iran = "🇮🇷";
+var iceland = "🇮🇸";
+var it = "🇮🇹";
+var jersey = "🇯🇪";
+var jamaica = "🇯🇲";
+var jordan = "🇯🇴";
+var jp = "🇯🇵";
+var kenya = "🇰🇪";
+var kyrgyzstan = "🇰🇬";
+var cambodia = "🇰🇭";
+var kiribati = "🇰🇮";
+var comoros = "🇰🇲";
+var st_kitts_nevis = "🇰🇳";
+var north_korea = "🇰🇵";
+var kr = "🇰🇷";
+var kuwait = "🇰🇼";
+var cayman_islands = "🇰🇾";
+var kazakhstan = "🇰🇿";
+var laos = "🇱🇦";
+var lebanon = "🇱🇧";
+var st_lucia = "🇱🇨";
+var liechtenstein = "🇱🇮";
+var sri_lanka = "🇱🇰";
+var liberia = "🇱🇷";
+var lesotho = "🇱🇸";
+var lithuania = "🇱🇹";
+var luxembourg = "🇱🇺";
+var latvia = "🇱🇻";
+var libya = "🇱🇾";
+var morocco = "🇲🇦";
+var monaco = "🇲🇨";
+var moldova = "🇲🇩";
+var montenegro = "🇲🇪";
+var st_martin = "🇲🇫";
+var madagascar = "🇲🇬";
+var marshall_islands = "🇲🇭";
+var macedonia = "🇲🇰";
+var mali = "🇲🇱";
+var myanmar = "🇲🇲";
+var mongolia = "🇲🇳";
+var macau = "🇲🇴";
+var northern_mariana_islands = "🇲🇵";
+var martinique = "🇲🇶";
+var mauritania = "🇲🇷";
+var montserrat = "🇲🇸";
+var malta = "🇲🇹";
+var mauritius = "🇲🇺";
+var maldives = "🇲🇻";
+var malawi = "🇲🇼";
+var mexico = "🇲🇽";
+var malaysia = "🇲🇾";
+var mozambique = "🇲🇿";
+var namibia = "🇳🇦";
+var new_caledonia = "🇳🇨";
+var niger = "🇳🇪";
+var norfolk_island = "🇳🇫";
+var nigeria = "🇳🇬";
+var nicaragua = "🇳🇮";
+var netherlands = "🇳🇱";
+var norway = "🇳🇴";
+var nepal = "🇳🇵";
+var nauru = "🇳🇷";
+var niue = "🇳🇺";
+var new_zealand = "🇳🇿";
+var oman = "🇴🇲";
+var panama = "🇵🇦";
+var peru = "🇵🇪";
+var french_polynesia = "🇵🇫";
+var papua_new_guinea = "🇵🇬";
+var philippines = "🇵🇭";
+var pakistan = "🇵🇰";
+var poland = "🇵🇱";
+var st_pierre_miquelon = "🇵🇲";
+var pitcairn_islands = "🇵🇳";
+var puerto_rico = "🇵🇷";
+var palestinian_territories = "🇵🇸";
+var portugal = "🇵🇹";
+var palau = "🇵🇼";
+var paraguay = "🇵🇾";
+var qatar = "🇶🇦";
+var reunion = "🇷🇪";
+var romania = "🇷🇴";
+var serbia = "🇷🇸";
+var ru = "🇷🇺";
+var rwanda = "🇷🇼";
+var saudi_arabia = "🇸🇦";
+var solomon_islands = "🇸🇧";
+var seychelles = "🇸🇨";
+var sudan = "🇸🇩";
+var sweden = "🇸🇪";
+var singapore = "🇸🇬";
+var st_helena = "🇸🇭";
+var slovenia = "🇸🇮";
+var svalbard_jan_mayen = "🇸🇯";
+var slovakia = "🇸🇰";
+var sierra_leone = "🇸🇱";
+var san_marino = "🇸🇲";
+var senegal = "🇸🇳";
+var somalia = "🇸🇴";
+var suriname = "🇸🇷";
+var south_sudan = "🇸🇸";
+var sao_tome_principe = "🇸🇹";
+var el_salvador = "🇸🇻";
+var sint_maarten = "🇸🇽";
+var syria = "🇸🇾";
+var swaziland = "🇸🇿";
+var tristan_da_cunha = "🇹🇦";
+var turks_caicos_islands = "🇹🇨";
+var chad = "🇹🇩";
+var french_southern_territories = "🇹🇫";
+var togo = "🇹🇬";
+var thailand = "🇹🇭";
+var tajikistan = "🇹🇯";
+var tokelau = "🇹🇰";
+var timor_leste = "🇹🇱";
+var turkmenistan = "🇹🇲";
+var tunisia = "🇹🇳";
+var tonga = "🇹🇴";
+var tr = "🇹🇷";
+var trinidad_tobago = "🇹🇹";
+var tuvalu = "🇹🇻";
+var taiwan = "🇹🇼";
+var tanzania = "🇹🇿";
+var ukraine = "🇺🇦";
+var uganda = "🇺🇬";
+var us_outlying_islands = "🇺🇲";
+var united_nations = "🇺🇳";
+var us = "🇺🇸";
+var uruguay = "🇺🇾";
+var uzbekistan = "🇺🇿";
+var vatican_city = "🇻🇦";
+var st_vincent_grenadines = "🇻🇨";
+var venezuela = "🇻🇪";
+var british_virgin_islands = "🇻🇬";
+var us_virgin_islands = "🇻🇮";
+var vietnam = "🇻🇳";
+var vanuatu = "🇻🇺";
+var wallis_futuna = "🇼🇫";
+var samoa = "🇼🇸";
+var kosovo = "🇽🇰";
+var yemen = "🇾🇪";
+var mayotte = "🇾🇹";
+var south_africa = "🇿🇦";
+var zambia = "🇿🇲";
+var zimbabwe = "🇿🇼";
+var england = "🏴󠁧󠁢󠁥󠁮󠁧󠁿";
+var scotland = "🏴󠁧󠁢󠁳󠁣󠁴󠁿";
+var wales = "🏴󠁧󠁢󠁷󠁬󠁳󠁿";
+var emojies_defs = {
+	"100": "💯",
+	"1234": "🔢",
+	grinning: grinning,
+	smiley: smiley,
+	smile: smile,
+	grin: grin,
+	laughing: laughing,
+	satisfied: satisfied,
+	sweat_smile: sweat_smile,
+	rofl: rofl,
+	joy: joy,
+	slightly_smiling_face: slightly_smiling_face,
+	upside_down_face: upside_down_face,
+	wink: wink,
+	blush: blush,
+	innocent: innocent,
+	smiling_face_with_three_hearts: smiling_face_with_three_hearts,
+	heart_eyes: heart_eyes,
+	star_struck: star_struck,
+	kissing_heart: kissing_heart,
+	kissing: kissing,
+	relaxed: relaxed,
+	kissing_closed_eyes: kissing_closed_eyes,
+	kissing_smiling_eyes: kissing_smiling_eyes,
+	smiling_face_with_tear: smiling_face_with_tear,
+	yum: yum,
+	stuck_out_tongue: stuck_out_tongue,
+	stuck_out_tongue_winking_eye: stuck_out_tongue_winking_eye,
+	zany_face: zany_face,
+	stuck_out_tongue_closed_eyes: stuck_out_tongue_closed_eyes,
+	money_mouth_face: money_mouth_face,
+	hugs: hugs,
+	hand_over_mouth: hand_over_mouth,
+	shushing_face: shushing_face,
+	thinking: thinking,
+	zipper_mouth_face: zipper_mouth_face,
+	raised_eyebrow: raised_eyebrow,
+	neutral_face: neutral_face,
+	expressionless: expressionless,
+	no_mouth: no_mouth,
+	smirk: smirk,
+	unamused: unamused,
+	roll_eyes: roll_eyes,
+	grimacing: grimacing,
+	lying_face: lying_face,
+	relieved: relieved,
+	pensive: pensive,
+	sleepy: sleepy,
+	drooling_face: drooling_face,
+	sleeping: sleeping,
+	mask: mask,
+	face_with_thermometer: face_with_thermometer,
+	face_with_head_bandage: face_with_head_bandage,
+	nauseated_face: nauseated_face,
+	vomiting_face: vomiting_face,
+	sneezing_face: sneezing_face,
+	hot_face: hot_face,
+	cold_face: cold_face,
+	woozy_face: woozy_face,
+	dizzy_face: dizzy_face,
+	exploding_head: exploding_head,
+	cowboy_hat_face: cowboy_hat_face,
+	partying_face: partying_face,
+	disguised_face: disguised_face,
+	sunglasses: sunglasses,
+	nerd_face: nerd_face,
+	monocle_face: monocle_face,
+	confused: confused,
+	worried: worried,
+	slightly_frowning_face: slightly_frowning_face,
+	frowning_face: frowning_face,
+	open_mouth: open_mouth,
+	hushed: hushed,
+	astonished: astonished,
+	flushed: flushed,
+	pleading_face: pleading_face,
+	frowning: frowning,
+	anguished: anguished,
+	fearful: fearful,
+	cold_sweat: cold_sweat,
+	disappointed_relieved: disappointed_relieved,
+	cry: cry,
+	sob: sob,
+	scream: scream,
+	confounded: confounded,
+	persevere: persevere,
+	disappointed: disappointed,
+	sweat: sweat,
+	weary: weary,
+	tired_face: tired_face,
+	yawning_face: yawning_face,
+	triumph: triumph,
+	rage: rage,
+	pout: pout,
+	angry: angry,
+	cursing_face: cursing_face,
+	smiling_imp: smiling_imp,
+	imp: imp,
+	skull: skull,
+	skull_and_crossbones: skull_and_crossbones,
+	hankey: hankey,
+	poop: poop,
+	shit: shit,
+	clown_face: clown_face,
+	japanese_ogre: japanese_ogre,
+	japanese_goblin: japanese_goblin,
+	ghost: ghost,
+	alien: alien,
+	space_invader: space_invader,
+	robot: robot,
+	smiley_cat: smiley_cat,
+	smile_cat: smile_cat,
+	joy_cat: joy_cat,
+	heart_eyes_cat: heart_eyes_cat,
+	smirk_cat: smirk_cat,
+	kissing_cat: kissing_cat,
+	scream_cat: scream_cat,
+	crying_cat_face: crying_cat_face,
+	pouting_cat: pouting_cat,
+	see_no_evil: see_no_evil,
+	hear_no_evil: hear_no_evil,
+	speak_no_evil: speak_no_evil,
+	kiss: kiss,
+	love_letter: love_letter,
+	cupid: cupid,
+	gift_heart: gift_heart,
+	sparkling_heart: sparkling_heart,
+	heartpulse: heartpulse,
+	heartbeat: heartbeat,
+	revolving_hearts: revolving_hearts,
+	two_hearts: two_hearts,
+	heart_decoration: heart_decoration,
+	heavy_heart_exclamation: heavy_heart_exclamation,
+	broken_heart: broken_heart,
+	heart: heart,
+	orange_heart: orange_heart,
+	yellow_heart: yellow_heart,
+	green_heart: green_heart,
+	blue_heart: blue_heart,
+	purple_heart: purple_heart,
+	brown_heart: brown_heart,
+	black_heart: black_heart,
+	white_heart: white_heart,
+	anger: anger,
+	boom: boom,
+	collision: collision,
+	dizzy: dizzy,
+	sweat_drops: sweat_drops,
+	dash: dash,
+	hole: hole,
+	bomb: bomb,
+	speech_balloon: speech_balloon,
+	eye_speech_bubble: eye_speech_bubble,
+	left_speech_bubble: left_speech_bubble,
+	right_anger_bubble: right_anger_bubble,
+	thought_balloon: thought_balloon,
+	zzz: zzz,
+	wave: wave,
+	raised_back_of_hand: raised_back_of_hand,
+	raised_hand_with_fingers_splayed: raised_hand_with_fingers_splayed,
+	hand: hand,
+	raised_hand: raised_hand,
+	vulcan_salute: vulcan_salute,
+	ok_hand: ok_hand,
+	pinched_fingers: pinched_fingers,
+	pinching_hand: pinching_hand,
+	v: v,
+	crossed_fingers: crossed_fingers,
+	love_you_gesture: love_you_gesture,
+	metal: metal,
+	call_me_hand: call_me_hand,
+	point_left: point_left,
+	point_right: point_right,
+	point_up_2: point_up_2,
+	middle_finger: middle_finger,
+	fu: fu,
+	point_down: point_down,
+	point_up: point_up,
+	"+1": "👍",
+	thumbsup: thumbsup,
+	"-1": "👎",
+	thumbsdown: thumbsdown,
+	fist_raised: fist_raised,
+	fist: fist,
+	fist_oncoming: fist_oncoming,
+	facepunch: facepunch,
+	punch: punch,
+	fist_left: fist_left,
+	fist_right: fist_right,
+	clap: clap,
+	raised_hands: raised_hands,
+	open_hands: open_hands,
+	palms_up_together: palms_up_together,
+	handshake: handshake,
+	pray: pray,
+	writing_hand: writing_hand,
+	nail_care: nail_care,
+	selfie: selfie,
+	muscle: muscle,
+	mechanical_arm: mechanical_arm,
+	mechanical_leg: mechanical_leg,
+	leg: leg,
+	foot: foot,
+	ear: ear,
+	ear_with_hearing_aid: ear_with_hearing_aid,
+	nose: nose,
+	brain: brain,
+	anatomical_heart: anatomical_heart,
+	lungs: lungs,
+	tooth: tooth,
+	bone: bone,
+	eyes: eyes,
+	eye: eye,
+	tongue: tongue,
+	lips: lips,
+	baby: baby,
+	child: child,
+	boy: boy,
+	girl: girl,
+	adult: adult,
+	blond_haired_person: blond_haired_person,
+	man: man,
+	bearded_person: bearded_person,
+	red_haired_man: red_haired_man,
+	curly_haired_man: curly_haired_man,
+	white_haired_man: white_haired_man,
+	bald_man: bald_man,
+	woman: woman,
+	red_haired_woman: red_haired_woman,
+	person_red_hair: person_red_hair,
+	curly_haired_woman: curly_haired_woman,
+	person_curly_hair: person_curly_hair,
+	white_haired_woman: white_haired_woman,
+	person_white_hair: person_white_hair,
+	bald_woman: bald_woman,
+	person_bald: person_bald,
+	blond_haired_woman: blond_haired_woman,
+	blonde_woman: blonde_woman,
+	blond_haired_man: blond_haired_man,
+	older_adult: older_adult,
+	older_man: older_man,
+	older_woman: older_woman,
+	frowning_person: frowning_person,
+	frowning_man: frowning_man,
+	frowning_woman: frowning_woman,
+	pouting_face: pouting_face,
+	pouting_man: pouting_man,
+	pouting_woman: pouting_woman,
+	no_good: no_good,
+	no_good_man: no_good_man,
+	ng_man: ng_man,
+	no_good_woman: no_good_woman,
+	ng_woman: ng_woman,
+	ok_person: ok_person,
+	ok_man: ok_man,
+	ok_woman: ok_woman,
+	tipping_hand_person: tipping_hand_person,
+	information_desk_person: information_desk_person,
+	tipping_hand_man: tipping_hand_man,
+	sassy_man: sassy_man,
+	tipping_hand_woman: tipping_hand_woman,
+	sassy_woman: sassy_woman,
+	raising_hand: raising_hand,
+	raising_hand_man: raising_hand_man,
+	raising_hand_woman: raising_hand_woman,
+	deaf_person: deaf_person,
+	deaf_man: deaf_man,
+	deaf_woman: deaf_woman,
+	bow: bow,
+	bowing_man: bowing_man,
+	bowing_woman: bowing_woman,
+	facepalm: facepalm,
+	man_facepalming: man_facepalming,
+	woman_facepalming: woman_facepalming,
+	shrug: shrug,
+	man_shrugging: man_shrugging,
+	woman_shrugging: woman_shrugging,
+	health_worker: health_worker,
+	man_health_worker: man_health_worker,
+	woman_health_worker: woman_health_worker,
+	student: student,
+	man_student: man_student,
+	woman_student: woman_student,
+	teacher: teacher,
+	man_teacher: man_teacher,
+	woman_teacher: woman_teacher,
+	judge: judge,
+	man_judge: man_judge,
+	woman_judge: woman_judge,
+	farmer: farmer,
+	man_farmer: man_farmer,
+	woman_farmer: woman_farmer,
+	cook: cook,
+	man_cook: man_cook,
+	woman_cook: woman_cook,
+	mechanic: mechanic,
+	man_mechanic: man_mechanic,
+	woman_mechanic: woman_mechanic,
+	factory_worker: factory_worker,
+	man_factory_worker: man_factory_worker,
+	woman_factory_worker: woman_factory_worker,
+	office_worker: office_worker,
+	man_office_worker: man_office_worker,
+	woman_office_worker: woman_office_worker,
+	scientist: scientist,
+	man_scientist: man_scientist,
+	woman_scientist: woman_scientist,
+	technologist: technologist,
+	man_technologist: man_technologist,
+	woman_technologist: woman_technologist,
+	singer: singer,
+	man_singer: man_singer,
+	woman_singer: woman_singer,
+	artist: artist,
+	man_artist: man_artist,
+	woman_artist: woman_artist,
+	pilot: pilot,
+	man_pilot: man_pilot,
+	woman_pilot: woman_pilot,
+	astronaut: astronaut,
+	man_astronaut: man_astronaut,
+	woman_astronaut: woman_astronaut,
+	firefighter: firefighter,
+	man_firefighter: man_firefighter,
+	woman_firefighter: woman_firefighter,
+	police_officer: police_officer,
+	cop: cop,
+	policeman: policeman,
+	policewoman: policewoman,
+	detective: detective,
+	male_detective: male_detective,
+	female_detective: female_detective,
+	guard: guard,
+	guardsman: guardsman,
+	guardswoman: guardswoman,
+	ninja: ninja,
+	construction_worker: construction_worker,
+	construction_worker_man: construction_worker_man,
+	construction_worker_woman: construction_worker_woman,
+	prince: prince,
+	princess: princess,
+	person_with_turban: person_with_turban,
+	man_with_turban: man_with_turban,
+	woman_with_turban: woman_with_turban,
+	man_with_gua_pi_mao: man_with_gua_pi_mao,
+	woman_with_headscarf: woman_with_headscarf,
+	person_in_tuxedo: person_in_tuxedo,
+	man_in_tuxedo: man_in_tuxedo,
+	woman_in_tuxedo: woman_in_tuxedo,
+	person_with_veil: person_with_veil,
+	man_with_veil: man_with_veil,
+	woman_with_veil: woman_with_veil,
+	bride_with_veil: bride_with_veil,
+	pregnant_woman: pregnant_woman,
+	breast_feeding: breast_feeding,
+	woman_feeding_baby: woman_feeding_baby,
+	man_feeding_baby: man_feeding_baby,
+	person_feeding_baby: person_feeding_baby,
+	angel: angel,
+	santa: santa,
+	mrs_claus: mrs_claus,
+	mx_claus: mx_claus,
+	superhero: superhero,
+	superhero_man: superhero_man,
+	superhero_woman: superhero_woman,
+	supervillain: supervillain,
+	supervillain_man: supervillain_man,
+	supervillain_woman: supervillain_woman,
+	mage: mage,
+	mage_man: mage_man,
+	mage_woman: mage_woman,
+	fairy: fairy,
+	fairy_man: fairy_man,
+	fairy_woman: fairy_woman,
+	vampire: vampire,
+	vampire_man: vampire_man,
+	vampire_woman: vampire_woman,
+	merperson: merperson,
+	merman: merman,
+	mermaid: mermaid,
+	elf: elf,
+	elf_man: elf_man,
+	elf_woman: elf_woman,
+	genie: genie,
+	genie_man: genie_man,
+	genie_woman: genie_woman,
+	zombie: zombie,
+	zombie_man: zombie_man,
+	zombie_woman: zombie_woman,
+	massage: massage,
+	massage_man: massage_man,
+	massage_woman: massage_woman,
+	haircut: haircut,
+	haircut_man: haircut_man,
+	haircut_woman: haircut_woman,
+	walking: walking,
+	walking_man: walking_man,
+	walking_woman: walking_woman,
+	standing_person: standing_person,
+	standing_man: standing_man,
+	standing_woman: standing_woman,
+	kneeling_person: kneeling_person,
+	kneeling_man: kneeling_man,
+	kneeling_woman: kneeling_woman,
+	person_with_probing_cane: person_with_probing_cane,
+	man_with_probing_cane: man_with_probing_cane,
+	woman_with_probing_cane: woman_with_probing_cane,
+	person_in_motorized_wheelchair: person_in_motorized_wheelchair,
+	man_in_motorized_wheelchair: man_in_motorized_wheelchair,
+	woman_in_motorized_wheelchair: woman_in_motorized_wheelchair,
+	person_in_manual_wheelchair: person_in_manual_wheelchair,
+	man_in_manual_wheelchair: man_in_manual_wheelchair,
+	woman_in_manual_wheelchair: woman_in_manual_wheelchair,
+	runner: runner,
+	running: running,
+	running_man: running_man,
+	running_woman: running_woman,
+	woman_dancing: woman_dancing,
+	dancer: dancer,
+	man_dancing: man_dancing,
+	business_suit_levitating: business_suit_levitating,
+	dancers: dancers,
+	dancing_men: dancing_men,
+	dancing_women: dancing_women,
+	sauna_person: sauna_person,
+	sauna_man: sauna_man,
+	sauna_woman: sauna_woman,
+	climbing: climbing,
+	climbing_man: climbing_man,
+	climbing_woman: climbing_woman,
+	person_fencing: person_fencing,
+	horse_racing: horse_racing,
+	skier: skier,
+	snowboarder: snowboarder,
+	golfing: golfing,
+	golfing_man: golfing_man,
+	golfing_woman: golfing_woman,
+	surfer: surfer,
+	surfing_man: surfing_man,
+	surfing_woman: surfing_woman,
+	rowboat: rowboat,
+	rowing_man: rowing_man,
+	rowing_woman: rowing_woman,
+	swimmer: swimmer,
+	swimming_man: swimming_man,
+	swimming_woman: swimming_woman,
+	bouncing_ball_person: bouncing_ball_person,
+	bouncing_ball_man: bouncing_ball_man,
+	basketball_man: basketball_man,
+	bouncing_ball_woman: bouncing_ball_woman,
+	basketball_woman: basketball_woman,
+	weight_lifting: weight_lifting,
+	weight_lifting_man: weight_lifting_man,
+	weight_lifting_woman: weight_lifting_woman,
+	bicyclist: bicyclist,
+	biking_man: biking_man,
+	biking_woman: biking_woman,
+	mountain_bicyclist: mountain_bicyclist,
+	mountain_biking_man: mountain_biking_man,
+	mountain_biking_woman: mountain_biking_woman,
+	cartwheeling: cartwheeling,
+	man_cartwheeling: man_cartwheeling,
+	woman_cartwheeling: woman_cartwheeling,
+	wrestling: wrestling,
+	men_wrestling: men_wrestling,
+	women_wrestling: women_wrestling,
+	water_polo: water_polo,
+	man_playing_water_polo: man_playing_water_polo,
+	woman_playing_water_polo: woman_playing_water_polo,
+	handball_person: handball_person,
+	man_playing_handball: man_playing_handball,
+	woman_playing_handball: woman_playing_handball,
+	juggling_person: juggling_person,
+	man_juggling: man_juggling,
+	woman_juggling: woman_juggling,
+	lotus_position: lotus_position,
+	lotus_position_man: lotus_position_man,
+	lotus_position_woman: lotus_position_woman,
+	bath: bath,
+	sleeping_bed: sleeping_bed,
+	people_holding_hands: people_holding_hands,
+	two_women_holding_hands: two_women_holding_hands,
+	couple: couple,
+	two_men_holding_hands: two_men_holding_hands,
+	couplekiss: couplekiss,
+	couplekiss_man_woman: couplekiss_man_woman,
+	couplekiss_man_man: couplekiss_man_man,
+	couplekiss_woman_woman: couplekiss_woman_woman,
+	couple_with_heart: couple_with_heart,
+	couple_with_heart_woman_man: couple_with_heart_woman_man,
+	couple_with_heart_man_man: couple_with_heart_man_man,
+	couple_with_heart_woman_woman: couple_with_heart_woman_woman,
+	family: family,
+	family_man_woman_boy: family_man_woman_boy,
+	family_man_woman_girl: family_man_woman_girl,
+	family_man_woman_girl_boy: family_man_woman_girl_boy,
+	family_man_woman_boy_boy: family_man_woman_boy_boy,
+	family_man_woman_girl_girl: family_man_woman_girl_girl,
+	family_man_man_boy: family_man_man_boy,
+	family_man_man_girl: family_man_man_girl,
+	family_man_man_girl_boy: family_man_man_girl_boy,
+	family_man_man_boy_boy: family_man_man_boy_boy,
+	family_man_man_girl_girl: family_man_man_girl_girl,
+	family_woman_woman_boy: family_woman_woman_boy,
+	family_woman_woman_girl: family_woman_woman_girl,
+	family_woman_woman_girl_boy: family_woman_woman_girl_boy,
+	family_woman_woman_boy_boy: family_woman_woman_boy_boy,
+	family_woman_woman_girl_girl: family_woman_woman_girl_girl,
+	family_man_boy: family_man_boy,
+	family_man_boy_boy: family_man_boy_boy,
+	family_man_girl: family_man_girl,
+	family_man_girl_boy: family_man_girl_boy,
+	family_man_girl_girl: family_man_girl_girl,
+	family_woman_boy: family_woman_boy,
+	family_woman_boy_boy: family_woman_boy_boy,
+	family_woman_girl: family_woman_girl,
+	family_woman_girl_boy: family_woman_girl_boy,
+	family_woman_girl_girl: family_woman_girl_girl,
+	speaking_head: speaking_head,
+	bust_in_silhouette: bust_in_silhouette,
+	busts_in_silhouette: busts_in_silhouette,
+	people_hugging: people_hugging,
+	footprints: footprints,
+	monkey_face: monkey_face,
+	monkey: monkey,
+	gorilla: gorilla,
+	orangutan: orangutan,
+	dog: dog,
+	dog2: dog2,
+	guide_dog: guide_dog,
+	service_dog: service_dog,
+	poodle: poodle,
+	wolf: wolf,
+	fox_face: fox_face,
+	raccoon: raccoon,
+	cat: cat,
+	cat2: cat2,
+	black_cat: black_cat,
+	lion: lion,
+	tiger: tiger,
+	tiger2: tiger2,
+	leopard: leopard,
+	horse: horse,
+	racehorse: racehorse,
+	unicorn: unicorn,
+	zebra: zebra,
+	deer: deer,
+	bison: bison,
+	cow: cow,
+	ox: ox,
+	water_buffalo: water_buffalo,
+	cow2: cow2,
+	pig: pig,
+	pig2: pig2,
+	boar: boar,
+	pig_nose: pig_nose,
+	ram: ram,
+	sheep: sheep,
+	goat: goat,
+	dromedary_camel: dromedary_camel,
+	camel: camel,
+	llama: llama,
+	giraffe: giraffe,
+	elephant: elephant,
+	mammoth: mammoth,
+	rhinoceros: rhinoceros,
+	hippopotamus: hippopotamus,
+	mouse: mouse,
+	mouse2: mouse2,
+	rat: rat,
+	hamster: hamster,
+	rabbit: rabbit,
+	rabbit2: rabbit2,
+	chipmunk: chipmunk,
+	beaver: beaver,
+	hedgehog: hedgehog,
+	bat: bat,
+	bear: bear,
+	polar_bear: polar_bear,
+	koala: koala,
+	panda_face: panda_face,
+	sloth: sloth,
+	otter: otter,
+	skunk: skunk,
+	kangaroo: kangaroo,
+	badger: badger,
+	feet: feet,
+	paw_prints: paw_prints,
+	turkey: turkey,
+	chicken: chicken,
+	rooster: rooster,
+	hatching_chick: hatching_chick,
+	baby_chick: baby_chick,
+	hatched_chick: hatched_chick,
+	bird: bird,
+	penguin: penguin,
+	dove: dove,
+	eagle: eagle,
+	duck: duck,
+	swan: swan,
+	owl: owl,
+	dodo: dodo,
+	feather: feather,
+	flamingo: flamingo,
+	peacock: peacock,
+	parrot: parrot,
+	frog: frog,
+	crocodile: crocodile,
+	turtle: turtle,
+	lizard: lizard,
+	snake: snake,
+	dragon_face: dragon_face,
+	dragon: dragon,
+	sauropod: sauropod,
+	"t-rex": "🦖",
+	whale: whale,
+	whale2: whale2,
+	dolphin: dolphin,
+	flipper: flipper,
+	seal: seal,
+	fish: fish,
+	tropical_fish: tropical_fish,
+	blowfish: blowfish,
+	shark: shark,
+	octopus: octopus,
+	shell: shell,
+	snail: snail,
+	butterfly: butterfly,
+	bug: bug,
+	ant: ant,
+	bee: bee,
+	honeybee: honeybee,
+	beetle: beetle,
+	lady_beetle: lady_beetle,
+	cricket: cricket,
+	cockroach: cockroach,
+	spider: spider,
+	spider_web: spider_web,
+	scorpion: scorpion,
+	mosquito: mosquito,
+	fly: fly,
+	worm: worm,
+	microbe: microbe,
+	bouquet: bouquet,
+	cherry_blossom: cherry_blossom,
+	white_flower: white_flower,
+	rosette: rosette,
+	rose: rose,
+	wilted_flower: wilted_flower,
+	hibiscus: hibiscus,
+	sunflower: sunflower,
+	blossom: blossom,
+	tulip: tulip,
+	seedling: seedling,
+	potted_plant: potted_plant,
+	evergreen_tree: evergreen_tree,
+	deciduous_tree: deciduous_tree,
+	palm_tree: palm_tree,
+	cactus: cactus,
+	ear_of_rice: ear_of_rice,
+	herb: herb,
+	shamrock: shamrock,
+	four_leaf_clover: four_leaf_clover,
+	maple_leaf: maple_leaf,
+	fallen_leaf: fallen_leaf,
+	leaves: leaves,
+	grapes: grapes,
+	melon: melon,
+	watermelon: watermelon,
+	tangerine: tangerine,
+	orange: orange,
+	mandarin: mandarin,
+	lemon: lemon,
+	banana: banana,
+	pineapple: pineapple,
+	mango: mango,
+	apple: apple,
+	green_apple: green_apple,
+	pear: pear,
+	peach: peach,
+	cherries: cherries,
+	strawberry: strawberry,
+	blueberries: blueberries,
+	kiwi_fruit: kiwi_fruit,
+	tomato: tomato,
+	olive: olive,
+	coconut: coconut,
+	avocado: avocado,
+	eggplant: eggplant,
+	potato: potato,
+	carrot: carrot,
+	corn: corn,
+	hot_pepper: hot_pepper,
+	bell_pepper: bell_pepper,
+	cucumber: cucumber,
+	leafy_green: leafy_green,
+	broccoli: broccoli,
+	garlic: garlic,
+	onion: onion,
+	mushroom: mushroom,
+	peanuts: peanuts,
+	chestnut: chestnut,
+	bread: bread,
+	croissant: croissant,
+	baguette_bread: baguette_bread,
+	flatbread: flatbread,
+	pretzel: pretzel,
+	bagel: bagel,
+	pancakes: pancakes,
+	waffle: waffle,
+	cheese: cheese,
+	meat_on_bone: meat_on_bone,
+	poultry_leg: poultry_leg,
+	cut_of_meat: cut_of_meat,
+	bacon: bacon,
+	hamburger: hamburger,
+	fries: fries,
+	pizza: pizza,
+	hotdog: hotdog,
+	sandwich: sandwich,
+	taco: taco,
+	burrito: burrito,
+	tamale: tamale,
+	stuffed_flatbread: stuffed_flatbread,
+	falafel: falafel,
+	egg: egg,
+	fried_egg: fried_egg,
+	shallow_pan_of_food: shallow_pan_of_food,
+	stew: stew,
+	fondue: fondue,
+	bowl_with_spoon: bowl_with_spoon,
+	green_salad: green_salad,
+	popcorn: popcorn,
+	butter: butter,
+	salt: salt,
+	canned_food: canned_food,
+	bento: bento,
+	rice_cracker: rice_cracker,
+	rice_ball: rice_ball,
+	rice: rice,
+	curry: curry,
+	ramen: ramen,
+	spaghetti: spaghetti,
+	sweet_potato: sweet_potato,
+	oden: oden,
+	sushi: sushi,
+	fried_shrimp: fried_shrimp,
+	fish_cake: fish_cake,
+	moon_cake: moon_cake,
+	dango: dango,
+	dumpling: dumpling,
+	fortune_cookie: fortune_cookie,
+	takeout_box: takeout_box,
+	crab: crab,
+	lobster: lobster,
+	shrimp: shrimp,
+	squid: squid,
+	oyster: oyster,
+	icecream: icecream,
+	shaved_ice: shaved_ice,
+	ice_cream: ice_cream,
+	doughnut: doughnut,
+	cookie: cookie,
+	birthday: birthday,
+	cake: cake,
+	cupcake: cupcake,
+	pie: pie,
+	chocolate_bar: chocolate_bar,
+	candy: candy,
+	lollipop: lollipop,
+	custard: custard,
+	honey_pot: honey_pot,
+	baby_bottle: baby_bottle,
+	milk_glass: milk_glass,
+	coffee: coffee,
+	teapot: teapot,
+	tea: tea,
+	sake: sake,
+	champagne: champagne,
+	wine_glass: wine_glass,
+	cocktail: cocktail,
+	tropical_drink: tropical_drink,
+	beer: beer,
+	beers: beers,
+	clinking_glasses: clinking_glasses,
+	tumbler_glass: tumbler_glass,
+	cup_with_straw: cup_with_straw,
+	bubble_tea: bubble_tea,
+	beverage_box: beverage_box,
+	mate: mate,
+	ice_cube: ice_cube,
+	chopsticks: chopsticks,
+	plate_with_cutlery: plate_with_cutlery,
+	fork_and_knife: fork_and_knife,
+	spoon: spoon,
+	hocho: hocho,
+	knife: knife,
+	amphora: amphora,
+	earth_africa: earth_africa,
+	earth_americas: earth_americas,
+	earth_asia: earth_asia,
+	globe_with_meridians: globe_with_meridians,
+	world_map: world_map,
+	japan: japan,
+	compass: compass,
+	mountain_snow: mountain_snow,
+	mountain: mountain,
+	volcano: volcano,
+	mount_fuji: mount_fuji,
+	camping: camping,
+	beach_umbrella: beach_umbrella,
+	desert: desert,
+	desert_island: desert_island,
+	national_park: national_park,
+	stadium: stadium,
+	classical_building: classical_building,
+	building_construction: building_construction,
+	bricks: bricks,
+	rock: rock,
+	wood: wood,
+	hut: hut,
+	houses: houses,
+	derelict_house: derelict_house,
+	house: house,
+	house_with_garden: house_with_garden,
+	office: office,
+	post_office: post_office,
+	european_post_office: european_post_office,
+	hospital: hospital,
+	bank: bank,
+	hotel: hotel,
+	love_hotel: love_hotel,
+	convenience_store: convenience_store,
+	school: school,
+	department_store: department_store,
+	factory: factory,
+	japanese_castle: japanese_castle,
+	european_castle: european_castle,
+	wedding: wedding,
+	tokyo_tower: tokyo_tower,
+	statue_of_liberty: statue_of_liberty,
+	church: church,
+	mosque: mosque,
+	hindu_temple: hindu_temple,
+	synagogue: synagogue,
+	shinto_shrine: shinto_shrine,
+	kaaba: kaaba,
+	fountain: fountain,
+	tent: tent,
+	foggy: foggy,
+	night_with_stars: night_with_stars,
+	cityscape: cityscape,
+	sunrise_over_mountains: sunrise_over_mountains,
+	sunrise: sunrise,
+	city_sunset: city_sunset,
+	city_sunrise: city_sunrise,
+	bridge_at_night: bridge_at_night,
+	hotsprings: hotsprings,
+	carousel_horse: carousel_horse,
+	ferris_wheel: ferris_wheel,
+	roller_coaster: roller_coaster,
+	barber: barber,
+	circus_tent: circus_tent,
+	steam_locomotive: steam_locomotive,
+	railway_car: railway_car,
+	bullettrain_side: bullettrain_side,
+	bullettrain_front: bullettrain_front,
+	train2: train2,
+	metro: metro,
+	light_rail: light_rail,
+	station: station,
+	tram: tram,
+	monorail: monorail,
+	mountain_railway: mountain_railway,
+	train: train,
+	bus: bus,
+	oncoming_bus: oncoming_bus,
+	trolleybus: trolleybus,
+	minibus: minibus,
+	ambulance: ambulance,
+	fire_engine: fire_engine,
+	police_car: police_car,
+	oncoming_police_car: oncoming_police_car,
+	taxi: taxi,
+	oncoming_taxi: oncoming_taxi,
+	car: car,
+	red_car: red_car,
+	oncoming_automobile: oncoming_automobile,
+	blue_car: blue_car,
+	pickup_truck: pickup_truck,
+	truck: truck,
+	articulated_lorry: articulated_lorry,
+	tractor: tractor,
+	racing_car: racing_car,
+	motorcycle: motorcycle,
+	motor_scooter: motor_scooter,
+	manual_wheelchair: manual_wheelchair,
+	motorized_wheelchair: motorized_wheelchair,
+	auto_rickshaw: auto_rickshaw,
+	bike: bike,
+	kick_scooter: kick_scooter,
+	skateboard: skateboard,
+	roller_skate: roller_skate,
+	busstop: busstop,
+	motorway: motorway,
+	railway_track: railway_track,
+	oil_drum: oil_drum,
+	fuelpump: fuelpump,
+	rotating_light: rotating_light,
+	traffic_light: traffic_light,
+	vertical_traffic_light: vertical_traffic_light,
+	stop_sign: stop_sign,
+	construction: construction,
+	anchor: anchor,
+	boat: boat,
+	sailboat: sailboat,
+	canoe: canoe,
+	speedboat: speedboat,
+	passenger_ship: passenger_ship,
+	ferry: ferry,
+	motor_boat: motor_boat,
+	ship: ship,
+	airplane: airplane,
+	small_airplane: small_airplane,
+	flight_departure: flight_departure,
+	flight_arrival: flight_arrival,
+	parachute: parachute,
+	seat: seat,
+	helicopter: helicopter,
+	suspension_railway: suspension_railway,
+	mountain_cableway: mountain_cableway,
+	aerial_tramway: aerial_tramway,
+	artificial_satellite: artificial_satellite,
+	rocket: rocket,
+	flying_saucer: flying_saucer,
+	bellhop_bell: bellhop_bell,
+	luggage: luggage,
+	hourglass: hourglass,
+	hourglass_flowing_sand: hourglass_flowing_sand,
+	watch: watch,
+	alarm_clock: alarm_clock,
+	stopwatch: stopwatch,
+	timer_clock: timer_clock,
+	mantelpiece_clock: mantelpiece_clock,
+	clock12: clock12,
+	clock1230: clock1230,
+	clock1: clock1,
+	clock130: clock130,
+	clock2: clock2,
+	clock230: clock230,
+	clock3: clock3,
+	clock330: clock330,
+	clock4: clock4,
+	clock430: clock430,
+	clock5: clock5,
+	clock530: clock530,
+	clock6: clock6,
+	clock630: clock630,
+	clock7: clock7,
+	clock730: clock730,
+	clock8: clock8,
+	clock830: clock830,
+	clock9: clock9,
+	clock930: clock930,
+	clock10: clock10,
+	clock1030: clock1030,
+	clock11: clock11,
+	clock1130: clock1130,
+	new_moon: new_moon,
+	waxing_crescent_moon: waxing_crescent_moon,
+	first_quarter_moon: first_quarter_moon,
+	moon: moon,
+	waxing_gibbous_moon: waxing_gibbous_moon,
+	full_moon: full_moon,
+	waning_gibbous_moon: waning_gibbous_moon,
+	last_quarter_moon: last_quarter_moon,
+	waning_crescent_moon: waning_crescent_moon,
+	crescent_moon: crescent_moon,
+	new_moon_with_face: new_moon_with_face,
+	first_quarter_moon_with_face: first_quarter_moon_with_face,
+	last_quarter_moon_with_face: last_quarter_moon_with_face,
+	thermometer: thermometer,
+	sunny: sunny,
+	full_moon_with_face: full_moon_with_face,
+	sun_with_face: sun_with_face,
+	ringed_planet: ringed_planet,
+	star: star,
+	star2: star2,
+	stars: stars,
+	milky_way: milky_way,
+	cloud: cloud,
+	partly_sunny: partly_sunny,
+	cloud_with_lightning_and_rain: cloud_with_lightning_and_rain,
+	sun_behind_small_cloud: sun_behind_small_cloud,
+	sun_behind_large_cloud: sun_behind_large_cloud,
+	sun_behind_rain_cloud: sun_behind_rain_cloud,
+	cloud_with_rain: cloud_with_rain,
+	cloud_with_snow: cloud_with_snow,
+	cloud_with_lightning: cloud_with_lightning,
+	tornado: tornado,
+	fog: fog,
+	wind_face: wind_face,
+	cyclone: cyclone,
+	rainbow: rainbow,
+	closed_umbrella: closed_umbrella,
+	open_umbrella: open_umbrella,
+	umbrella: umbrella,
+	parasol_on_ground: parasol_on_ground,
+	zap: zap,
+	snowflake: snowflake,
+	snowman_with_snow: snowman_with_snow,
+	snowman: snowman,
+	comet: comet,
+	fire: fire,
+	droplet: droplet,
+	ocean: ocean,
+	jack_o_lantern: jack_o_lantern,
+	christmas_tree: christmas_tree,
+	fireworks: fireworks,
+	sparkler: sparkler,
+	firecracker: firecracker,
+	sparkles: sparkles,
+	balloon: balloon,
+	tada: tada,
+	confetti_ball: confetti_ball,
+	tanabata_tree: tanabata_tree,
+	bamboo: bamboo,
+	dolls: dolls,
+	flags: flags,
+	wind_chime: wind_chime,
+	rice_scene: rice_scene,
+	red_envelope: red_envelope,
+	ribbon: ribbon,
+	gift: gift,
+	reminder_ribbon: reminder_ribbon,
+	tickets: tickets,
+	ticket: ticket,
+	medal_military: medal_military,
+	trophy: trophy,
+	medal_sports: medal_sports,
+	"1st_place_medal": "🥇",
+	"2nd_place_medal": "🥈",
+	"3rd_place_medal": "🥉",
+	soccer: soccer,
+	baseball: baseball,
+	softball: softball,
+	basketball: basketball,
+	volleyball: volleyball,
+	football: football,
+	rugby_football: rugby_football,
+	tennis: tennis,
+	flying_disc: flying_disc,
+	bowling: bowling,
+	cricket_game: cricket_game,
+	field_hockey: field_hockey,
+	ice_hockey: ice_hockey,
+	lacrosse: lacrosse,
+	ping_pong: ping_pong,
+	badminton: badminton,
+	boxing_glove: boxing_glove,
+	martial_arts_uniform: martial_arts_uniform,
+	goal_net: goal_net,
+	golf: golf,
+	ice_skate: ice_skate,
+	fishing_pole_and_fish: fishing_pole_and_fish,
+	diving_mask: diving_mask,
+	running_shirt_with_sash: running_shirt_with_sash,
+	ski: ski,
+	sled: sled,
+	curling_stone: curling_stone,
+	dart: dart,
+	yo_yo: yo_yo,
+	kite: kite,
+	"8ball": "🎱",
+	crystal_ball: crystal_ball,
+	magic_wand: magic_wand,
+	nazar_amulet: nazar_amulet,
+	video_game: video_game,
+	joystick: joystick,
+	slot_machine: slot_machine,
+	game_die: game_die,
+	jigsaw: jigsaw,
+	teddy_bear: teddy_bear,
+	pi_ata: pi_ata,
+	nesting_dolls: nesting_dolls,
+	spades: spades,
+	hearts: hearts,
+	diamonds: diamonds,
+	clubs: clubs,
+	chess_pawn: chess_pawn,
+	black_joker: black_joker,
+	mahjong: mahjong,
+	flower_playing_cards: flower_playing_cards,
+	performing_arts: performing_arts,
+	framed_picture: framed_picture,
+	art: art,
+	thread: thread,
+	sewing_needle: sewing_needle,
+	yarn: yarn,
+	knot: knot,
+	eyeglasses: eyeglasses,
+	dark_sunglasses: dark_sunglasses,
+	goggles: goggles,
+	lab_coat: lab_coat,
+	safety_vest: safety_vest,
+	necktie: necktie,
+	shirt: shirt,
+	tshirt: tshirt,
+	jeans: jeans,
+	scarf: scarf,
+	gloves: gloves,
+	coat: coat,
+	socks: socks,
+	dress: dress,
+	kimono: kimono,
+	sari: sari,
+	one_piece_swimsuit: one_piece_swimsuit,
+	swim_brief: swim_brief,
+	shorts: shorts,
+	bikini: bikini,
+	womans_clothes: womans_clothes,
+	purse: purse,
+	handbag: handbag,
+	pouch: pouch,
+	shopping: shopping,
+	school_satchel: school_satchel,
+	thong_sandal: thong_sandal,
+	mans_shoe: mans_shoe,
+	shoe: shoe,
+	athletic_shoe: athletic_shoe,
+	hiking_boot: hiking_boot,
+	flat_shoe: flat_shoe,
+	high_heel: high_heel,
+	sandal: sandal,
+	ballet_shoes: ballet_shoes,
+	boot: boot,
+	crown: crown,
+	womans_hat: womans_hat,
+	tophat: tophat,
+	mortar_board: mortar_board,
+	billed_cap: billed_cap,
+	military_helmet: military_helmet,
+	rescue_worker_helmet: rescue_worker_helmet,
+	prayer_beads: prayer_beads,
+	lipstick: lipstick,
+	ring: ring,
+	gem: gem,
+	mute: mute,
+	speaker: speaker,
+	sound: sound,
+	loud_sound: loud_sound,
+	loudspeaker: loudspeaker,
+	mega: mega,
+	postal_horn: postal_horn,
+	bell: bell,
+	no_bell: no_bell,
+	musical_score: musical_score,
+	musical_note: musical_note,
+	notes: notes,
+	studio_microphone: studio_microphone,
+	level_slider: level_slider,
+	control_knobs: control_knobs,
+	microphone: microphone,
+	headphones: headphones,
+	radio: radio,
+	saxophone: saxophone,
+	accordion: accordion,
+	guitar: guitar,
+	musical_keyboard: musical_keyboard,
+	trumpet: trumpet,
+	violin: violin,
+	banjo: banjo,
+	drum: drum,
+	long_drum: long_drum,
+	iphone: iphone,
+	calling: calling,
+	phone: phone,
+	telephone: telephone,
+	telephone_receiver: telephone_receiver,
+	pager: pager,
+	fax: fax,
+	battery: battery,
+	electric_plug: electric_plug,
+	computer: computer,
+	desktop_computer: desktop_computer,
+	printer: printer,
+	keyboard: keyboard,
+	computer_mouse: computer_mouse,
+	trackball: trackball,
+	minidisc: minidisc,
+	floppy_disk: floppy_disk,
+	cd: cd,
+	dvd: dvd,
+	abacus: abacus,
+	movie_camera: movie_camera,
+	film_strip: film_strip,
+	film_projector: film_projector,
+	clapper: clapper,
+	tv: tv,
+	camera: camera,
+	camera_flash: camera_flash,
+	video_camera: video_camera,
+	vhs: vhs,
+	mag: mag,
+	mag_right: mag_right,
+	candle: candle,
+	bulb: bulb,
+	flashlight: flashlight,
+	izakaya_lantern: izakaya_lantern,
+	lantern: lantern,
+	diya_lamp: diya_lamp,
+	notebook_with_decorative_cover: notebook_with_decorative_cover,
+	closed_book: closed_book,
+	book: book,
+	open_book: open_book,
+	green_book: green_book,
+	blue_book: blue_book,
+	orange_book: orange_book,
+	books: books,
+	notebook: notebook,
+	ledger: ledger,
+	page_with_curl: page_with_curl,
+	scroll: scroll,
+	page_facing_up: page_facing_up,
+	newspaper: newspaper,
+	newspaper_roll: newspaper_roll,
+	bookmark_tabs: bookmark_tabs,
+	bookmark: bookmark,
+	label: label,
+	moneybag: moneybag,
+	coin: coin,
+	yen: yen,
+	dollar: dollar,
+	euro: euro,
+	pound: pound,
+	money_with_wings: money_with_wings,
+	credit_card: credit_card,
+	receipt: receipt,
+	chart: chart,
+	email: email,
+	envelope: envelope,
+	"e-mail": "📧",
+	incoming_envelope: incoming_envelope,
+	envelope_with_arrow: envelope_with_arrow,
+	outbox_tray: outbox_tray,
+	inbox_tray: inbox_tray,
+	"package": "📦",
+	mailbox: mailbox,
+	mailbox_closed: mailbox_closed,
+	mailbox_with_mail: mailbox_with_mail,
+	mailbox_with_no_mail: mailbox_with_no_mail,
+	postbox: postbox,
+	ballot_box: ballot_box,
+	pencil2: pencil2,
+	black_nib: black_nib,
+	fountain_pen: fountain_pen,
+	pen: pen,
+	paintbrush: paintbrush,
+	crayon: crayon,
+	memo: memo,
+	pencil: pencil,
+	briefcase: briefcase,
+	file_folder: file_folder,
+	open_file_folder: open_file_folder,
+	card_index_dividers: card_index_dividers,
+	date: date,
+	calendar: calendar,
+	spiral_notepad: spiral_notepad,
+	spiral_calendar: spiral_calendar,
+	card_index: card_index,
+	chart_with_upwards_trend: chart_with_upwards_trend,
+	chart_with_downwards_trend: chart_with_downwards_trend,
+	bar_chart: bar_chart,
+	clipboard: clipboard,
+	pushpin: pushpin,
+	round_pushpin: round_pushpin,
+	paperclip: paperclip,
+	paperclips: paperclips,
+	straight_ruler: straight_ruler,
+	triangular_ruler: triangular_ruler,
+	scissors: scissors,
+	card_file_box: card_file_box,
+	file_cabinet: file_cabinet,
+	wastebasket: wastebasket,
+	lock: lock,
+	unlock: unlock,
+	lock_with_ink_pen: lock_with_ink_pen,
+	closed_lock_with_key: closed_lock_with_key,
+	key: key,
+	old_key: old_key,
+	hammer: hammer,
+	axe: axe,
+	pick: pick,
+	hammer_and_pick: hammer_and_pick,
+	hammer_and_wrench: hammer_and_wrench,
+	dagger: dagger,
+	crossed_swords: crossed_swords,
+	gun: gun,
+	boomerang: boomerang,
+	bow_and_arrow: bow_and_arrow,
+	shield: shield,
+	carpentry_saw: carpentry_saw,
+	wrench: wrench,
+	screwdriver: screwdriver,
+	nut_and_bolt: nut_and_bolt,
+	gear: gear,
+	clamp: clamp,
+	balance_scale: balance_scale,
+	probing_cane: probing_cane,
+	link: link,
+	chains: chains,
+	hook: hook,
+	toolbox: toolbox,
+	magnet: magnet,
+	ladder: ladder,
+	alembic: alembic,
+	test_tube: test_tube,
+	petri_dish: petri_dish,
+	dna: dna,
+	microscope: microscope,
+	telescope: telescope,
+	satellite: satellite,
+	syringe: syringe,
+	drop_of_blood: drop_of_blood,
+	pill: pill,
+	adhesive_bandage: adhesive_bandage,
+	stethoscope: stethoscope,
+	door: door,
+	elevator: elevator,
+	mirror: mirror,
+	window: window,
+	bed: bed,
+	couch_and_lamp: couch_and_lamp,
+	chair: chair,
+	toilet: toilet,
+	plunger: plunger,
+	shower: shower,
+	bathtub: bathtub,
+	mouse_trap: mouse_trap,
+	razor: razor,
+	lotion_bottle: lotion_bottle,
+	safety_pin: safety_pin,
+	broom: broom,
+	basket: basket,
+	roll_of_paper: roll_of_paper,
+	bucket: bucket,
+	soap: soap,
+	toothbrush: toothbrush,
+	sponge: sponge,
+	fire_extinguisher: fire_extinguisher,
+	shopping_cart: shopping_cart,
+	smoking: smoking,
+	coffin: coffin,
+	headstone: headstone,
+	funeral_urn: funeral_urn,
+	moyai: moyai,
+	placard: placard,
+	atm: atm,
+	put_litter_in_its_place: put_litter_in_its_place,
+	potable_water: potable_water,
+	wheelchair: wheelchair,
+	mens: mens,
+	womens: womens,
+	restroom: restroom,
+	baby_symbol: baby_symbol,
+	wc: wc,
+	passport_control: passport_control,
+	customs: customs,
+	baggage_claim: baggage_claim,
+	left_luggage: left_luggage,
+	warning: warning,
+	children_crossing: children_crossing,
+	no_entry: no_entry,
+	no_entry_sign: no_entry_sign,
+	no_bicycles: no_bicycles,
+	no_smoking: no_smoking,
+	do_not_litter: do_not_litter,
+	"non-potable_water": "🚱",
+	no_pedestrians: no_pedestrians,
+	no_mobile_phones: no_mobile_phones,
+	underage: underage,
+	radioactive: radioactive,
+	biohazard: biohazard,
+	arrow_up: arrow_up,
+	arrow_upper_right: arrow_upper_right,
+	arrow_right: arrow_right,
+	arrow_lower_right: arrow_lower_right,
+	arrow_down: arrow_down,
+	arrow_lower_left: arrow_lower_left,
+	arrow_left: arrow_left,
+	arrow_upper_left: arrow_upper_left,
+	arrow_up_down: arrow_up_down,
+	left_right_arrow: left_right_arrow,
+	leftwards_arrow_with_hook: leftwards_arrow_with_hook,
+	arrow_right_hook: arrow_right_hook,
+	arrow_heading_up: arrow_heading_up,
+	arrow_heading_down: arrow_heading_down,
+	arrows_clockwise: arrows_clockwise,
+	arrows_counterclockwise: arrows_counterclockwise,
+	back: back,
+	end: end,
+	on: on,
+	soon: soon,
+	top: top,
+	place_of_worship: place_of_worship,
+	atom_symbol: atom_symbol,
+	om: om,
+	star_of_david: star_of_david,
+	wheel_of_dharma: wheel_of_dharma,
+	yin_yang: yin_yang,
+	latin_cross: latin_cross,
+	orthodox_cross: orthodox_cross,
+	star_and_crescent: star_and_crescent,
+	peace_symbol: peace_symbol,
+	menorah: menorah,
+	six_pointed_star: six_pointed_star,
+	aries: aries,
+	taurus: taurus,
+	gemini: gemini,
+	cancer: cancer,
+	leo: leo,
+	virgo: virgo,
+	libra: libra,
+	scorpius: scorpius,
+	sagittarius: sagittarius,
+	capricorn: capricorn,
+	aquarius: aquarius,
+	pisces: pisces,
+	ophiuchus: ophiuchus,
+	twisted_rightwards_arrows: twisted_rightwards_arrows,
+	repeat: repeat,
+	repeat_one: repeat_one,
+	arrow_forward: arrow_forward,
+	fast_forward: fast_forward,
+	next_track_button: next_track_button,
+	play_or_pause_button: play_or_pause_button,
+	arrow_backward: arrow_backward,
+	rewind: rewind,
+	previous_track_button: previous_track_button,
+	arrow_up_small: arrow_up_small,
+	arrow_double_up: arrow_double_up,
+	arrow_down_small: arrow_down_small,
+	arrow_double_down: arrow_double_down,
+	pause_button: pause_button,
+	stop_button: stop_button,
+	record_button: record_button,
+	eject_button: eject_button,
+	cinema: cinema,
+	low_brightness: low_brightness,
+	high_brightness: high_brightness,
+	signal_strength: signal_strength,
+	vibration_mode: vibration_mode,
+	mobile_phone_off: mobile_phone_off,
+	female_sign: female_sign,
+	male_sign: male_sign,
+	transgender_symbol: transgender_symbol,
+	heavy_multiplication_x: heavy_multiplication_x,
+	heavy_plus_sign: heavy_plus_sign,
+	heavy_minus_sign: heavy_minus_sign,
+	heavy_division_sign: heavy_division_sign,
+	infinity: infinity,
+	bangbang: bangbang,
+	interrobang: interrobang,
+	question: question,
+	grey_question: grey_question,
+	grey_exclamation: grey_exclamation,
+	exclamation: exclamation,
+	heavy_exclamation_mark: heavy_exclamation_mark,
+	wavy_dash: wavy_dash,
+	currency_exchange: currency_exchange,
+	heavy_dollar_sign: heavy_dollar_sign,
+	medical_symbol: medical_symbol,
+	recycle: recycle,
+	fleur_de_lis: fleur_de_lis,
+	trident: trident,
+	name_badge: name_badge,
+	beginner: beginner,
+	o: o,
+	white_check_mark: white_check_mark,
+	ballot_box_with_check: ballot_box_with_check,
+	heavy_check_mark: heavy_check_mark,
+	x: x,
+	negative_squared_cross_mark: negative_squared_cross_mark,
+	curly_loop: curly_loop,
+	loop: loop,
+	part_alternation_mark: part_alternation_mark,
+	eight_spoked_asterisk: eight_spoked_asterisk,
+	eight_pointed_black_star: eight_pointed_black_star,
+	sparkle: sparkle,
+	copyright: copyright,
+	registered: registered,
+	tm: tm,
+	hash: hash,
+	asterisk: asterisk,
+	zero: zero,
+	one: one,
+	two: two,
+	three: three,
+	four: four,
+	five: five,
+	six: six,
+	seven: seven,
+	eight: eight,
+	nine: nine,
+	keycap_ten: keycap_ten,
+	capital_abcd: capital_abcd,
+	abcd: abcd,
+	symbols: symbols,
+	abc: abc,
+	a: a,
+	ab: ab,
+	b: b,
+	cl: cl,
+	cool: cool,
+	free: free,
+	information_source: information_source,
+	id: id,
+	m: m,
+	"new": "🆕",
+	ng: ng,
+	o2: o2,
+	ok: ok,
+	parking: parking,
+	sos: sos,
+	up: up,
+	vs: vs,
+	koko: koko,
+	sa: sa,
+	ideograph_advantage: ideograph_advantage,
+	accept: accept,
+	congratulations: congratulations,
+	secret: secret,
+	u6e80: u6e80,
+	red_circle: red_circle,
+	orange_circle: orange_circle,
+	yellow_circle: yellow_circle,
+	green_circle: green_circle,
+	large_blue_circle: large_blue_circle,
+	purple_circle: purple_circle,
+	brown_circle: brown_circle,
+	black_circle: black_circle,
+	white_circle: white_circle,
+	red_square: red_square,
+	orange_square: orange_square,
+	yellow_square: yellow_square,
+	green_square: green_square,
+	blue_square: blue_square,
+	purple_square: purple_square,
+	brown_square: brown_square,
+	black_large_square: black_large_square,
+	white_large_square: white_large_square,
+	black_medium_square: black_medium_square,
+	white_medium_square: white_medium_square,
+	black_medium_small_square: black_medium_small_square,
+	white_medium_small_square: white_medium_small_square,
+	black_small_square: black_small_square,
+	white_small_square: white_small_square,
+	large_orange_diamond: large_orange_diamond,
+	large_blue_diamond: large_blue_diamond,
+	small_orange_diamond: small_orange_diamond,
+	small_blue_diamond: small_blue_diamond,
+	small_red_triangle: small_red_triangle,
+	small_red_triangle_down: small_red_triangle_down,
+	diamond_shape_with_a_dot_inside: diamond_shape_with_a_dot_inside,
+	radio_button: radio_button,
+	white_square_button: white_square_button,
+	black_square_button: black_square_button,
+	checkered_flag: checkered_flag,
+	triangular_flag_on_post: triangular_flag_on_post,
+	crossed_flags: crossed_flags,
+	black_flag: black_flag,
+	white_flag: white_flag,
+	rainbow_flag: rainbow_flag,
+	transgender_flag: transgender_flag,
+	pirate_flag: pirate_flag,
+	ascension_island: ascension_island,
+	andorra: andorra,
+	united_arab_emirates: united_arab_emirates,
+	afghanistan: afghanistan,
+	antigua_barbuda: antigua_barbuda,
+	anguilla: anguilla,
+	albania: albania,
+	armenia: armenia,
+	angola: angola,
+	antarctica: antarctica,
+	argentina: argentina,
+	american_samoa: american_samoa,
+	austria: austria,
+	australia: australia,
+	aruba: aruba,
+	aland_islands: aland_islands,
+	azerbaijan: azerbaijan,
+	bosnia_herzegovina: bosnia_herzegovina,
+	barbados: barbados,
+	bangladesh: bangladesh,
+	belgium: belgium,
+	burkina_faso: burkina_faso,
+	bulgaria: bulgaria,
+	bahrain: bahrain,
+	burundi: burundi,
+	benin: benin,
+	st_barthelemy: st_barthelemy,
+	bermuda: bermuda,
+	brunei: brunei,
+	bolivia: bolivia,
+	caribbean_netherlands: caribbean_netherlands,
+	brazil: brazil,
+	bahamas: bahamas,
+	bhutan: bhutan,
+	bouvet_island: bouvet_island,
+	botswana: botswana,
+	belarus: belarus,
+	belize: belize,
+	canada: canada,
+	cocos_islands: cocos_islands,
+	congo_kinshasa: congo_kinshasa,
+	central_african_republic: central_african_republic,
+	congo_brazzaville: congo_brazzaville,
+	switzerland: switzerland,
+	cote_divoire: cote_divoire,
+	cook_islands: cook_islands,
+	chile: chile,
+	cameroon: cameroon,
+	cn: cn,
+	colombia: colombia,
+	clipperton_island: clipperton_island,
+	costa_rica: costa_rica,
+	cuba: cuba,
+	cape_verde: cape_verde,
+	curacao: curacao,
+	christmas_island: christmas_island,
+	cyprus: cyprus,
+	czech_republic: czech_republic,
+	de: de,
+	diego_garcia: diego_garcia,
+	djibouti: djibouti,
+	denmark: denmark,
+	dominica: dominica,
+	dominican_republic: dominican_republic,
+	algeria: algeria,
+	ceuta_melilla: ceuta_melilla,
+	ecuador: ecuador,
+	estonia: estonia,
+	egypt: egypt,
+	western_sahara: western_sahara,
+	eritrea: eritrea,
+	es: es,
+	ethiopia: ethiopia,
+	eu: eu,
+	european_union: european_union,
+	finland: finland,
+	fiji: fiji,
+	falkland_islands: falkland_islands,
+	micronesia: micronesia,
+	faroe_islands: faroe_islands,
+	fr: fr,
+	gabon: gabon,
+	gb: gb,
+	uk: uk,
+	grenada: grenada,
+	georgia: georgia,
+	french_guiana: french_guiana,
+	guernsey: guernsey,
+	ghana: ghana,
+	gibraltar: gibraltar,
+	greenland: greenland,
+	gambia: gambia,
+	guinea: guinea,
+	guadeloupe: guadeloupe,
+	equatorial_guinea: equatorial_guinea,
+	greece: greece,
+	south_georgia_south_sandwich_islands: south_georgia_south_sandwich_islands,
+	guatemala: guatemala,
+	guam: guam,
+	guinea_bissau: guinea_bissau,
+	guyana: guyana,
+	hong_kong: hong_kong,
+	heard_mcdonald_islands: heard_mcdonald_islands,
+	honduras: honduras,
+	croatia: croatia,
+	haiti: haiti,
+	hungary: hungary,
+	canary_islands: canary_islands,
+	indonesia: indonesia,
+	ireland: ireland,
+	israel: israel,
+	isle_of_man: isle_of_man,
+	india: india,
+	british_indian_ocean_territory: british_indian_ocean_territory,
+	iraq: iraq,
+	iran: iran,
+	iceland: iceland,
+	it: it,
+	jersey: jersey,
+	jamaica: jamaica,
+	jordan: jordan,
+	jp: jp,
+	kenya: kenya,
+	kyrgyzstan: kyrgyzstan,
+	cambodia: cambodia,
+	kiribati: kiribati,
+	comoros: comoros,
+	st_kitts_nevis: st_kitts_nevis,
+	north_korea: north_korea,
+	kr: kr,
+	kuwait: kuwait,
+	cayman_islands: cayman_islands,
+	kazakhstan: kazakhstan,
+	laos: laos,
+	lebanon: lebanon,
+	st_lucia: st_lucia,
+	liechtenstein: liechtenstein,
+	sri_lanka: sri_lanka,
+	liberia: liberia,
+	lesotho: lesotho,
+	lithuania: lithuania,
+	luxembourg: luxembourg,
+	latvia: latvia,
+	libya: libya,
+	morocco: morocco,
+	monaco: monaco,
+	moldova: moldova,
+	montenegro: montenegro,
+	st_martin: st_martin,
+	madagascar: madagascar,
+	marshall_islands: marshall_islands,
+	macedonia: macedonia,
+	mali: mali,
+	myanmar: myanmar,
+	mongolia: mongolia,
+	macau: macau,
+	northern_mariana_islands: northern_mariana_islands,
+	martinique: martinique,
+	mauritania: mauritania,
+	montserrat: montserrat,
+	malta: malta,
+	mauritius: mauritius,
+	maldives: maldives,
+	malawi: malawi,
+	mexico: mexico,
+	malaysia: malaysia,
+	mozambique: mozambique,
+	namibia: namibia,
+	new_caledonia: new_caledonia,
+	niger: niger,
+	norfolk_island: norfolk_island,
+	nigeria: nigeria,
+	nicaragua: nicaragua,
+	netherlands: netherlands,
+	norway: norway,
+	nepal: nepal,
+	nauru: nauru,
+	niue: niue,
+	new_zealand: new_zealand,
+	oman: oman,
+	panama: panama,
+	peru: peru,
+	french_polynesia: french_polynesia,
+	papua_new_guinea: papua_new_guinea,
+	philippines: philippines,
+	pakistan: pakistan,
+	poland: poland,
+	st_pierre_miquelon: st_pierre_miquelon,
+	pitcairn_islands: pitcairn_islands,
+	puerto_rico: puerto_rico,
+	palestinian_territories: palestinian_territories,
+	portugal: portugal,
+	palau: palau,
+	paraguay: paraguay,
+	qatar: qatar,
+	reunion: reunion,
+	romania: romania,
+	serbia: serbia,
+	ru: ru,
+	rwanda: rwanda,
+	saudi_arabia: saudi_arabia,
+	solomon_islands: solomon_islands,
+	seychelles: seychelles,
+	sudan: sudan,
+	sweden: sweden,
+	singapore: singapore,
+	st_helena: st_helena,
+	slovenia: slovenia,
+	svalbard_jan_mayen: svalbard_jan_mayen,
+	slovakia: slovakia,
+	sierra_leone: sierra_leone,
+	san_marino: san_marino,
+	senegal: senegal,
+	somalia: somalia,
+	suriname: suriname,
+	south_sudan: south_sudan,
+	sao_tome_principe: sao_tome_principe,
+	el_salvador: el_salvador,
+	sint_maarten: sint_maarten,
+	syria: syria,
+	swaziland: swaziland,
+	tristan_da_cunha: tristan_da_cunha,
+	turks_caicos_islands: turks_caicos_islands,
+	chad: chad,
+	french_southern_territories: french_southern_territories,
+	togo: togo,
+	thailand: thailand,
+	tajikistan: tajikistan,
+	tokelau: tokelau,
+	timor_leste: timor_leste,
+	turkmenistan: turkmenistan,
+	tunisia: tunisia,
+	tonga: tonga,
+	tr: tr,
+	trinidad_tobago: trinidad_tobago,
+	tuvalu: tuvalu,
+	taiwan: taiwan,
+	tanzania: tanzania,
+	ukraine: ukraine,
+	uganda: uganda,
+	us_outlying_islands: us_outlying_islands,
+	united_nations: united_nations,
+	us: us,
+	uruguay: uruguay,
+	uzbekistan: uzbekistan,
+	vatican_city: vatican_city,
+	st_vincent_grenadines: st_vincent_grenadines,
+	venezuela: venezuela,
+	british_virgin_islands: british_virgin_islands,
+	us_virgin_islands: us_virgin_islands,
+	vietnam: vietnam,
+	vanuatu: vanuatu,
+	wallis_futuna: wallis_futuna,
+	samoa: samoa,
+	kosovo: kosovo,
+	yemen: yemen,
+	mayotte: mayotte,
+	south_africa: south_africa,
+	zambia: zambia,
+	zimbabwe: zimbabwe,
+	england: england,
+	scotland: scotland,
+	wales: wales
 };
 
-},{"./lib/data/full.json":256,"./lib/data/shortcuts":257,"./lib/normalize_opts":258,"./lib/render":259,"./lib/replace":260}],256:[function(require,module,exports){
-module.exports={
-  "100": "💯",
-  "1234": "🔢",
-  "grinning": "😀",
-  "smiley": "😃",
-  "smile": "😄",
-  "grin": "😁",
-  "laughing": "😆",
-  "satisfied": "😆",
-  "sweat_smile": "😅",
-  "joy": "😂",
-  "rofl": "🤣",
-  "relaxed": "☺️",
-  "blush": "😊",
-  "innocent": "😇",
-  "slightly_smiling_face": "🙂",
-  "upside_down_face": "🙃",
-  "wink": "😉",
-  "relieved": "😌",
-  "heart_eyes": "😍",
-  "kissing_heart": "😘",
-  "kissing": "😗",
-  "kissing_smiling_eyes": "😙",
-  "kissing_closed_eyes": "😚",
-  "yum": "😋",
-  "stuck_out_tongue_winking_eye": "😜",
-  "stuck_out_tongue_closed_eyes": "😝",
-  "stuck_out_tongue": "😛",
-  "money_mouth_face": "🤑",
-  "hugs": "🤗",
-  "nerd_face": "🤓",
-  "sunglasses": "😎",
-  "clown_face": "🤡",
-  "cowboy_hat_face": "🤠",
-  "smirk": "😏",
-  "unamused": "😒",
-  "disappointed": "😞",
-  "pensive": "😔",
-  "worried": "😟",
-  "confused": "😕",
-  "slightly_frowning_face": "🙁",
-  "frowning_face": "☹️",
-  "persevere": "😣",
-  "confounded": "😖",
-  "tired_face": "😫",
-  "weary": "😩",
-  "triumph": "😤",
-  "angry": "😠",
-  "rage": "😡",
-  "pout": "😡",
-  "no_mouth": "😶",
-  "neutral_face": "😐",
-  "expressionless": "😑",
-  "hushed": "😯",
-  "frowning": "😦",
-  "anguished": "😧",
-  "open_mouth": "😮",
-  "astonished": "😲",
-  "dizzy_face": "😵",
-  "flushed": "😳",
-  "scream": "😱",
-  "fearful": "😨",
-  "cold_sweat": "😰",
-  "cry": "😢",
-  "disappointed_relieved": "😥",
-  "drooling_face": "🤤",
-  "sob": "😭",
-  "sweat": "😓",
-  "sleepy": "😪",
-  "sleeping": "😴",
-  "roll_eyes": "🙄",
-  "thinking": "🤔",
-  "lying_face": "🤥",
-  "grimacing": "😬",
-  "zipper_mouth_face": "🤐",
-  "nauseated_face": "🤢",
-  "sneezing_face": "🤧",
-  "mask": "😷",
-  "face_with_thermometer": "🤒",
-  "face_with_head_bandage": "🤕",
-  "smiling_imp": "😈",
-  "imp": "👿",
-  "japanese_ogre": "👹",
-  "japanese_goblin": "👺",
-  "hankey": "💩",
-  "poop": "💩",
-  "shit": "💩",
-  "ghost": "👻",
-  "skull": "💀",
-  "skull_and_crossbones": "☠️",
-  "alien": "👽",
-  "space_invader": "👾",
-  "robot": "🤖",
-  "jack_o_lantern": "🎃",
-  "smiley_cat": "😺",
-  "smile_cat": "😸",
-  "joy_cat": "😹",
-  "heart_eyes_cat": "😻",
-  "smirk_cat": "😼",
-  "kissing_cat": "😽",
-  "scream_cat": "🙀",
-  "crying_cat_face": "😿",
-  "pouting_cat": "😾",
-  "open_hands": "👐",
-  "raised_hands": "🙌",
-  "clap": "👏",
-  "pray": "🙏",
-  "handshake": "🤝",
-  "+1": "👍",
-  "thumbsup": "👍",
-  "-1": "👎",
-  "thumbsdown": "👎",
-  "fist_oncoming": "👊",
-  "facepunch": "👊",
-  "punch": "👊",
-  "fist_raised": "✊",
-  "fist": "✊",
-  "fist_left": "🤛",
-  "fist_right": "🤜",
-  "crossed_fingers": "🤞",
-  "v": "✌️",
-  "metal": "🤘",
-  "ok_hand": "👌",
-  "point_left": "👈",
-  "point_right": "👉",
-  "point_up_2": "👆",
-  "point_down": "👇",
-  "point_up": "☝️",
-  "hand": "✋",
-  "raised_hand": "✋",
-  "raised_back_of_hand": "🤚",
-  "raised_hand_with_fingers_splayed": "🖐",
-  "vulcan_salute": "🖖",
-  "wave": "👋",
-  "call_me_hand": "🤙",
-  "muscle": "💪",
-  "middle_finger": "🖕",
-  "fu": "🖕",
-  "writing_hand": "✍️",
-  "selfie": "🤳",
-  "nail_care": "💅",
-  "ring": "💍",
-  "lipstick": "💄",
-  "kiss": "💋",
-  "lips": "👄",
-  "tongue": "👅",
-  "ear": "👂",
-  "nose": "👃",
-  "footprints": "👣",
-  "eye": "👁",
-  "eyes": "👀",
-  "speaking_head": "🗣",
-  "bust_in_silhouette": "👤",
-  "busts_in_silhouette": "👥",
-  "baby": "👶",
-  "boy": "👦",
-  "girl": "👧",
-  "man": "👨",
-  "woman": "👩",
-  "blonde_woman": "👱‍♀",
-  "blonde_man": "👱",
-  "person_with_blond_hair": "👱",
-  "older_man": "👴",
-  "older_woman": "👵",
-  "man_with_gua_pi_mao": "👲",
-  "woman_with_turban": "👳‍♀",
-  "man_with_turban": "👳",
-  "policewoman": "👮‍♀",
-  "policeman": "👮",
-  "cop": "👮",
-  "construction_worker_woman": "👷‍♀",
-  "construction_worker_man": "👷",
-  "construction_worker": "👷",
-  "guardswoman": "💂‍♀",
-  "guardsman": "💂",
-  "female_detective": "🕵️‍♀️",
-  "male_detective": "🕵",
-  "detective": "🕵",
-  "woman_health_worker": "👩‍⚕",
-  "man_health_worker": "👨‍⚕",
-  "woman_farmer": "👩‍🌾",
-  "man_farmer": "👨‍🌾",
-  "woman_cook": "👩‍🍳",
-  "man_cook": "👨‍🍳",
-  "woman_student": "👩‍🎓",
-  "man_student": "👨‍🎓",
-  "woman_singer": "👩‍🎤",
-  "man_singer": "👨‍🎤",
-  "woman_teacher": "👩‍🏫",
-  "man_teacher": "👨‍🏫",
-  "woman_factory_worker": "👩‍🏭",
-  "man_factory_worker": "👨‍🏭",
-  "woman_technologist": "👩‍💻",
-  "man_technologist": "👨‍💻",
-  "woman_office_worker": "👩‍💼",
-  "man_office_worker": "👨‍💼",
-  "woman_mechanic": "👩‍🔧",
-  "man_mechanic": "👨‍🔧",
-  "woman_scientist": "👩‍🔬",
-  "man_scientist": "👨‍🔬",
-  "woman_artist": "👩‍🎨",
-  "man_artist": "👨‍🎨",
-  "woman_firefighter": "👩‍🚒",
-  "man_firefighter": "👨‍🚒",
-  "woman_pilot": "👩‍✈",
-  "man_pilot": "👨‍✈",
-  "woman_astronaut": "👩‍🚀",
-  "man_astronaut": "👨‍🚀",
-  "woman_judge": "👩‍⚖",
-  "man_judge": "👨‍⚖",
-  "mrs_claus": "🤶",
-  "santa": "🎅",
-  "princess": "👸",
-  "prince": "🤴",
-  "bride_with_veil": "👰",
-  "man_in_tuxedo": "🤵",
-  "angel": "👼",
-  "pregnant_woman": "🤰",
-  "bowing_woman": "🙇‍♀",
-  "bowing_man": "🙇",
-  "bow": "🙇",
-  "tipping_hand_woman": "💁",
-  "information_desk_person": "💁",
-  "sassy_woman": "💁",
-  "tipping_hand_man": "💁‍♂",
-  "sassy_man": "💁‍♂",
-  "no_good_woman": "🙅",
-  "no_good": "🙅",
-  "ng_woman": "🙅",
-  "no_good_man": "🙅‍♂",
-  "ng_man": "🙅‍♂",
-  "ok_woman": "🙆",
-  "ok_man": "🙆‍♂",
-  "raising_hand_woman": "🙋",
-  "raising_hand": "🙋",
-  "raising_hand_man": "🙋‍♂",
-  "woman_facepalming": "🤦‍♀",
-  "man_facepalming": "🤦‍♂",
-  "woman_shrugging": "🤷‍♀",
-  "man_shrugging": "🤷‍♂",
-  "pouting_woman": "🙎",
-  "person_with_pouting_face": "🙎",
-  "pouting_man": "🙎‍♂",
-  "frowning_woman": "🙍",
-  "person_frowning": "🙍",
-  "frowning_man": "🙍‍♂",
-  "haircut_woman": "💇",
-  "haircut": "💇",
-  "haircut_man": "💇‍♂",
-  "massage_woman": "💆",
-  "massage": "💆",
-  "massage_man": "💆‍♂",
-  "business_suit_levitating": "🕴",
-  "dancer": "💃",
-  "man_dancing": "🕺",
-  "dancing_women": "👯",
-  "dancers": "👯",
-  "dancing_men": "👯‍♂",
-  "walking_woman": "🚶‍♀",
-  "walking_man": "🚶",
-  "walking": "🚶",
-  "running_woman": "🏃‍♀",
-  "running_man": "🏃",
-  "runner": "🏃",
-  "running": "🏃",
-  "couple": "👫",
-  "two_women_holding_hands": "👭",
-  "two_men_holding_hands": "👬",
-  "couple_with_heart_woman_man": "💑",
-  "couple_with_heart": "💑",
-  "couple_with_heart_woman_woman": "👩‍❤️‍👩",
-  "couple_with_heart_man_man": "👨‍❤️‍👨",
-  "couplekiss_man_woman": "💏",
-  "couplekiss_woman_woman": "👩‍❤️‍💋‍👩",
-  "couplekiss_man_man": "👨‍❤️‍💋‍👨",
-  "family_man_woman_boy": "👪",
-  "family": "👪",
-  "family_man_woman_girl": "👨‍👩‍👧",
-  "family_man_woman_girl_boy": "👨‍👩‍👧‍👦",
-  "family_man_woman_boy_boy": "👨‍👩‍👦‍👦",
-  "family_man_woman_girl_girl": "👨‍👩‍👧‍👧",
-  "family_woman_woman_boy": "👩‍👩‍👦",
-  "family_woman_woman_girl": "👩‍👩‍👧",
-  "family_woman_woman_girl_boy": "👩‍👩‍👧‍👦",
-  "family_woman_woman_boy_boy": "👩‍👩‍👦‍👦",
-  "family_woman_woman_girl_girl": "👩‍👩‍👧‍👧",
-  "family_man_man_boy": "👨‍👨‍👦",
-  "family_man_man_girl": "👨‍👨‍👧",
-  "family_man_man_girl_boy": "👨‍👨‍👧‍👦",
-  "family_man_man_boy_boy": "👨‍👨‍👦‍👦",
-  "family_man_man_girl_girl": "👨‍👨‍👧‍👧",
-  "family_woman_boy": "👩‍👦",
-  "family_woman_girl": "👩‍👧",
-  "family_woman_girl_boy": "👩‍👧‍👦",
-  "family_woman_boy_boy": "👩‍👦‍👦",
-  "family_woman_girl_girl": "👩‍👧‍👧",
-  "family_man_boy": "👨‍👦",
-  "family_man_girl": "👨‍👧",
-  "family_man_girl_boy": "👨‍👧‍👦",
-  "family_man_boy_boy": "👨‍👦‍👦",
-  "family_man_girl_girl": "👨‍👧‍👧",
-  "womans_clothes": "👚",
-  "shirt": "👕",
-  "tshirt": "👕",
-  "jeans": "👖",
-  "necktie": "👔",
-  "dress": "👗",
-  "bikini": "👙",
-  "kimono": "👘",
-  "high_heel": "👠",
-  "sandal": "👡",
-  "boot": "👢",
-  "mans_shoe": "👞",
-  "shoe": "👞",
-  "athletic_shoe": "👟",
-  "womans_hat": "👒",
-  "tophat": "🎩",
-  "mortar_board": "🎓",
-  "crown": "👑",
-  "rescue_worker_helmet": "⛑",
-  "school_satchel": "🎒",
-  "pouch": "👝",
-  "purse": "👛",
-  "handbag": "👜",
-  "briefcase": "💼",
-  "eyeglasses": "👓",
-  "dark_sunglasses": "🕶",
-  "closed_umbrella": "🌂",
-  "open_umbrella": "☂️",
-  "dog": "🐶",
-  "cat": "🐱",
-  "mouse": "🐭",
-  "hamster": "🐹",
-  "rabbit": "🐰",
-  "fox_face": "🦊",
-  "bear": "🐻",
-  "panda_face": "🐼",
-  "koala": "🐨",
-  "tiger": "🐯",
-  "lion": "🦁",
-  "cow": "🐮",
-  "pig": "🐷",
-  "pig_nose": "🐽",
-  "frog": "🐸",
-  "monkey_face": "🐵",
-  "see_no_evil": "🙈",
-  "hear_no_evil": "🙉",
-  "speak_no_evil": "🙊",
-  "monkey": "🐒",
-  "chicken": "🐔",
-  "penguin": "🐧",
-  "bird": "🐦",
-  "baby_chick": "🐤",
-  "hatching_chick": "🐣",
-  "hatched_chick": "🐥",
-  "duck": "🦆",
-  "eagle": "🦅",
-  "owl": "🦉",
-  "bat": "🦇",
-  "wolf": "🐺",
-  "boar": "🐗",
-  "horse": "🐴",
-  "unicorn": "🦄",
-  "bee": "🐝",
-  "honeybee": "🐝",
-  "bug": "🐛",
-  "butterfly": "🦋",
-  "snail": "🐌",
-  "shell": "🐚",
-  "beetle": "🐞",
-  "ant": "🐜",
-  "spider": "🕷",
-  "spider_web": "🕸",
-  "turtle": "🐢",
-  "snake": "🐍",
-  "lizard": "🦎",
-  "scorpion": "🦂",
-  "crab": "🦀",
-  "squid": "🦑",
-  "octopus": "🐙",
-  "shrimp": "🦐",
-  "tropical_fish": "🐠",
-  "fish": "🐟",
-  "blowfish": "🐡",
-  "dolphin": "🐬",
-  "flipper": "🐬",
-  "shark": "🦈",
-  "whale": "🐳",
-  "whale2": "🐋",
-  "crocodile": "🐊",
-  "leopard": "🐆",
-  "tiger2": "🐅",
-  "water_buffalo": "🐃",
-  "ox": "🐂",
-  "cow2": "🐄",
-  "deer": "🦌",
-  "dromedary_camel": "🐪",
-  "camel": "🐫",
-  "elephant": "🐘",
-  "rhinoceros": "🦏",
-  "gorilla": "🦍",
-  "racehorse": "🐎",
-  "pig2": "🐖",
-  "goat": "🐐",
-  "ram": "🐏",
-  "sheep": "🐑",
-  "dog2": "🐕",
-  "poodle": "🐩",
-  "cat2": "🐈",
-  "rooster": "🐓",
-  "turkey": "🦃",
-  "dove": "🕊",
-  "rabbit2": "🐇",
-  "mouse2": "🐁",
-  "rat": "🐀",
-  "chipmunk": "🐿",
-  "feet": "🐾",
-  "paw_prints": "🐾",
-  "dragon": "🐉",
-  "dragon_face": "🐲",
-  "cactus": "🌵",
-  "christmas_tree": "🎄",
-  "evergreen_tree": "🌲",
-  "deciduous_tree": "🌳",
-  "palm_tree": "🌴",
-  "seedling": "🌱",
-  "herb": "🌿",
-  "shamrock": "☘️",
-  "four_leaf_clover": "🍀",
-  "bamboo": "🎍",
-  "tanabata_tree": "🎋",
-  "leaves": "🍃",
-  "fallen_leaf": "🍂",
-  "maple_leaf": "🍁",
-  "mushroom": "🍄",
-  "ear_of_rice": "🌾",
-  "bouquet": "💐",
-  "tulip": "🌷",
-  "rose": "🌹",
-  "wilted_flower": "🥀",
-  "sunflower": "🌻",
-  "blossom": "🌼",
-  "cherry_blossom": "🌸",
-  "hibiscus": "🌺",
-  "earth_americas": "🌎",
-  "earth_africa": "🌍",
-  "earth_asia": "🌏",
-  "full_moon": "🌕",
-  "waning_gibbous_moon": "🌖",
-  "last_quarter_moon": "🌗",
-  "waning_crescent_moon": "🌘",
-  "new_moon": "🌑",
-  "waxing_crescent_moon": "🌒",
-  "first_quarter_moon": "🌓",
-  "moon": "🌔",
-  "waxing_gibbous_moon": "🌔",
-  "new_moon_with_face": "🌚",
-  "full_moon_with_face": "🌝",
-  "sun_with_face": "🌞",
-  "first_quarter_moon_with_face": "🌛",
-  "last_quarter_moon_with_face": "🌜",
-  "crescent_moon": "🌙",
-  "dizzy": "💫",
-  "star": "⭐️",
-  "star2": "🌟",
-  "sparkles": "✨",
-  "zap": "⚡️",
-  "fire": "🔥",
-  "boom": "💥",
-  "collision": "💥",
-  "comet": "☄",
-  "sunny": "☀️",
-  "sun_behind_small_cloud": "🌤",
-  "partly_sunny": "⛅️",
-  "sun_behind_large_cloud": "🌥",
-  "sun_behind_rain_cloud": "🌦",
-  "rainbow": "🌈",
-  "cloud": "☁️",
-  "cloud_with_rain": "🌧",
-  "cloud_with_lightning_and_rain": "⛈",
-  "cloud_with_lightning": "🌩",
-  "cloud_with_snow": "🌨",
-  "snowman_with_snow": "☃️",
-  "snowman": "⛄️",
-  "snowflake": "❄️",
-  "wind_face": "🌬",
-  "dash": "💨",
-  "tornado": "🌪",
-  "fog": "🌫",
-  "ocean": "🌊",
-  "droplet": "💧",
-  "sweat_drops": "💦",
-  "umbrella": "☔️",
-  "green_apple": "🍏",
-  "apple": "🍎",
-  "pear": "🍐",
-  "tangerine": "🍊",
-  "orange": "🍊",
-  "mandarin": "🍊",
-  "lemon": "🍋",
-  "banana": "🍌",
-  "watermelon": "🍉",
-  "grapes": "🍇",
-  "strawberry": "🍓",
-  "melon": "🍈",
-  "cherries": "🍒",
-  "peach": "🍑",
-  "pineapple": "🍍",
-  "kiwi_fruit": "🥝",
-  "avocado": "🥑",
-  "tomato": "🍅",
-  "eggplant": "🍆",
-  "cucumber": "🥒",
-  "carrot": "🥕",
-  "corn": "🌽",
-  "hot_pepper": "🌶",
-  "potato": "🥔",
-  "sweet_potato": "🍠",
-  "chestnut": "🌰",
-  "peanuts": "🥜",
-  "honey_pot": "🍯",
-  "croissant": "🥐",
-  "bread": "🍞",
-  "baguette_bread": "🥖",
-  "cheese": "🧀",
-  "egg": "🥚",
-  "fried_egg": "🍳",
-  "bacon": "🥓",
-  "pancakes": "🥞",
-  "fried_shrimp": "🍤",
-  "poultry_leg": "🍗",
-  "meat_on_bone": "🍖",
-  "pizza": "🍕",
-  "hotdog": "🌭",
-  "hamburger": "🍔",
-  "fries": "🍟",
-  "stuffed_flatbread": "🥙",
-  "taco": "🌮",
-  "burrito": "🌯",
-  "green_salad": "🥗",
-  "shallow_pan_of_food": "🥘",
-  "spaghetti": "🍝",
-  "ramen": "🍜",
-  "stew": "🍲",
-  "fish_cake": "🍥",
-  "sushi": "🍣",
-  "bento": "🍱",
-  "curry": "🍛",
-  "rice": "🍚",
-  "rice_ball": "🍙",
-  "rice_cracker": "🍘",
-  "oden": "🍢",
-  "dango": "🍡",
-  "shaved_ice": "🍧",
-  "ice_cream": "🍨",
-  "icecream": "🍦",
-  "cake": "🍰",
-  "birthday": "🎂",
-  "custard": "🍮",
-  "lollipop": "🍭",
-  "candy": "🍬",
-  "chocolate_bar": "🍫",
-  "popcorn": "🍿",
-  "doughnut": "🍩",
-  "cookie": "🍪",
-  "milk_glass": "🥛",
-  "baby_bottle": "🍼",
-  "coffee": "☕️",
-  "tea": "🍵",
-  "sake": "🍶",
-  "beer": "🍺",
-  "beers": "🍻",
-  "clinking_glasses": "🥂",
-  "wine_glass": "🍷",
-  "tumbler_glass": "🥃",
-  "cocktail": "🍸",
-  "tropical_drink": "🍹",
-  "champagne": "🍾",
-  "spoon": "🥄",
-  "fork_and_knife": "🍴",
-  "plate_with_cutlery": "🍽",
-  "soccer": "⚽️",
-  "basketball": "🏀",
-  "football": "🏈",
-  "baseball": "⚾️",
-  "tennis": "🎾",
-  "volleyball": "🏐",
-  "rugby_football": "🏉",
-  "8ball": "🎱",
-  "ping_pong": "🏓",
-  "badminton": "🏸",
-  "goal_net": "🥅",
-  "ice_hockey": "🏒",
-  "field_hockey": "🏑",
-  "cricket": "🏏",
-  "golf": "⛳️",
-  "bow_and_arrow": "🏹",
-  "fishing_pole_and_fish": "🎣",
-  "boxing_glove": "🥊",
-  "martial_arts_uniform": "🥋",
-  "ice_skate": "⛸",
-  "ski": "🎿",
-  "skier": "⛷",
-  "snowboarder": "🏂",
-  "weight_lifting_woman": "🏋️‍♀️",
-  "weight_lifting_man": "🏋",
-  "person_fencing": "🤺",
-  "women_wrestling": "🤼‍♀",
-  "men_wrestling": "🤼‍♂",
-  "woman_cartwheeling": "🤸‍♀",
-  "man_cartwheeling": "🤸‍♂",
-  "basketball_woman": "⛹️‍♀️",
-  "basketball_man": "⛹",
-  "woman_playing_handball": "🤾‍♀",
-  "man_playing_handball": "🤾‍♂",
-  "golfing_woman": "🏌️‍♀️",
-  "golfing_man": "🏌",
-  "surfing_woman": "🏄‍♀",
-  "surfing_man": "🏄",
-  "surfer": "🏄",
-  "swimming_woman": "🏊‍♀",
-  "swimming_man": "🏊",
-  "swimmer": "🏊",
-  "woman_playing_water_polo": "🤽‍♀",
-  "man_playing_water_polo": "🤽‍♂",
-  "rowing_woman": "🚣‍♀",
-  "rowing_man": "🚣",
-  "rowboat": "🚣",
-  "horse_racing": "🏇",
-  "biking_woman": "🚴‍♀",
-  "biking_man": "🚴",
-  "bicyclist": "🚴",
-  "mountain_biking_woman": "🚵‍♀",
-  "mountain_biking_man": "🚵",
-  "mountain_bicyclist": "🚵",
-  "running_shirt_with_sash": "🎽",
-  "medal_sports": "🏅",
-  "medal_military": "🎖",
-  "1st_place_medal": "🥇",
-  "2nd_place_medal": "🥈",
-  "3rd_place_medal": "🥉",
-  "trophy": "🏆",
-  "rosette": "🏵",
-  "reminder_ribbon": "🎗",
-  "ticket": "🎫",
-  "tickets": "🎟",
-  "circus_tent": "🎪",
-  "woman_juggling": "🤹‍♀",
-  "man_juggling": "🤹‍♂",
-  "performing_arts": "🎭",
-  "art": "🎨",
-  "clapper": "🎬",
-  "microphone": "🎤",
-  "headphones": "🎧",
-  "musical_score": "🎼",
-  "musical_keyboard": "🎹",
-  "drum": "🥁",
-  "saxophone": "🎷",
-  "trumpet": "🎺",
-  "guitar": "🎸",
-  "violin": "🎻",
-  "game_die": "🎲",
-  "dart": "🎯",
-  "bowling": "🎳",
-  "video_game": "🎮",
-  "slot_machine": "🎰",
-  "car": "🚗",
-  "red_car": "🚗",
-  "taxi": "🚕",
-  "blue_car": "🚙",
-  "bus": "🚌",
-  "trolleybus": "🚎",
-  "racing_car": "🏎",
-  "police_car": "🚓",
-  "ambulance": "🚑",
-  "fire_engine": "🚒",
-  "minibus": "🚐",
-  "truck": "🚚",
-  "articulated_lorry": "🚛",
-  "tractor": "🚜",
-  "kick_scooter": "🛴",
-  "bike": "🚲",
-  "motor_scooter": "🛵",
-  "motorcycle": "🏍",
-  "rotating_light": "🚨",
-  "oncoming_police_car": "🚔",
-  "oncoming_bus": "🚍",
-  "oncoming_automobile": "🚘",
-  "oncoming_taxi": "🚖",
-  "aerial_tramway": "🚡",
-  "mountain_cableway": "🚠",
-  "suspension_railway": "🚟",
-  "railway_car": "🚃",
-  "train": "🚋",
-  "mountain_railway": "🚞",
-  "monorail": "🚝",
-  "bullettrain_side": "🚄",
-  "bullettrain_front": "🚅",
-  "light_rail": "🚈",
-  "steam_locomotive": "🚂",
-  "train2": "🚆",
-  "metro": "🚇",
-  "tram": "🚊",
-  "station": "🚉",
-  "helicopter": "🚁",
-  "small_airplane": "🛩",
-  "airplane": "✈️",
-  "flight_departure": "🛫",
-  "flight_arrival": "🛬",
-  "rocket": "🚀",
-  "artificial_satellite": "🛰",
-  "seat": "💺",
-  "canoe": "🛶",
-  "boat": "⛵️",
-  "sailboat": "⛵️",
-  "motor_boat": "🛥",
-  "speedboat": "🚤",
-  "passenger_ship": "🛳",
-  "ferry": "⛴",
-  "ship": "🚢",
-  "anchor": "⚓️",
-  "construction": "🚧",
-  "fuelpump": "⛽️",
-  "busstop": "🚏",
-  "vertical_traffic_light": "🚦",
-  "traffic_light": "🚥",
-  "world_map": "🗺",
-  "moyai": "🗿",
-  "statue_of_liberty": "🗽",
-  "fountain": "⛲️",
-  "tokyo_tower": "🗼",
-  "european_castle": "🏰",
-  "japanese_castle": "🏯",
-  "stadium": "🏟",
-  "ferris_wheel": "🎡",
-  "roller_coaster": "🎢",
-  "carousel_horse": "🎠",
-  "parasol_on_ground": "⛱",
-  "beach_umbrella": "🏖",
-  "desert_island": "🏝",
-  "mountain": "⛰",
-  "mountain_snow": "🏔",
-  "mount_fuji": "🗻",
-  "volcano": "🌋",
-  "desert": "🏜",
-  "camping": "🏕",
-  "tent": "⛺️",
-  "railway_track": "🛤",
-  "motorway": "🛣",
-  "building_construction": "🏗",
-  "factory": "🏭",
-  "house": "🏠",
-  "house_with_garden": "🏡",
-  "houses": "🏘",
-  "derelict_house": "🏚",
-  "office": "🏢",
-  "department_store": "🏬",
-  "post_office": "🏣",
-  "european_post_office": "🏤",
-  "hospital": "🏥",
-  "bank": "🏦",
-  "hotel": "🏨",
-  "convenience_store": "🏪",
-  "school": "🏫",
-  "love_hotel": "🏩",
-  "wedding": "💒",
-  "classical_building": "🏛",
-  "church": "⛪️",
-  "mosque": "🕌",
-  "synagogue": "🕍",
-  "kaaba": "🕋",
-  "shinto_shrine": "⛩",
-  "japan": "🗾",
-  "rice_scene": "🎑",
-  "national_park": "🏞",
-  "sunrise": "🌅",
-  "sunrise_over_mountains": "🌄",
-  "stars": "🌠",
-  "sparkler": "🎇",
-  "fireworks": "🎆",
-  "city_sunrise": "🌇",
-  "city_sunset": "🌆",
-  "cityscape": "🏙",
-  "night_with_stars": "🌃",
-  "milky_way": "🌌",
-  "bridge_at_night": "🌉",
-  "foggy": "🌁",
-  "watch": "⌚️",
-  "iphone": "📱",
-  "calling": "📲",
-  "computer": "💻",
-  "keyboard": "⌨️",
-  "desktop_computer": "🖥",
-  "printer": "🖨",
-  "computer_mouse": "🖱",
-  "trackball": "🖲",
-  "joystick": "🕹",
-  "clamp": "🗜",
-  "minidisc": "💽",
-  "floppy_disk": "💾",
-  "cd": "💿",
-  "dvd": "📀",
-  "vhs": "📼",
-  "camera": "📷",
-  "camera_flash": "📸",
-  "video_camera": "📹",
-  "movie_camera": "🎥",
-  "film_projector": "📽",
-  "film_strip": "🎞",
-  "telephone_receiver": "📞",
-  "phone": "☎️",
-  "telephone": "☎️",
-  "pager": "📟",
-  "fax": "📠",
-  "tv": "📺",
-  "radio": "📻",
-  "studio_microphone": "🎙",
-  "level_slider": "🎚",
-  "control_knobs": "🎛",
-  "stopwatch": "⏱",
-  "timer_clock": "⏲",
-  "alarm_clock": "⏰",
-  "mantelpiece_clock": "🕰",
-  "hourglass": "⌛️",
-  "hourglass_flowing_sand": "⏳",
-  "satellite": "📡",
-  "battery": "🔋",
-  "electric_plug": "🔌",
-  "bulb": "💡",
-  "flashlight": "🔦",
-  "candle": "🕯",
-  "wastebasket": "🗑",
-  "oil_drum": "🛢",
-  "money_with_wings": "💸",
-  "dollar": "💵",
-  "yen": "💴",
-  "euro": "💶",
-  "pound": "💷",
-  "moneybag": "💰",
-  "credit_card": "💳",
-  "gem": "💎",
-  "balance_scale": "⚖️",
-  "wrench": "🔧",
-  "hammer": "🔨",
-  "hammer_and_pick": "⚒",
-  "hammer_and_wrench": "🛠",
-  "pick": "⛏",
-  "nut_and_bolt": "🔩",
-  "gear": "⚙️",
-  "chains": "⛓",
-  "gun": "🔫",
-  "bomb": "💣",
-  "hocho": "🔪",
-  "knife": "🔪",
-  "dagger": "🗡",
-  "crossed_swords": "⚔️",
-  "shield": "🛡",
-  "smoking": "🚬",
-  "coffin": "⚰️",
-  "funeral_urn": "⚱️",
-  "amphora": "🏺",
-  "crystal_ball": "🔮",
-  "prayer_beads": "📿",
-  "barber": "💈",
-  "alembic": "⚗️",
-  "telescope": "🔭",
-  "microscope": "🔬",
-  "hole": "🕳",
-  "pill": "💊",
-  "syringe": "💉",
-  "thermometer": "🌡",
-  "toilet": "🚽",
-  "potable_water": "🚰",
-  "shower": "🚿",
-  "bathtub": "🛁",
-  "bath": "🛀",
-  "bellhop_bell": "🛎",
-  "key": "🔑",
-  "old_key": "🗝",
-  "door": "🚪",
-  "couch_and_lamp": "🛋",
-  "bed": "🛏",
-  "sleeping_bed": "🛌",
-  "framed_picture": "🖼",
-  "shopping": "🛍",
-  "shopping_cart": "🛒",
-  "gift": "🎁",
-  "balloon": "🎈",
-  "flags": "🎏",
-  "ribbon": "🎀",
-  "confetti_ball": "🎊",
-  "tada": "🎉",
-  "dolls": "🎎",
-  "izakaya_lantern": "🏮",
-  "lantern": "🏮",
-  "wind_chime": "🎐",
-  "email": "✉️",
-  "envelope": "✉️",
-  "envelope_with_arrow": "📩",
-  "incoming_envelope": "📨",
-  "e-mail": "📧",
-  "love_letter": "💌",
-  "inbox_tray": "📥",
-  "outbox_tray": "📤",
-  "package": "📦",
-  "label": "🏷",
-  "mailbox_closed": "📪",
-  "mailbox": "📫",
-  "mailbox_with_mail": "📬",
-  "mailbox_with_no_mail": "📭",
-  "postbox": "📮",
-  "postal_horn": "📯",
-  "scroll": "📜",
-  "page_with_curl": "📃",
-  "page_facing_up": "📄",
-  "bookmark_tabs": "📑",
-  "bar_chart": "📊",
-  "chart_with_upwards_trend": "📈",
-  "chart_with_downwards_trend": "📉",
-  "spiral_notepad": "🗒",
-  "spiral_calendar": "🗓",
-  "calendar": "📆",
-  "date": "📅",
-  "card_index": "📇",
-  "card_file_box": "🗃",
-  "ballot_box": "🗳",
-  "file_cabinet": "🗄",
-  "clipboard": "📋",
-  "file_folder": "📁",
-  "open_file_folder": "📂",
-  "card_index_dividers": "🗂",
-  "newspaper_roll": "🗞",
-  "newspaper": "📰",
-  "notebook": "📓",
-  "notebook_with_decorative_cover": "📔",
-  "ledger": "📒",
-  "closed_book": "📕",
-  "green_book": "📗",
-  "blue_book": "📘",
-  "orange_book": "📙",
-  "books": "📚",
-  "book": "📖",
-  "open_book": "📖",
-  "bookmark": "🔖",
-  "link": "🔗",
-  "paperclip": "📎",
-  "paperclips": "🖇",
-  "triangular_ruler": "📐",
-  "straight_ruler": "📏",
-  "pushpin": "📌",
-  "round_pushpin": "📍",
-  "scissors": "✂️",
-  "pen": "🖊",
-  "fountain_pen": "🖋",
-  "black_nib": "✒️",
-  "paintbrush": "🖌",
-  "crayon": "🖍",
-  "memo": "📝",
-  "pencil": "📝",
-  "pencil2": "✏️",
-  "mag": "🔍",
-  "mag_right": "🔎",
-  "lock_with_ink_pen": "🔏",
-  "closed_lock_with_key": "🔐",
-  "lock": "🔒",
-  "unlock": "🔓",
-  "heart": "❤️",
-  "yellow_heart": "💛",
-  "green_heart": "💚",
-  "blue_heart": "💙",
-  "purple_heart": "💜",
-  "black_heart": "🖤",
-  "broken_heart": "💔",
-  "heavy_heart_exclamation": "❣️",
-  "two_hearts": "💕",
-  "revolving_hearts": "💞",
-  "heartbeat": "💓",
-  "heartpulse": "💗",
-  "sparkling_heart": "💖",
-  "cupid": "💘",
-  "gift_heart": "💝",
-  "heart_decoration": "💟",
-  "peace_symbol": "☮️",
-  "latin_cross": "✝️",
-  "star_and_crescent": "☪️",
-  "om": "🕉",
-  "wheel_of_dharma": "☸️",
-  "star_of_david": "✡️",
-  "six_pointed_star": "🔯",
-  "menorah": "🕎",
-  "yin_yang": "☯️",
-  "orthodox_cross": "☦️",
-  "place_of_worship": "🛐",
-  "ophiuchus": "⛎",
-  "aries": "♈️",
-  "taurus": "♉️",
-  "gemini": "♊️",
-  "cancer": "♋️",
-  "leo": "♌️",
-  "virgo": "♍️",
-  "libra": "♎️",
-  "scorpius": "♏️",
-  "sagittarius": "♐️",
-  "capricorn": "♑️",
-  "aquarius": "♒️",
-  "pisces": "♓️",
-  "id": "🆔",
-  "atom_symbol": "⚛️",
-  "accept": "🉑",
-  "radioactive": "☢️",
-  "biohazard": "☣️",
-  "mobile_phone_off": "📴",
-  "vibration_mode": "📳",
-  "u6709": "🈶",
-  "u7121": "🈚️",
-  "u7533": "🈸",
-  "u55b6": "🈺",
-  "u6708": "🈷️",
-  "eight_pointed_black_star": "✴️",
-  "vs": "🆚",
-  "white_flower": "💮",
-  "ideograph_advantage": "🉐",
-  "secret": "㊙️",
-  "congratulations": "㊗️",
-  "u5408": "🈴",
-  "u6e80": "🈵",
-  "u5272": "🈹",
-  "u7981": "🈲",
-  "a": "🅰️",
-  "b": "🅱️",
-  "ab": "🆎",
-  "cl": "🆑",
-  "o2": "🅾️",
-  "sos": "🆘",
-  "x": "❌",
-  "o": "⭕️",
-  "stop_sign": "🛑",
-  "no_entry": "⛔️",
-  "name_badge": "📛",
-  "no_entry_sign": "🚫",
-  "anger": "💢",
-  "hotsprings": "♨️",
-  "no_pedestrians": "🚷",
-  "do_not_litter": "🚯",
-  "no_bicycles": "🚳",
-  "non-potable_water": "🚱",
-  "underage": "🔞",
-  "no_mobile_phones": "📵",
-  "no_smoking": "🚭",
-  "exclamation": "❗️",
-  "heavy_exclamation_mark": "❗️",
-  "grey_exclamation": "❕",
-  "question": "❓",
-  "grey_question": "❔",
-  "bangbang": "‼️",
-  "interrobang": "⁉️",
-  "low_brightness": "🔅",
-  "high_brightness": "🔆",
-  "part_alternation_mark": "〽️",
-  "warning": "⚠️",
-  "children_crossing": "🚸",
-  "trident": "🔱",
-  "fleur_de_lis": "⚜️",
-  "beginner": "🔰",
-  "recycle": "♻️",
-  "white_check_mark": "✅",
-  "u6307": "🈯️",
-  "chart": "💹",
-  "sparkle": "❇️",
-  "eight_spoked_asterisk": "✳️",
-  "negative_squared_cross_mark": "❎",
-  "globe_with_meridians": "🌐",
-  "diamond_shape_with_a_dot_inside": "💠",
-  "m": "Ⓜ️",
-  "cyclone": "🌀",
-  "zzz": "💤",
-  "atm": "🏧",
-  "wc": "🚾",
-  "wheelchair": "♿️",
-  "parking": "🅿️",
-  "u7a7a": "🈳",
-  "sa": "🈂️",
-  "passport_control": "🛂",
-  "customs": "🛃",
-  "baggage_claim": "🛄",
-  "left_luggage": "🛅",
-  "mens": "🚹",
-  "womens": "🚺",
-  "baby_symbol": "🚼",
-  "restroom": "🚻",
-  "put_litter_in_its_place": "🚮",
-  "cinema": "🎦",
-  "signal_strength": "📶",
-  "koko": "🈁",
-  "symbols": "🔣",
-  "information_source": "ℹ️",
-  "abc": "🔤",
-  "abcd": "🔡",
-  "capital_abcd": "🔠",
-  "ng": "🆖",
-  "ok": "🆗",
-  "up": "🆙",
-  "cool": "🆒",
-  "new": "🆕",
-  "free": "🆓",
-  "zero": "0️⃣",
-  "one": "1️⃣",
-  "two": "2️⃣",
-  "three": "3️⃣",
-  "four": "4️⃣",
-  "five": "5️⃣",
-  "six": "6️⃣",
-  "seven": "7️⃣",
-  "eight": "8️⃣",
-  "nine": "9️⃣",
-  "keycap_ten": "🔟",
-  "hash": "#️⃣",
-  "asterisk": "*️⃣",
-  "arrow_forward": "▶️",
-  "pause_button": "⏸",
-  "play_or_pause_button": "⏯",
-  "stop_button": "⏹",
-  "record_button": "⏺",
-  "next_track_button": "⏭",
-  "previous_track_button": "⏮",
-  "fast_forward": "⏩",
-  "rewind": "⏪",
-  "arrow_double_up": "⏫",
-  "arrow_double_down": "⏬",
-  "arrow_backward": "◀️",
-  "arrow_up_small": "🔼",
-  "arrow_down_small": "🔽",
-  "arrow_right": "➡️",
-  "arrow_left": "⬅️",
-  "arrow_up": "⬆️",
-  "arrow_down": "⬇️",
-  "arrow_upper_right": "↗️",
-  "arrow_lower_right": "↘️",
-  "arrow_lower_left": "↙️",
-  "arrow_upper_left": "↖️",
-  "arrow_up_down": "↕️",
-  "left_right_arrow": "↔️",
-  "arrow_right_hook": "↪️",
-  "leftwards_arrow_with_hook": "↩️",
-  "arrow_heading_up": "⤴️",
-  "arrow_heading_down": "⤵️",
-  "twisted_rightwards_arrows": "🔀",
-  "repeat": "🔁",
-  "repeat_one": "🔂",
-  "arrows_counterclockwise": "🔄",
-  "arrows_clockwise": "🔃",
-  "musical_note": "🎵",
-  "notes": "🎶",
-  "heavy_plus_sign": "➕",
-  "heavy_minus_sign": "➖",
-  "heavy_division_sign": "➗",
-  "heavy_multiplication_x": "✖️",
-  "heavy_dollar_sign": "💲",
-  "currency_exchange": "💱",
-  "tm": "™️",
-  "copyright": "©️",
-  "registered": "®️",
-  "wavy_dash": "〰️",
-  "curly_loop": "➰",
-  "loop": "➿",
-  "end": "🔚",
-  "back": "🔙",
-  "on": "🔛",
-  "top": "🔝",
-  "soon": "🔜",
-  "heavy_check_mark": "✔️",
-  "ballot_box_with_check": "☑️",
-  "radio_button": "🔘",
-  "white_circle": "⚪️",
-  "black_circle": "⚫️",
-  "red_circle": "🔴",
-  "large_blue_circle": "🔵",
-  "small_red_triangle": "🔺",
-  "small_red_triangle_down": "🔻",
-  "small_orange_diamond": "🔸",
-  "small_blue_diamond": "🔹",
-  "large_orange_diamond": "🔶",
-  "large_blue_diamond": "🔷",
-  "white_square_button": "🔳",
-  "black_square_button": "🔲",
-  "black_small_square": "▪️",
-  "white_small_square": "▫️",
-  "black_medium_small_square": "◾️",
-  "white_medium_small_square": "◽️",
-  "black_medium_square": "◼️",
-  "white_medium_square": "◻️",
-  "black_large_square": "⬛️",
-  "white_large_square": "⬜️",
-  "speaker": "🔈",
-  "mute": "🔇",
-  "sound": "🔉",
-  "loud_sound": "🔊",
-  "bell": "🔔",
-  "no_bell": "🔕",
-  "mega": "📣",
-  "loudspeaker": "📢",
-  "eye_speech_bubble": "👁‍🗨",
-  "speech_balloon": "💬",
-  "thought_balloon": "💭",
-  "right_anger_bubble": "🗯",
-  "spades": "♠️",
-  "clubs": "♣️",
-  "hearts": "♥️",
-  "diamonds": "♦️",
-  "black_joker": "🃏",
-  "flower_playing_cards": "🎴",
-  "mahjong": "🀄️",
-  "clock1": "🕐",
-  "clock2": "🕑",
-  "clock3": "🕒",
-  "clock4": "🕓",
-  "clock5": "🕔",
-  "clock6": "🕕",
-  "clock7": "🕖",
-  "clock8": "🕗",
-  "clock9": "🕘",
-  "clock10": "🕙",
-  "clock11": "🕚",
-  "clock12": "🕛",
-  "clock130": "🕜",
-  "clock230": "🕝",
-  "clock330": "🕞",
-  "clock430": "🕟",
-  "clock530": "🕠",
-  "clock630": "🕡",
-  "clock730": "🕢",
-  "clock830": "🕣",
-  "clock930": "🕤",
-  "clock1030": "🕥",
-  "clock1130": "🕦",
-  "clock1230": "🕧",
-  "white_flag": "🏳️",
-  "black_flag": "🏴",
-  "checkered_flag": "🏁",
-  "triangular_flag_on_post": "🚩",
-  "rainbow_flag": "🏳️‍🌈",
-  "afghanistan": "🇦🇫",
-  "aland_islands": "🇦🇽",
-  "albania": "🇦🇱",
-  "algeria": "🇩🇿",
-  "american_samoa": "🇦🇸",
-  "andorra": "🇦🇩",
-  "angola": "🇦🇴",
-  "anguilla": "🇦🇮",
-  "antarctica": "🇦🇶",
-  "antigua_barbuda": "🇦🇬",
-  "argentina": "🇦🇷",
-  "armenia": "🇦🇲",
-  "aruba": "🇦🇼",
-  "australia": "🇦🇺",
-  "austria": "🇦🇹",
-  "azerbaijan": "🇦🇿",
-  "bahamas": "🇧🇸",
-  "bahrain": "🇧🇭",
-  "bangladesh": "🇧🇩",
-  "barbados": "🇧🇧",
-  "belarus": "🇧🇾",
-  "belgium": "🇧🇪",
-  "belize": "🇧🇿",
-  "benin": "🇧🇯",
-  "bermuda": "🇧🇲",
-  "bhutan": "🇧🇹",
-  "bolivia": "🇧🇴",
-  "caribbean_netherlands": "🇧🇶",
-  "bosnia_herzegovina": "🇧🇦",
-  "botswana": "🇧🇼",
-  "brazil": "🇧🇷",
-  "british_indian_ocean_territory": "🇮🇴",
-  "british_virgin_islands": "🇻🇬",
-  "brunei": "🇧🇳",
-  "bulgaria": "🇧🇬",
-  "burkina_faso": "🇧🇫",
-  "burundi": "🇧🇮",
-  "cape_verde": "🇨🇻",
-  "cambodia": "🇰🇭",
-  "cameroon": "🇨🇲",
-  "canada": "🇨🇦",
-  "canary_islands": "🇮🇨",
-  "cayman_islands": "🇰🇾",
-  "central_african_republic": "🇨🇫",
-  "chad": "🇹🇩",
-  "chile": "🇨🇱",
-  "cn": "🇨🇳",
-  "christmas_island": "🇨🇽",
-  "cocos_islands": "🇨🇨",
-  "colombia": "🇨🇴",
-  "comoros": "🇰🇲",
-  "congo_brazzaville": "🇨🇬",
-  "congo_kinshasa": "🇨🇩",
-  "cook_islands": "🇨🇰",
-  "costa_rica": "🇨🇷",
-  "cote_divoire": "🇨🇮",
-  "croatia": "🇭🇷",
-  "cuba": "🇨🇺",
-  "curacao": "🇨🇼",
-  "cyprus": "🇨🇾",
-  "czech_republic": "🇨🇿",
-  "denmark": "🇩🇰",
-  "djibouti": "🇩🇯",
-  "dominica": "🇩🇲",
-  "dominican_republic": "🇩🇴",
-  "ecuador": "🇪🇨",
-  "egypt": "🇪🇬",
-  "el_salvador": "🇸🇻",
-  "equatorial_guinea": "🇬🇶",
-  "eritrea": "🇪🇷",
-  "estonia": "🇪🇪",
-  "ethiopia": "🇪🇹",
-  "eu": "🇪🇺",
-  "european_union": "🇪🇺",
-  "falkland_islands": "🇫🇰",
-  "faroe_islands": "🇫🇴",
-  "fiji": "🇫🇯",
-  "finland": "🇫🇮",
-  "fr": "🇫🇷",
-  "french_guiana": "🇬🇫",
-  "french_polynesia": "🇵🇫",
-  "french_southern_territories": "🇹🇫",
-  "gabon": "🇬🇦",
-  "gambia": "🇬🇲",
-  "georgia": "🇬🇪",
-  "de": "🇩🇪",
-  "ghana": "🇬🇭",
-  "gibraltar": "🇬🇮",
-  "greece": "🇬🇷",
-  "greenland": "🇬🇱",
-  "grenada": "🇬🇩",
-  "guadeloupe": "🇬🇵",
-  "guam": "🇬🇺",
-  "guatemala": "🇬🇹",
-  "guernsey": "🇬🇬",
-  "guinea": "🇬🇳",
-  "guinea_bissau": "🇬🇼",
-  "guyana": "🇬🇾",
-  "haiti": "🇭🇹",
-  "honduras": "🇭🇳",
-  "hong_kong": "🇭🇰",
-  "hungary": "🇭🇺",
-  "iceland": "🇮🇸",
-  "india": "🇮🇳",
-  "indonesia": "🇮🇩",
-  "iran": "🇮🇷",
-  "iraq": "🇮🇶",
-  "ireland": "🇮🇪",
-  "isle_of_man": "🇮🇲",
-  "israel": "🇮🇱",
-  "it": "🇮🇹",
-  "jamaica": "🇯🇲",
-  "jp": "🇯🇵",
-  "crossed_flags": "🎌",
-  "jersey": "🇯🇪",
-  "jordan": "🇯🇴",
-  "kazakhstan": "🇰🇿",
-  "kenya": "🇰🇪",
-  "kiribati": "🇰🇮",
-  "kosovo": "🇽🇰",
-  "kuwait": "🇰🇼",
-  "kyrgyzstan": "🇰🇬",
-  "laos": "🇱🇦",
-  "latvia": "🇱🇻",
-  "lebanon": "🇱🇧",
-  "lesotho": "🇱🇸",
-  "liberia": "🇱🇷",
-  "libya": "🇱🇾",
-  "liechtenstein": "🇱🇮",
-  "lithuania": "🇱🇹",
-  "luxembourg": "🇱🇺",
-  "macau": "🇲🇴",
-  "macedonia": "🇲🇰",
-  "madagascar": "🇲🇬",
-  "malawi": "🇲🇼",
-  "malaysia": "🇲🇾",
-  "maldives": "🇲🇻",
-  "mali": "🇲🇱",
-  "malta": "🇲🇹",
-  "marshall_islands": "🇲🇭",
-  "martinique": "🇲🇶",
-  "mauritania": "🇲🇷",
-  "mauritius": "🇲🇺",
-  "mayotte": "🇾🇹",
-  "mexico": "🇲🇽",
-  "micronesia": "🇫🇲",
-  "moldova": "🇲🇩",
-  "monaco": "🇲🇨",
-  "mongolia": "🇲🇳",
-  "montenegro": "🇲🇪",
-  "montserrat": "🇲🇸",
-  "morocco": "🇲🇦",
-  "mozambique": "🇲🇿",
-  "myanmar": "🇲🇲",
-  "namibia": "🇳🇦",
-  "nauru": "🇳🇷",
-  "nepal": "🇳🇵",
-  "netherlands": "🇳🇱",
-  "new_caledonia": "🇳🇨",
-  "new_zealand": "🇳🇿",
-  "nicaragua": "🇳🇮",
-  "niger": "🇳🇪",
-  "nigeria": "🇳🇬",
-  "niue": "🇳🇺",
-  "norfolk_island": "🇳🇫",
-  "northern_mariana_islands": "🇲🇵",
-  "north_korea": "🇰🇵",
-  "norway": "🇳🇴",
-  "oman": "🇴🇲",
-  "pakistan": "🇵🇰",
-  "palau": "🇵🇼",
-  "palestinian_territories": "🇵🇸",
-  "panama": "🇵🇦",
-  "papua_new_guinea": "🇵🇬",
-  "paraguay": "🇵🇾",
-  "peru": "🇵🇪",
-  "philippines": "🇵🇭",
-  "pitcairn_islands": "🇵🇳",
-  "poland": "🇵🇱",
-  "portugal": "🇵🇹",
-  "puerto_rico": "🇵🇷",
-  "qatar": "🇶🇦",
-  "reunion": "🇷🇪",
-  "romania": "🇷🇴",
-  "ru": "🇷🇺",
-  "rwanda": "🇷🇼",
-  "st_barthelemy": "🇧🇱",
-  "st_helena": "🇸🇭",
-  "st_kitts_nevis": "🇰🇳",
-  "st_lucia": "🇱🇨",
-  "st_pierre_miquelon": "🇵🇲",
-  "st_vincent_grenadines": "🇻🇨",
-  "samoa": "🇼🇸",
-  "san_marino": "🇸🇲",
-  "sao_tome_principe": "🇸🇹",
-  "saudi_arabia": "🇸🇦",
-  "senegal": "🇸🇳",
-  "serbia": "🇷🇸",
-  "seychelles": "🇸🇨",
-  "sierra_leone": "🇸🇱",
-  "singapore": "🇸🇬",
-  "sint_maarten": "🇸🇽",
-  "slovakia": "🇸🇰",
-  "slovenia": "🇸🇮",
-  "solomon_islands": "🇸🇧",
-  "somalia": "🇸🇴",
-  "south_africa": "🇿🇦",
-  "south_georgia_south_sandwich_islands": "🇬🇸",
-  "kr": "🇰🇷",
-  "south_sudan": "🇸🇸",
-  "es": "🇪🇸",
-  "sri_lanka": "🇱🇰",
-  "sudan": "🇸🇩",
-  "suriname": "🇸🇷",
-  "swaziland": "🇸🇿",
-  "sweden": "🇸🇪",
-  "switzerland": "🇨🇭",
-  "syria": "🇸🇾",
-  "taiwan": "🇹🇼",
-  "tajikistan": "🇹🇯",
-  "tanzania": "🇹🇿",
-  "thailand": "🇹🇭",
-  "timor_leste": "🇹🇱",
-  "togo": "🇹🇬",
-  "tokelau": "🇹🇰",
-  "tonga": "🇹🇴",
-  "trinidad_tobago": "🇹🇹",
-  "tunisia": "🇹🇳",
-  "tr": "🇹🇷",
-  "turkmenistan": "🇹🇲",
-  "turks_caicos_islands": "🇹🇨",
-  "tuvalu": "🇹🇻",
-  "uganda": "🇺🇬",
-  "ukraine": "🇺🇦",
-  "united_arab_emirates": "🇦🇪",
-  "gb": "🇬🇧",
-  "uk": "🇬🇧",
-  "us": "🇺🇸",
-  "us_virgin_islands": "🇻🇮",
-  "uruguay": "🇺🇾",
-  "uzbekistan": "🇺🇿",
-  "vanuatu": "🇻🇺",
-  "vatican_city": "🇻🇦",
-  "venezuela": "🇻🇪",
-  "vietnam": "🇻🇳",
-  "wallis_futuna": "🇼🇫",
-  "western_sahara": "🇪🇭",
-  "yemen": "🇾🇪",
-  "zambia": "🇿🇲",
-  "zimbabwe": "🇿🇼"
-}
-},{}],257:[function(require,module,exports){
 // Emoticons -> Emoji mapping.
 //
 // (!) Some patterns skipped, to avoid collisions
@@ -40634,67 +42855,159 @@ module.exports={
 // - https://github.com/wooorm/emoticon/blob/master/Support.md
 // - http://factoryjoe.com/projects/emoticons/
 //
-'use strict';
-
-module.exports = {
-  angry:            [ '>:(', '>:-(' ],
-  blush:            [ ':")', ':-")' ],
-  broken_heart:     [ '</3', '<\\3' ],
+var emojies_shortcuts = {
+  angry: ['>:(', '>:-('],
+  blush: [':")', ':-")'],
+  broken_heart: ['</3', '<\\3'],
   // :\ and :-\ not used because of conflict with markdown escaping
-  confused:         [ ':/', ':-/' ], // twemoji shows question
-  cry:              [ ":'(", ":'-(", ':,(', ':,-(' ],
-  frowning:         [ ':(', ':-(' ],
-  heart:            [ '<3' ],
-  imp:              [ ']:(', ']:-(' ],
-  innocent:         [ 'o:)', 'O:)', 'o:-)', 'O:-)', '0:)', '0:-)' ],
-  joy:              [ ":')", ":'-)", ':,)', ':,-)', ":'D", ":'-D", ':,D', ':,-D' ],
-  kissing:          [ ':*', ':-*' ],
-  laughing:         [ 'x-)', 'X-)' ],
-  neutral_face:     [ ':|', ':-|' ],
-  open_mouth:       [ ':o', ':-o', ':O', ':-O' ],
-  rage:             [ ':@', ':-@' ],
-  smile:            [ ':D', ':-D' ],
-  smiley:           [ ':)', ':-)' ],
-  smiling_imp:      [ ']:)', ']:-)' ],
-  sob:              [ ":,'(", ":,'-(", ';(', ';-(' ],
-  stuck_out_tongue: [ ':P', ':-P' ],
-  sunglasses:       [ '8-)', 'B-)' ],
-  sweat:            [ ',:(', ',:-(' ],
-  sweat_smile:      [ ',:)', ',:-)' ],
-  unamused:         [ ':s', ':-S', ':z', ':-Z', ':$', ':-$' ],
-  wink:             [ ';)', ';-)' ]
+  confused: [':/', ':-/'],
+  // twemoji shows question
+  cry: [":'(", ":'-(", ':,(', ':,-('],
+  frowning: [':(', ':-('],
+  heart: ['<3'],
+  imp: [']:(', ']:-('],
+  innocent: ['o:)', 'O:)', 'o:-)', 'O:-)', '0:)', '0:-)'],
+  joy: [":')", ":'-)", ':,)', ':,-)', ":'D", ":'-D", ':,D', ':,-D'],
+  kissing: [':*', ':-*'],
+  laughing: ['x-)', 'X-)'],
+  neutral_face: [':|', ':-|'],
+  open_mouth: [':o', ':-o', ':O', ':-O'],
+  rage: [':@', ':-@'],
+  smile: [':D', ':-D'],
+  smiley: [':)', ':-)'],
+  smiling_imp: [']:)', ']:-)'],
+  sob: [":,'(", ":,'-(", ';(', ';-('],
+  stuck_out_tongue: [':P', ':-P'],
+  sunglasses: ['8-)', 'B-)'],
+  sweat: [',:(', ',:-('],
+  sweat_smile: [',:)', ',:-)'],
+  unamused: [':s', ':-S', ':z', ':-Z', ':$', ':-$'],
+  wink: [';)', ';-)']
 };
 
-},{}],258:[function(require,module,exports){
+function emoji_html(tokens, idx
+/*, options, env */
+) {
+  return tokens[idx].content;
+}
+
+// Emojies & shortcuts replacement logic.
+//
+// Note: In theory, it could be faster to parse :smile: in inline chain and
+// leave only shortcuts here. But, who care...
+//
+function create_rule(md, emojies, shortcuts, scanRE, replaceRE) {
+  let arrayReplaceAt = md.utils.arrayReplaceAt,
+      ucm = md.utils.lib.ucmicro,
+      ZPCc = new RegExp([ucm.Z.source, ucm.P.source, ucm.Cc.source].join('|'));
+
+  function splitTextToken(text, level, Token) {
+    let token,
+        last_pos = 0,
+        nodes = [];
+    text.replace(replaceRE, function (match, offset, src) {
+      let emoji_name; // Validate emoji name
+
+      if (shortcuts.hasOwnProperty(match)) {
+        // replace shortcut with full name
+        emoji_name = shortcuts[match]; // Don't allow letters before any shortcut (as in no ":/" in http://)
+
+        if (offset > 0 && !ZPCc.test(src[offset - 1])) {
+          return;
+        } // Don't allow letters after any shortcut
+
+
+        if (offset + match.length < src.length && !ZPCc.test(src[offset + match.length])) {
+          return;
+        }
+      } else {
+        emoji_name = match.slice(1, -1);
+      } // Add new tokens to pending list
+
+
+      if (offset > last_pos) {
+        token = new Token('text', '', 0);
+        token.content = text.slice(last_pos, offset);
+        nodes.push(token);
+      }
+
+      token = new Token('emoji', '', 0);
+      token.markup = emoji_name;
+      token.content = emojies[emoji_name];
+      nodes.push(token);
+      last_pos = offset + match.length;
+    });
+
+    if (last_pos < text.length) {
+      token = new Token('text', '', 0);
+      token.content = text.slice(last_pos);
+      nodes.push(token);
+    }
+
+    return nodes;
+  }
+
+  return function emoji_replace(state) {
+    let i,
+        j,
+        l,
+        tokens,
+        token,
+        blockTokens = state.tokens,
+        autolinkLevel = 0;
+
+    for (j = 0, l = blockTokens.length; j < l; j++) {
+      if (blockTokens[j].type !== 'inline') {
+        continue;
+      }
+
+      tokens = blockTokens[j].children; // We scan from the end, to keep position when new tags added.
+      // Use reversed logic in links start/end match
+
+      for (i = tokens.length - 1; i >= 0; i--) {
+        token = tokens[i];
+
+        if (token.type === 'link_open' || token.type === 'link_close') {
+          if (token.info === 'auto') {
+            autolinkLevel -= token.nesting;
+          }
+        }
+
+        if (token.type === 'text' && autolinkLevel === 0 && scanRE.test(token.content)) {
+          // replace current node
+          blockTokens[j].children = tokens = arrayReplaceAt(tokens, i, splitTextToken(token.content, token.level, state.Token));
+        }
+      }
+    }
+  };
+}
+
 // Convert input options to more useable format
 // and compile search regexp
-
-'use strict';
-
-
 function quoteRE(str) {
   return str.replace(/[.?*+^$[\]\\(){}|-]/g, '\\$&');
 }
 
+function normalize_opts(options) {
+  let emojies = options.defs,
+      shortcuts; // Filter emojies by whitelist, if needed
 
-module.exports = function normalize_opts(options) {
-  var emojies = options.defs,
-      shortcuts;
-
-  // Filter emojies by whitelist, if needed
   if (options.enabled.length) {
     emojies = Object.keys(emojies).reduce(function (acc, key) {
       if (options.enabled.indexOf(key) >= 0) {
         acc[key] = emojies[key];
       }
+
       return acc;
     }, {});
-  }
+  } // Flatten shortcuts to simple object: { alias: emoji_name }
 
-  // Flatten shortcuts to simple object: { alias: emoji_name }
+
   shortcuts = Object.keys(options.shortcuts).reduce(function (acc, key) {
     // Skip aliases for filtered emojies, to reduce regexp
-    if (!emojies[key]) { return acc; }
+    if (!emojies[key]) {
+      return acc;
+    }
 
     if (Array.isArray(options.shortcuts[key])) {
       options.shortcuts[key].forEach(function (alias) {
@@ -40705,279 +43018,324 @@ module.exports = function normalize_opts(options) {
 
     acc[options.shortcuts[key]] = key;
     return acc;
-  }, {});
+  }, {}); // Compile regexp
 
-  // Compile regexp
-  var names = Object.keys(emojies)
-                .map(function (name) { return ':' + name + ':'; })
-                .concat(Object.keys(shortcuts))
-                .sort()
-                .reverse()
-                .map(function (name) { return quoteRE(name); })
-                .join('|');
-  var scanRE = RegExp(names);
-  var replaceRE = RegExp(names, 'g');
-
+  let names = Object.keys(emojies).map(function (name) {
+    return ':' + name + ':';
+  }).concat(Object.keys(shortcuts)).sort().reverse().map(function (name) {
+    return quoteRE(name);
+  }).join('|');
+  let scanRE = RegExp(names);
+  let replaceRE = RegExp(names, 'g');
   return {
     defs: emojies,
     shortcuts: shortcuts,
     scanRE: scanRE,
     replaceRE: replaceRE
   };
-};
+}
 
-},{}],259:[function(require,module,exports){
-'use strict';
-
-module.exports = function emoji_html(tokens, idx /*, options, env */) {
-  return tokens[idx].content;
-};
-
-},{}],260:[function(require,module,exports){
-// Emojies & shortcuts replacement logic.
-//
-// Note: In theory, it could be faster to parse :smile: in inline chain and
-// leave only shortcuts here. But, who care...
-//
-
-'use strict';
-
-
-module.exports = function create_rule(md, emojies, shortcuts, scanRE, replaceRE) {
-  var arrayReplaceAt = md.utils.arrayReplaceAt,
-      ucm = md.utils.lib.ucmicro,
-      ZPCc = new RegExp([ ucm.Z.source, ucm.P.source, ucm.Cc.source ].join('|'));
-
-  function splitTextToken(text, level, Token) {
-    var token, last_pos = 0, nodes = [];
-
-    text.replace(replaceRE, function (match, offset, src) {
-      var emoji_name;
-      // Validate emoji name
-      if (shortcuts.hasOwnProperty(match)) {
-        // replace shortcut with full name
-        emoji_name = shortcuts[match];
-
-        // Don't allow letters before any shortcut (as in no ":/" in http://)
-        if (offset > 0 && !ZPCc.test(src[offset - 1])) {
-          return;
-        }
-
-        // Don't allow letters after any shortcut
-        if (offset + match.length < src.length && !ZPCc.test(src[offset + match.length])) {
-          return;
-        }
-      } else {
-        emoji_name = match.slice(1, -1);
-      }
-
-      // Add new tokens to pending list
-      if (offset > last_pos) {
-        token         = new Token('text', '', 0);
-        token.content = text.slice(last_pos, offset);
-        nodes.push(token);
-      }
-
-      token         = new Token('emoji', '', 0);
-      token.markup  = emoji_name;
-      token.content = emojies[emoji_name];
-      nodes.push(token);
-
-      last_pos = offset + match.length;
-    });
-
-    if (last_pos < text.length) {
-      token         = new Token('text', '', 0);
-      token.content = text.slice(last_pos);
-      nodes.push(token);
-    }
-
-    return nodes;
-  }
-
-  return function emoji_replace(state) {
-    var i, j, l, tokens, token,
-        blockTokens = state.tokens,
-        autolinkLevel = 0;
-
-    for (j = 0, l = blockTokens.length; j < l; j++) {
-      if (blockTokens[j].type !== 'inline') { continue; }
-      tokens = blockTokens[j].children;
-
-      // We scan from the end, to keep position when new tags added.
-      // Use reversed logic in links start/end match
-      for (i = tokens.length - 1; i >= 0; i--) {
-        token = tokens[i];
-
-        if (token.type === 'link_open' || token.type === 'link_close') {
-          if (token.info === 'auto') { autolinkLevel -= token.nesting; }
-        }
-
-        if (token.type === 'text' && scanRE.test(token.content) && autolinkLevel === 0) {
-          // replace current node
-          blockTokens[j].children = tokens = arrayReplaceAt(
-            tokens, i, splitTextToken(token.content, token.level, state.Token)
-          );
-        }
-      }
-    }
+function emoji_plugin(md, options) {
+  let defaults = {
+    defs: emojies_defs,
+    shortcuts: emojies_shortcuts,
+    enabled: []
   };
-};
+  let opts = normalize_opts(md.utils.assign({}, defaults, options || {}));
+  md.renderer.rules.emoji = emoji_html;
+  md.core.ruler.push('emoji', create_rule(md, opts.defs, opts.shortcuts, opts.scanRE, opts.replaceRE));
+}
 
-},{}],261:[function(require,module,exports){
+module.exports = emoji_plugin;
+
+
+},{}],254:[function(require,module,exports){
+/*! markdown-it-fontawesome 0.3.0-3 https://github.com//GerHobbelt/markdown-it-fontawesome @license MIT */
+
 'use strict';
 
-var Plugin = require('@gerhobbelt/markdown-it-regexp');
+let Plugin = require('@gerhobbelt/markdown-it-regexp');
 
 module.exports = function fontawesome_plugin(md) {
-	// FA4 style.
-	md.use(Plugin(
-		/\:fa-([\w\-]+)\:/,
-		function (match, utils) {
-			return '<i class="fa fa-' + utils.escape(match[1]) + '"></i>';
-		}
-	));
+  // FA4 style.
+  md.use(Plugin(/\:fa-([\w\-]+)\:/, function (match, utils) {
+    return '<i class="fa fa-' + utils.escape(match[1]) + '"></i>';
+  })); // FA5 style.
 
-    // FA5 style.
-    md.use(Plugin(
-        /\:fa([\w])-([\w\-]+)\:/,
-        function (match, utils) {
-            return '<i class="fa' + utils.escape(match[1]) + ' fa-' + utils.escape(match[2]) + '"></i>';
-        }
-    ));
+  md.use(Plugin(/\:fa([\w])-([\w\-]+)\:/, function (match, utils) {
+    return '<i class="fa' + utils.escape(match[1]) + ' fa-' + utils.escape(match[2]) + '"></i>';
+  }));
 };
-},{"@gerhobbelt/markdown-it-regexp":276}],262:[function(require,module,exports){
-// Process footnotes
-//
+
+
+},{"@gerhobbelt/markdown-it-regexp":255}],255:[function(require,module,exports){
+/*! markdown-it-regexp 0.5.0-3 https://github.com//GerHobbelt/markdown-it-regexp @license MIT */
+
 'use strict';
 
+/*!
+ * markdown-it-regexp
+ * Copyright (c) 2014 Alex Kocharin
+ * MIT Licensed
+ */
+
+/**
+ * Escape special characters in the given string of html.
+ *
+ * Borrowed from escape-html component, MIT-licensed
+ */
+function escape(html) {
+  return String(html).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+/*!
+ * markdown-it-regexp
+ * Copyright (c) 2014 Alex Kocharin
+ * MIT Licensed
+ */
+/**
+ * Counter for multi usage.
+ */
+
+let counter = 0;
+/**
+ * Constructor function
+ */
+
+function createPlugin(regexp, replacer) {
+  // clone regexp with all the flags
+  let flags = (regexp.global ? 'g' : '') + (regexp.multiline ? 'm' : '') + (regexp.ignoreCase ? 'i' : '');
+  regexp = RegExp('^' + regexp.source, flags); // this plugin can be inserted multiple times,
+  // so we're generating unique name for it
+
+  let id = 'regexp-' + counter;
+  counter++; // closure var
+
+  let plugin_options; // return value should be a callable function
+  // with strictly defined options passed by markdown-it
+
+  let handler = function cbHandler(md, options) {
+    plugin_options = options;
+    init(md);
+  }; // function that registers plugin with markdown-it
+
+
+  function init(md) {
+    md.inline.ruler.push(id, parse);
+    md.renderer.rules[id] = render;
+  }
+
+  function parse(state, silent) {
+    // slowwww... maybe use an advanced regexp engine for this
+    let match = regexp.exec(state.src.slice(state.pos));
+    if (!match) return false; // valid match found, now we need to advance cursor
+
+    state.pos += match[0].length; // don't insert any tokens in silent mode
+
+    if (silent) return true;
+    let token = state.push(id, '', 0);
+    token.meta = {
+      match: match
+    };
+    return true;
+  }
+
+  function render(tokens, id, options, env) {
+    return replacer(tokens[id].meta.match, {
+      escape
+    }, plugin_options, env);
+  }
+
+  return handler;
+}
+
+module.exports = createPlugin;
+
+
+},{}],256:[function(require,module,exports){
+/*! markdown-it-footnote 3.0.2-3 https://github.com//GerHobbelt/markdown-it-footnote @license MIT */
+
+'use strict';
+
+// Process footnotes
+//
 ////////////////////////////////////////////////////////////////////////////////
 // Renderer partials
+function anchorFnDefault(n, excludeSubId, tokens, idx, options, env, slf) {
+  let prefix = '';
 
-function render_footnote_anchor_name(tokens, idx, options, env/*, slf*/) {
-  var n = Number(tokens[idx].meta.id + 1).toString();
-  var prefix = '';
-
-  if (typeof env.docId === 'string') {
+  if (typeof env.docId === 'string' && env.docId.length > 0) {
     prefix = '-' + env.docId + '-';
   }
 
   return prefix + n;
 }
 
-function render_footnote_caption(tokens, idx/*, options, env, slf*/) {
-  var n = Number(tokens[idx].meta.id + 1).toString();
-
-  if (tokens[idx].meta.subId > 0) {
-    n += ':' + tokens[idx].meta.subId;
-  }
-
+function captionFnDefault(n, tokens, idx, options, env, slf) {
   return '[' + n + ']';
 }
 
-function render_footnote_ref(tokens, idx, options, env, slf) {
-  var id      = slf.rules.footnote_anchor_name(tokens, idx, options, env, slf);
-  var caption = slf.rules.footnote_caption(tokens, idx, options, env, slf);
-  var refid   = id;
-
-  if (tokens[idx].meta.subId > 0) {
-    refid += ':' + tokens[idx].meta.subId;
-  }
-
-  return '<sup class="footnote-ref"><a href="#fn' + id + '" id="fnref' + refid + '">' + caption + '</a></sup>';
+function headerFnDefault(state) {
+  return '';
 }
 
-function render_footnote_block_open(tokens, idx, options) {
-  return (options.xhtmlOut ? '<hr class="footnotes-sep" />\n' : '<hr class="footnotes-sep">\n') +
-         '<section class="footnotes">\n' +
-         '<ol class="footnotes-list">\n';
-}
-
-function render_footnote_block_close() {
-  return '</ol>\n</section>\n';
-}
-
-function render_footnote_open(tokens, idx, options, env, slf) {
-  var id = slf.rules.footnote_anchor_name(tokens, idx, options, env, slf);
-
-  if (tokens[idx].meta.subId > 0) {
-    id += ':' + tokens[idx].meta.subId;
-  }
-
-  return '<li id="fn' + id + '" class="footnote-item">';
-}
-
-function render_footnote_close() {
-  return '</li>\n';
-}
-
-function render_footnote_anchor(tokens, idx, options, env, slf) {
-  var id = slf.rules.footnote_anchor_name(tokens, idx, options, env, slf);
-
-  if (tokens[idx].meta.subId > 0) {
-    id += ':' + tokens[idx].meta.subId;
-  }
-
-  /* ↩ with escape code to prevent display as Apple Emoji on iOS */
-  return ' <a href="#fnref' + id + '" class="footnote-backref">\u21a9\uFE0E</a>';
-}
-
-
-module.exports = function footnote_plugin(md) {
-  var parseLinkLabel = md.helpers.parseLinkLabel,
+module.exports = function footnote_plugin(md, plugin_options) {
+  let parseLinkLabel = md.helpers.parseLinkLabel,
       isSpace = md.utils.isSpace;
+  let anchorFn = plugin_options && plugin_options.anchor ? plugin_options.anchor : anchorFnDefault;
+  let captionFn = plugin_options && plugin_options.caption ? plugin_options.caption : captionFnDefault;
+  let headerFn = plugin_options && plugin_options.header ? plugin_options.header : headerFnDefault;
 
-  md.renderer.rules.footnote_ref          = render_footnote_ref;
-  md.renderer.rules.footnote_block_open   = render_footnote_block_open;
-  md.renderer.rules.footnote_block_close  = render_footnote_block_close;
-  md.renderer.rules.footnote_open         = render_footnote_open;
-  md.renderer.rules.footnote_close        = render_footnote_close;
-  md.renderer.rules.footnote_anchor       = render_footnote_anchor;
+  function render_footnote_n(tokens, idx, excludeSubId) {
+    let n = Number(tokens[idx].meta.id + 1).toString();
 
-  // helpers (only used in other rules, no tokens are attached to those)
-  md.renderer.rules.footnote_caption      = render_footnote_caption;
-  md.renderer.rules.footnote_anchor_name  = render_footnote_anchor_name;
-
-  // Process footnote block definition
-  function footnote_def(state, startLine, endLine, silent) {
-    var oldBMark, oldTShift, oldSCount, oldParentType, pos, label, token,
-        initial, offset, ch, posAfterColon,
-        start = state.bMarks[startLine] + state.tShift[startLine],
-        max = state.eMarks[startLine];
-
-    // line should be at least 5 chars - "[^x]:"
-    if (start + 4 > max) { return false; }
-
-    if (state.src.charCodeAt(start) !== 0x5B/* [ */) { return false; }
-    if (state.src.charCodeAt(start + 1) !== 0x5E/* ^ */) { return false; }
-
-    for (pos = start + 2; pos < max; pos++) {
-      if (state.src.charCodeAt(pos) === 0x20) { return false; }
-      if (state.src.charCodeAt(pos) === 0x5D /* ] */) {
-        break;
-      }
+    if (!excludeSubId && tokens[idx].meta.subId > 0) {
+      n += ':' + tokens[idx].meta.subId;
     }
 
-    if (pos === start + 2) { return false; } // no empty footnote labels
-    if (pos + 1 >= max || state.src.charCodeAt(++pos) !== 0x3A /* : */) { return false; }
-    if (silent) { return true; }
+    return n;
+  }
+
+  function render_footnote_anchor_name(tokens, idx, options, env, slf) {
+    let n = render_footnote_n(tokens, idx, true);
+    return anchorFn(n, true, tokens, idx, options, env, slf);
+  }
+
+  function render_footnote_caption(tokens, idx, options, env, slf) {
+    let n = render_footnote_n(tokens, idx);
+    return captionFn(n, tokens, idx, options, env, slf);
+  }
+
+  function render_footnote_ref(tokens, idx, options, env, slf) {
+    let id = slf.rules.footnote_anchor_name(tokens, idx, options, env, slf);
+    let caption = slf.rules.footnote_caption(tokens, idx, options, env, slf);
+    let refid = render_footnote_n(tokens, idx);
+    refid = anchorFn(refid, false, tokens, idx, options, env, slf);
+    return '<sup class="footnote-ref"><a href="#fn' + id + '" id="fnref' + refid + '">' + caption + '</a></sup>';
+  }
+
+  function render_footnote_block_open(tokens, idx, options) {
+    let header = tokens[idx].markup;
+    return (options.xhtmlOut ? '<hr class="footnotes-sep" />\n' : '<hr class="footnotes-sep">\n') + '<section class="footnotes">\n' + (header ? '<h3 class="footnotes-header">' + header + '</h3>' : '') + '<ol class="footnotes-list">\n';
+  }
+
+  function render_footnote_block_close() {
+    return '</ol>\n</section>\n';
+  }
+
+  function render_footnote_open(tokens, idx, options, env, slf) {
+    let id = slf.rules.footnote_anchor_name(tokens, idx, options, env, slf);
+    /*
+      if (tokens[idx].meta.subId > 0) {
+        id += ':' + tokens[idx].meta.subId;
+      }
+    */
+
+    return '<li id="fn' + id + '" class="footnote-item">';
+  }
+
+  function render_footnote_close() {
+    return '</li>\n';
+  }
+
+  function render_footnote_anchor(tokens, idx, options, env, slf) {
+    let refid = render_footnote_n(tokens, idx);
+    refid = anchorFn(refid, false, tokens, idx, options, env, slf);
+    /* ↩ with escape code to prevent display as Apple Emoji on iOS */
+
+    return ' <a href="#fnref' + refid + '" class="footnote-backref">\u21a9\uFE0E</a>';
+  }
+
+  md.renderer.rules.footnote_ref = render_footnote_ref;
+  md.renderer.rules.footnote_block_open = render_footnote_block_open;
+  md.renderer.rules.footnote_block_close = render_footnote_block_close;
+  md.renderer.rules.footnote_open = render_footnote_open;
+  md.renderer.rules.footnote_close = render_footnote_close;
+  md.renderer.rules.footnote_anchor = render_footnote_anchor; // helpers (only used in other rules, no tokens are attached to those)
+
+  md.renderer.rules.footnote_caption = render_footnote_caption;
+  md.renderer.rules.footnote_anchor_name = render_footnote_anchor_name; // Process footnote block definition
+
+  function footnote_def(state, startLine, endLine, silent) {
+    let oldBMark,
+        oldTShift,
+        oldSCount,
+        oldParentType,
+        pos,
+        label,
+        token,
+        initial,
+        offset,
+        ch,
+        posAfterColon,
+        start = state.bMarks[startLine] + state.tShift[startLine],
+        max = state.eMarks[startLine]; // line should be at least 5 chars - "[^x]:"
+
+    if (start + 4 > max) {
+      return false;
+    }
+
+    if (state.src.charCodeAt(start) !== 0x5B
+    /* [ */
+    ) {
+        return false;
+      }
+
+    if (state.src.charCodeAt(start + 1) !== 0x5E
+    /* ^ */
+    ) {
+        return false;
+      }
+
+    for (pos = start + 2; pos < max; pos++) {
+      if (state.src.charCodeAt(pos) === 0x20) {
+        return false;
+      }
+
+      if (state.src.charCodeAt(pos) === 0x5D
+      /* ] */
+      ) {
+          break;
+        }
+    }
+
+    if (pos === start + 2) {
+      return false;
+    } // no empty footnote labels
+
+
+    if (pos + 1 >= max || state.src.charCodeAt(++pos) !== 0x3A
+    /* : */
+    ) {
+        return false;
+      }
+
+    if (silent) {
+      return true;
+    }
+
     pos++;
 
-    if (!state.env.footnotes) { state.env.footnotes = {}; }
-    if (!state.env.footnotes.refs) { state.env.footnotes.refs = {}; }
+    if (!state.env.footnotes) {
+      state.env.footnotes = {};
+    }
+
+    if (!state.env.footnotes.refs) {
+      state.env.footnotes.refs = {};
+    }
+
     label = state.src.slice(start + 2, pos - 2);
     state.env.footnotes.refs[':' + label] = -1;
-
-    token       = new state.Token('footnote_reference_open', '', 1);
-    token.meta  = { label: label };
+    token = new state.Token('footnote_reference_open', '', 1);
+    token.meta = {
+      label: label
+    };
     token.level = state.level++;
     state.tokens.push(token);
-
     oldBMark = state.bMarks[startLine];
     oldTShift = state.tShift[startLine];
     oldSCount = state.sCount[startLine];
     oldParentType = state.parentType;
-
     posAfterColon = pos;
     initial = offset = state.sCount[startLine] + pos - (state.bMarks[startLine] + state.tShift[startLine]);
 
@@ -40999,7 +43357,6 @@ module.exports = function footnote_plugin(md) {
 
     state.tShift[startLine] = pos - posAfterColon;
     state.sCount[startLine] = offset - initial;
-
     state.bMarks[startLine] = posAfterColon;
     state.blkIndent += 4;
     state.parentType = 'footnote';
@@ -41009,23 +43366,20 @@ module.exports = function footnote_plugin(md) {
     }
 
     state.md.block.tokenize(state, startLine, endLine, true);
-
     state.parentType = oldParentType;
     state.blkIndent -= 4;
     state.tShift[startLine] = oldTShift;
     state.sCount[startLine] = oldSCount;
     state.bMarks[startLine] = oldBMark;
-
-    token       = new state.Token('footnote_reference_close', '', -1);
+    token = new state.Token('footnote_reference_close', '', -1);
     token.level = --state.level;
     state.tokens.push(token);
-
     return true;
-  }
+  } // Process inline footnotes (^[...])
 
-  // Process inline footnotes (^[...])
+
   function footnote_inline(state, silent) {
-    var labelStart,
+    let labelStart,
         labelEnd,
         footnoteId,
         token,
@@ -41033,80 +43387,138 @@ module.exports = function footnote_plugin(md) {
         max = state.posMax,
         start = state.pos;
 
-    if (start + 2 >= max) { return false; }
-    if (state.src.charCodeAt(start) !== 0x5E/* ^ */) { return false; }
-    if (state.src.charCodeAt(start + 1) !== 0x5B/* [ */) { return false; }
+    if (start + 2 >= max) {
+      return false;
+    }
+
+    if (state.src.charCodeAt(start) !== 0x5E
+    /* ^ */
+    ) {
+        return false;
+      }
+
+    if (state.src.charCodeAt(start + 1) !== 0x5B
+    /* [ */
+    ) {
+        return false;
+      }
 
     labelStart = start + 2;
-    labelEnd = parseLinkLabel(state, start + 1);
+    labelEnd = parseLinkLabel(state, start + 1); // parser failed to find ']', so it's not a valid note
 
-    // parser failed to find ']', so it's not a valid note
-    if (labelEnd < 0) { return false; }
-
-    // We found the end of the link, and know for a fact it's a valid link;
+    if (labelEnd < 0) {
+      return false;
+    } // We found the end of the link, and know for a fact it's a valid link;
     // so all that's left to do is to call tokenizer.
     //
+
+
     if (!silent) {
-      if (!state.env.footnotes) { state.env.footnotes = {}; }
-      if (!state.env.footnotes.list) { state.env.footnotes.list = []; }
-      footnoteId = state.env.footnotes.list.length;
+      // inline blocks have their own *child* environment in markdown-it v10+.
+      // As the footnotes must live beyond the lifetime of the inline block env,
+      // we must patch them into the `parentState.env` for the footnote_tail
+      // handler to be able to access them afterwards!
+      let parentEnv = state.env.parentState.env;
 
-      state.md.inline.parse(
-        state.src.slice(labelStart, labelEnd),
-        state.md,
-        state.env,
-        tokens = []
-      );
+      if (!parentEnv.footnotes) {
+        parentEnv.footnotes = {};
+      }
 
-      token      = state.push('footnote_ref', '', 0);
-      token.meta = { id: footnoteId };
+      if (!parentEnv.footnotes.list) {
+        parentEnv.footnotes.list = [];
+      }
 
-      state.env.footnotes.list[footnoteId] = { tokens: tokens };
+      footnoteId = parentEnv.footnotes.list.length;
+      token = state.push('footnote_ref', '', 0); //token.meta = { id: footnoteId, subId: 0, label: null };
+
+      token.meta = {
+        id: footnoteId
+      };
+      state.md.inline.parse(state.src.slice(labelStart, labelEnd), state.md, state.env, tokens = []);
+      parentEnv.footnotes.list[footnoteId] = {
+        content: state.src.slice(labelStart, labelEnd),
+        tokens: tokens
+      };
     }
 
     state.pos = labelEnd + 1;
     state.posMax = max;
     return true;
-  }
+  } // Process footnote references ([^...])
 
-  // Process footnote references ([^...])
+
   function footnote_ref(state, silent) {
-    var label,
+    let label,
         pos,
         footnoteId,
         footnoteSubId,
         token,
         max = state.posMax,
-        start = state.pos;
+        start = state.pos; // should be at least 4 chars - "[^x]"
 
-    // should be at least 4 chars - "[^x]"
-    if (start + 3 > max) { return false; }
-
-    if (!state.env.footnotes || !state.env.footnotes.refs) { return false; }
-    if (state.src.charCodeAt(start) !== 0x5B/* [ */) { return false; }
-    if (state.src.charCodeAt(start + 1) !== 0x5E/* ^ */) { return false; }
-
-    for (pos = start + 2; pos < max; pos++) {
-      if (state.src.charCodeAt(pos) === 0x20) { return false; }
-      if (state.src.charCodeAt(pos) === 0x0A) { return false; }
-      if (state.src.charCodeAt(pos) === 0x5D /* ] */) {
-        break;
-      }
+    if (start + 3 > max) {
+      return false;
     }
 
-    if (pos === start + 2) { return false; } // no empty footnote labels
-    if (pos >= max) { return false; }
-    pos++;
+    if (!state.env.footnotes || !state.env.footnotes.refs) {
+      return false;
+    }
 
+    if (state.src.charCodeAt(start) !== 0x5B
+    /* [ */
+    ) {
+        return false;
+      }
+
+    if (state.src.charCodeAt(start + 1) !== 0x5E
+    /* ^ */
+    ) {
+        return false;
+      }
+
+    for (pos = start + 2; pos < max; pos++) {
+      if (state.src.charCodeAt(pos) === 0x20) {
+        return false;
+      }
+
+      if (state.src.charCodeAt(pos) === 0x0A) {
+        return false;
+      }
+
+      if (state.src.charCodeAt(pos) === 0x5D
+      /* ] */
+      ) {
+          break;
+        }
+    }
+
+    if (pos === start + 2) {
+      return false;
+    } // no empty footnote labels
+
+
+    if (pos >= max) {
+      return false;
+    }
+
+    pos++;
     label = state.src.slice(start + 2, pos - 1);
-    if (typeof state.env.footnotes.refs[':' + label] === 'undefined') { return false; }
+
+    if (typeof state.env.footnotes.refs[':' + label] === 'undefined') {
+      return false;
+    }
 
     if (!silent) {
-      if (!state.env.footnotes.list) { state.env.footnotes.list = []; }
+      if (!state.env.footnotes.list) {
+        state.env.footnotes.list = [];
+      }
 
       if (state.env.footnotes.refs[':' + label] < 0) {
         footnoteId = state.env.footnotes.list.length;
-        state.env.footnotes.list[footnoteId] = { label: label, count: 0 };
+        state.env.footnotes.list[footnoteId] = {
+          label: label,
+          count: 0
+        };
         state.env.footnotes.refs[':' + label] = footnoteId;
       } else {
         footnoteId = state.env.footnotes.refs[':' + label];
@@ -41114,23 +43526,37 @@ module.exports = function footnote_plugin(md) {
 
       footnoteSubId = state.env.footnotes.list[footnoteId].count;
       state.env.footnotes.list[footnoteId].count++;
-
-      token      = state.push('footnote_ref', '', 0);
-      token.meta = { id: footnoteId, subId: footnoteSubId, label: label };
+      token = state.push('footnote_ref', '', 0);
+      token.meta = {
+        id: footnoteId,
+        subId: footnoteSubId,
+        label: label
+      };
     }
 
     state.pos = pos;
     state.posMax = max;
     return true;
-  }
+  } // Glue footnote tokens to end of token stream
 
-  // Glue footnote tokens to end of token stream
+
   function footnote_tail(state) {
-    var i, l, j, t, lastParagraph, list, token, tokens, current, currentLabel,
+    let i,
+        l,
+        j,
+        t,
+        lastParagraph,
+        list,
+        token,
+        tokens,
+        current,
+        currentLabel,
         insideRef = false,
         refTokens = {};
 
-    if (!state.env.footnotes) { return; }
+    if (!state.env.footnotes) {
+      return;
+    }
 
     state.tokens = state.tokens.filter(function (tok) {
       if (tok.type === 'footnote_reference_open') {
@@ -41139,48 +43565,56 @@ module.exports = function footnote_plugin(md) {
         currentLabel = tok.meta.label;
         return false;
       }
+
       if (tok.type === 'footnote_reference_close') {
-        insideRef = false;
-        // prepend ':' to avoid conflict with Object.prototype members
+        insideRef = false; // prepend ':' to avoid conflict with Object.prototype members
+
         refTokens[':' + currentLabel] = current;
         return false;
       }
-      if (insideRef) { current.push(tok); }
+
+      if (insideRef) {
+        current.push(tok);
+      }
+
       return !insideRef;
     });
 
-    if (!state.env.footnotes.list) { return; }
-    list = state.env.footnotes.list;
+    if (!state.env.footnotes.list) {
+      return;
+    }
 
+    list = state.env.footnotes.list;
     token = new state.Token('footnote_block_open', '', 1);
+    token.markup = headerFn(state);
     state.tokens.push(token);
 
     for (i = 0, l = list.length; i < l; i++) {
-      token      = new state.Token('footnote_open', '', 1);
-      token.meta = { id: i, label: list[i].label };
+      token = new state.Token('footnote_open', '', 1);
+      token.meta = {
+        id: i,
+        label: list[i].label
+      };
       state.tokens.push(token);
 
       if (list[i].tokens) {
         tokens = [];
-
-        token          = new state.Token('paragraph_open', 'p', 1);
-        token.block    = true;
+        token = new state.Token('paragraph_open', 'p', 1);
+        token.block = true;
         tokens.push(token);
-
-        token          = new state.Token('inline', '', 0);
+        token = new state.Token('inline', '', 0);
         token.children = list[i].tokens;
-        token.content  = '';
+        token.content = list[i].content;
         tokens.push(token);
-
-        token          = new state.Token('paragraph_close', 'p', -1);
-        token.block    = true;
+        token = new state.Token('paragraph_close', 'p', -1);
+        token.block = true;
         tokens.push(token);
-
       } else if (list[i].label) {
         tokens = refTokens[':' + list[i].label];
       }
 
       state.tokens = state.tokens.concat(tokens);
+
       if (state.tokens[state.tokens.length - 1].type === 'paragraph_close') {
         lastParagraph = state.tokens.pop();
       } else {
@@ -41188,9 +43622,14 @@ module.exports = function footnote_plugin(md) {
       }
 
       t = list[i].count > 0 ? list[i].count : 1;
+
       for (j = 0; j < t; j++) {
-        token      = new state.Token('footnote_anchor', '', 0);
-        token.meta = { id: i, subId: j, label: list[i].label };
+        token = new state.Token('footnote_anchor', '', 0);
+        token.meta = {
+          id: i,
+          subId: j,
+          label: list[i].label
+        };
         state.tokens.push(token);
       }
 
@@ -41206,13 +43645,16 @@ module.exports = function footnote_plugin(md) {
     state.tokens.push(token);
   }
 
-  md.block.ruler.before('reference', 'footnote_def', footnote_def, { alt: [ 'paragraph', 'reference' ] });
+  md.block.ruler.before('reference', 'footnote_def', footnote_def, {
+    alt: ['paragraph', 'reference']
+  });
   md.inline.ruler.after('image', 'footnote_inline', footnote_inline);
   md.inline.ruler.after('footnote_inline', 'footnote_ref', footnote_ref);
   md.core.ruler.after('inline', 'footnote_tail', footnote_tail);
 };
 
-},{}],263:[function(require,module,exports){
+
+},{}],257:[function(require,module,exports){
 /*! markdown-it-front-matter 0.2.1-2 https://github.com//GerHobbelt/markdown-it-front-matter @license MIT */
 
 'use strict';
@@ -41335,7 +43777,7 @@ module.exports = function front_matter_plugin(md, opts) {
 };
 
 
-},{}],264:[function(require,module,exports){
+},{}],258:[function(require,module,exports){
 const renderHashtagOpen = (tokens, idx) => '<a href="/tags/' + tokens[idx].content.toLowerCase() + '" class="tag">',
       renderHashtagClose = () => "</a>",
       renderHashtagText = (tokens, idx) => "#" + tokens[idx].content,
@@ -41473,7 +43915,7 @@ module.exports = function hashtagPlugin(md, options) {
   /* eslint-enable camelcase */
 };
 
-},{}],265:[function(require,module,exports){
+},{}],259:[function(require,module,exports){
 
 module.exports = function headerSections(md) {
 
@@ -41559,7 +44001,7 @@ function last(arr) {
   return arr.slice(-1)[0];
 }
 
-},{}],266:[function(require,module,exports){
+},{}],260:[function(require,module,exports){
 /*
  * Copyright Adam Pritchard 2015
  * MIT License : http://adampritchard.mit-license.org/
@@ -41625,7 +44067,7 @@ module.exports = function headinganchorPlugin (md, opts) {
   md.core.ruler.push('heading_anchors', makeRule(md, options));
 };
 
-},{}],267:[function(require,module,exports){
+},{}],261:[function(require,module,exports){
 "use strict";
 
 // export.default = ...  <-- causes slightly different behaviour: MarkDownIt.use(require(plugin).default);
@@ -41648,7 +44090,7 @@ module.exports = md => {
   };
 };
 
-},{}],268:[function(require,module,exports){
+},{}],262:[function(require,module,exports){
 const hljs = require('@gerhobbelt/highlight.js')
 
 const maybe = f => {
@@ -41700,85 +44142,96 @@ highlightjs.defaults = {
 
 module.exports = highlightjs
 
-},{"@gerhobbelt/highlight.js":2}],269:[function(require,module,exports){
+},{"@gerhobbelt/highlight.js":2}],263:[function(require,module,exports){
+/*! markdown-it-implicit-figures 0.10.0-6 https://github.com//GerHobbelt/markdown-it-implicit-figures @license MIT */
+
 'use strict';
 
-module.exports = function implicitFiguresPlugin(md, options) {
+function implicitFiguresPlugin(md, options) {
   options = options || {};
 
   function implicitFigures(state) {
     // reset tabIndex on md.render()
-    var tabIndex = 1;
+    let tabIndex = 1; // do not process first and last token
 
-    // do not process first and last token
-    for (var i=1, l=state.tokens.length; i < (l - 1); ++i) {
-      var token = state.tokens[i];
+    for (let i = 1, l = state.tokens.length; i < l - 1; ++i) {
+      let token = state.tokens[i];
 
-      if (token.type !== 'inline') { continue; }
-      // children: image alone, or link_open -> image -> link_close
-      if (!token.children || (token.children.length !== 1 && token.children.length !== 3)) { continue; }
-      // one child, should be img
-      if (token.children.length === 1 && token.children[0].type !== 'image') { continue; }
-      // three children, should be image enclosed in link
-      if (token.children.length === 3 &&
-          (token.children[0].type !== 'link_open' ||
-           token.children[1].type !== 'image' ||
-           token.children[2].type !== 'link_close')) {
+      if (token.type !== 'inline') {
         continue;
-      }
-      // prev token is paragraph open
-      if (i !== 0 && state.tokens[i - 1].type !== 'paragraph_open') { continue; }
-      // next token is paragraph close
-      if (i !== (l - 1) && state.tokens[i + 1].type !== 'paragraph_close') { continue; }
+      } // children: image alone, or link_open -> image -> link_close
 
-      // We have inline token containing an image only.
+
+      if (!token.children || token.children.length !== 1 && token.children.length !== 3) {
+        continue;
+      } // one child, should be img
+
+
+      if (token.children.length === 1 && token.children[0].type !== 'image') {
+        continue;
+      } // three children, should be image enclosed in link
+
+
+      if (token.children.length === 3 && (token.children[0].type !== 'link_open' || token.children[1].type !== 'image' || token.children[2].type !== 'link_close')) {
+        continue;
+      } // prev token is paragraph open
+
+
+      if (i !== 0 && state.tokens[i - 1].type !== 'paragraph_open') {
+        continue;
+      } // next token is paragraph close
+
+
+      if (i !== l - 1 && state.tokens[i + 1].type !== 'paragraph_close') {
+        continue;
+      } // We have inline token containing an image only.
       // Previous token is paragraph open.
       // Next token is paragraph close.
       // Lets replace the paragraph tokens with figure tokens.
-      var figure = state.tokens[i - 1];
+
+
+      let figure = state.tokens[i - 1];
       figure.type = 'figure_open';
       figure.tag = 'figure';
       state.tokens[i + 1].type = 'figure_close';
       state.tokens[i + 1].tag = 'figure';
 
-      if (options.dataType == true) {
-        state.tokens[i - 1].attrPush(['data-type', 'image']);
+      if (options.dataType === true) {
+        // if inside link, image/video is second child
+        figure = token.children.length === 1 ? token.children[0] : token.children[1]; // Get data type
+
+        let src = figure.attrs.find(item => item[0] === 'src')[1];
+        let dataType = src.match(/(mp4|webm|ogg)$/) ? 'video' : 'image';
+        state.tokens[i - 1].attrPush(['data-type', dataType]);
       }
+
       var image;
 
-      if (options.link == true && token.children.length === 1) {
+      if (options.link === true && token.children.length === 1) {
         image = token.children[0];
-        token.children.unshift(
-          new state.Token('link_open', 'a', 1)
-        );
+        token.children.unshift(new state.Token('link_open', 'a', 1));
         token.children[0].attrPush(['href', image.attrGet('src')]);
-        token.children.push(
-          new state.Token('link_close', 'a', -1)
-        );
-      }
+        token.children.push(new state.Token('link_close', 'a', -1));
+      } // for linked images, image is one off
 
-      // for linked images, image is one off
+
       image = token.children.length === 1 ? token.children[0] : token.children[1];
 
-      if (options.figcaption == true) {
+      if (options.figcaption === true) {
         if (image.children && image.children.length) {
-          token.children.push(
-            new state.Token('figcaption_open', 'figcaption', 1)
-            );
+          token.children.push(new state.Token('figcaption_open', 'figcaption', 1));
           token.children.splice(token.children.length, 0, ...image.children);
-          token.children.push(
-            new state.Token('figcaption_close', 'figcaption', -1)
-            );
+          token.children.push(new state.Token('figcaption_close', 'figcaption', -1));
           image.children.length = 0;
         }
       }
 
       if (options.copyAttrs && image.attrs) {
-        const f = options.copyAttrs === true ? '' : options.copyAttrs
-        figure.attrs = image.attrs.filter(([k,v]) => k.match(f))
+        const f = options.copyAttrs === true ? '' : options.copyAttrs;
+        figure.attrs = image.attrs.filter(([k, v]) => k.match(f));
       }
 
-      if (options.tabindex == true) {
+      if (options.tabindex === true) {
         // add a tabindex property
         // you could use this with css-tricks.com/expanding-images-html5
         state.tokens[i - 1].attrPush(['tabindex', tabIndex]);
@@ -41786,10 +44239,14 @@ module.exports = function implicitFiguresPlugin(md, options) {
       }
     }
   }
-  md.core.ruler.before('replacements', 'implicit_figures', implicitFigures);
-};
 
-},{}],270:[function(require,module,exports){
+  md.core.ruler.before('replacements', 'implicit_figures', implicitFigures);
+}
+
+module.exports = implicitFiguresPlugin;
+
+
+},{}],264:[function(require,module,exports){
 'use strict';
 
 
@@ -41911,78 +44368,91 @@ module.exports = function ins_plugin(md) {
   md.inline.ruler2.before('emphasis', 'ins', postProcess);
 };
 
-},{}],271:[function(require,module,exports){
+},{}],265:[function(require,module,exports){
+/*! markdown-it-kbd 2.0.0-6 https://github.com//GerHobbelt/markdown-it-kbd @license GPL-3.0 */
+
 'use strict';
 
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
 // [[kbd]]
 //
+let options = {
+  MARKER_OPEN: '[[',
+  MARKER_CLOSE: ']]',
+  TAG: 'kbd',
+  // intern use; derived at time of initialization:
+  MARKER_OPEN_1ST_CHR: 0
+};
 
-var MARKER_OPEN = '[';
-var MARKER_CLOSE = ']';
-var TAG = 'kbd';
-
-/*
- * Add delimiters for double occurences of MARKER_SYMBOL.
- */
 function tokenize(state, silent) {
-	if (silent) {
-		return false;
-	}
+  if (silent) {
+    return false;
+  }
 
-	var start = state.pos;
-	var max = state.posMax;
-	var momChar = state.src.charAt(start);
-	var nextChar = state.src.charAt(start + 1);
+  let start = state.pos;
+  const max = state.posMax;
+  let momChar = state.src.charCodeAt(start); // we're looking for two times the open symbol.
 
-	// we're looking for two times the open symbol.
-	if (momChar !== MARKER_OPEN || nextChar !== MARKER_OPEN) {
-		return false;
-	}
+  if (momChar !== options.MARKER_OPEN_1ST_CHR) {
+    return false;
+  }
 
-	// find the end sequence
-	var end = -1;
-	nextChar = state.src.charAt(start + 2);
-	for (var i = start + 2; i < max && end === -1; i++) {
-		momChar = nextChar;
-		nextChar = state.src.charAt(i + 1);
-		if (momChar === MARKER_CLOSE && nextChar === MARKER_CLOSE) {
-			// found the end!
-			end = i;
-		}
-		if (momChar === MARKER_OPEN && momChar === MARKER_OPEN) {
-			// found another opening sequence before the end. Thus, ignore ours!
-			return false;
-		}
-		if (momChar === '\n') {
-			// found end of line before the end sequence. Thus, ignore our start sequence!
-			return false;
-		}
-	}
+  let src = state.src.slice(start);
 
-	// start tag
-	state.push('kbd_open', TAG, 1);
-	// parse inner
-	state.pos += 2;
-	state.posMax = end;
-	state.md.inline.tokenize(state);
-	state.pos = end + 2;
-	state.posMax = max;
-	// end tag
-	state.push('kbd_close', TAG, -1);
+  if (!src.startsWith(options.MARKER_OPEN)) {
+    return false;
+  }
 
-	return true;
+  const startLen = options.MARKER_OPEN.length;
+  start += startLen;
+  src = src.slice(startLen); // find the end sequence
+
+  let end = src.indexOf(options.MARKER_CLOSE);
+
+  if (end < 0) {
+    // no end marker found,
+    // input ended before closing sequence
+    return false;
+  }
+
+  let lf = src.indexOf('\n');
+
+  if (lf >= 0 && lf < end) {
+    // found end of line before the end sequence. Thus, ignore our start sequence!
+    return false;
+  }
+
+  let second = src.indexOf(options.MARKER_OPEN);
+
+  if (second >= 0 && second < end) {
+    // found another opening sequence before the end. Thus, ignore ours!
+    return false;
+  } // make end position into absolute index
+
+
+  end += start; // start tag
+
+  state.push('kbd_open', options.TAG, 1); // parse inner
+
+  state.pos = start;
+  state.posMax = end;
+  state.md.inline.tokenize(state);
+  state.pos = end + options.MARKER_CLOSE.length;
+  state.posMax = max; // end tag
+
+  state.push('kbd_close', options.TAG, -1);
+  return true;
 }
 
-function kbdplugin(markdownit) {
-	markdownit.inline.ruler.before('link', 'kbd', tokenize);
+function kbdplugin(markdownit, opts) {
+  options = Object.assign(options, opts);
+  options.MARKER_OPEN_1ST_CHR = options.MARKER_OPEN.charCodeAt(0);
+  markdownit.inline.ruler.before('link', 'kbd', tokenize);
 }
 
-exports.default = kbdplugin;
-module.exports = exports['default'];
-},{}],272:[function(require,module,exports){
+module.exports = kbdplugin;
+
+
+},{}],266:[function(require,module,exports){
 'use strict';
 
 
@@ -42104,7 +44574,7 @@ module.exports = function ins_plugin(md) {
   md.inline.ruler2.before('emphasis', 'mark', postProcess);
 };
 
-},{}],273:[function(require,module,exports){
+},{}],267:[function(require,module,exports){
 (function (root, factory) {
   if (typeof exports === 'object') {
     module.exports = factory();
@@ -42244,7 +44714,7 @@ module.exports = function ins_plugin(md) {
   };
 });
 
-},{}],274:[function(require,module,exports){
+},{}],268:[function(require,module,exports){
 'use strict';
 
 function modifyToken(token, modifyFn, env) {
@@ -42281,7 +44751,7 @@ module.exports = function (md) {
     );
 };
 
-},{}],275:[function(require,module,exports){
+},{}],269:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -42466,99 +44936,11 @@ function markdownItPrism(markdownit, useroptions) {
 
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{"@gerhobbelt/prismjs":289,"@gerhobbelt/prismjs/components/":287}],276:[function(require,module,exports){
-module.exports = require('./lib')
+},{"@gerhobbelt/prismjs":281,"@gerhobbelt/prismjs/components/":279}],270:[function(require,module,exports){
+/*! markdown-it-regexp 0.6.0-11 https://github.com//GerHobbelt/markdown-it-regexp @license MIT */
 
-},{"./lib":277}],277:[function(require,module,exports){
-/*!
- * markdown-it-regexp
- * Copyright (c) 2014 Alex Kocharin
- * MIT Licensed
- */
+'use strict';
 
-/**
- * Module dependencies.
- */
-
-var util  = require('util')
-var stuff = require('./utils')
-
-/**
- * Counter for multi usage.
- */
-var counter = 0
-
-/**
- * Expose `Plugin`
- */
-
-module.exports = Plugin
-
-/**
- * Constructor function
- */
-
-function Plugin(regexp, replacer) {
-  // return value should be a callable function
-  // with strictly defined options passed by markdown-it
-  var self = function (md, options) {
-    self.options = options
-    self.init(md)
-  }
-
-  // initialize plugin object
-  self.__proto__ = Plugin.prototype
-
-  // clone regexp with all the flags
-  var flags = (regexp.global     ? 'g' : '')
-            + (regexp.multiline  ? 'm' : '')
-            + (regexp.ignoreCase ? 'i' : '')
-
-  self.regexp = RegExp('^' + regexp.source, flags)
-
-  // copy init options
-  self.replacer = replacer
-
-  // this plugin can be inserted multiple times,
-  // so we're generating unique name for it
-  self.id = 'regexp-' + counter
-  counter++
-
-  return self
-}
-
-util.inherits(Plugin, Function)
-
-// function that registers plugin with markdown-it
-Plugin.prototype.init = function (md) {
-  md.inline.ruler.push(this.id, this.parse.bind(this))
-
-  md.renderer.rules[this.id] = this.render.bind(this)
-}
-
-Plugin.prototype.parse = function (state, silent) {
-  // slowwww... maybe use an advanced regexp engine for this
-  var match = this.regexp.exec(state.src.slice(state.pos))
-  if (!match) return false
-
-  // valid match found, now we need to advance cursor
-  state.pos += match[0].length
-
-  // don't insert any tokens in silent mode
-  if (silent) return true
-
-  var token = state.push(this.id, '', 0)
-  token.meta = { match: match }
-
-  return true
-}
-
-Plugin.prototype.render = function (tokens, id, options, env) {
-  return this.replacer(tokens[id].meta.match, stuff)
-}
-
-
-},{"./utils":278,"util":304}],278:[function(require,module,exports){
 /*!
  * markdown-it-regexp
  * Copyright (c) 2014 Alex Kocharin
@@ -42570,17 +44952,154 @@ Plugin.prototype.render = function (tokens, id, options, env) {
  *
  * Borrowed from escape-html component, MIT-licensed
  */
-exports.escape = function(html) {
-  return String(html)
-    .replace(/&/g, '&amp;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
+function escape(html) {
+  return String(html).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+} // code assumes you're wrapping HTML attributes in doublequotes:
+
+function encodeHtmlAttr(value) {
+  // https://stackoverflow.com/questions/4015345/how-do-i-properly-escape-quotes-inside-html-attributes
+  return value.replace(/"/g, '&#34;');
 }
 
+/*!
+ * markdown-it-regexp
+ * Copyright (c) 2014 Alex Kocharin
+ * MIT Licensed
+ */
+/**
+ * Counter for multi usage.
+ */
 
-},{}],279:[function(require,module,exports){
+let counter = 0;
+let registered_ids = [];
+
+function transformRegExpToOnlyMatchFromStart(regexp) {
+  // clone regexp with all the flags
+  let flags = (regexp.global ? 'g' : '') + (regexp.multiline ? 'm' : '') + (regexp.ignoreCase ? 'i' : '') + (regexp.unicode ? 'u' : '') + (regexp.sticky ? 'y' : ''); // make sure compound / erroneous(!) regexes are transformed to ALWAYS only match from the start of the input:
+  // (f.e.: before this, markdown-it-wikilinks exhibited some very duplication-like behaviour)
+
+  regexp = RegExp('^(?:' + regexp.source + ')', flags);
+  return regexp;
+}
+/**
+ * Constructor function
+ */
+
+
+let createPlugin = function createPluginF(regexp, config) {
+  regexp = transformRegExpToOnlyMatchFromStart(regexp);
+  config = Object.assign({}, {
+    setup: (setup, config) => config,
+    shouldParse: (state, match) => true,
+    postprocessParse: (state, token) => {},
+    escape,
+    encodeHtmlAttr,
+    regexp
+  }, typeof config === 'function' ? {
+    replacer: config
+  } : config);
+
+  if (typeof config.replacer !== 'function') {
+    throw new Error('createPlugin(re, config): config.replacer MUST be a replacer function.');
+  }
+
+  if (typeof config.shouldParse !== 'function') {
+    throw new Error('createPlugin(re, config): config.shouldParse MUST be a function.');
+  }
+
+  if (typeof config.postprocessParse !== 'function') {
+    throw new Error('createPlugin(re, config): config.postprocessParse MUST be a function.');
+  }
+
+  if (typeof config.setup !== 'function') {
+    throw new Error('createPlugin(re, config): config.setup MUST be a function.');
+  } // this plugin can be inserted multiple times,
+  // so we're generating unique name for it
+
+
+  let id = config.pluginId;
+
+  if (id && registered_ids['p-' + id]) {
+    throw new Error(`Plugin ID '${id}' has already been registered by another plugin or this plugin is registered multiple times.`);
+  }
+
+  if (!id) {
+    id = 'regexp-' + counter;
+
+    while (registered_ids['p-' + id]) {
+      counter++;
+      id = 'regexp-' + counter;
+    }
+
+    config.pluginId = id;
+  }
+
+  registered_ids['p-' + id] = true; // closure var
+
+  let plugin_options; // return value should be a callable function
+  // with strictly defined options passed by markdown-it
+
+  let handler = function cbHandler(md, options) {
+    // store use(..., options) in closure
+    plugin_options = config.setup(config, options); // when user has provided another regex via `setup()`,
+    // then we MUST clone that one to ensure it only matches
+    // from the start of the input:
+
+    if (regexp.source !== config.regexp.source) {
+      regexp = config.regexp = transformRegExpToOnlyMatchFromStart(config.regexp);
+    } // register plugin with markdown-it
+
+
+    let id = config.pluginId;
+    md.inline.ruler.push(id, parse);
+    md.renderer.rules[id] = render;
+  };
+
+  function parse(state, silent) {
+    // slowwww... maybe use an advanced regexp engine for this
+    const match = config.regexp.exec(state.src.slice(state.pos));
+    if (!match) return false;
+
+    if (!config.shouldParse(state, match, config, plugin_options)) {
+      return false;
+    }
+
+    if (state.pending) {
+      state.pushPending();
+    } // valid match found, now we need to advance cursor
+
+
+    const originalPos = state.pos;
+    const matchlen = match[0].length;
+    state.pos += matchlen; // don't insert any tokens in silent mode
+
+    if (silent) return true;
+    let token = state.push(id, '', 0);
+    token.meta = {
+      match: match
+    };
+    token.position = originalPos;
+    token.size = matchlen;
+    config.postprocessParse(state, token, config, plugin_options);
+    return true;
+  }
+
+  function render(tokens, id, options, env) {
+    return config.replacer(tokens[id].meta.match, config, plugin_options, env, tokens, id, options);
+  }
+
+  return handler;
+};
+
+createPlugin.reset = function () {
+  counter = 0;
+  registered_ids = [];
+};
+
+module.exports = createPlugin;
+
+
+},{}],271:[function(require,module,exports){
 'use strict';
 
 module.exports = function sample_plugin(md) {
@@ -42681,7 +45200,7 @@ module.exports = function sample_plugin(md) {
 }
 
 
-},{}],280:[function(require,module,exports){
+},{}],272:[function(require,module,exports){
 // Process --strikethrough--
 // Will not recognize '---' or '-test-'
 
@@ -42778,7 +45297,7 @@ module.exports = function strikethrough_alt_plugin(md) {
   md.inline.ruler2.before('emphasis', 'strikethrough_alt_plugin', postProcess);
 };
 
-},{}],281:[function(require,module,exports){
+},{}],273:[function(require,module,exports){
 // Process ~subscript~
 
 'use strict';
@@ -42846,7 +45365,7 @@ module.exports = function sub_plugin(md) {
   md.inline.ruler.after('emphasis', 'sub', subscript);
 };
 
-},{}],282:[function(require,module,exports){
+},{}],274:[function(require,module,exports){
 // Process ^superscript^
 
 'use strict';
@@ -42914,7 +45433,7 @@ module.exports = function sup_plugin(md) {
   md.inline.ruler.after('emphasis', 'sup', superscript);
 };
 
-},{}],283:[function(require,module,exports){
+},{}],275:[function(require,module,exports){
 'use strict';
 
 const slugify = (s) => encodeURIComponent(String(s).trim().toLowerCase().replace(/\s+/g, '-'));
@@ -43089,7 +45608,7 @@ module.exports = (md, o) => {
   md.inline.ruler.after('emphasis', 'toc', toc);
 };
 
-},{}],284:[function(require,module,exports){
+},{}],276:[function(require,module,exports){
 // Process @[toc](|Title)
 
 'use strict';
@@ -43259,98 +45778,121 @@ module.exports = function (md) {
   md.inline.ruler.after('emphasis', 'toc', toc);
 };
 
-},{}],285:[function(require,module,exports){
-'use strict'
+},{}],277:[function(require,module,exports){
+/*! markdown-it-wikilinks 1.1.1-7 https://github.com//GerHobbelt/markdown-it-wikilinks @license MIT */
 
-const Plugin = require('@gerhobbelt/markdown-it-regexp')
-const extend = require('extend')
-const sanitize = require('sanitize-filename')
+'use strict';
 
-module.exports = (options) => {
+const createPlugin = require('@gerhobbelt/markdown-it-regexp');
 
-  const defaults = {
-    baseURL: '/',
-    relativeBaseURL: './',
-    makeAllLinksAbsolute: false,
-    uriSuffix: '.html',
-    htmlAttributes: {
-    },
-    generatePageNameFromLabel: (label) => {
-      return label
-    },
-    postProcessPageName: (pageName) => {
-      pageName = pageName.trim()
-      pageName = pageName.split('/').map(sanitize).join('/')
-      pageName = pageName.replace(/\s+/, '_')
-      return pageName
-    },
-    postProcessLabel: (label) => {
-      label = label.trim()
-      return label
+const sanitize = require('sanitize-filename');
+
+function removeInitialSlashes(str) {
+  return str.replace(/^\/+/g, '');
+} // separate the setup/config object from the `md.use(...)` call for code clarity:
+
+
+const defaultSetup = {
+  pluginId: 'wikilink',
+  replacer: function (match, setup, options, env, tokens, id) {
+    let label = '';
+    let pageName = '';
+    let href = '';
+    let htmlAttrs = [];
+    let htmlAttrsString = '';
+    const isSplit = !!match[2];
+
+    function isAbsolute(pageName) {
+      return options.makeAllLinksAbsolute || pageName.charCodeAt(0) === 0x2F;
+      /* / */
     }
-  }
 
-  options = extend(true, defaults, options)
-
-  function isAbsolute(pageName) {
-    return options.makeAllLinksAbsolute || pageName.charCodeAt(0) === 0x2F/* / */
-  }
-
-  function removeInitialSlashes(str) {
-    return str.replace(/^\/+/g, '')
-  }
-
-  return Plugin(
-    /\[\[([\w\s/]+)(\|([\w\s/]+))?\]\]/,
-    (match, utils) => {
-      let label = ''
-      let pageName = ''
-      let href = ''
-      let htmlAttrs = []
-      let htmlAttrsString = ''
-      const isSplit = !!match[3]
-      if (isSplit) {
-        label = match[3]
-        pageName = match[1]
-      }
-      else {
-        label = match[1]
-        pageName = options.generatePageNameFromLabel(label)
-      }
-
-      label = options.postProcessLabel(label)
-      pageName = options.postProcessPageName(pageName)
-
-      // make sure none of the values are empty
-      if (!label || !pageName) {
-        return match.input
-      }
-
-      if (isAbsolute(pageName)) {
-        pageName = removeInitialSlashes(pageName)
-        href = options.baseURL + pageName + options.uriSuffix
-      }
-      else {
-        href = options.relativeBaseURL + pageName + options.uriSuffix
-      }
-      href = utils.escape(href)
-
-      htmlAttrs.push(`href="${href}"`)
-      for (let attrName in options.htmlAttributes) {
-        const attrValue = options.htmlAttributes[attrName]
-        htmlAttrs.push(`${attrName}="${attrValue}"`)
-      }
-      htmlAttrsString = htmlAttrs.join(' ')
-      
-      return `<a ${htmlAttrsString}>${label}</a>`
+    if (isSplit) {
+      label = match[3];
+      pageName = match[1];
+    } else {
+      label = match[1];
+      pageName = options.generatePageNameFromLabel(label);
     }
-  )
-}
 
-},{"@gerhobbelt/markdown-it-regexp":276,"extend":290,"sanitize-filename":297}],286:[function(require,module,exports){
+    label = options.postProcessLabel(label);
+    pageName = options.postProcessPageName(pageName); // make sure none of the values are empty
+
+    if (!label || !pageName) {
+      return match.input;
+    }
+
+    if (isAbsolute(pageName)) {
+      pageName = removeInitialSlashes(pageName);
+      href = options.baseURL + pageName + options.uriSuffix;
+    } else {
+      href = options.relativeBaseURL + pageName + options.uriSuffix;
+    }
+
+    href = setup.escape(href);
+    htmlAttrs.push(`href="${href}"`);
+
+    for (let attrName in options.htmlAttributes) {
+      const attrValue = options.htmlAttributes[attrName];
+      htmlAttrs.push(`${attrName}="${setup.encodeHtmlAttr(attrValue)}"`);
+    }
+
+    htmlAttrsString = htmlAttrs.join(' ');
+    return `<a ${htmlAttrsString}>${label}</a>`; // - showcase using the `options` passed in via `MarkdownIt.use()`
+    // - showcase using the `setup` object
+    // - showcase using the `tokens` stream + `id` index to access the token
+    // return '\n' + setup.pluginId + ':' + options.opt1 + ':' + setup.escape(url) + ':' + options.opt2 + ':' + (token.wonko || '---') + ':' + token.type + ':' + token.nesting + ':' + token.level;
+  },
+  setup: function (config, options) {
+    const defaults = {
+      linkPattern: /\[\[([^\x00-\x1f|]+?)(\|([\s\S]+?))?\]\]/,
+      // accept anything, except control characters (CR, LF, etc) or |
+      // linkPattern: /\[\[([-\w\s\/]+)(\|([-\w\s\/]+))?\]\]/,  // accept words, dashes and whitespace
+      baseURL: '/',
+      relativeBaseURL: './',
+      makeAllLinksAbsolute: false,
+      uriSuffix: '.html',
+      htmlAttributes: {},
+      generatePageNameFromLabel: label => {
+        return label;
+      },
+      postProcessPageName: pageName => {
+        pageName = pageName.trim();
+        pageName = pageName.split('/').map(sanitize).join('/');
+        pageName = pageName.replace(/\s+/g, '_');
+        return pageName;
+      },
+      postProcessLabel: label => {
+        label = label.trim();
+        return label;
+      }
+    };
+    options = Object.assign({}, defaults, options); // override the regexp used for token matching:
+
+    if (options.linkPattern) {
+      config.regexp = options.linkPattern;
+    }
+
+    return options;
+  }
+};
+const plugin = createPlugin( // regexp to match: fake one. Will be set up by setup callback instead.
+/./, Object.assign({}, defaultSetup)); // only use this for test rigs:
+
+plugin.createTestInstance = function (setup) {
+  createPlugin.reset();
+  const p = createPlugin( // regexp to match: fake one. Will be set up by setup callback instead.
+  /./, Object.assign({}, defaultSetup));
+  return p;
+};
+
+module.exports = plugin;
+
+
+},{"@gerhobbelt/markdown-it-regexp":270,"sanitize-filename":287}],278:[function(require,module,exports){
 var components = {"core":{"meta":{"path":"components/prism-core.js","option":"mandatory"},"core":"Core"},"themes":{"meta":{"path":"themes/{id}.css","link":"index.html?theme={id}","exclusive":true},"prism":{"title":"Default","option":"default"},"prism-dark":"Dark","prism-funky":"Funky","prism-okaidia":{"title":"Okaidia","owner":"ocodia"},"prism-twilight":{"title":"Twilight","owner":"remybach"},"prism-coy":{"title":"Coy","owner":"tshedor"},"prism-solarizedlight":{"title":"Solarized Light","owner":"hectormatos2011 "},"prism-tomorrow":{"title":"Tomorrow Night","owner":"Rosey"}},"languages":{"meta":{"path":"components/prism-{id}","noCSS":true,"examplesPath":"examples/prism-{id}","addCheckAll":true},"markup":{"title":"Markup","alias":["html","xml","svg","mathml"],"aliasTitles":{"html":"HTML","xml":"XML","svg":"SVG","mathml":"MathML"},"option":"default"},"css":{"title":"CSS","option":"default","modify":"markup"},"clike":{"title":"C-like","option":"default"},"javascript":{"title":"JavaScript","require":"clike","modify":"markup","alias":"js","option":"default"},"abap":{"title":"ABAP","owner":"dellagustin"},"abnf":{"title":"Augmented Backus–Naur form","owner":"RunDevelopment"},"actionscript":{"title":"ActionScript","require":"javascript","modify":"markup","owner":"Golmote"},"ada":{"title":"Ada","owner":"Lucretia"},"antlr4":{"title":"ANTLR4","alias":"g4","owner":"RunDevelopment"},"apacheconf":{"title":"Apache Configuration","owner":"GuiTeK"},"apl":{"title":"APL","owner":"ngn"},"applescript":{"title":"AppleScript","owner":"Golmote"},"aql":{"title":"AQL","owner":"RunDevelopment"},"arduino":{"title":"Arduino","require":"cpp","owner":"eisbehr-"},"arff":{"title":"ARFF","owner":"Golmote"},"asciidoc":{"alias":"adoc","title":"AsciiDoc","owner":"Golmote"},"asm6502":{"title":"6502 Assembly","owner":"kzurawel"},"aspnet":{"title":"ASP.NET (C#)","require":["markup","csharp"],"owner":"nauzilus"},"autohotkey":{"title":"AutoHotkey","owner":"aviaryan"},"autoit":{"title":"AutoIt","owner":"Golmote"},"bash":{"title":"Bash","alias":"shell","aliasTitles":{"shell":"Shell"},"owner":"zeitgeist87"},"basic":{"title":"BASIC","owner":"Golmote"},"batch":{"title":"Batch","owner":"Golmote"},"bbcode":{"title":"BBcode","alias":"shortcode","aliasTitles":{"shortcode":"Shortcode"},"owner":"RunDevelopment"},"bison":{"title":"Bison","require":"c","owner":"Golmote"},"bnf":{"title":"Backus–Naur form","alias":"rbnf","aliasTitles":{"rbnf":"Routing Backus–Naur form"},"owner":"RunDevelopment"},"brainfuck":{"title":"Brainfuck","owner":"Golmote"},"brightscript":{"title":"BrightScript","owner":"RunDevelopment"},"bro":{"title":"Bro","owner":"wayward710"},"c":{"title":"C","require":"clike","owner":"zeitgeist87"},"concurnas":{"title":"Concurnas","alias":"conc","owner":"jasontatton"},"csharp":{"title":"C#","require":"clike","alias":["cs","dotnet"],"owner":"mvalipour"},"cpp":{"title":"C++","require":"c","owner":"zeitgeist87"},"cil":{"title":"CIL","owner":"sbrl"},"coffeescript":{"title":"CoffeeScript","require":"javascript","alias":"coffee","owner":"R-osey"},"cmake":{"title":"CMake","owner":"mjrogozinski"},"clojure":{"title":"Clojure","owner":"troglotit"},"crystal":{"title":"Crystal","require":"ruby","owner":"MakeNowJust"},"csp":{"title":"Content-Security-Policy","owner":"ScottHelme"},"css-extras":{"title":"CSS Extras","require":"css","modify":"css","owner":"milesj"},"d":{"title":"D","require":"clike","owner":"Golmote"},"dart":{"title":"Dart","require":"clike","owner":"Golmote"},"dax":{"title":"DAX","owner":"peterbud"},"diff":{"title":"Diff","owner":"uranusjr"},"django":{"title":"Django/Jinja2","require":"markup-templating","alias":"jinja2","owner":"romanvm"},"dns-zone-file":{"title":"DNS zone file","owner":"RunDevelopment","alias":"dns-zone"},"docker":{"title":"Docker","alias":"dockerfile","owner":"JustinBeckwith"},"ebnf":{"title":"Extended Backus–Naur form","owner":"RunDevelopment"},"eiffel":{"title":"Eiffel","owner":"Conaclos"},"ejs":{"title":"EJS","require":["javascript","markup-templating"],"owner":"RunDevelopment","alias":"eta","aliasTitles":{"eta":"Eta"}},"elixir":{"title":"Elixir","owner":"Golmote"},"elm":{"title":"Elm","owner":"zwilias"},"etlua":{"title":"Embedded Lua templating","require":["lua","markup-templating"],"owner":"RunDevelopment"},"erb":{"title":"ERB","require":["ruby","markup-templating"],"owner":"Golmote"},"erlang":{"title":"Erlang","owner":"Golmote"},"excel-formula":{"title":"Excel Formula","alias":["xlsx","xls"],"owner":"RunDevelopment"},"fsharp":{"title":"F#","require":"clike","owner":"simonreynolds7"},"factor":{"title":"Factor","owner":"catb0t"},"firestore-security-rules":{"title":"Firestore security rules","require":"clike","owner":"RunDevelopment"},"flow":{"title":"Flow","require":"javascript","owner":"Golmote"},"fortran":{"title":"Fortran","owner":"Golmote"},"ftl":{"title":"FreeMarker Template Language","require":"markup-templating","owner":"RunDevelopment"},"gcode":{"title":"G-code","owner":"RunDevelopment"},"gdscript":{"title":"GDScript","owner":"RunDevelopment"},"gedcom":{"title":"GEDCOM","owner":"Golmote"},"gherkin":{"title":"Gherkin","owner":"hason"},"git":{"title":"Git","owner":"lgiraudel"},"glsl":{"title":"GLSL","require":"clike","owner":"Golmote"},"gml":{"title":"GameMaker Language","alias":"gamemakerlanguage","require":"clike","owner":"LiarOnce"},"go":{"title":"Go","require":"clike","owner":"arnehormann"},"graphql":{"title":"GraphQL","owner":"Golmote"},"groovy":{"title":"Groovy","require":"clike","owner":"robfletcher"},"haml":{"title":"Haml","require":"ruby","optional":["css","css-extras","coffeescript","erb","javascript","less","markdown","scss","textile"],"owner":"Golmote"},"handlebars":{"title":"Handlebars","require":"markup-templating","owner":"Golmote"},"haskell":{"title":"Haskell","alias":"hs","owner":"bholst"},"haxe":{"title":"Haxe","require":"clike","owner":"Golmote"},"hcl":{"title":"HCL","owner":"outsideris"},"http":{"title":"HTTP","optional":["css","javascript","json","markup"],"owner":"danielgtaylor"},"hpkp":{"title":"HTTP Public-Key-Pins","owner":"ScottHelme"},"hsts":{"title":"HTTP Strict-Transport-Security","owner":"ScottHelme"},"ichigojam":{"title":"IchigoJam","owner":"BlueCocoa"},"icon":{"title":"Icon","owner":"Golmote"},"iecst":{"title":"Structured Text (IEC 61131-3)","owner":"serhioromano"},"inform7":{"title":"Inform 7","owner":"Golmote"},"ini":{"title":"Ini","owner":"aviaryan"},"io":{"title":"Io","owner":"AlesTsurko"},"j":{"title":"J","owner":"Golmote"},"java":{"title":"Java","require":"clike","owner":"sherblot"},"javadoc":{"title":"JavaDoc","require":["markup","java","javadoclike"],"modify":"java","optional":"scala","owner":"RunDevelopment"},"javadoclike":{"title":"JavaDoc-like","modify":["java","javascript","php"],"owner":"RunDevelopment"},"javastacktrace":{"title":"Java stack trace","owner":"RunDevelopment"},"jolie":{"title":"Jolie","require":"clike","owner":"thesave"},"jq":{"title":"JQ","owner":"RunDevelopment"},"jsdoc":{"title":"JSDoc","require":["javascript","javadoclike"],"modify":"javascript","optional":["actionscript","coffeescript"],"owner":"RunDevelopment"},"js-extras":{"title":"JS Extras","require":"javascript","modify":"javascript","optional":["actionscript","coffeescript","flow","n4js","typescript"],"owner":"RunDevelopment"},"js-templates":{"title":"JS Templates","require":"javascript","modify":"javascript","optional":["css","css-extras","graphql","markdown","markup"],"owner":"RunDevelopment"},"json":{"title":"JSON","owner":"CupOfTea696"},"jsonp":{"title":"JSONP","require":"json","owner":"RunDevelopment"},"json5":{"title":"JSON5","require":"json","owner":"RunDevelopment"},"julia":{"title":"Julia","owner":"cdagnino"},"keyman":{"title":"Keyman","owner":"mcdurdin"},"kotlin":{"title":"Kotlin","require":"clike","owner":"Golmote"},"latex":{"title":"LaTeX","alias":["tex","context"],"aliasTitles":{"tex":"TeX","context":"ConTeXt"},"owner":"japborst"},"latte":{"title":"Latte","require":["clike","markup-templating","php"],"owner":"nette"},"less":{"title":"Less","require":"css","optional":"css-extras","owner":"Golmote"},"lilypond":{"title":"LilyPond","require":"scheme","alias":"ly","owner":"RunDevelopment"},"liquid":{"title":"Liquid","owner":"cinhtau"},"lisp":{"title":"Lisp","alias":["emacs","elisp","emacs-lisp"],"owner":"JuanCaicedo"},"livescript":{"title":"LiveScript","owner":"Golmote"},"llvm":{"title":"LLVM IR","owner":"porglezomp"},"lolcode":{"title":"LOLCODE","owner":"Golmote"},"lua":{"title":"Lua","owner":"Golmote"},"makefile":{"title":"Makefile","owner":"Golmote"},"markdown":{"title":"Markdown","require":"markup","alias":"md","owner":"Golmote"},"markup-templating":{"title":"Markup templating","require":"markup","owner":"Golmote"},"matlab":{"title":"MATLAB","owner":"Golmote"},"mel":{"title":"MEL","owner":"Golmote"},"mizar":{"title":"Mizar","owner":"Golmote"},"monkey":{"title":"Monkey","owner":"Golmote"},"moonscript":{"title":"MoonScript","alias":"moon","owner":"RunDevelopment"},"n1ql":{"title":"N1QL","owner":"TMWilds"},"n4js":{"title":"N4JS","require":"javascript","optional":"jsdoc","alias":"n4jsd","owner":"bsmith-n4"},"nand2tetris-hdl":{"title":"Nand To Tetris HDL","owner":"stephanmax"},"nasm":{"title":"NASM","owner":"rbmj"},"neon":{"title":"NEON","owner":"nette"},"nginx":{"title":"nginx","owner":"westonganger","require":"clike"},"nim":{"title":"Nim","owner":"Golmote"},"nix":{"title":"Nix","owner":"Golmote"},"nsis":{"title":"NSIS","owner":"idleberg"},"objectivec":{"title":"Objective-C","require":"c","owner":"uranusjr"},"ocaml":{"title":"OCaml","owner":"Golmote"},"opencl":{"title":"OpenCL","require":"c","modify":["c","cpp"],"owner":"Milania1"},"oz":{"title":"Oz","owner":"Golmote"},"parigp":{"title":"PARI/GP","owner":"Golmote"},"parser":{"title":"Parser","require":"markup","owner":"Golmote"},"pascal":{"title":"Pascal","alias":"objectpascal","aliasTitles":{"objectpascal":"Object Pascal"},"owner":"Golmote"},"pascaligo":{"title":"Pascaligo","owner":"DefinitelyNotAGoat"},"pcaxis":{"title":"PC-Axis","alias":"px","owner":"RunDevelopment"},"perl":{"title":"Perl","owner":"Golmote"},"php":{"title":"PHP","require":["clike","markup-templating"],"owner":"milesj"},"phpdoc":{"title":"PHPDoc","require":["php","javadoclike"],"modify":"php","owner":"RunDevelopment"},"php-extras":{"title":"PHP Extras","require":"php","modify":"php","owner":"milesj"},"plsql":{"title":"PL/SQL","require":"sql","owner":"Golmote"},"powerquery":{"title":"PowerQuery","alias":["pq","mscript"],"owner":"peterbud"},"powershell":{"title":"PowerShell","owner":"nauzilus"},"processing":{"title":"Processing","require":"clike","owner":"Golmote"},"prolog":{"title":"Prolog","owner":"Golmote"},"properties":{"title":".properties","owner":"Golmote"},"protobuf":{"title":"Protocol Buffers","require":"clike","owner":"just-boris"},"pug":{"title":"Pug","require":["markup","javascript"],"optional":["coffeescript","ejs","handlebars","less","livescript","markdown","scss","stylus","twig"],"owner":"Golmote"},"puppet":{"title":"Puppet","owner":"Golmote"},"pure":{"title":"Pure","optional":["c","cpp","fortran"],"owner":"Golmote"},"python":{"title":"Python","alias":"py","owner":"multipetros"},"q":{"title":"Q (kdb+ database)","owner":"Golmote"},"qml":{"title":"QML","require":"javascript","owner":"RunDevelopment"},"qore":{"title":"Qore","require":"clike","owner":"temnroegg"},"r":{"title":"R","owner":"Golmote"},"jsx":{"title":"React JSX","require":["markup","javascript"],"optional":["jsdoc","js-extras","js-templates"],"owner":"vkbansal"},"tsx":{"title":"React TSX","require":["jsx","typescript"]},"renpy":{"title":"Ren'py","owner":"HyuchiaDiego"},"reason":{"title":"Reason","require":"clike","owner":"Golmote"},"regex":{"title":"Regex","modify":["actionscript","coffeescript","flow","javascript","typescript","vala"],"owner":"RunDevelopment"},"rest":{"title":"reST (reStructuredText)","owner":"Golmote"},"rip":{"title":"Rip","owner":"ravinggenius"},"roboconf":{"title":"Roboconf","owner":"Golmote"},"robotframework":{"title":"Robot Framework","alias":"robot","owner":"RunDevelopment"},"ruby":{"title":"Ruby","require":"clike","alias":"rb","owner":"samflores"},"rust":{"title":"Rust","owner":"Golmote"},"sas":{"title":"SAS","optional":["groovy","lua","sql"],"owner":"Golmote"},"sass":{"title":"Sass (Sass)","require":"css","owner":"Golmote"},"scss":{"title":"Sass (Scss)","require":"css","optional":"css-extras","owner":"MoOx"},"scala":{"title":"Scala","require":"java","owner":"jozic"},"scheme":{"title":"Scheme","owner":"bacchus123"},"shell-session":{"title":"Shell session","require":"bash","owner":"RunDevelopment"},"smalltalk":{"title":"Smalltalk","owner":"Golmote"},"smarty":{"title":"Smarty","require":"markup-templating","owner":"Golmote"},"solidity":{"title":"Solidity (Ethereum)","require":"clike","owner":"glachaud"},"solution-file":{"title":"Solution file","alias":"sln","owner":"RunDevelopment"},"soy":{"title":"Soy (Closure Template)","require":"markup-templating","owner":"Golmote"},"sparql":{"title":"SPARQL","require":"turtle","owner":"Triply-Dev","alias":"rq"},"splunk-spl":{"title":"Splunk SPL","owner":"RunDevelopment"},"sqf":{"title":"SQF: Status Quo Function (Arma 3)","require":"clike","owner":"RunDevelopment"},"sql":{"title":"SQL","owner":"multipetros"},"stylus":{"title":"Stylus","owner":"vkbansal"},"swift":{"title":"Swift","require":"clike","owner":"chrischares"},"tap":{"title":"TAP","owner":"isaacs","require":"yaml"},"tcl":{"title":"Tcl","owner":"PeterChaplin"},"textile":{"title":"Textile","require":"markup","optional":"css","owner":"Golmote"},"toml":{"title":"TOML","owner":"RunDevelopment"},"tt2":{"title":"Template Toolkit 2","require":["clike","markup-templating"],"owner":"gflohr"},"turtle":{"title":"Turtle","alias":"trig","aliasTitles":{"trig":"TriG"},"owner":"jakubklimek"},"twig":{"title":"Twig","require":"markup","owner":"brandonkelly"},"typescript":{"title":"TypeScript","require":"javascript","optional":"js-templates","alias":"ts","owner":"vkbansal"},"t4-cs":{"title":"T4 Text Templates (C#)","require":["t4-templating","csharp"],"alias":"t4","owner":"RunDevelopment"},"t4-vb":{"title":"T4 Text Templates (VB)","require":["t4-templating","visual-basic"],"owner":"RunDevelopment"},"t4-templating":{"title":"T4 templating","owner":"RunDevelopment"},"vala":{"title":"Vala","require":"clike","owner":"TemplarVolk"},"vbnet":{"title":"VB.Net","require":"basic","owner":"Bigsby"},"velocity":{"title":"Velocity","require":"markup","owner":"Golmote"},"verilog":{"title":"Verilog","owner":"a-rey"},"vhdl":{"title":"VHDL","owner":"a-rey"},"vim":{"title":"vim","owner":"westonganger"},"visual-basic":{"title":"Visual Basic","alias":"vb","owner":"Golmote"},"wasm":{"title":"WebAssembly","owner":"Golmote"},"wiki":{"title":"Wiki markup","require":"markup","owner":"Golmote"},"xeora":{"title":"Xeora","require":"markup","alias":"xeoracube","aliasTitles":{"xeoracube":"XeoraCube"},"owner":"freakmaxi"},"xojo":{"title":"Xojo (REALbasic)","owner":"Golmote"},"xquery":{"title":"XQuery","require":"markup","owner":"Golmote"},"yaml":{"title":"YAML","alias":"yml","owner":"hason"},"zig":{"title":"Zig","owner":"RunDevelopment"}},"plugins":{"meta":{"path":"plugins/{id}/prism-{id}","link":"plugins/{id}/"},"line-highlight":{"title":"Line Highlight","description":"Highlights specific lines and/or line ranges."},"line-numbers":{"title":"Line Numbers","description":"Line number at the beginning of code lines.","owner":"kuba-kubula"},"show-invisibles":{"title":"Show Invisibles","description":"Show hidden characters such as tabs and line breaks.","optional":["autolinker","data-uri-highlight"]},"autolinker":{"title":"Autolinker","description":"Converts URLs and emails in code to clickable links. Parses Markdown links in comments."},"wpd":{"title":"WebPlatform Docs","description":"Makes tokens link to <a href=\"https://webplatform.github.io/docs/\">WebPlatform.org documentation</a>. The links open in a new tab."},"custom-class":{"title":"Custom Class","description":"This plugin allows you to prefix Prism's default classes (<code>.comment</code> can become <code>.namespace--comment</code>) or replace them with your defined ones (like <code>.editor__comment</code>). You can even add new classes.","owner":"dvkndn","noCSS":true},"file-highlight":{"title":"File Highlight","description":"Fetch external files and highlight them with Prism. Used on the Prism website itself.","noCSS":true},"show-language":{"title":"Show Language","description":"Display the highlighted language in code blocks (inline code does not show the label).","owner":"nauzilus","noCSS":true,"require":"toolbar"},"jsonp-highlight":{"title":"JSONP Highlight","description":"Fetch content with JSONP and highlight some interesting content (e.g. GitHub/Gists or Bitbucket API).","noCSS":true,"owner":"nauzilus"},"highlight-keywords":{"title":"Highlight Keywords","description":"Adds special CSS classes for each keyword matched in the code. For example, the keyword <code>if</code> will have the class <code>keyword-if</code> as well. You can have fine grained control over the appearance of each keyword by providing your own CSS rules.","owner":"vkbansal","noCSS":true},"remove-initial-line-feed":{"title":"Remove initial line feed","description":"Removes the initial line feed in code blocks.","owner":"Golmote","noCSS":true},"inline-color":{"title":"Inline color","description":"Adds a small inline preview for colors in style sheets.","require":"css-extras","owner":"RunDevelopment"},"previewers":{"title":"Previewers","description":"Previewers for angles, colors, gradients, easing and time.","require":"css-extras","owner":"Golmote"},"autoloader":{"title":"Autoloader","description":"Automatically loads the needed languages to highlight the code blocks.","owner":"Golmote","noCSS":true},"keep-markup":{"title":"Keep Markup","description":"Prevents custom markup from being dropped out during highlighting.","owner":"Golmote","optional":"normalize-whitespace","noCSS":true},"command-line":{"title":"Command Line","description":"Display a command line with a prompt and, optionally, the output/response from the commands.","owner":"chriswells0"},"unescaped-markup":{"title":"Unescaped Markup","description":"Write markup without having to escape anything."},"normalize-whitespace":{"title":"Normalize Whitespace","description":"Supports multiple operations to normalize whitespace in code blocks.","owner":"zeitgeist87","optional":"unescaped-markup","noCSS":true},"data-uri-highlight":{"title":"Data-URI Highlight","description":"Highlights data-URI contents.","owner":"Golmote","noCSS":true},"toolbar":{"title":"Toolbar","description":"Attach a toolbar for plugins to easily register buttons on the top of a code block.","owner":"mAAdhaTTah"},"copy-to-clipboard":{"title":"Copy to Clipboard Button","description":"Add a button that copies the code block to the clipboard when clicked.","owner":"mAAdhaTTah","require":"toolbar","noCSS":true},"download-button":{"title":"Download Button","description":"A button in the toolbar of a code block adding a convenient way to download a code file.","owner":"Golmote","require":"toolbar","noCSS":true},"match-braces":{"title":"Match braces","description":"Highlights matching braces.","owner":"RunDevelopment"},"diff-highlight":{"title":"Diff Highlight","description":"Highlights the code inside diff blocks.","owner":"RunDevelopment","require":"diff"},"filter-highlight-all":{"title":"Filter highlightAll","description":"Filters the elements the <code>highlightAll</code> and <code>highlightAllUnder</code> methods actually highlight.","owner":"RunDevelopment","noCSS":true},"treeview":{"title":"Treeview","description":"A language with special styles to highlight file system tree structures.","owner":"Golmote"}}};
 if (typeof module !== 'undefined' && module.exports) { module.exports = components; }
-},{}],287:[function(require,module,exports){
+},{}],279:[function(require,module,exports){
 const components = require('../components.js');
 const getLoader = require('../dependencies');
 
@@ -43412,7 +45954,7 @@ loadLanguages.getSupportedLanguages = function () {
 
 module.exports = loadLanguages;
 
-},{"../components.js":286,"../dependencies":288}],288:[function(require,module,exports){
+},{"../components.js":278,"../dependencies":280}],280:[function(require,module,exports){
 "use strict";
 
 /**
@@ -43864,7 +46406,7 @@ if (typeof module !== 'undefined') {
 	module.exports = getLoader;
 }
 
-},{}],289:[function(require,module,exports){
+},{}],281:[function(require,module,exports){
 (function (global){
 
 /* **********************************************
@@ -45004,126 +47546,7 @@ Prism.languages.js = Prism.languages.javascript;
 })();
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],290:[function(require,module,exports){
-'use strict';
-
-var hasOwn = Object.prototype.hasOwnProperty;
-var toStr = Object.prototype.toString;
-var defineProperty = Object.defineProperty;
-var gOPD = Object.getOwnPropertyDescriptor;
-
-var isArray = function isArray(arr) {
-	if (typeof Array.isArray === 'function') {
-		return Array.isArray(arr);
-	}
-
-	return toStr.call(arr) === '[object Array]';
-};
-
-var isPlainObject = function isPlainObject(obj) {
-	if (!obj || toStr.call(obj) !== '[object Object]') {
-		return false;
-	}
-
-	var hasOwnConstructor = hasOwn.call(obj, 'constructor');
-	var hasIsPrototypeOf = obj.constructor && obj.constructor.prototype && hasOwn.call(obj.constructor.prototype, 'isPrototypeOf');
-	// Not own constructor property must be Object
-	if (obj.constructor && !hasOwnConstructor && !hasIsPrototypeOf) {
-		return false;
-	}
-
-	// Own properties are enumerated firstly, so to speed up,
-	// if last one is own, then all properties are own.
-	var key;
-	for (key in obj) { /**/ }
-
-	return typeof key === 'undefined' || hasOwn.call(obj, key);
-};
-
-// If name is '__proto__', and Object.defineProperty is available, define __proto__ as an own property on target
-var setProperty = function setProperty(target, options) {
-	if (defineProperty && options.name === '__proto__') {
-		defineProperty(target, options.name, {
-			enumerable: true,
-			configurable: true,
-			value: options.newValue,
-			writable: true
-		});
-	} else {
-		target[options.name] = options.newValue;
-	}
-};
-
-// Return undefined instead of __proto__ if '__proto__' is not an own property
-var getProperty = function getProperty(obj, name) {
-	if (name === '__proto__') {
-		if (!hasOwn.call(obj, name)) {
-			return void 0;
-		} else if (gOPD) {
-			// In early versions of node, obj['__proto__'] is buggy when obj has
-			// __proto__ as an own property. Object.getOwnPropertyDescriptor() works.
-			return gOPD(obj, name).value;
-		}
-	}
-
-	return obj[name];
-};
-
-module.exports = function extend() {
-	var options, name, src, copy, copyIsArray, clone;
-	var target = arguments[0];
-	var i = 1;
-	var length = arguments.length;
-	var deep = false;
-
-	// Handle a deep copy situation
-	if (typeof target === 'boolean') {
-		deep = target;
-		target = arguments[1] || {};
-		// skip the boolean and the target
-		i = 2;
-	}
-	if (target == null || (typeof target !== 'object' && typeof target !== 'function')) {
-		target = {};
-	}
-
-	for (; i < length; ++i) {
-		options = arguments[i];
-		// Only deal with non-null/undefined values
-		if (options != null) {
-			// Extend the base object
-			for (name in options) {
-				src = getProperty(target, name);
-				copy = getProperty(options, name);
-
-				// Prevent never-ending loop
-				if (target !== copy) {
-					// Recurse if we're merging plain objects or arrays
-					if (deep && copy && (isPlainObject(copy) || (copyIsArray = isArray(copy)))) {
-						if (copyIsArray) {
-							copyIsArray = false;
-							clone = src && isArray(src) ? src : [];
-						} else {
-							clone = src && isPlainObject(src) ? src : {};
-						}
-
-						// Never move original objects, clone them
-						setProperty(target, { name: name, newValue: extend(deep, clone, copy) });
-
-					// Don't bring in undefined values
-					} else if (typeof copy !== 'undefined') {
-						setProperty(target, { name: name, newValue: copy });
-					}
-				}
-			}
-		}
-	}
-
-	// Return the modified object
-	return target;
-};
-
-},{}],291:[function(require,module,exports){
+},{}],282:[function(require,module,exports){
 
 'use strict';
 
@@ -45247,7 +47670,7 @@ decode.componentChars = '';
 
 module.exports = decode;
 
-},{}],292:[function(require,module,exports){
+},{}],283:[function(require,module,exports){
 
 'use strict';
 
@@ -45347,7 +47770,7 @@ encode.componentChars = "-_.!~*'()";
 
 module.exports = encode;
 
-},{}],293:[function(require,module,exports){
+},{}],284:[function(require,module,exports){
 
 'use strict';
 
@@ -45374,7 +47797,7 @@ module.exports = function format(url) {
   return result;
 };
 
-},{}],294:[function(require,module,exports){
+},{}],285:[function(require,module,exports){
 'use strict';
 
 
@@ -45383,7 +47806,7 @@ module.exports.decode = require('./decode');
 module.exports.format = require('./format');
 module.exports.parse  = require('./parse');
 
-},{"./decode":291,"./encode":292,"./format":293,"./parse":295}],295:[function(require,module,exports){
+},{"./decode":282,"./encode":283,"./format":284,"./parse":286}],286:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -45697,193 +48120,7 @@ Url.prototype.parseHost = function(host) {
 
 module.exports = urlParse;
 
-},{}],296:[function(require,module,exports){
-// shim for using process in browser
-var process = module.exports = {};
-
-// cached from whatever global is present so that test runners that stub it
-// don't break things.  But we need to wrap it in a try catch in case it is
-// wrapped in strict mode code which doesn't define any globals.  It's inside a
-// function because try/catches deoptimize in certain engines.
-
-var cachedSetTimeout;
-var cachedClearTimeout;
-
-function defaultSetTimout() {
-    throw new Error('setTimeout has not been defined');
-}
-function defaultClearTimeout () {
-    throw new Error('clearTimeout has not been defined');
-}
-(function () {
-    try {
-        if (typeof setTimeout === 'function') {
-            cachedSetTimeout = setTimeout;
-        } else {
-            cachedSetTimeout = defaultSetTimout;
-        }
-    } catch (e) {
-        cachedSetTimeout = defaultSetTimout;
-    }
-    try {
-        if (typeof clearTimeout === 'function') {
-            cachedClearTimeout = clearTimeout;
-        } else {
-            cachedClearTimeout = defaultClearTimeout;
-        }
-    } catch (e) {
-        cachedClearTimeout = defaultClearTimeout;
-    }
-} ())
-function runTimeout(fun) {
-    if (cachedSetTimeout === setTimeout) {
-        //normal enviroments in sane situations
-        return setTimeout(fun, 0);
-    }
-    // if setTimeout wasn't available but was latter defined
-    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
-        cachedSetTimeout = setTimeout;
-        return setTimeout(fun, 0);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedSetTimeout(fun, 0);
-    } catch(e){
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
-            return cachedSetTimeout.call(null, fun, 0);
-        } catch(e){
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
-            return cachedSetTimeout.call(this, fun, 0);
-        }
-    }
-
-
-}
-function runClearTimeout(marker) {
-    if (cachedClearTimeout === clearTimeout) {
-        //normal enviroments in sane situations
-        return clearTimeout(marker);
-    }
-    // if clearTimeout wasn't available but was latter defined
-    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
-        cachedClearTimeout = clearTimeout;
-        return clearTimeout(marker);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedClearTimeout(marker);
-    } catch (e){
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
-            return cachedClearTimeout.call(null, marker);
-        } catch (e){
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
-            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
-            return cachedClearTimeout.call(this, marker);
-        }
-    }
-
-
-
-}
-var queue = [];
-var draining = false;
-var currentQueue;
-var queueIndex = -1;
-
-function cleanUpNextTick() {
-    if (!draining || !currentQueue) {
-        return;
-    }
-    draining = false;
-    if (currentQueue.length) {
-        queue = currentQueue.concat(queue);
-    } else {
-        queueIndex = -1;
-    }
-    if (queue.length) {
-        drainQueue();
-    }
-}
-
-function drainQueue() {
-    if (draining) {
-        return;
-    }
-    var timeout = runTimeout(cleanUpNextTick);
-    draining = true;
-
-    var len = queue.length;
-    while(len) {
-        currentQueue = queue;
-        queue = [];
-        while (++queueIndex < len) {
-            if (currentQueue) {
-                currentQueue[queueIndex].run();
-            }
-        }
-        queueIndex = -1;
-        len = queue.length;
-    }
-    currentQueue = null;
-    draining = false;
-    runClearTimeout(timeout);
-}
-
-process.nextTick = function (fun) {
-    var args = new Array(arguments.length - 1);
-    if (arguments.length > 1) {
-        for (var i = 1; i < arguments.length; i++) {
-            args[i - 1] = arguments[i];
-        }
-    }
-    queue.push(new Item(fun, args));
-    if (queue.length === 1 && !draining) {
-        runTimeout(drainQueue);
-    }
-};
-
-// v8 likes predictible objects
-function Item(fun, array) {
-    this.fun = fun;
-    this.array = array;
-}
-Item.prototype.run = function () {
-    this.fun.apply(null, this.array);
-};
-process.title = 'browser';
-process.browser = true;
-process.env = {};
-process.argv = [];
-process.version = ''; // empty string to avoid regexp issues
-process.versions = {};
-
-function noop() {}
-
-process.on = noop;
-process.addListener = noop;
-process.once = noop;
-process.off = noop;
-process.removeListener = noop;
-process.removeAllListeners = noop;
-process.emit = noop;
-process.prependListener = noop;
-process.prependOnceListener = noop;
-
-process.listeners = function (name) { return [] }
-
-process.binding = function (name) {
-    throw new Error('process.binding is not supported');
-};
-
-process.cwd = function () { return '/' };
-process.chdir = function (dir) {
-    throw new Error('process.chdir is not supported');
-};
-process.umask = function() { return 0; };
-
-},{}],297:[function(require,module,exports){
+},{}],287:[function(require,module,exports){
 /*jshint node:true*/
 'use strict';
 
@@ -45910,19 +48147,22 @@ process.umask = function() { return 0; };
  * http://unix.stackexchange.com/questions/32795/what-is-the-maximum-allowed-filename-and-folder-size-with-ecryptfs
  *
  * @param  {String} input   Original filename
- * @param  {Object} options {replacement: String}
+ * @param  {Object} options {replacement: String | Function }
  * @return {String}         Sanitized filename
  */
 
 var truncate = require("truncate-utf8-bytes");
 
-var illegalRe = /[\/\?<>\\:\*\|":]/g;
+var illegalRe = /[\/\?<>\\:\*\|"]/g;
 var controlRe = /[\x00-\x1f\x80-\x9f]/g;
 var reservedRe = /^\.+$/;
 var windowsReservedRe = /^(con|prn|aux|nul|com[0-9]|lpt[0-9])(\..*)?$/i;
 var windowsTrailingRe = /[\. ]+$/;
 
 function sanitize(input, replacement) {
+  if (typeof input !== 'string') {
+    throw new Error('Input must be string');
+  }
   var sanitized = input
     .replace(illegalRe, replacement)
     .replace(controlRe, replacement)
@@ -45941,14 +48181,14 @@ module.exports = function (input, options) {
   return sanitize(output, '');
 };
 
-},{"truncate-utf8-bytes":298}],298:[function(require,module,exports){
+},{"truncate-utf8-bytes":288}],288:[function(require,module,exports){
 'use strict';
 
 var truncate = require("./lib/truncate");
 var getLength = require("utf8-byte-length/browser");
 module.exports = truncate.bind(null, getLength);
 
-},{"./lib/truncate":299,"utf8-byte-length/browser":301}],299:[function(require,module,exports){
+},{"./lib/truncate":289,"utf8-byte-length/browser":291}],289:[function(require,module,exports){
 'use strict';
 
 function isHighSurrogate(codePoint) {
@@ -45993,7 +48233,7 @@ module.exports = function truncate(getLength, string, byteLength) {
 };
 
 
-},{}],300:[function(require,module,exports){
+},{}],290:[function(require,module,exports){
 //     Underscore.js 1.8.3
 //     http://underscorejs.org
 //     (c) 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -47543,7 +49783,7 @@ module.exports = function truncate(getLength, string, byteLength) {
   }
 }.call(this));
 
-},{}],301:[function(require,module,exports){
+},{}],291:[function(require,module,exports){
 'use strict';
 
 function isHighSurrogate(codePoint) {
@@ -47592,629 +49832,7 @@ module.exports = function getByteLength(string) {
   return byteLength;
 };
 
-},{}],302:[function(require,module,exports){
-if (typeof Object.create === 'function') {
-  // implementation from standard node.js 'util' module
-  module.exports = function inherits(ctor, superCtor) {
-    ctor.super_ = superCtor
-    ctor.prototype = Object.create(superCtor.prototype, {
-      constructor: {
-        value: ctor,
-        enumerable: false,
-        writable: true,
-        configurable: true
-      }
-    });
-  };
-} else {
-  // old school shim for old browsers
-  module.exports = function inherits(ctor, superCtor) {
-    ctor.super_ = superCtor
-    var TempCtor = function () {}
-    TempCtor.prototype = superCtor.prototype
-    ctor.prototype = new TempCtor()
-    ctor.prototype.constructor = ctor
-  }
-}
-
-},{}],303:[function(require,module,exports){
-module.exports = function isBuffer(arg) {
-  return arg && typeof arg === 'object'
-    && typeof arg.copy === 'function'
-    && typeof arg.fill === 'function'
-    && typeof arg.readUInt8 === 'function';
-}
-},{}],304:[function(require,module,exports){
-(function (process,global){
-// Copyright Joyent, Inc. and other Node contributors.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to permit
-// persons to whom the Software is furnished to do so, subject to the
-// following conditions:
-//
-// The above copyright notice and this permission notice shall be included
-// in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-// USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-var formatRegExp = /%[sdj%]/g;
-exports.format = function(f) {
-  if (!isString(f)) {
-    var objects = [];
-    for (var i = 0; i < arguments.length; i++) {
-      objects.push(inspect(arguments[i]));
-    }
-    return objects.join(' ');
-  }
-
-  var i = 1;
-  var args = arguments;
-  var len = args.length;
-  var str = String(f).replace(formatRegExp, function(x) {
-    if (x === '%%') return '%';
-    if (i >= len) return x;
-    switch (x) {
-      case '%s': return String(args[i++]);
-      case '%d': return Number(args[i++]);
-      case '%j':
-        try {
-          return JSON.stringify(args[i++]);
-        } catch (_) {
-          return '[Circular]';
-        }
-      default:
-        return x;
-    }
-  });
-  for (var x = args[i]; i < len; x = args[++i]) {
-    if (isNull(x) || !isObject(x)) {
-      str += ' ' + x;
-    } else {
-      str += ' ' + inspect(x);
-    }
-  }
-  return str;
-};
-
-
-// Mark that a method should not be used.
-// Returns a modified function which warns once by default.
-// If --no-deprecation is set, then it is a no-op.
-exports.deprecate = function(fn, msg) {
-  // Allow for deprecating things in the process of starting up.
-  if (isUndefined(global.process)) {
-    return function() {
-      return exports.deprecate(fn, msg).apply(this, arguments);
-    };
-  }
-
-  if (process.noDeprecation === true) {
-    return fn;
-  }
-
-  var warned = false;
-  function deprecated() {
-    if (!warned) {
-      if (process.throwDeprecation) {
-        throw new Error(msg);
-      } else if (process.traceDeprecation) {
-        console.trace(msg);
-      } else {
-        console.error(msg);
-      }
-      warned = true;
-    }
-    return fn.apply(this, arguments);
-  }
-
-  return deprecated;
-};
-
-
-var debugs = {};
-var debugEnviron;
-exports.debuglog = function(set) {
-  if (isUndefined(debugEnviron))
-    debugEnviron = process.env.NODE_DEBUG || '';
-  set = set.toUpperCase();
-  if (!debugs[set]) {
-    if (new RegExp('\\b' + set + '\\b', 'i').test(debugEnviron)) {
-      var pid = process.pid;
-      debugs[set] = function() {
-        var msg = exports.format.apply(exports, arguments);
-        console.error('%s %d: %s', set, pid, msg);
-      };
-    } else {
-      debugs[set] = function() {};
-    }
-  }
-  return debugs[set];
-};
-
-
-/**
- * Echos the value of a value. Trys to print the value out
- * in the best way possible given the different types.
- *
- * @param {Object} obj The object to print out.
- * @param {Object} opts Optional options object that alters the output.
- */
-/* legacy: obj, showHidden, depth, colors*/
-function inspect(obj, opts) {
-  // default options
-  var ctx = {
-    seen: [],
-    stylize: stylizeNoColor
-  };
-  // legacy...
-  if (arguments.length >= 3) ctx.depth = arguments[2];
-  if (arguments.length >= 4) ctx.colors = arguments[3];
-  if (isBoolean(opts)) {
-    // legacy...
-    ctx.showHidden = opts;
-  } else if (opts) {
-    // got an "options" object
-    exports._extend(ctx, opts);
-  }
-  // set default options
-  if (isUndefined(ctx.showHidden)) ctx.showHidden = false;
-  if (isUndefined(ctx.depth)) ctx.depth = 2;
-  if (isUndefined(ctx.colors)) ctx.colors = false;
-  if (isUndefined(ctx.customInspect)) ctx.customInspect = true;
-  if (ctx.colors) ctx.stylize = stylizeWithColor;
-  return formatValue(ctx, obj, ctx.depth);
-}
-exports.inspect = inspect;
-
-
-// http://en.wikipedia.org/wiki/ANSI_escape_code#graphics
-inspect.colors = {
-  'bold' : [1, 22],
-  'italic' : [3, 23],
-  'underline' : [4, 24],
-  'inverse' : [7, 27],
-  'white' : [37, 39],
-  'grey' : [90, 39],
-  'black' : [30, 39],
-  'blue' : [34, 39],
-  'cyan' : [36, 39],
-  'green' : [32, 39],
-  'magenta' : [35, 39],
-  'red' : [31, 39],
-  'yellow' : [33, 39]
-};
-
-// Don't use 'blue' not visible on cmd.exe
-inspect.styles = {
-  'special': 'cyan',
-  'number': 'yellow',
-  'boolean': 'yellow',
-  'undefined': 'grey',
-  'null': 'bold',
-  'string': 'green',
-  'date': 'magenta',
-  // "name": intentionally not styling
-  'regexp': 'red'
-};
-
-
-function stylizeWithColor(str, styleType) {
-  var style = inspect.styles[styleType];
-
-  if (style) {
-    return '\u001b[' + inspect.colors[style][0] + 'm' + str +
-           '\u001b[' + inspect.colors[style][1] + 'm';
-  } else {
-    return str;
-  }
-}
-
-
-function stylizeNoColor(str, styleType) {
-  return str;
-}
-
-
-function arrayToHash(array) {
-  var hash = {};
-
-  array.forEach(function(val, idx) {
-    hash[val] = true;
-  });
-
-  return hash;
-}
-
-
-function formatValue(ctx, value, recurseTimes) {
-  // Provide a hook for user-specified inspect functions.
-  // Check that value is an object with an inspect function on it
-  if (ctx.customInspect &&
-      value &&
-      isFunction(value.inspect) &&
-      // Filter out the util module, it's inspect function is special
-      value.inspect !== exports.inspect &&
-      // Also filter out any prototype objects using the circular check.
-      !(value.constructor && value.constructor.prototype === value)) {
-    var ret = value.inspect(recurseTimes, ctx);
-    if (!isString(ret)) {
-      ret = formatValue(ctx, ret, recurseTimes);
-    }
-    return ret;
-  }
-
-  // Primitive types cannot have properties
-  var primitive = formatPrimitive(ctx, value);
-  if (primitive) {
-    return primitive;
-  }
-
-  // Look up the keys of the object.
-  var keys = Object.keys(value);
-  var visibleKeys = arrayToHash(keys);
-
-  if (ctx.showHidden) {
-    keys = Object.getOwnPropertyNames(value);
-  }
-
-  // IE doesn't make error fields non-enumerable
-  // http://msdn.microsoft.com/en-us/library/ie/dww52sbt(v=vs.94).aspx
-  if (isError(value)
-      && (keys.indexOf('message') >= 0 || keys.indexOf('description') >= 0)) {
-    return formatError(value);
-  }
-
-  // Some type of object without properties can be shortcutted.
-  if (keys.length === 0) {
-    if (isFunction(value)) {
-      var name = value.name ? ': ' + value.name : '';
-      return ctx.stylize('[Function' + name + ']', 'special');
-    }
-    if (isRegExp(value)) {
-      return ctx.stylize(RegExp.prototype.toString.call(value), 'regexp');
-    }
-    if (isDate(value)) {
-      return ctx.stylize(Date.prototype.toString.call(value), 'date');
-    }
-    if (isError(value)) {
-      return formatError(value);
-    }
-  }
-
-  var base = '', array = false, braces = ['{', '}'];
-
-  // Make Array say that they are Array
-  if (isArray(value)) {
-    array = true;
-    braces = ['[', ']'];
-  }
-
-  // Make functions say that they are functions
-  if (isFunction(value)) {
-    var n = value.name ? ': ' + value.name : '';
-    base = ' [Function' + n + ']';
-  }
-
-  // Make RegExps say that they are RegExps
-  if (isRegExp(value)) {
-    base = ' ' + RegExp.prototype.toString.call(value);
-  }
-
-  // Make dates with properties first say the date
-  if (isDate(value)) {
-    base = ' ' + Date.prototype.toUTCString.call(value);
-  }
-
-  // Make error with message first say the error
-  if (isError(value)) {
-    base = ' ' + formatError(value);
-  }
-
-  if (keys.length === 0 && (!array || value.length == 0)) {
-    return braces[0] + base + braces[1];
-  }
-
-  if (recurseTimes < 0) {
-    if (isRegExp(value)) {
-      return ctx.stylize(RegExp.prototype.toString.call(value), 'regexp');
-    } else {
-      return ctx.stylize('[Object]', 'special');
-    }
-  }
-
-  ctx.seen.push(value);
-
-  var output;
-  if (array) {
-    output = formatArray(ctx, value, recurseTimes, visibleKeys, keys);
-  } else {
-    output = keys.map(function(key) {
-      return formatProperty(ctx, value, recurseTimes, visibleKeys, key, array);
-    });
-  }
-
-  ctx.seen.pop();
-
-  return reduceToSingleString(output, base, braces);
-}
-
-
-function formatPrimitive(ctx, value) {
-  if (isUndefined(value))
-    return ctx.stylize('undefined', 'undefined');
-  if (isString(value)) {
-    var simple = '\'' + JSON.stringify(value).replace(/^"|"$/g, '')
-                                             .replace(/'/g, "\\'")
-                                             .replace(/\\"/g, '"') + '\'';
-    return ctx.stylize(simple, 'string');
-  }
-  if (isNumber(value))
-    return ctx.stylize('' + value, 'number');
-  if (isBoolean(value))
-    return ctx.stylize('' + value, 'boolean');
-  // For some reason typeof null is "object", so special case here.
-  if (isNull(value))
-    return ctx.stylize('null', 'null');
-}
-
-
-function formatError(value) {
-  return '[' + Error.prototype.toString.call(value) + ']';
-}
-
-
-function formatArray(ctx, value, recurseTimes, visibleKeys, keys) {
-  var output = [];
-  for (var i = 0, l = value.length; i < l; ++i) {
-    if (hasOwnProperty(value, String(i))) {
-      output.push(formatProperty(ctx, value, recurseTimes, visibleKeys,
-          String(i), true));
-    } else {
-      output.push('');
-    }
-  }
-  keys.forEach(function(key) {
-    if (!key.match(/^\d+$/)) {
-      output.push(formatProperty(ctx, value, recurseTimes, visibleKeys,
-          key, true));
-    }
-  });
-  return output;
-}
-
-
-function formatProperty(ctx, value, recurseTimes, visibleKeys, key, array) {
-  var name, str, desc;
-  desc = Object.getOwnPropertyDescriptor(value, key) || { value: value[key] };
-  if (desc.get) {
-    if (desc.set) {
-      str = ctx.stylize('[Getter/Setter]', 'special');
-    } else {
-      str = ctx.stylize('[Getter]', 'special');
-    }
-  } else {
-    if (desc.set) {
-      str = ctx.stylize('[Setter]', 'special');
-    }
-  }
-  if (!hasOwnProperty(visibleKeys, key)) {
-    name = '[' + key + ']';
-  }
-  if (!str) {
-    if (ctx.seen.indexOf(desc.value) < 0) {
-      if (isNull(recurseTimes)) {
-        str = formatValue(ctx, desc.value, null);
-      } else {
-        str = formatValue(ctx, desc.value, recurseTimes - 1);
-      }
-      if (str.indexOf('\n') > -1) {
-        if (array) {
-          str = str.split('\n').map(function(line) {
-            return '  ' + line;
-          }).join('\n').substr(2);
-        } else {
-          str = '\n' + str.split('\n').map(function(line) {
-            return '   ' + line;
-          }).join('\n');
-        }
-      }
-    } else {
-      str = ctx.stylize('[Circular]', 'special');
-    }
-  }
-  if (isUndefined(name)) {
-    if (array && key.match(/^\d+$/)) {
-      return str;
-    }
-    name = JSON.stringify('' + key);
-    if (name.match(/^"([a-zA-Z_][a-zA-Z_0-9]*)"$/)) {
-      name = name.substr(1, name.length - 2);
-      name = ctx.stylize(name, 'name');
-    } else {
-      name = name.replace(/'/g, "\\'")
-                 .replace(/\\"/g, '"')
-                 .replace(/(^"|"$)/g, "'");
-      name = ctx.stylize(name, 'string');
-    }
-  }
-
-  return name + ': ' + str;
-}
-
-
-function reduceToSingleString(output, base, braces) {
-  var numLinesEst = 0;
-  var length = output.reduce(function(prev, cur) {
-    numLinesEst++;
-    if (cur.indexOf('\n') >= 0) numLinesEst++;
-    return prev + cur.replace(/\u001b\[\d\d?m/g, '').length + 1;
-  }, 0);
-
-  if (length > 60) {
-    return braces[0] +
-           (base === '' ? '' : base + '\n ') +
-           ' ' +
-           output.join(',\n  ') +
-           ' ' +
-           braces[1];
-  }
-
-  return braces[0] + base + ' ' + output.join(', ') + ' ' + braces[1];
-}
-
-
-// NOTE: These type checking functions intentionally don't use `instanceof`
-// because it is fragile and can be easily faked with `Object.create()`.
-function isArray(ar) {
-  return Array.isArray(ar);
-}
-exports.isArray = isArray;
-
-function isBoolean(arg) {
-  return typeof arg === 'boolean';
-}
-exports.isBoolean = isBoolean;
-
-function isNull(arg) {
-  return arg === null;
-}
-exports.isNull = isNull;
-
-function isNullOrUndefined(arg) {
-  return arg == null;
-}
-exports.isNullOrUndefined = isNullOrUndefined;
-
-function isNumber(arg) {
-  return typeof arg === 'number';
-}
-exports.isNumber = isNumber;
-
-function isString(arg) {
-  return typeof arg === 'string';
-}
-exports.isString = isString;
-
-function isSymbol(arg) {
-  return typeof arg === 'symbol';
-}
-exports.isSymbol = isSymbol;
-
-function isUndefined(arg) {
-  return arg === void 0;
-}
-exports.isUndefined = isUndefined;
-
-function isRegExp(re) {
-  return isObject(re) && objectToString(re) === '[object RegExp]';
-}
-exports.isRegExp = isRegExp;
-
-function isObject(arg) {
-  return typeof arg === 'object' && arg !== null;
-}
-exports.isObject = isObject;
-
-function isDate(d) {
-  return isObject(d) && objectToString(d) === '[object Date]';
-}
-exports.isDate = isDate;
-
-function isError(e) {
-  return isObject(e) &&
-      (objectToString(e) === '[object Error]' || e instanceof Error);
-}
-exports.isError = isError;
-
-function isFunction(arg) {
-  return typeof arg === 'function';
-}
-exports.isFunction = isFunction;
-
-function isPrimitive(arg) {
-  return arg === null ||
-         typeof arg === 'boolean' ||
-         typeof arg === 'number' ||
-         typeof arg === 'string' ||
-         typeof arg === 'symbol' ||  // ES6 symbol
-         typeof arg === 'undefined';
-}
-exports.isPrimitive = isPrimitive;
-
-exports.isBuffer = require('./support/isBuffer');
-
-function objectToString(o) {
-  return Object.prototype.toString.call(o);
-}
-
-
-function pad(n) {
-  return n < 10 ? '0' + n.toString(10) : n.toString(10);
-}
-
-
-var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
-              'Oct', 'Nov', 'Dec'];
-
-// 26 Feb 16:19:34
-function timestamp() {
-  var d = new Date();
-  var time = [pad(d.getHours()),
-              pad(d.getMinutes()),
-              pad(d.getSeconds())].join(':');
-  return [d.getDate(), months[d.getMonth()], time].join(' ');
-}
-
-
-// log is just a thin wrapper to console.log that prepends a timestamp
-exports.log = function() {
-  console.log('%s - %s', timestamp(), exports.format.apply(exports, arguments));
-};
-
-
-/**
- * Inherit the prototype methods from one constructor into another.
- *
- * The Function.prototype.inherits from lang.js rewritten as a standalone
- * function (not on Function.prototype). NOTE: If this file is to be loaded
- * during bootstrapping this function needs to be rewritten using some native
- * functions as prototype setup using normal JavaScript does not work as
- * expected during bootstrapping (see mirror.js in r114903).
- *
- * @param {function} ctor Constructor function which needs to inherit the
- *     prototype.
- * @param {function} superCtor Constructor function to inherit prototype from.
- */
-exports.inherits = require('inherits');
-
-exports._extend = function(origin, add) {
-  // Don't do anything if add isn't an object
-  if (!add || !isObject(add)) return origin;
-
-  var keys = Object.keys(add);
-  var i = keys.length;
-  while (i--) {
-    origin[keys[i]] = add[keys[i]];
-  }
-  return origin;
-};
-
-function hasOwnProperty(obj, prop) {
-  return Object.prototype.hasOwnProperty.call(obj, prop);
-}
-
-}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":303,"_process":296,"inherits":302}],305:[function(require,module,exports){
+},{}],292:[function(require,module,exports){
 
 
 /*eslint-env browser*/
@@ -48818,4 +50436,4 @@ $(function () {
   updateResult();
 });
 
-},{"@gerhobbelt/highlight.js":2,"@gerhobbelt/highlight.js/lib//languages/asciidoc":17,"@gerhobbelt/highlight.js/lib/languages/actionscript":8,"@gerhobbelt/highlight.js/lib/languages/apache":12,"@gerhobbelt/highlight.js/lib/languages/arduino":15,"@gerhobbelt/highlight.js/lib/languages/armasm":16,"@gerhobbelt/highlight.js/lib/languages/avrasm":22,"@gerhobbelt/highlight.js/lib/languages/bash":27,"@gerhobbelt/highlight.js/lib/languages/c":34,"@gerhobbelt/highlight.js/lib/languages/c-like":33,"@gerhobbelt/highlight.js/lib/languages/clojure":40,"@gerhobbelt/highlight.js/lib/languages/cmake":41,"@gerhobbelt/highlight.js/lib/languages/coffeescript":42,"@gerhobbelt/highlight.js/lib/languages/cpp":45,"@gerhobbelt/highlight.js/lib/languages/csharp":48,"@gerhobbelt/highlight.js/lib/languages/css":51,"@gerhobbelt/highlight.js/lib/languages/diff":58,"@gerhobbelt/highlight.js/lib/languages/django":59,"@gerhobbelt/highlight.js/lib/languages/dockerfile":61,"@gerhobbelt/highlight.js/lib/languages/fortran":77,"@gerhobbelt/highlight.js/lib/languages/glsl":84,"@gerhobbelt/highlight.js/lib/languages/go":87,"@gerhobbelt/highlight.js/lib/languages/groovy":91,"@gerhobbelt/highlight.js/lib/languages/handlebars":94,"@gerhobbelt/highlight.js/lib/languages/haskell":95,"@gerhobbelt/highlight.js/lib/languages/ini":104,"@gerhobbelt/highlight.js/lib/languages/java":111,"@gerhobbelt/highlight.js/lib/languages/javascript":112,"@gerhobbelt/highlight.js/lib/languages/json":114,"@gerhobbelt/highlight.js/lib/languages/latex":120,"@gerhobbelt/highlight.js/lib/languages/less":124,"@gerhobbelt/highlight.js/lib/languages/lisp":125,"@gerhobbelt/highlight.js/lib/languages/livescript":127,"@gerhobbelt/highlight.js/lib/languages/lua":131,"@gerhobbelt/highlight.js/lib/languages/makefile":132,"@gerhobbelt/highlight.js/lib/languages/matlab":135,"@gerhobbelt/highlight.js/lib/languages/mipsasm":141,"@gerhobbelt/highlight.js/lib/languages/nginx":149,"@gerhobbelt/highlight.js/lib/languages/objectivec":153,"@gerhobbelt/highlight.js/lib/languages/perl":162,"@gerhobbelt/highlight.js/lib/languages/php":166,"@gerhobbelt/highlight.js/lib/languages/python":182,"@gerhobbelt/highlight.js/lib/languages/python-repl":181,"@gerhobbelt/highlight.js/lib/languages/ruby":194,"@gerhobbelt/highlight.js/lib/languages/rust":196,"@gerhobbelt/highlight.js/lib/languages/scala":198,"@gerhobbelt/highlight.js/lib/languages/scheme":199,"@gerhobbelt/highlight.js/lib/languages/scss":201,"@gerhobbelt/highlight.js/lib/languages/smalltalk":204,"@gerhobbelt/highlight.js/lib/languages/stylus":218,"@gerhobbelt/highlight.js/lib/languages/swift":220,"@gerhobbelt/highlight.js/lib/languages/tcl":223,"@gerhobbelt/highlight.js/lib/languages/typescript":231,"@gerhobbelt/highlight.js/lib/languages/verilog":236,"@gerhobbelt/highlight.js/lib/languages/vhdl":237,"@gerhobbelt/highlight.js/lib/languages/xml":242,"@gerhobbelt/highlight.js/lib/languages/yaml":244,"@gerhobbelt/markdown-it-abbr":248,"@gerhobbelt/markdown-it-attrs":249,"@gerhobbelt/markdown-it-checkbox":252,"@gerhobbelt/markdown-it-container":253,"@gerhobbelt/markdown-it-deflist":254,"@gerhobbelt/markdown-it-emoji":255,"@gerhobbelt/markdown-it-fontawesome":261,"@gerhobbelt/markdown-it-footnote":262,"@gerhobbelt/markdown-it-front-matter":263,"@gerhobbelt/markdown-it-hashtag":264,"@gerhobbelt/markdown-it-header-sections":265,"@gerhobbelt/markdown-it-headinganchor":266,"@gerhobbelt/markdown-it-highlighted":267,"@gerhobbelt/markdown-it-highlightjs":268,"@gerhobbelt/markdown-it-implicit-figures":269,"@gerhobbelt/markdown-it-ins":270,"@gerhobbelt/markdown-it-kbd":271,"@gerhobbelt/markdown-it-mark":272,"@gerhobbelt/markdown-it-mathjax":273,"@gerhobbelt/markdown-it-modify-token":274,"@gerhobbelt/markdown-it-prism":275,"@gerhobbelt/markdown-it-samp":279,"@gerhobbelt/markdown-it-strikethrough-alt":280,"@gerhobbelt/markdown-it-sub":281,"@gerhobbelt/markdown-it-sup":282,"@gerhobbelt/markdown-it-table-of-contents":283,"@gerhobbelt/markdown-it-toc":284,"@gerhobbelt/markdown-it-wikilinks":285,"mdurl":294}]},{},[305]);
+},{"@gerhobbelt/highlight.js":2,"@gerhobbelt/highlight.js/lib//languages/asciidoc":17,"@gerhobbelt/highlight.js/lib/languages/actionscript":8,"@gerhobbelt/highlight.js/lib/languages/apache":12,"@gerhobbelt/highlight.js/lib/languages/arduino":15,"@gerhobbelt/highlight.js/lib/languages/armasm":16,"@gerhobbelt/highlight.js/lib/languages/avrasm":22,"@gerhobbelt/highlight.js/lib/languages/bash":27,"@gerhobbelt/highlight.js/lib/languages/c":34,"@gerhobbelt/highlight.js/lib/languages/c-like":33,"@gerhobbelt/highlight.js/lib/languages/clojure":40,"@gerhobbelt/highlight.js/lib/languages/cmake":41,"@gerhobbelt/highlight.js/lib/languages/coffeescript":42,"@gerhobbelt/highlight.js/lib/languages/cpp":45,"@gerhobbelt/highlight.js/lib/languages/csharp":48,"@gerhobbelt/highlight.js/lib/languages/css":51,"@gerhobbelt/highlight.js/lib/languages/diff":58,"@gerhobbelt/highlight.js/lib/languages/django":59,"@gerhobbelt/highlight.js/lib/languages/dockerfile":61,"@gerhobbelt/highlight.js/lib/languages/fortran":77,"@gerhobbelt/highlight.js/lib/languages/glsl":84,"@gerhobbelt/highlight.js/lib/languages/go":87,"@gerhobbelt/highlight.js/lib/languages/groovy":91,"@gerhobbelt/highlight.js/lib/languages/handlebars":94,"@gerhobbelt/highlight.js/lib/languages/haskell":95,"@gerhobbelt/highlight.js/lib/languages/ini":104,"@gerhobbelt/highlight.js/lib/languages/java":111,"@gerhobbelt/highlight.js/lib/languages/javascript":112,"@gerhobbelt/highlight.js/lib/languages/json":114,"@gerhobbelt/highlight.js/lib/languages/latex":120,"@gerhobbelt/highlight.js/lib/languages/less":124,"@gerhobbelt/highlight.js/lib/languages/lisp":125,"@gerhobbelt/highlight.js/lib/languages/livescript":127,"@gerhobbelt/highlight.js/lib/languages/lua":131,"@gerhobbelt/highlight.js/lib/languages/makefile":132,"@gerhobbelt/highlight.js/lib/languages/matlab":135,"@gerhobbelt/highlight.js/lib/languages/mipsasm":141,"@gerhobbelt/highlight.js/lib/languages/nginx":149,"@gerhobbelt/highlight.js/lib/languages/objectivec":153,"@gerhobbelt/highlight.js/lib/languages/perl":162,"@gerhobbelt/highlight.js/lib/languages/php":166,"@gerhobbelt/highlight.js/lib/languages/python":182,"@gerhobbelt/highlight.js/lib/languages/python-repl":181,"@gerhobbelt/highlight.js/lib/languages/ruby":194,"@gerhobbelt/highlight.js/lib/languages/rust":196,"@gerhobbelt/highlight.js/lib/languages/scala":198,"@gerhobbelt/highlight.js/lib/languages/scheme":199,"@gerhobbelt/highlight.js/lib/languages/scss":201,"@gerhobbelt/highlight.js/lib/languages/smalltalk":204,"@gerhobbelt/highlight.js/lib/languages/stylus":218,"@gerhobbelt/highlight.js/lib/languages/swift":220,"@gerhobbelt/highlight.js/lib/languages/tcl":223,"@gerhobbelt/highlight.js/lib/languages/typescript":231,"@gerhobbelt/highlight.js/lib/languages/verilog":236,"@gerhobbelt/highlight.js/lib/languages/vhdl":237,"@gerhobbelt/highlight.js/lib/languages/xml":242,"@gerhobbelt/highlight.js/lib/languages/yaml":244,"@gerhobbelt/markdown-it-abbr":248,"@gerhobbelt/markdown-it-attrs":249,"@gerhobbelt/markdown-it-checkbox":250,"@gerhobbelt/markdown-it-container":251,"@gerhobbelt/markdown-it-deflist":252,"@gerhobbelt/markdown-it-emoji":253,"@gerhobbelt/markdown-it-fontawesome":254,"@gerhobbelt/markdown-it-footnote":256,"@gerhobbelt/markdown-it-front-matter":257,"@gerhobbelt/markdown-it-hashtag":258,"@gerhobbelt/markdown-it-header-sections":259,"@gerhobbelt/markdown-it-headinganchor":260,"@gerhobbelt/markdown-it-highlighted":261,"@gerhobbelt/markdown-it-highlightjs":262,"@gerhobbelt/markdown-it-implicit-figures":263,"@gerhobbelt/markdown-it-ins":264,"@gerhobbelt/markdown-it-kbd":265,"@gerhobbelt/markdown-it-mark":266,"@gerhobbelt/markdown-it-mathjax":267,"@gerhobbelt/markdown-it-modify-token":268,"@gerhobbelt/markdown-it-prism":269,"@gerhobbelt/markdown-it-samp":271,"@gerhobbelt/markdown-it-strikethrough-alt":272,"@gerhobbelt/markdown-it-sub":273,"@gerhobbelt/markdown-it-sup":274,"@gerhobbelt/markdown-it-table-of-contents":275,"@gerhobbelt/markdown-it-toc":276,"@gerhobbelt/markdown-it-wikilinks":277,"mdurl":285}]},{},[292]);
