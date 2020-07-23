@@ -1,5 +1,5 @@
 ---
-skip: true
+skip: false
 ---
 
 Should render correctly em/strong combination (*** case):
