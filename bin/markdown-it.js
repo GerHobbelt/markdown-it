@@ -26,6 +26,12 @@ cli.addArgument([ '-l', '--linkify' ], {
   action: 'storeTrue'
 });
 
+cli.addArgument([ '--plugins' ], {
+  help: 'List of plugin package names to include (e.g. markdown-it-footnote)',
+  action: 'append',
+  nargs: '+'
+});
+
 cli.addArgument([ '-t', '--typographer' ], {
   help:   'Enable smartquotes and other typographic replacements',
   action: 'storeTrue'
@@ -49,7 +55,6 @@ cli.addArgument([ '-o', '--output' ], {
 
 var options = cli.parseArgs();
 
-
 function readFile(filename, encoding, callback) {
   if (options.file === '-') {
     // read from stdin
@@ -65,6 +70,20 @@ function readFile(filename, encoding, callback) {
   }
 }
 
+function loadPlugins(md, plugins) {
+  // Flatten array of plugins or arrays of plugins and load them.
+  plugins = [].concat.apply([], plugins);
+
+  for (var index = 0; index < plugins.length; ++index) {
+    var name = plugins[index];
+
+    try {
+      md.use(require(name));
+    } catch (e) {
+      console.error('cannot load plugin ' + name);
+    }
+  }
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -91,6 +110,8 @@ readFile(options.file, 'utf8', function (err, input) {
     typographer: options.typographer,
     linkify: options.linkify
   });
+
+  if (options.plugins) loadPlugins(md, options.plugins);
 
   try {
     output = md.render(input);
