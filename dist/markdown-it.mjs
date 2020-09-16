@@ -8476,7 +8476,7 @@ function process_inlines(tokens, state) {
       } else {
         for (j = i - 1; j >= 0; j--) {
           if (tokens[j].type === 'softbreak' || tokens[j].type === 'hardbreak') break; // lastChar defaults to 0x20
-          if (tokens[j].type !== 'text') continue;
+          if (!tokens[j].content) continue; // should skip all tokens except 'text', 'html_inline' or 'code_inline'
 
           lastChar = tokens[j].content.charCodeAt(tokens[j].content.length - 1);
           break;
@@ -8493,7 +8493,7 @@ function process_inlines(tokens, state) {
       } else {
         for (j = i + 1; j < tokens.length; j++) {
           if (tokens[j].type === 'softbreak' || tokens[j].type === 'hardbreak') break; // nextChar defaults to 0x20
-          if (tokens[j].type !== 'text') continue;
+          if (!tokens[j].content) continue; // should skip all tokens except 'text', 'html_inline' or 'code_inline'
 
           nextChar = tokens[j].content.charCodeAt(0);
           break;
@@ -9150,6 +9150,7 @@ var table = function table(state, startLine, endLine, silent) {
     len = Math.max(columns.length, columnCount);
     for (i = 0; i < len; i++) {
       token          = state.push('td_open', 'td', 1);
+      token.map      = [ nextLine, nextLine + 1 ];
       token.size     = 1;
       token.position = columnVIndex;
       columnVIndex++;
@@ -9161,6 +9162,7 @@ var table = function table(state, startLine, endLine, silent) {
       let originalContent = columns[i] || '';
 
       token          = state.push('inline', '', 0);
+      token.map      = [ nextLine, nextLine + 1 ];
       token.content  = originalContent.trim();
       token.children = [];
       token.size     = token.content.length;
@@ -9364,7 +9366,7 @@ var blockquote = function blockquote(state, startLine, endLine, silent) {
       terminate,
       terminatorRules,
       token,
-      wasOutdented,
+      isOutdented,
       oldLineMax = state.lineMax,
       pos = state.bMarks[startLine] + state.tShift[startLine],
       max = state.eMarks[startLine];
@@ -9382,8 +9384,8 @@ var blockquote = function blockquote(state, startLine, endLine, silent) {
   // store position for token position/size later on
   blockStart = pos;
 
-  // skip spaces after ">" and re-calculate offset
-  initial = offset = state.sCount[startLine] + pos - (state.bMarks[startLine] + state.tShift[startLine]);
+  // set offset past spaces and ">"
+  initial = offset = state.sCount[startLine] + 1;
 
   // skip one optional space after '>'
   if (state.src.charCodeAt(pos) === 0x20 /* space */) {
@@ -9448,7 +9450,6 @@ var blockquote = function blockquote(state, startLine, endLine, silent) {
 
   oldParentType = state.parentType;
   state.parentType = 'blockquote';
-  wasOutdented = false;
 
   // Search the end of the block
   //
@@ -9477,7 +9478,7 @@ var blockquote = function blockquote(state, startLine, endLine, silent) {
     //    > current blockquote
     // 2. checking this line
     // ```
-    if (state.sCount[nextLine] < state.blkIndent) wasOutdented = true;
+    isOutdented = state.sCount[nextLine] < state.blkIndent;
 
     pos = state.bMarks[nextLine] + state.tShift[nextLine];
     max = state.eMarks[nextLine];
@@ -9487,11 +9488,11 @@ var blockquote = function blockquote(state, startLine, endLine, silent) {
       break;
     }
 
-    if (state.src.charCodeAt(pos++) === 0x3E/* > */ && !wasOutdented) {
+    if (state.src.charCodeAt(pos++) === 0x3E/* > */ && !isOutdented) {
       // This line is inside the blockquote.
 
-      // skip spaces after ">" and re-calculate offset
-      initial = offset = state.sCount[nextLine] + pos - (state.bMarks[nextLine] + state.tShift[nextLine]);
+      // set offset past spaces and ">"
+      initial = offset = state.sCount[nextLine] + 1;
 
       // skip one optional space after '>'
       if (state.src.charCodeAt(pos) === 0x20 /* space */) {
@@ -12191,9 +12192,7 @@ function processDelimiters(state, delimiters) {
 
       if (newMinOpenerIdx === -1) newMinOpenerIdx = openerIdx;
 
-      if (opener.open &&
-          opener.end < 0 &&
-          opener.level === closer.level) {
+      if (opener.open && opener.end < 0) {
 
         isOddMatch = false;
 
