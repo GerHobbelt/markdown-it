@@ -8930,8 +8930,7 @@ Core.prototype.State = state_core;
 
 var parser_core = Core;
 
-// GFM table, non-standard
-
+// GFM table, https://github.github.com/gfm/#tables-extension-
 
 
 let isSpace = utils.isSpace;
@@ -8950,49 +8949,34 @@ function escapedSplit(str, positions) {
       pos = 0,
       max = str.length,
       ch,
-      escapes = 0,
+      isEscaped = false,
       lastPos = 0,
-      backTicked = false,
-      lastBackTick = 0;
+      current = '';
 
   ch  = str.charCodeAt(pos);
 
   while (pos < max) {
-    if (ch === 0x60/* ` */) {
-      if (backTicked) {
-        // make \` close code sequence, but not open it;
-        // the reason is: `\` is correct code block
-        backTicked = false;
-        lastBackTick = pos;
-      } else if (escapes % 2 === 0) {
-        backTicked = true;
-        lastBackTick = pos;
+    if (ch === 0x7c/* | */) {
+      if (!isEscaped) {
+        // pipe separating cells, '|'
+        result.push(current + str.substring(lastPos, pos));
+        positions.push(lastPos);
+        current = '';
+        lastPos = pos + 1;
+      } else {
+        // escaped pipe, '\|'
+        current += str.substring(lastPos, pos - 1);
+        lastPos = pos;
       }
-    } else if (ch === 0x7c/* | */ && (escapes % 2 === 0) && !backTicked) {
-      result.push(str.substring(lastPos, pos));
-      positions.push(lastPos);
-      lastPos = pos + 1;
     }
 
-    if (ch === 0x5c/* \ */) {
-      escapes++;
-    } else {
-      escapes = 0;
-    }
-
+    isEscaped = (ch === 0x5c/* \ */);
     pos++;
-
-    // If there was an un-closed backtick, go back to just after
-    // the last backtick, but as if it was a normal character
-    if (pos === max && backTicked) {
-      backTicked = false;
-      pos = lastBackTick + 1;
-    }
 
     ch = str.charCodeAt(pos);
   }
 
-  result.push(str.substring(lastPos));
+  result.push(current + str.substring(lastPos));
   positions.push(lastPos);
 
   return result;
@@ -9000,8 +8984,9 @@ function escapedSplit(str, positions) {
 
 
 var table = function table(state, startLine, endLine, silent) {
-  let ch, lineText, lineTextReplaced, pos, i, nextLine, columns, columnCount, token,
-      aligns, t, tableLines, tbodyLines, positions, len, columnVIndex;
+  let ch, lineText, pos, i, l, nextLine, columns, columnCount, token,
+      aligns, t, tableLines, tbodyLines, oldParentType, terminate,
+      terminatorRules, positions, len, columnVIndex;
 
   // should have at least two lines
   if (startLine + 2 > endLine) { return false; }
@@ -9060,17 +9045,30 @@ var table = function table(state, startLine, endLine, silent) {
   lineText = getLine(state, startLine).trim();
   if (lineText.indexOf('|') === -1) { return false; }
   if (state.sCount[startLine] - state.blkIndent >= 4) { return false; }
-  lineTextReplaced = lineText.replace(/^\||\|$/g, '');
-  pos = state.bMarks[startLine] + lineText.indexOf(lineTextReplaced);
   positions = [];
-  columns = escapedSplit(lineTextReplaced, positions);
+  columns = escapedSplit(lineText, positions);
+  if (columns.length && columns[0] === '') {
+    columns.shift();
+    positions.shift();
+  }
+  if (columns.length && columns[columns.length - 1] === '') {
+    columns.pop();
+    positions.pop();
+  }
 
   // header row will define an amount of columns in the entire table,
-  // and align row shouldn't be smaller than that (the rest of the rows can)
+  // and align row should be exactly the same (the rest of the rows can differ)
   columnCount = columns.length;
-  if (columnCount > aligns.length) { return false; }
+  if (columnCount !== aligns.length) { return false; }
 
   if (silent) { return true; }
+
+  oldParentType = state.parentType;
+  state.parentType = 'table';
+
+  // use 'blockquote' lists for termination because it's
+  // the most similar to tables
+  terminatorRules = state.md.block.ruler.getRules('blockquote');
 
   token          = state.push('table_open', 'table', 1);
   token.map      = tableLines = [ startLine, 0 ];
@@ -9126,21 +9124,38 @@ var table = function table(state, startLine, endLine, silent) {
   token.size     = state.eMarks[startLine + 1] - state.bMarks[startLine + 1];
   token.position = state.bMarks[startLine + 1];
 
-  token     = state.push('tbody_open', 'tbody', 1);
-  token.map = tbodyLines = [ startLine + 2, 0 ];
-  token.size     = 0;
-  token.position = state.bMarks[startLine + 2];
-
   for (nextLine = startLine + 2; nextLine < endLine; nextLine++) {
     if (state.sCount[nextLine] < state.blkIndent) { break; }
 
+    terminate = false;
+    for (i = 0, l = terminatorRules.length; i < l; i++) {
+      if (terminatorRules[i](state, nextLine, endLine, true)) {
+        terminate = true;
+        break;
+      }
+    }
+
+    if (terminate) { break; }
     lineText = getLine(state, nextLine).trim();
-    if (lineText.indexOf('|') === -1) { break; }
+    if (!lineText) { break; }
     if (state.sCount[nextLine] - state.blkIndent >= 4) { break; }
-    lineTextReplaced = lineText.replace(/^\||\|$/g, '');
-    pos = state.bMarks[nextLine] + lineText.indexOf(lineTextReplaced);
     positions = [];
-    columns = escapedSplit(lineTextReplaced, positions);
+    columns = escapedSplit(lineText, positions);
+    if (columns.length && columns[0] === '') {
+      columns.shift();
+      positions.shift();
+    }
+    if (columns.length && columns[columns.length - 1] === '') {
+      columns.pop();
+      positions.pop();
+    }
+
+    if (nextLine === startLine + 2) {
+      token     = state.push('tbody_open', 'tbody', 1);
+      token.map = tbodyLines = [ startLine + 2, 0 ];
+      token.size     = 0;
+      token.position = state.bMarks[startLine + 2];
+    }
 
     token = state.push('tr_open', 'tr', 1);
     token.size     = 0;
@@ -9183,15 +9198,20 @@ var table = function table(state, startLine, endLine, silent) {
     token.size     = 0;
     token.position = state.eMarks[nextLine];
   }
-  token = state.push('tbody_close', 'tbody', -1);
-  token.size     = 0;
-  token.position = state.eMarks[nextLine];
+
+  if (tbodyLines) {
+    token = state.push('tbody_close', 'tbody', -1);
+    token.size     = 0;
+    token.position = state.eMarks[nextLine];
+    tbodyLines[1] = nextLine;
+  }
 
   token = state.push('table_close', 'table', -1);
   token.size     = 0;
   token.position = state.eMarks[nextLine];
+  tableLines[1] = nextLine;
 
-  tableLines[1] = tbodyLines[1] = nextLine;
+  state.parentType = oldParentType;
   state.line = nextLine;
   return true;
 };
