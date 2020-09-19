@@ -25,7 +25,8 @@ demo: lint
 	pug ./support/demo_template/index.pug --pretty \
 		--obj ./support/demo_template/sample.json \
 		--out ./demo
-	stylus -u autoprefixer-stylus \
+	npx browserslist@latest --update-db
+	npx stylus -u autoprefixer-stylus \
 		< ./support/demo_template/index.styl \
 		> ./demo/index.css
 	rm -rf ./support/demo_template/sample.json

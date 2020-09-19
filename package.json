@@ -97,6 +97,7 @@
     "autoprefixer-stylus": "1.0.0",
     "benchmark": "2.1.4",
     "browserify": "16.5.2",
+    "browserlist": "^1.0.1",
     "chai": "4.2.0",
     "commonmark": "0.29.2",
     "cross-env": "7.0.2",
@@ -111,14 +112,14 @@
     "prismjs": "1.21.0",
     "pug": "3.0.0",
     "pug-cli": "1.0.0-alpha6",
-    "rollup": "2.27.0",
+    "rollup": "2.27.1",
     "rollup-plugin-commonjs": "10.1.0",
     "rollup-plugin-json": "4.0.0",
     "rollup-plugin-node-resolve": "5.2.0",
     "shelljs": "0.8.4",
     "stylus": "0.54.8",
     "supertest": "4.0.2",
-    "terser": "5.3.1"
+    "terser": "5.3.2"
   },
   "mocha": {
     "inline-diffs": true
