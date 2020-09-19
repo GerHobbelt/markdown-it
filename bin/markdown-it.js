@@ -26,6 +26,12 @@ cli.addArgument([ '-l', '--linkify' ], {
   action: 'storeTrue'
 });
 
+cli.addArgument([ '-p', '--plugins' ], {
+  help: 'List of plugin package names to include (e.g. markdown-it-footnote). Assumes plugins have been installed already.',
+  action: 'append',
+  nargs: '+'
+});
+
 cli.addArgument([ '-t', '--typographer' ], {
   help:   'Enable smartquotes and other typographic replacements',
   action: 'storeTrue'
@@ -47,11 +53,6 @@ cli.addArgument([ '-o', '--output' ], {
   defaultValue: '-'
 });
 
-cli.addArgument([ '-p', '--plugin' ], {
-  help: 'Load an optional plugin. Use multiple times for more than one plugin. Assumes PLUGIN has been installed already.',
-  action: 'append'
-});
-
 let options = cli.parseArgs();
 
 
@@ -70,7 +71,21 @@ function readFile(filename, encoding, callback) {
   }
 }
 
+function loadPlugins(md, plugins) {
+  // Flatten array of plugins or arrays of plugins and load them.
+  plugins = [].concat.apply([], plugins);
 
+  for (let index = 0; index < plugins.length; ++index) {
+    let name = plugins[index];
+
+    try {
+      let plugin = require(name);
+      md.use(plugin.default || plugin);
+    } catch (e) {
+      console.error('cannot load plugin ' + name);
+    }
+  }
+}
 ////////////////////////////////////////////////////////////////////////////////
 
 readFile(options.file, 'utf8', function (err, input) {
@@ -97,12 +112,7 @@ readFile(options.file, 'utf8', function (err, input) {
     linkify: options.linkify
   });
 
-  if (options.plugin) {
-    options.plugin.forEach(function (pluginName) {
-      let plugin = require(pluginName);
-      md.use(plugin.default || plugin);
-    });
-  }
+  if (options.plugins) loadPlugins(md, options.plugins);
 
   try {
     output = md.render(input);
