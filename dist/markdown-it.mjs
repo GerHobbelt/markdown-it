@@ -7562,17 +7562,17 @@ default_rules.fence = function (tokens, idx, options, env, slf) {
   let token = tokens[idx],
       info = token.info ? unescapeAll$2(token.info).trim() : '',
       langName = '',
-      langAttrs = '',
+      langAttrs = [],
       highlighted, i, arr, tmpAttrs, tmpToken;
 
   if (info) {
-    arr = info.split(/(\s+)/g);
+    arr = info.split(/\s+/g);
     langName = arr[0];
-    langAttrs = arr.slice(2).join('');
+    langAttrs = arr.slice(1);
   }
 
   if (options.highlight) {
-    highlighted = options.highlight(token.content, langName, langAttrs) || escapeHtml(token.content);
+    highlighted = options.highlight(token.content, langName, [].concat(token.attrs || [], langAttrs)) || escapeHtml(token.content);
   } else {
     highlighted = escapeHtml(token.content);
   }
@@ -14363,7 +14363,7 @@ function normalizeLinkText(url) {
  *   use `'«»„“'` for Russian, `'„“‚‘'` for German, and
  *   `['«\xA0', '\xA0»', '‹\xA0', '\xA0›']` for French (including nbsp).
  * - __highlight__ - `null`. Highlighter function for fenced code blocks.
- *   Highlighter `function (str, lang)` should return escaped HTML. It can also
+ *   Highlighter `function (str, lang, attrs)` should return escaped HTML. It can also
  *   return empty string if the source was not changed and should be escaped
  *   externaly. If result starts with <pre... internal wrapper is skipped.
  *
@@ -14390,7 +14390,7 @@ function normalizeLinkText(url) {
  * var hljs = require('highlight.js') // https://highlightjs.org/
  *
  * var md = require('markdown-it')({
- *   highlight: function (str, lang) {
+ *   highlight: function (str, lang, attrs) {
  *     if (lang && hljs.getLanguage(lang)) {
  *       try {
  *         return hljs.highlight(lang, str, true).value;
@@ -14409,7 +14409,7 @@ function normalizeLinkText(url) {
  *
  * // Actual default values
  * var md = require('markdown-it')({
- *   highlight: function (str, lang) {
+ *   highlight: function (str, lang, attrs) {
  *     if (lang && hljs.getLanguage(lang)) {
  *       try {
  *         return '<pre class="hljs"><code>' +

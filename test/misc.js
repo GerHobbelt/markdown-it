@@ -66,7 +66,7 @@ describe('API', function () {
     let md = markdownit({
       highlight: function (str, lang, attrs) {
         assert.strictEqual(lang, 'a');
-        assert.strictEqual(attrs, 'b  c  d');
+        assert.deepEqual(attrs, [ 'b', 'c', 'd' ]);
         return '<pre><code>==' + str + '==</code></pre>';
       }
     });

@@ -144,7 +144,7 @@ const md = require('markdown-it')({
   // Highlighter function. Should return escaped HTML,
   // or '' if the source string is not changed and should be escaped externally.
   // If result starts with <pre... internal wrapper is skipped.
-  highlight: function (/*str, lang*/) { return ''; },
+  highlight: function (str, lang, attrs) { return ''; },
   
   // Configure default attributes for given tags
   default_attributes:  { 'a': [['rel', 'nofollow']] }
@@ -170,7 +170,7 @@ var hljs = require('highlight.js'); // https://highlightjs.org/
 
 // Actual default values
 var md = require('markdown-it')({
-  highlight: function (str, lang) {
+  highlight: function (str, lang, attrs) {
     if (lang && hljs.getLanguage(lang)) {
       try {
         return hljs.highlight(lang, str).value;
@@ -189,7 +189,7 @@ var hljs = require('highlight.js'); // https://highlightjs.org/
 
 // Actual default values
 var md = require('markdown-it')({
-  highlight: function (str, lang) {
+  highlight: function (str, lang, attrs) {
     if (lang && hljs.getLanguage(lang)) {
       try {
         return '<pre class="hljs"><code>' +

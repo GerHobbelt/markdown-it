@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [12.0.0] - WIP
 ### Changed
-- Added 3rd argument to `highlight(code, lang, attrs)`, #626.
+- Added 3rd argument to `highlight(code, lang, attrs)`, #626. `attrs` is an array of attributes.
 - Rewrite tables according to latest GFM spec, #697.
 
 
