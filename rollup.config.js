@@ -1,6 +1,7 @@
-import commonjs from 'rollup-plugin-commonjs';
-import nodeResolve from 'rollup-plugin-node-resolve';
-import json from 'rollup-plugin-json';
+import commonjs from '@rollup/plugin-commonjs';
+import nodeResolve from '@rollup/plugin-node-resolve';
+import replace from '@rollup/plugin-replace';
+import json from '@rollup/plugin-json';
 
 export default {
   input: 'index.js',
@@ -9,10 +10,15 @@ export default {
     format: 'esm'
   },
   plugins: [
-    json(),
+    commonjs(),
     nodeResolve({
       preferBuiltins: false
     }),
-    commonjs()
+    replace({
+      values: {
+        'process.env.NODE_ENV': '"production"'
+      }
+    }),
+    json()
   ]
 };

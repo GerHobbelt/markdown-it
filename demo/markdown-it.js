@@ -4362,7 +4362,6 @@ module.exports = function table(state, startLine, endLine, silent) {
   columnVIndex = state.bMarks[startLine] + state.tShift[startLine];
   for (i = 0; i < columns.length; i++) {
     token          = state.push('th_open', 'th', 1);
-    token.map      = [ startLine, startLine + 1 ];
     token.size     = 1;
     token.position = columnVIndex;
     columnVIndex  += 1;
@@ -4373,7 +4372,6 @@ module.exports = function table(state, startLine, endLine, silent) {
 
     token          = state.push('inline', '', 0);
     token.content  = columns[i].trim();
-    token.map      = [ startLine, startLine + 1 ];
     token.children = [];
     token.position = columnVIndex + trimLeftOffset(columns[i]);
     token.size     = token.content.length;
@@ -4431,7 +4429,8 @@ module.exports = function table(state, startLine, endLine, silent) {
       token.position = state.bMarks[startLine + 2];
     }
 
-    token = state.push('tr_open', 'tr', 1);
+    token          = state.push('tr_open', 'tr', 1);
+    token.map      = [ nextLine, nextLine + 1 ];
     token.size     = 0;
     token.position = state.bMarks[nextLine];
 
@@ -4439,7 +4438,6 @@ module.exports = function table(state, startLine, endLine, silent) {
     len = Math.max(columns.length, columnCount);
     for (i = 0; i < len; i++) {
       token          = state.push('td_open', 'td', 1);
-      token.map      = [ nextLine, nextLine + 1 ];
       token.size     = 1;
       token.position = columnVIndex;
       columnVIndex++;
@@ -4451,7 +4449,6 @@ module.exports = function table(state, startLine, endLine, silent) {
       let originalContent = columns[i] || '';
 
       token          = state.push('inline', '', 0);
-      token.map      = [ nextLine, nextLine + 1 ];
       token.content  = originalContent.trim();
       token.children = [];
       token.size     = token.content.length;
