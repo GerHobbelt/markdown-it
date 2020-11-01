@@ -1,4 +1,4 @@
-/*! @gerhobbelt/markdown-it 12.0.1-49 https://github.com/GerHobbelt/markdown-it @license MIT */
+/*! @gerhobbelt/markdown-it 12.0.2-49 https://github.com/GerHobbelt/markdown-it @license MIT */
 (function(global, factory) {
   typeof exports === "object" && typeof module !== "undefined" ? module.exports = factory() : typeof define === "function" && define.amd ? define(factory) : (global = typeof globalThis !== "undefined" ? globalThis : global || self, 
   global.markdownit = factory());
@@ -4293,7 +4293,7 @@
     // header row will define an amount of columns in the entire table,
     // and align row should be exactly the same (the rest of the rows can differ)
         columnCount = columns.length;
-    if (columnCount !== aligns.length) {
+    if (columnCount === 0 || columnCount !== aligns.length) {
       return false;
     }
     if (silent) {
