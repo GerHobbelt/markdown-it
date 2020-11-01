@@ -6,13 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [12.0.0] - WIP
+## [12.0.0] - 2020-10-14
+### Added
+- `.gitattributes`, force unix eol under windows, for development.
+
 ### Changed
 - Added 3rd argument to `highlight(code, lang, attrs)`, #626. `attrs` is an array of attributes.
 - Rewrite tables according to latest GFM spec, #697.
+- Use `rollup.js` to browserify sources.
+- Drop `bower.json` (bower reached EOL).
+- Deps bump.
+- Tune `specsplit.js` options.
+- Drop `Makefile` in favour of npm scrips.
 
 ### Fixed
 - Fix mappings for table rows (amended fix made in 11.0.1), #705.
+- `%25` is no longer decoded in beautified urls, #720.
 
 
 ## [11.0.1] - 2020-09-14

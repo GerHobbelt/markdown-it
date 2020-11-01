@@ -29,13 +29,13 @@ __Table of content__
   - [Syntax extensions](#syntax-extensions)
     - [Manage rules](#manage-rules)
   - [Benchmark](#benchmark)
-  - [Support markdown-it](#support-markdown-it)
+  - [markdown-it for enterprise](#markdown-it-for-enterprise)
   - [Authors](#authors)
   - [References / Thanks](#references--thanks)
 
 ## Install
 
-**node.js** & **bower**:
+**node.js**:
 
 ```sh
 npm install markdown-it
