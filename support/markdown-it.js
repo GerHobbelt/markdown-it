@@ -20,7 +20,7 @@ cli.add_argument('file', {
   default: '-'
 });
 
-var options = cli.parse_args();
+let options = cli.parse_args();
 
 
 function readFile(filename, encoding, callback) {

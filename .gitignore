@@ -157,3 +157,5 @@ typings/
 # misc
 benchmark/extra/
 
+/dist/*.min.js
+

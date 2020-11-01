@@ -9,7 +9,7 @@ const shell = require('shelljs');
 shell.rm('-rf', 'demo');
 shell.mkdir('demo');
 
-shell.exec('support/demodata.js > support/demo_template/sample.json');
+shell.exec('node support/demodata.js > support/demo_template/sample.json');
 
 shell.exec('node_modules/.bin/pug support/demo_template/index.pug --pretty \
 --obj support/demo_template/sample.json \

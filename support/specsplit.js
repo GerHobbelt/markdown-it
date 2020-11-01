@@ -32,7 +32,7 @@ cli.add_argument('-o', '--output', {
   default: '-'
 });
 
-var options = cli.parse_args();
+let options = cli.parse_args();
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -109,7 +109,7 @@ readFile(options.spec, 'utf8', function (error, input) {
       }
     });
 
-  var out = [];
+  let out = [];
 
   if (!options.type) {
     out.push(util.format('CM spec stat: passed samples - %s, failed samples - %s', good.length, bad.length));

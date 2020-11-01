@@ -12094,7 +12094,7 @@ var punycode$1 = /*@__PURE__*/getAugmentedNamespace(punycode_es6);
 
 
 let config = {
-  'default': _default,
+  default: _default,
   zero: zero,
   commonmark: commonmark
 };
@@ -12169,7 +12169,8 @@ function normalizeLinkText(url) {
     }
   }
 
-  return mdurl.decode(mdurl.format(parsed));
+  // add '%' to exclude list because of https://github.com/markdown-it/markdown-it/issues/720
+  return mdurl.decode(mdurl.format(parsed), mdurl.decode.defaultChars + '%');
 }
 
 

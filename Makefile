@@ -22,19 +22,16 @@ demo: lint
 	mkdir ./demo
 	#node support/build_demo.js
 	./support/demodata.js > ./support/demo_template/sample.json
-	pug ./support/demo_template/index.pug --pretty \
+	npx pug ./support/demo_template/index.pug --pretty \
 		--obj ./support/demo_template/sample.json \
 		--out ./demo
 	npx stylus -u autoprefixer-stylus \
 		< ./support/demo_template/index.styl \
 		> ./demo/index.css
 	rm -rf ./support/demo_template/sample.json
-	browserify ./index.js -s markdownit > ./demo/markdown-it.js
-	# process ./support/demo_template/index.js:
-	#rollup -c ./rollup.config4demo_template.js
-	browserify ./support/demo_template/index.js > ./demo/index.js
+	rollup -c support/demo_template/rollup.config.js
 	cp ./support/demo_template/README.md ./demo/
-	cp ./support/demo_template/test.html ./demo/
+	#cp ./support/demo_template/test.html ./demo/
 	touch ./demo/.nojekyll
 
 gh-demo: demo
@@ -98,15 +95,7 @@ browserify:
 	-rm -rf ./dist
 	mkdir dist
 	# Browserify
-	( printf "/*! ${NPM_PACKAGE} ${NPM_VERSION} ${GITHUB_PROJ} @license MIT */" ; \
-		browserify ./index.js -s ${GLOBAL_NAME} \
-		) > dist/${NPM_PACKAGE}.js
-
-minify: browserify
-	# Minify
-	terser dist/${NPM_PACKAGE}.js -b beautify=false,ascii_only=true -c -m \
-		--preamble "/*! ${NPM_PACKAGE} ${NPM_VERSION} ${GITHUB_PROJ} @license MIT */" \
-		> dist/${NPM_PACKAGE}.min.js
+	rollup -c support/rollup.config.js
 
 benchmark-deps:
 	#npm install --prefix benchmark/extra/ -g marked@0.3.6 commonmark@0.26.0 markdown-it/markdown-it.git#2.2.1
@@ -129,27 +118,16 @@ profile2chrome:
 	# extra options for node are: --cpu-prof-dir=DIR and --cpu-prof-name=FILE
 	node --cpu-prof benchmark/profile.js 30
 	# now open this file in Chrome DevTools (after we've edited the HTML page that we use to ease this process)
-	# 
+	#
 	# wait 1 to ensure the FS has updated; seems we don't always get the latest file when we don't wait for a bit
 	sleep 1
 	node support/mk-profile-devtools.js
 	start chrome support/profile-devtools.html
 
-specsplit: 											\
-			./test/fixtures/commonmark/good.txt     \
-			./test/fixtures/commonmark/bad.txt
-
-./test/fixtures/commonmark/good.txt : 				\
-			./support/specsplit.js 					\
-			./test/fixtures/commonmark/spec.txt
-	./support/specsplit.js good ./test/fixtures/commonmark/spec.txt > ./test/fixtures/commonmark/good.txt
-	./support/specsplit.js ./test/fixtures/commonmark/spec.txt
-
-./test/fixtures/commonmark/bad.txt :    			\
-			./support/specsplit.js 					\
-			./test/fixtures/commonmark/spec.txt
-	./support/specsplit.js bad ./test/fixtures/commonmark/spec.txt > ./test/fixtures/commonmark/bad.txt
-	./support/specsplit.js ./test/fixtures/commonmark/spec.txt
+specsplit:
+	./support/specsplit.js good -o test/fixtures/commonmark/good.txt
+	./support/specsplit.js bad -o test/fixtures/commonmark/bad.txt
+	./support/specsplit.js
 
 todo:
 	@echo ""

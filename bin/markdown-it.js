@@ -55,7 +55,7 @@ cli.add_argument('-o', '--output', {
   default: '-'
 });
 
-var options = cli.parse_args();
+let options = cli.parse_args();
 
 
 function readFile(filename, encoding, callback) {
