@@ -98,7 +98,7 @@ browserify:
 	rollup -c support/rollup.config.js
 
 benchmark-deps:
-	#npm install --prefix benchmark/extra/ -g marked@0.3.6 commonmark@0.26.0 markdown-it/markdown-it.git#2.2.1
+	npm install --prefix benchmark/extra/ -g marked@0.3.6 commonmark@0.26.0 markdown-it/markdown-it.git#2.2.1
 
 benchmark: benchmark-deps
 	node benchmark/benchmark.js

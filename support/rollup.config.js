@@ -26,6 +26,7 @@ export default {
         })
       ]
     },
+/*    
     {
       file: 'dist/markdown-it.min.js',
       format: 'umd',
@@ -38,6 +39,7 @@ export default {
         })
       ]
     }
+*/    
   ],
   plugins: [
     nodeResolve({ preferBuiltins: true }),

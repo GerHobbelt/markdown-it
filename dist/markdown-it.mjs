@@ -6813,7 +6813,7 @@ let trimLeftOffset = utils.trimLeftOffset;
 
 
 function getLine(state, line) {
-  let pos = state.bMarks[line] + state.blkIndent,
+  let pos = state.bMarks[line] + state.tShift[line],
       max = state.eMarks[line];
 
   return state.src.substr(pos, max - pos);

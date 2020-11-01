@@ -1,4 +1,4 @@
-/*! @gerhobbelt/markdown-it 12.0.0-49 https://github.com/GerHobbelt/markdown-it @license MIT */
+/*! @gerhobbelt/markdown-it 12.0.1-49 https://github.com/GerHobbelt/markdown-it @license MIT */
 (function(global, factory) {
   typeof exports === "object" && typeof module !== "undefined" ? module.exports = factory() : typeof define === "function" && define.amd ? define(factory) : (global = typeof globalThis !== "undefined" ? globalThis : global || self, 
   global.markdownit = factory());
@@ -4188,7 +4188,7 @@
     let isSpace = utils.isSpace;
   let trimLeftOffset = utils.trimLeftOffset;
   function getLine(state, line) {
-    let pos = state.bMarks[line] + state.blkIndent, max = state.eMarks[line];
+    let pos = state.bMarks[line] + state.tShift[line], max = state.eMarks[line];
     return state.src.substr(pos, max - pos);
   }
   function escapedSplit(str, positions) {
