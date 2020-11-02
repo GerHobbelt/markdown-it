@@ -15,7 +15,7 @@ CURR_HEAD   := $(firstword $(shell git show-ref --hash HEAD | cut -b -6) master)
 GITHUB_PROJ := https://github.com//GerHobbelt/${NPM_PACKAGE}
 
 
-build: report-config lintfix browserify rollup doc test coverage demo todo
+build: report-config lintfix rollup doc test coverage demo todo
 
 demo: lint
 	-rm -rf ./demo
@@ -46,11 +46,6 @@ lint:
 
 lintfix:
 	eslint --fix .
-
-rollup:
-	-mkdir dist
-	# Rollup
-	rollup -c
 
 test: specsplit
 	mocha
@@ -91,10 +86,9 @@ publish:
 	git tag ${NPM_VERSION} && git push origin ${NPM_VERSION}
 	npm run pub
 
-browserify:
+rollup:
 	-rm -rf ./dist
 	mkdir dist
-	# Browserify
 	rollup -c support/rollup.config.js
 
 benchmark-deps:
@@ -163,5 +157,5 @@ report-config:
 	-echo "NPM_PACKAGE=${NPM_PACKAGE} NPM_VERSION=${NPM_VERSION} GLOBAL_NAME=${GLOBAL_NAME} BUNDLE_NAME=${BUNDLE_NAME} TMP_PATH=${TMP_PATH} REMOTE_NAME=${REMOTE_NAME} REMOTE_REPO=${REMOTE_REPO} CURR_HEAD=${CURR_HEAD}"
 
 
-.PHONY: clean superclean prep prep-ci report-config publish lint lintfix test todo demo coverage report-coverage doc build browserify minify gh-demo gh-doc specsplit rollup benchmark-deps benchmark profile profile2chrome
+.PHONY: clean superclean prep prep-ci report-config publish lint lintfix test todo demo coverage report-coverage doc build minify gh-demo gh-doc specsplit rollup benchmark-deps benchmark profile profile2chrome
 .SILENT: help todo report-config

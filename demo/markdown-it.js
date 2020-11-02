@@ -4187,7 +4187,7 @@
     let isSpace = utils.isSpace;
   let trimLeftOffset = utils.trimLeftOffset;
   function getLine(state, line) {
-    let pos = state.bMarks[line] + state.blkIndent, max = state.eMarks[line];
+    let pos = state.bMarks[line] + state.tShift[line], max = state.eMarks[line];
     return state.src.substr(pos, max - pos);
   }
   function escapedSplit(str, positions) {
@@ -4292,7 +4292,7 @@
     // header row will define an amount of columns in the entire table,
     // and align row should be exactly the same (the rest of the rows can differ)
         columnCount = columns.length;
-    if (columnCount !== aligns.length) {
+    if (columnCount === 0 || columnCount !== aligns.length) {
       return false;
     }
     if (silent) {

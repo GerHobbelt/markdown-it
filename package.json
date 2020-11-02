@@ -128,6 +128,7 @@
   "reporter": [
     "lcov",
     "text",
+    "html",
     "text-summary"
   ]
 }

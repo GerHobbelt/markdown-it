@@ -2,6 +2,7 @@ import nodeResolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
 import nodePolyfills from 'rollup-plugin-node-polyfills';
+import replace from '@rollup/plugin-replace';
 import pkg from '../package.json';
 import { terser } from 'rollup-plugin-terser';
 
@@ -40,6 +41,29 @@ export default {
       ]
     }
 */    
+    {
+      file: 'dist/markdown-it.mjs',
+      format: 'esm',
+      name: 'markdownit',
+      plugins: [
+        // Here terser is used only to force ascii output
+        terser({
+          mangle: false,
+          compress: false,
+          format: {
+            comments: 'all',
+            beautify: true,
+            ascii_only: true,
+            indent_level: 2
+          }
+        }),
+        replace({
+          values: {
+            'process.env.NODE_ENV': '"production"'
+          }
+        })
+      ]
+    }
   ],
   plugins: [
     nodeResolve({ preferBuiltins: true }),
