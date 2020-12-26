@@ -20,7 +20,7 @@ async function test_pattern(str) {
       worker.render(str),
 
       new Promise(function (resolve, reject) {
-        setTimeout(() => { reject(new Error('Terminated (timeout exceeded)')); }, 30000);
+        setTimeout(() => { reject(new Error('Terminated (timeout exceeded)')); }, 3000);
       })
     ]);
   } finally {
@@ -56,15 +56,15 @@ describe('Pathological sequences speed', () => {
     });
 
     it('nested strong emph', async () => {
-      await test_pattern('*a **a '.repeat(5000) + 'b' + ' a** a*'.repeat(5000));
+      await test_pattern('*a **a '.repeat(1800) + 'b' + ' a** a*'.repeat(1800));
     });
 
     it('many emph closers with no openers', async () => {
-      await test_pattern('a_ '.repeat(30000));
+      await test_pattern('a_ '.repeat(7000));
     });
 
     it('many emph openers with no closers', async () => {
-      await test_pattern('_a '.repeat(30000));
+      await test_pattern('_a '.repeat(8000));
     });
 
     it('many link closers with no openers', async () => {
@@ -76,11 +76,11 @@ describe('Pathological sequences speed', () => {
     });
 
     it('mismatched openers and closers', async () => {
-      await test_pattern('*a_ '.repeat(50000));
+      await test_pattern('*a_ '.repeat(4000));
     });
 
     it('openers and closers multiple of 3', async () => {
-      await test_pattern('a**b' + ('c* '.repeat(50000)));
+      await test_pattern('a**b' + ('c* '.repeat(5000)));
     });
 
     it('link openers and emph closers', async () => {
@@ -118,7 +118,7 @@ describe('Pathological sequences speed', () => {
 
   describe('Markdown-it', () => {
     it('emphasis **_* pattern', async () => {
-      await test_pattern('**_* '.repeat(50000));
+      await test_pattern('**_* '.repeat(4000));
     });
 
     it('backtick ``\\``\\`` pattern', async () => {
