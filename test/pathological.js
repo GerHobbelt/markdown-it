@@ -1,3 +1,4 @@
+/* eslint-disable no-bitwise */
 
 const needle = require('needle');
 const assert = require('assert');
@@ -22,14 +23,14 @@ async function test_pattern(func) {
   let err;
   let spinner = {
     __frames: [
-      "⢹",
-      "⢺",
-      "⢼",
-      "⣸",
-      "⣇",
-      "⡧",
-      "⡗",
-      "⡏"
+      '⢹',
+      '⢺',
+      '⢼',
+      '⣸',
+      '⣇',
+      '⡧',
+      '⡗',
+      '⡏'
     ],
     __pos: 0,
     __handle: null,
@@ -52,7 +53,7 @@ async function test_pattern(func) {
     end: function endSpinner() {
       clearInterval(this.__handle);
       this.__handle = null;
-    },
+    }
   };
 
   const TIME_LIMIT = 1000;
@@ -80,12 +81,12 @@ async function test_pattern(func) {
       await worker.end();
     }
 
-    let entry = marky.stop('pathological_test');    
+    let entry = marky.stop('pathological_test');
     dt = entry.duration;
     total_time_spent += dt;
 
     if (err) errcnt++;
-  
+
     process.stdout.write(`${spinner.frame()} N=${n}, dt=${Math.round(dt)}ms, err:${err ? 'Y' : '-'}, mode=${mode}  \r`);
 
     // rough heuristic to quickly find the limit, whether or not the underlying algo is exponential
@@ -116,15 +117,15 @@ async function test_pattern(func) {
       if (err) {
         // current N is too much. Assume exponential behavior so estimate next N far below the half-way mark:
         let dn = n - last_good_n;
-        // when the distance between 'last-known-good' and 'bad' gets below 
-        // a certain threshold (bad is within 15% of last-known-good), 
+        // when the distance between 'last-known-good' and 'bad' gets below
+        // a certain threshold (bad is within 15% of last-known-good),
         // we stop the search to save time:
         if (last_good_n && dn <= 0.15 * last_good_n) {
           terminate_reason = 'within 15% of last good N';
           break;
         }
 
-        n = last_good_n + dn * 0.35 + 1; 
+        n = last_good_n + dn * 0.35 + 1;
       } else {
         last_good_dt = dt;
         last_good_n = n;
@@ -134,7 +135,7 @@ async function test_pattern(func) {
           terminate_reason = 'within 33% of time limit';
           break;
         }
-        n += 0.25 * last_good_n; 
+        n += 0.25 * last_good_n;
       }
     }
     // convert n to integer
@@ -143,8 +144,8 @@ async function test_pattern(func) {
 
   spinner.end();
   // process.stdout.write(`            N=${last_good_n} (duration: ${Math.round(last_good_dt)}ms, rounds: ${rounds}, mode: ${mode}, errCnt: ${errcnt}, exit resaon: ${terminate_reason})\n`);
-  
-  // clearly mark potentially exponential pathological tests by printing their N 'depth' in white: 
+
+  // clearly mark potentially exponential pathological tests by printing their N 'depth' in white:
   if (last_good_n < 10000) {
     process.stdout.write(`            N = ${last_good_n}                           \n`);
   } else {
