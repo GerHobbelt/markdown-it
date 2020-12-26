@@ -21751,15 +21751,6 @@ var demo = function() {
     __proto__: null
   });
   var commonjsGlobal = typeof globalThis !== "undefined" ? globalThis : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : {};
-  function createCommonjsModule(fn, basedir, module) {
-    return module = {
-      path: basedir,
-      exports: {},
-      require: function(path, base) {
-        return commonjsRequire(path, base === undefined || base === null ? module.path : base);
-      }
-    }, fn(module, module.exports), module.exports;
-  }
   function getAugmentedNamespace(n) {
     if (n.__esModule) return n;
     var a = Object.defineProperty({}, "__esModule", {
@@ -21776,8 +21767,14 @@ var demo = function() {
     }));
     return a;
   }
-  function commonjsRequire() {
-    throw new Error("Dynamic requires are not currently supported by @rollup/plugin-commonjs");
+  function createCommonjsModule(fn) {
+    var module = {
+      exports: {}
+    };
+    return fn(module, module.exports), module.exports;
+  }
+  function commonjsRequire(target) {
+    throw new Error('Could not dynamically require "' + target + '". Please configure the dynamicRequireTargets option of @rollup/plugin-commonjs appropriately for this require call to behave properly.');
   }
   var underscore = createCommonjsModule((function(module, exports) {
     //     Underscore.js 1.8.3
@@ -30952,7 +30949,7 @@ var demo = function() {
       // remove from require cache and from Prism
             delete require.cache[require.resolve(pathToLanguage)];
       delete Prism.languages[lang];
-      commonjsRequire();
+      commonjsRequire(pathToLanguage);
       loadedLanguages.add(lang);
     }));
   }
