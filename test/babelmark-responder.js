@@ -26,7 +26,7 @@ describe('babelmark responder app', function () {
       try {
         await request.get('/').expect(200);
         break;
-      } catch (e) {}
+      } catch (e) {  /* ignore */ }
       await timeout(100);
     }
   });

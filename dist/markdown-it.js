@@ -1,36 +1,20 @@
-/*! @gerhobbelt/markdown-it 12.0.2-49 https://github.com/GerHobbelt/markdown-it @license MIT */
+/*! @gerhobbelt/markdown-it 12.0.4-50 https://github.com/GerHobbelt/markdown-it @license MIT */
 (function(global, factory) {
-  typeof exports === "object" && typeof module !== "undefined" ? module.exports = factory() : typeof define === "function" && define.amd ? define(factory) : (global = typeof globalThis !== "undefined" ? globalThis : global || self, 
-  global.markdownit = factory());
-})(this, (function() {
+  typeof exports === "object" && typeof module !== "undefined" ? module.exports = factory(require("punycode")) : typeof define === "function" && define.amd ? define([ "punycode" ], factory) : (global = typeof globalThis !== "undefined" ? globalThis : global || self, 
+  global.markdownit = factory(global.punycode));
+})(this, (function(punycode) {
   "use strict";
-  function createCommonjsModule(fn, basedir, module) {
-    return module = {
-      path: basedir,
-      exports: {},
-      require: function(path, base) {
-        return commonjsRequire(path, base === undefined || base === null ? module.path : base);
-      }
-    }, fn(module, module.exports), module.exports;
+  function _interopDefaultLegacy(e) {
+    return e && typeof e === "object" && "default" in e ? e : {
+      default: e
+    };
   }
-  function getAugmentedNamespace(n) {
-    if (n.__esModule) return n;
-    var a = Object.defineProperty({}, "__esModule", {
-      value: true
-    });
-    Object.keys(n).forEach((function(k) {
-      var d = Object.getOwnPropertyDescriptor(n, k);
-      Object.defineProperty(a, k, d.get ? d : {
-        enumerable: true,
-        get: function() {
-          return n[k];
-        }
-      });
-    }));
-    return a;
-  }
-  function commonjsRequire() {
-    throw new Error("Dynamic requires are not currently supported by @rollup/plugin-commonjs");
+  var punycode__default =  _interopDefaultLegacy(punycode);
+  function createCommonjsModule(fn) {
+    var module = {
+      exports: {}
+    };
+    return fn(module, module.exports), module.exports;
   }
   var require$$0 = {
     Aacute: "\xc1",
@@ -3000,6 +2984,9 @@
         if (code === 10 /* \n */) {
           return result;
         }
+        if (code === 60 /* < */) {
+          return result;
+        }
         if (code === 62 /* > */) {
           result.pos = pos + 1;
           result.str = unescapeAll(str.slice(start + 1, pos));
@@ -3027,11 +3014,17 @@
         break;
       }
       if (code === 92 /* \ */ && pos + 1 < max) {
+        if (str.charCodeAt(pos + 1) === 32) {
+          break;
+        }
         pos += 2;
         continue;
       }
       if (code === 40 /* ( */) {
         level++;
+        if (level > 32) {
+          return result;
+        }
       }
       if (code === 41 /* ) */) {
         if (level === 0) {
@@ -3082,6 +3075,8 @@
         result.lines = lines;
         result.str = unescapeAll$1(str.slice(start + 1, pos));
         result.ok = true;
+        return result;
+      } else if (code === 40 /* ( */ && marker === 41 /* ) */) {
         return result;
       } else if (code === 10) {
         lines++;
@@ -3140,7 +3135,7 @@
       return highlighted + "\n";
     }
     // If language exists, inject class gently, without modifying original token.
-    // May be, one day we will add .clone() for token and simplify this part, but
+    // May be, one day we will add .deepClone() for token and simplify this part, but
     // now we prefer to keep things local.
         if (info) {
       i = token.attrIndex("class");
@@ -3148,6 +3143,7 @@
       if (i < 0) {
         tmpAttrs.push([ "class", options.langPrefix + langName ]);
       } else {
+        tmpAttrs[i] = tmpAttrs[i].slice();
         tmpAttrs[i][1] += " " + options.langPrefix + langName;
       }
       // Fake token just to render attributes
@@ -5396,7 +5392,7 @@
   };
   // List of valid html blocks names, according to commonmark spec
   // http://jgm.github.io/CommonMark/spec.html#html-blocks
-    var html_blocks = [ "address", "article", "aside", "base", "basefont", "blockquote", "body", "caption", "center", "col", "colgroup", "dd", "details", "dialog", "dir", "div", "dl", "dt", "fieldset", "figcaption", "figure", "footer", "form", "frame", "frameset", "h1", "h2", "h3", "h4", "h5", "h6", "head", "header", "hr", "html", "iframe", "legend", "li", "link", "main", "menu", "menuitem", "meta", "nav", "noframes", "ol", "optgroup", "option", "p", "param", "section", "source", "summary", "table", "tbody", "td", "tfoot", "th", "thead", "title", "tr", "track", "ul" ];
+    var html_blocks = [ "address", "article", "aside", "base", "basefont", "blockquote", "body", "caption", "center", "col", "colgroup", "dd", "details", "dialog", "dir", "div", "dl", "dt", "fieldset", "figcaption", "figure", "footer", "form", "frame", "frameset", "h1", "h2", "h3", "h4", "h5", "h6", "head", "header", "hr", "html", "iframe", "legend", "li", "link", "main", "menu", "menuitem", "nav", "noframes", "ol", "optgroup", "option", "p", "param", "section", "source", "summary", "table", "tbody", "td", "tfoot", "th", "thead", "title", "tr", "track", "ul" ];
   // Regexps to match html elements
     let attr_name = "[a-zA-Z_:@][a-zA-Z0-9:._-]*";
   let unquoted = "[^\"'=<>`\\x00-\\x20]+";
@@ -5407,7 +5403,7 @@
   let open_tag = "<[A-Za-z][A-Za-z0-9\\-]*" + attribute + "*\\s*\\/?>";
   let close_tag = "<\\/[A-Za-z][A-Za-z0-9\\-]*\\s*>";
   let comment = "\x3c!----\x3e|\x3c!--(?:-?[^>-])(?:-?[^-])*--\x3e";
-  let processing = "<[?].*?[?]>";
+  let processing = "<[?][\\s\\S]*?[?]>";
   let declaration = "<![A-Z]+\\s+[^>]*>";
   let cdata = "<!\\[CDATA\\[[\\s\\S]*?\\]\\]>";
   let HTML_TAG_RE = new RegExp("^(?:" + open_tag + "|" + close_tag + "|" + comment + "|" + processing + "|" + declaration + "|" + cdata + ")");
@@ -6076,24 +6072,35 @@
   };
   // Parse backticks
     var backticks = function backtick(state, silent) {
-    let start, max, marker, matchStart, matchEnd, token, pos = state.pos, ch = state.src.charCodeAt(pos);
+    let start, max, marker, token, matchStart, matchEnd, openerLength, closerLength, pos = state.pos, ch = state.src.charCodeAt(pos);
     if (ch !== 96 /* ` */) {
       return false;
     }
     start = pos;
     pos++;
     max = state.posMax;
-    while (pos < max && state.src.charCodeAt(pos) === 96 /* ` */) {
+    // scan marker length
+        while (pos < max && state.src.charCodeAt(pos) === 96 /* ` */) {
       pos++;
     }
     marker = state.src.slice(start, pos);
+    openerLength = marker.length;
+    if (state.backticksScanned && (state.backticks[openerLength] || 0) <= start) {
+      if (!silent) state.pending += marker;
+      state.pos += openerLength;
+      return true;
+    }
     matchStart = matchEnd = pos;
-    while ((matchStart = state.src.indexOf("`", matchEnd)) !== -1) {
+    // Nothing found in the cache, scan until the end of the line (or until marker is found)
+        while ((matchStart = state.src.indexOf("`", matchEnd)) !== -1) {
       matchEnd = matchStart + 1;
-      while (matchEnd < max && state.src.charCodeAt(matchEnd) === 96 /* ` */) {
+      // scan marker length
+            while (matchEnd < max && state.src.charCodeAt(matchEnd) === 96 /* ` */) {
         matchEnd++;
       }
-      if (matchEnd - matchStart === marker.length) {
+      closerLength = matchEnd - matchStart;
+      if (closerLength === openerLength) {
+        // Found matching closer length.
         if (!silent) {
           token = state.push("code_inline", "code", 0);
           token.markup = marker;
@@ -6105,11 +6112,13 @@
         state.pos = matchEnd;
         return true;
       }
+      // Some different length found, put it in cache as upper limit of where closer can be found
+            state.backticks[closerLength] = matchStart;
     }
-    if (!silent) {
-      state.pending += marker;
-    }
-    state.pos += marker.length;
+    // Scanned through the end, didn't find anything
+        state.backticksScanned = true;
+    if (!silent) state.pending += marker;
+    state.pos += openerLength;
     return true;
   };
   // ~~strike through~~
@@ -6150,7 +6159,8 @@
         position: start,
         length: 0,
         // disable "rule of 3" length checks meant for emphasis
-        jump: i,
+        jump: i / 2,
+        // for `~~` 1 marker = 2 characters
         token: state.tokens.length - 1,
         end: -1,
         open: scanned.can_open,
@@ -6326,7 +6336,7 @@
     let normalizeReference$1 = utils.normalizeReference;
   let isSpace$9 = utils.isSpace;
   var link = function link(state, silent) {
-    let attrs, code, label, labelEnd, labelStart, pos, res, ref, title, token, href = "", oldPos = state.pos, max = state.posMax, start = state.pos, parseReference = true;
+    let attrs, code, label, labelEnd, labelStart, pos, res, ref, token, href = "", title = "", oldPos = state.pos, max = state.posMax, start = state.pos, parseReference = true;
     if (state.src.charCodeAt(state.pos) !== 91 /* [ */) {
       return false;
     }
@@ -6364,32 +6374,30 @@
         } else {
           href = "";
         }
-      }
-      // [link](  <href>  "title"  )
-      //                ^^ skipping these spaces
-            start = pos;
-      for (;pos < max; pos++) {
-        code = state.src.charCodeAt(pos);
-        if (!isSpace$9(code) && code !== 10) {
-          break;
-        }
-      }
-      // [link](  <href>  "title"  )
-      //                  ^^^^^^^ parsing link title
-            res = state.md.helpers.parseLinkTitle(state.src, pos, state.posMax);
-      if (pos < max && start !== pos && res.ok) {
-        title = res.str;
-        pos = res.pos;
         // [link](  <href>  "title"  )
-        //                         ^^ skipping these spaces
-                for (;pos < max; pos++) {
+        //                ^^ skipping these spaces
+                start = pos;
+        for (;pos < max; pos++) {
           code = state.src.charCodeAt(pos);
           if (!isSpace$9(code) && code !== 10) {
             break;
           }
         }
-      } else {
-        title = "";
+        // [link](  <href>  "title"  )
+        //                  ^^^^^^^ parsing link title
+                res = state.md.helpers.parseLinkTitle(state.src, pos, state.posMax);
+        if (pos < max && start !== pos && res.ok) {
+          title = res.str;
+          pos = res.pos;
+          // [link](  <href>  "title"  )
+          //                         ^^ skipping these spaces
+                    for (;pos < max; pos++) {
+            code = state.src.charCodeAt(pos);
+            if (!isSpace$9(code) && code !== 10) {
+              break;
+            }
+          }
+        }
       }
       if (pos >= max || state.src.charCodeAt(pos) !== 41 /* ) */) {
         // parsing a valid shortcut link failed, fallback to reference
@@ -6582,21 +6590,23 @@
     return true;
   };
   // Process autolinks '<protocol:...>'
-  /*eslint max-len:0*/  let EMAIL_RE = /^<([a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*)>/;
-  let AUTOLINK_RE = /^<([a-zA-Z][a-zA-Z0-9+.\-]{1,31}):([^<>\x00-\x20]*)>/;
+  /*eslint max-len:0*/  let EMAIL_RE = /^([a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*)$/;
+  let AUTOLINK_RE = /^([a-zA-Z][a-zA-Z0-9+.\-]{1,31}):([^<>\x00-\x20]*)$/;
   var autolink = function autolink(state, silent) {
-    let tail, linkMatch, emailMatch, url, fullUrl, token, pos = state.pos;
+    let url, fullUrl, token, start, max, pos = state.pos;
     if (state.src.charCodeAt(pos) !== 60 /* < */) {
       return false;
     }
-    tail = state.src.slice(pos);
-    if (tail.indexOf(">") < 0) {
-      return false;
+    start = state.pos;
+    max = state.posMax;
+    for (;;) {
+      if (++pos >= max) return false;
+      let ch = state.src.charCodeAt(pos);
+      if (ch === 60 /* < */) return false;
+      if (ch === 62 /* > */) break;
     }
-    if (AUTOLINK_RE.test(tail)) {
-      linkMatch = tail.match(AUTOLINK_RE);
-      let matchLen = linkMatch[0].length;
-      url = linkMatch[0].slice(1, -1);
+    url = state.src.slice(start + 1, pos);
+    if (AUTOLINK_RE.test(url)) {
       fullUrl = state.md.normalizeLink(url);
       if (!state.md.validateLink(fullUrl)) {
         return false;
@@ -6606,25 +6616,22 @@
         token.attrs = [ [ "href", fullUrl ] ];
         token.markup = "autolink";
         token.info = "auto";
-        token.position = pos;
-        token.size = matchLen;
+        token.position = start;
+        token.size = pos - start + 2;
         token = state.push("text", "", 0);
         token.content = state.md.normalizeLinkText(url);
-        token.position = pos;
-        token.size = token.content.length;
+        token.position = start + 1;
+        token.size = pos - start;
         token = state.push("link_close", "a", -1);
         token.markup = "autolink";
         token.info = "auto";
-        token.position = pos + matchLen;
+        token.position = pos;
         token.size = 0;
       }
-      state.pos += matchLen;
+      state.pos = pos + 1;
       return true;
     }
-    if (EMAIL_RE.test(tail)) {
-      emailMatch = tail.match(EMAIL_RE);
-      let matchLen = emailMatch[0].length;
-      url = emailMatch[0].slice(1, -1);
+    if (EMAIL_RE.test(url)) {
       fullUrl = state.md.normalizeLink("mailto:" + url);
       if (!state.md.validateLink(fullUrl)) {
         return false;
@@ -6634,19 +6641,19 @@
         token.attrs = [ [ "href", fullUrl ] ];
         token.markup = "autolink";
         token.info = "auto";
-        token.position = pos;
-        token.size = matchLen;
+        token.position = start;
+        token.size = pos - start + 2;
         token = state.push("text", "", 0);
         token.content = state.md.normalizeLinkText(url);
-        token.position = pos;
-        token.size = token.content.length;
+        token.position = start + 1;
+        token.size = pos - start;
         token = state.push("link_close", "a", -1);
         token.markup = "autolink";
         token.info = "auto";
-        token.position = pos + matchLen;
+        token.position = pos;
         token.size = 0;
       }
-      state.pos += matchLen;
+      state.pos = pos + 1;
       return true;
     }
     return false;
@@ -6747,12 +6754,13 @@
         openersBottom[closer.marker] = [ -1, -1, -1 ];
       }
       minOpenerIdx = openersBottom[closer.marker][closer.length % 3];
-      newMinOpenerIdx = -1;
       openerIdx = closerIdx - closer.jump - 1;
+      // avoid crash if `closer.jump` is pointing outside of the array, see #742
+            if (openerIdx < -1) openerIdx = -1;
+      newMinOpenerIdx = openerIdx;
       for (;openerIdx > minOpenerIdx; openerIdx -= opener.jump + 1) {
         opener = delimiters[openerIdx];
         if (opener.marker !== closer.marker) continue;
-        if (newMinOpenerIdx === -1) newMinOpenerIdx = openerIdx;
         if (opener.open && opener.end < 0) {
           isOddMatch = false;
           // from spec:
@@ -6865,6 +6873,9 @@
         this.delimiters = [];
     // Stack of delimiter lists for upper level tags
         this._prev_delimiters = [];
+    // backtick length => last seen position
+        this.backticks = {};
+    this.backticksScanned = false;
   }
   // Flush pending text
   
@@ -7671,386 +7682,6 @@
 	 * Override to modify basic RegExp-s.
 	 **/  LinkifyIt.prototype.onCompile = function onCompile() {};
   var linkifyIt = LinkifyIt;
-  /*! https://mths.be/punycode v1.4.1 by @mathias */
-  /** Highest positive signed 32-bit float value */  var maxInt = 2147483647;
- // aka. 0x7FFFFFFF or 2^31-1
-  /** Bootstring parameters */  var base = 36;
-  var tMin = 1;
-  var tMax = 26;
-  var skew = 38;
-  var damp = 700;
-  var initialBias = 72;
-  var initialN = 128;
- // 0x80
-    var delimiter = "-";
- // '\x2D'
-  /** Regular expressions */  var regexPunycode = /^xn--/;
-  var regexNonASCII = /[^\x20-\x7E]/;
- // unprintable ASCII chars + non-ASCII chars
-    var regexSeparators = /[\x2E\u3002\uFF0E\uFF61]/g;
- // RFC 3490 separators
-  /** Error messages */  var errors = {
-    overflow: "Overflow: input needs wider integers to process",
-    "not-basic": "Illegal input >= 0x80 (not a basic code point)",
-    "invalid-input": "Invalid input"
-  };
-  /** Convenience shortcuts */  var baseMinusTMin = base - tMin;
-  var floor = Math.floor;
-  var stringFromCharCode = String.fromCharCode;
-  /*--------------------------------------------------------------------------*/
-  /**
-	 * A generic error utility function.
-	 * @private
-	 * @param {String} type The error type.
-	 * @returns {Error} Throws a `RangeError` with the applicable error message.
-	 */  function error(type) {
-    throw new RangeError(errors[type]);
-  }
-  /**
-	 * A generic `Array#map` utility function.
-	 * @private
-	 * @param {Array} array The array to iterate over.
-	 * @param {Function} callback The function that gets called for every array
-	 * item.
-	 * @returns {Array} A new array of values returned by the callback function.
-	 */  function map(array, fn) {
-    var length = array.length;
-    var result = [];
-    while (length--) {
-      result[length] = fn(array[length]);
-    }
-    return result;
-  }
-  /**
-	 * A simple `Array#map`-like wrapper to work with domain name strings or email
-	 * addresses.
-	 * @private
-	 * @param {String} domain The domain name or email address.
-	 * @param {Function} callback The function that gets called for every
-	 * character.
-	 * @returns {Array} A new string of characters returned by the callback
-	 * function.
-	 */  function mapDomain(string, fn) {
-    var parts = string.split("@");
-    var result = "";
-    if (parts.length > 1) {
-      // In email addresses, only the domain name should be punycoded. Leave
-      // the local part (i.e. everything up to `@`) intact.
-      result = parts[0] + "@";
-      string = parts[1];
-    }
-    // Avoid `split(regex)` for IE8 compatibility. See #17.
-        string = string.replace(regexSeparators, ".");
-    var labels = string.split(".");
-    var encoded = map(labels, fn).join(".");
-    return result + encoded;
-  }
-  /**
-	 * Creates an array containing the numeric code points of each Unicode
-	 * character in the string. While JavaScript uses UCS-2 internally,
-	 * this function will convert a pair of surrogate halves (each of which
-	 * UCS-2 exposes as separate characters) into a single code point,
-	 * matching UTF-16.
-	 * @see `punycode.ucs2.encode`
-	 * @see <https://mathiasbynens.be/notes/javascript-encoding>
-	 * @memberOf punycode.ucs2
-	 * @name decode
-	 * @param {String} string The Unicode input string (UCS-2).
-	 * @returns {Array} The new array of code points.
-	 */  function ucs2decode(string) {
-    var output = [], counter = 0, length = string.length, value, extra;
-    while (counter < length) {
-      value = string.charCodeAt(counter++);
-      if (value >= 55296 && value <= 56319 && counter < length) {
-        // high surrogate, and there is a next character
-        extra = string.charCodeAt(counter++);
-        if ((extra & 64512) == 56320) {
-          // low surrogate
-          output.push(((value & 1023) << 10) + (extra & 1023) + 65536);
-        } else {
-          // unmatched surrogate; only append this code unit, in case the next
-          // code unit is the high surrogate of a surrogate pair
-          output.push(value);
-          counter--;
-        }
-      } else {
-        output.push(value);
-      }
-    }
-    return output;
-  }
-  /**
-	 * Creates a string based on an array of numeric code points.
-	 * @see `punycode.ucs2.decode`
-	 * @memberOf punycode.ucs2
-	 * @name encode
-	 * @param {Array} codePoints The array of numeric code points.
-	 * @returns {String} The new Unicode string (UCS-2).
-	 */  function ucs2encode(array) {
-    return map(array, (function(value) {
-      var output = "";
-      if (value > 65535) {
-        value -= 65536;
-        output += stringFromCharCode(value >>> 10 & 1023 | 55296);
-        value = 56320 | value & 1023;
-      }
-      output += stringFromCharCode(value);
-      return output;
-    })).join("");
-  }
-  /**
-	 * Converts a basic code point into a digit/integer.
-	 * @see `digitToBasic()`
-	 * @private
-	 * @param {Number} codePoint The basic numeric code point value.
-	 * @returns {Number} The numeric value of a basic code point (for use in
-	 * representing integers) in the range `0` to `base - 1`, or `base` if
-	 * the code point does not represent a value.
-	 */  function basicToDigit(codePoint) {
-    if (codePoint - 48 < 10) {
-      return codePoint - 22;
-    }
-    if (codePoint - 65 < 26) {
-      return codePoint - 65;
-    }
-    if (codePoint - 97 < 26) {
-      return codePoint - 97;
-    }
-    return base;
-  }
-  /**
-	 * Converts a digit/integer into a basic code point.
-	 * @see `basicToDigit()`
-	 * @private
-	 * @param {Number} digit The numeric value of a basic code point.
-	 * @returns {Number} The basic code point whose value (when used for
-	 * representing integers) is `digit`, which needs to be in the range
-	 * `0` to `base - 1`. If `flag` is non-zero, the uppercase form is
-	 * used; else, the lowercase form is used. The behavior is undefined
-	 * if `flag` is non-zero and `digit` has no uppercase form.
-	 */  function digitToBasic(digit, flag) {
-    //  0..25 map to ASCII a..z or A..Z
-    // 26..35 map to ASCII 0..9
-    return digit + 22 + 75 * (digit < 26) - ((flag != 0) << 5);
-  }
-  /**
-	 * Bias adaptation function as per section 3.4 of RFC 3492.
-	 * https://tools.ietf.org/html/rfc3492#section-3.4
-	 * @private
-	 */  function adapt(delta, numPoints, firstTime) {
-    var k = 0;
-    delta = firstTime ? floor(delta / damp) : delta >> 1;
-    delta += floor(delta / numPoints);
-    for (;delta > baseMinusTMin * tMax >> 1; k += base) {
-      delta = floor(delta / baseMinusTMin);
-    }
-    return floor(k + (baseMinusTMin + 1) * delta / (delta + skew));
-  }
-  /**
-	 * Converts a Punycode string of ASCII-only symbols to a string of Unicode
-	 * symbols.
-	 * @memberOf punycode
-	 * @param {String} input The Punycode string of ASCII-only symbols.
-	 * @returns {String} The resulting string of Unicode symbols.
-	 */  function decode$2(input) {
-    // Don't use UCS-2
-    var output = [], inputLength = input.length, out, i = 0, n = initialN, bias = initialBias, basic, j, index, oldi, w, k, digit, t, 
-    /** Cached calculation results */
-    baseMinusT;
-    // Handle the basic code points: let `basic` be the number of input code
-    // points before the last delimiter, or `0` if there is none, then copy
-    // the first basic code points to the output.
-        basic = input.lastIndexOf(delimiter);
-    if (basic < 0) {
-      basic = 0;
-    }
-    for (j = 0; j < basic; ++j) {
-      // if it's not a basic code point
-      if (input.charCodeAt(j) >= 128) {
-        error("not-basic");
-      }
-      output.push(input.charCodeAt(j));
-    }
-    // Main decoding loop: start just after the last delimiter if any basic code
-    // points were copied; start at the beginning otherwise.
-        for (index = basic > 0 ? basic + 1 : 0; index < inputLength; ) {
-      // `index` is the index of the next character to be consumed.
-      // Decode a generalized variable-length integer into `delta`,
-      // which gets added to `i`. The overflow checking is easier
-      // if we increase `i` as we go, then subtract off its starting
-      // value at the end to obtain `delta`.
-      for (oldi = i, w = 1, k = base; ;k += base) {
-        if (index >= inputLength) {
-          error("invalid-input");
-        }
-        digit = basicToDigit(input.charCodeAt(index++));
-        if (digit >= base || digit > floor((maxInt - i) / w)) {
-          error("overflow");
-        }
-        i += digit * w;
-        t = k <= bias ? tMin : k >= bias + tMax ? tMax : k - bias;
-        if (digit < t) {
-          break;
-        }
-        baseMinusT = base - t;
-        if (w > floor(maxInt / baseMinusT)) {
-          error("overflow");
-        }
-        w *= baseMinusT;
-      }
-      out = output.length + 1;
-      bias = adapt(i - oldi, out, oldi == 0);
-      // `i` was supposed to wrap around from `out` to `0`,
-      // incrementing `n` each time, so we'll fix that now:
-            if (floor(i / out) > maxInt - n) {
-        error("overflow");
-      }
-      n += floor(i / out);
-      i %= out;
-      // Insert `n` at position `i` of the output
-            output.splice(i++, 0, n);
-    }
-    return ucs2encode(output);
-  }
-  /**
-	 * Converts a string of Unicode symbols (e.g. a domain name label) to a
-	 * Punycode string of ASCII-only symbols.
-	 * @memberOf punycode
-	 * @param {String} input The string of Unicode symbols.
-	 * @returns {String} The resulting Punycode string of ASCII-only symbols.
-	 */  function encode$2(input) {
-    var n, delta, handledCPCount, basicLength, bias, j, m, q, k, t, currentValue, output = [], 
-    /** `inputLength` will hold the number of code points in `input`. */
-    inputLength, 
-    /** Cached calculation results */
-    handledCPCountPlusOne, baseMinusT, qMinusT;
-    // Convert the input in UCS-2 to Unicode
-        input = ucs2decode(input);
-    // Cache the length
-        inputLength = input.length;
-    // Initialize the state
-        n = initialN;
-    delta = 0;
-    bias = initialBias;
-    // Handle the basic code points
-        for (j = 0; j < inputLength; ++j) {
-      currentValue = input[j];
-      if (currentValue < 128) {
-        output.push(stringFromCharCode(currentValue));
-      }
-    }
-    handledCPCount = basicLength = output.length;
-    // `handledCPCount` is the number of code points that have been handled;
-    // `basicLength` is the number of basic code points.
-    // Finish the basic string - if it is not empty - with a delimiter
-        if (basicLength) {
-      output.push(delimiter);
-    }
-    // Main encoding loop:
-        while (handledCPCount < inputLength) {
-      // All non-basic code points < n have been handled already. Find the next
-      // larger one:
-      for (m = maxInt, j = 0; j < inputLength; ++j) {
-        currentValue = input[j];
-        if (currentValue >= n && currentValue < m) {
-          m = currentValue;
-        }
-      }
-      // Increase `delta` enough to advance the decoder's <n,i> state to <m,0>,
-      // but guard against overflow
-            handledCPCountPlusOne = handledCPCount + 1;
-      if (m - n > floor((maxInt - delta) / handledCPCountPlusOne)) {
-        error("overflow");
-      }
-      delta += (m - n) * handledCPCountPlusOne;
-      n = m;
-      for (j = 0; j < inputLength; ++j) {
-        currentValue = input[j];
-        if (currentValue < n && ++delta > maxInt) {
-          error("overflow");
-        }
-        if (currentValue == n) {
-          // Represent delta as a generalized variable-length integer
-          for (q = delta, k = base; ;k += base) {
-            t = k <= bias ? tMin : k >= bias + tMax ? tMax : k - bias;
-            if (q < t) {
-              break;
-            }
-            qMinusT = q - t;
-            baseMinusT = base - t;
-            output.push(stringFromCharCode(digitToBasic(t + qMinusT % baseMinusT, 0)));
-            q = floor(qMinusT / baseMinusT);
-          }
-          output.push(stringFromCharCode(digitToBasic(q, 0)));
-          bias = adapt(delta, handledCPCountPlusOne, handledCPCount == basicLength);
-          delta = 0;
-          ++handledCPCount;
-        }
-      }
-      ++delta;
-      ++n;
-    }
-    return output.join("");
-  }
-  /**
-	 * Converts a Punycode string representing a domain name or an email address
-	 * to Unicode. Only the Punycoded parts of the input will be converted, i.e.
-	 * it doesn't matter if you call it on a string that has already been
-	 * converted to Unicode.
-	 * @memberOf punycode
-	 * @param {String} input The Punycoded domain name or email address to
-	 * convert to Unicode.
-	 * @returns {String} The Unicode representation of the given Punycode
-	 * string.
-	 */  function toUnicode(input) {
-    return mapDomain(input, (function(string) {
-      return regexPunycode.test(string) ? decode$2(string.slice(4).toLowerCase()) : string;
-    }));
-  }
-  /**
-	 * Converts a Unicode string representing a domain name or an email address to
-	 * Punycode. Only the non-ASCII parts of the domain name will be converted,
-	 * i.e. it doesn't matter if you call it with a domain that's already in
-	 * ASCII.
-	 * @memberOf punycode
-	 * @param {String} input The domain name or email address to convert, as a
-	 * Unicode string.
-	 * @returns {String} The Punycode representation of the given domain name or
-	 * email address.
-	 */  function toASCII(input) {
-    return mapDomain(input, (function(string) {
-      return regexNonASCII.test(string) ? "xn--" + encode$2(string) : string;
-    }));
-  }
-  var version = "1.4.1";
-  /**
-	 * An object of methods to convert from JavaScript's internal character
-	 * representation (UCS-2) to Unicode code points, and back.
-	 * @see <https://mathiasbynens.be/notes/javascript-encoding>
-	 * @memberOf punycode
-	 * @type Object
-	 */  var ucs2 = {
-    decode: ucs2decode,
-    encode: ucs2encode
-  };
-  var punycode = {
-    version: version,
-    ucs2: ucs2,
-    toASCII: toASCII,
-    toUnicode: toUnicode,
-    encode: encode$2,
-    decode: decode$2
-  };
-  var punycode$1 =  Object.freeze({
-    __proto__: null,
-    decode: decode$2,
-    encode: encode$2,
-    toUnicode: toUnicode,
-    toASCII: toASCII,
-    version: version,
-    ucs2: ucs2,
-    default: punycode
-  });
   // markdown-it default options
     var _default = {
     options: {
@@ -8225,7 +7856,6 @@
       }
     }
   };
-  var punycode$2 =  getAugmentedNamespace(punycode$1);
   // Main parser class
     let config = {
     default: _default,
@@ -8258,7 +7888,7 @@
       // something we shouldn't (e.g. `skype:name` treated as `skype:host`)
       if (!parsed.protocol || RECODE_HOSTNAME_FOR.indexOf(parsed.protocol) >= 0) {
         try {
-          parsed.hostname = punycode$2.toASCII(parsed.hostname);
+          parsed.hostname = punycode__default["default"].toASCII(parsed.hostname);
         } catch (er) {}
       }
     }
@@ -8279,9 +7909,9 @@
       if (!parsed.protocol || RECODE_HOSTNAME_FOR.indexOf(parsed.protocol) >= 0) {
         try {
           if (this.options && !this.options.highSecurity) {
-            parsed.hostname = punycode$2.toUnicode(parsed.hostname);
+            parsed.hostname = punycode__default["default"].toUnicode(parsed.hostname);
           } else {
-            parsed.hostname = punycode$2.toASCII(parsed.hostname);
+            parsed.hostname = punycode__default["default"].toASCII(parsed.hostname);
           }
         } catch (er) {}
       }

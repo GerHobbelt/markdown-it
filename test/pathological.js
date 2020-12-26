@@ -1,4 +1,4 @@
-'use strict';
+
 
 
 const needle = require('needle');
@@ -19,12 +19,10 @@ async function test_pattern(str) {
     result = await Promise.race([
       worker.render(str),
 
-      new Promise(function (resolve, reject){
-        setTimeout(() => { reject(new Error('Terminated (timeout exceeded)')); }, 3000);
+      new Promise(function (resolve, reject) {
+        setTimeout(() => { reject(new Error('Terminated (timeout exceeded)')); }, 30000);
       })
     ]);
-  } catch (e) {
-    throw e;
   } finally {
     await worker.end();
   }

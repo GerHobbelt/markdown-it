@@ -277,6 +277,8 @@ Using Components In Headers
 
 
 
+/*
+
 
 let assert = require('chai').assert;
 let markdownit = require('../');
@@ -523,7 +525,7 @@ xdescribe('vuepress with fully pimped markdown-it', function () {
       require('@gerhobbelt/markdown-it-highlightjs')
     ))
 
-  /*  .use(require('@gerhobbelt/markdown-it-responsive'), {
+    .use(require('@gerhobbelt/markdown-it-responsive'), {
       responsive: {
         srcset: {
           'header-*': [ {
@@ -543,7 +545,7 @@ xdescribe('vuepress with fully pimped markdown-it', function () {
         }
       }
     })
-  */
+
     .use(require('@gerhobbelt/markdown-it-samp'))
     //.use(require('@gerhobbelt/markdown-it-sanitizer'))    <-- don't use this one when you want custom html to make it through to the output!
     .use(require('@gerhobbelt/markdown-it-smartarrows'))
@@ -643,4 +645,5 @@ You can use this component in header to add some status for some API:
 
 
 
+*/
 
