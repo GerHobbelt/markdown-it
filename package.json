@@ -1,6 +1,6 @@
 {
   "name": "@gerhobbelt/markdown-it",
-  "version": "12.0.2-50",
+  "version": "12.0.3-50",
   "description": "Markdown-it - modern pluggable markdown parser.",
   "keywords": [
     "markdown",
@@ -106,10 +106,12 @@
     "eslint": "7.12.1",
     "express": "4.17.1",
     "gh-pages": "3.1.0",
+    "jest-worker": "26.6.2",
     "marked": "1.2.2",
     "microtime": "3.0.0",
     "mocha": "8.2.0",
-    "ndoc": "5.0.1",
+    "ndoc": "6.0.0",
+    "needle": "2.5.2",
     "nyc": "15.1.0",
     "prismjs": "1.22.0",
     "pug": "3.0.0",
@@ -119,7 +121,7 @@
     "rollup-plugin-terser": "7.0.2",
     "shelljs": "0.8.4",
     "stylus": "0.54.8",
-    "supertest": "6.0.0"
+    "supertest": "6.0.1"
   },
   "mocha": {
     "inline-diffs": true,
