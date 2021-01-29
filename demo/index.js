@@ -20790,7 +20790,7 @@ var demo = function() {
   core.registerLanguage("z80asm", z80asm_1);
   core.registerLanguage("zephir", zephir_1);
   var lib = core;
-  /*! markdown-it-abbr 1.0.4-23 https://github.com//GerHobbelt/markdown-it-abbr @license MIT */
+  /*! markdown-it-abbr 1.0.4-24 https://github.com//GerHobbelt/markdown-it-abbr @license MIT */
   // Enclose abbreviations in <abbr> tags
   
   /**
@@ -21613,7 +21613,7 @@ var demo = function() {
     __proto__: null,
     default: attributes
   });
-  /*! markdown-it-container 3.0.0-5 https://github.com//GerHobbelt/markdown-it-container @license MIT */
+  /*! markdown-it-container 3.0.0-6 https://github.com//GerHobbelt/markdown-it-container @license MIT */
   // Process block-level custom containers
   
     module.exports = function container_plugin(md, name, options) {
