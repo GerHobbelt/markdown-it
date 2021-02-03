@@ -1,4 +1,4 @@
-/*! @gerhobbelt/markdown-it 12.0.4-52 https://github.com/GerHobbelt/markdown-it @license MIT */
+/*! @gerhobbelt/markdown-it 12.0.4-53 https://github.com/GerHobbelt/markdown-it @license MIT */
 import punycode from "punycode";
 
 function createCommonjsModule(fn) {
