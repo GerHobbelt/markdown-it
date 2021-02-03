@@ -1,5 +1,12 @@
-var demo = function() {
+var demo = function(path, fs, url, buffer) {
   "use strict";
+  function _interopDefaultLegacy(e) {
+    return e && typeof e === "object" && "default" in e ? e : {
+      default: e
+    };
+  }
+  var path__default =  _interopDefaultLegacy(path);
+  var fs__default =  _interopDefaultLegacy(fs);
   var encodeCache = {};
   // Create a lookup array where anything but characters in `chars` string
   // and alphanumeric chars is percent-encoded.
@@ -5497,7 +5504,7 @@ var demo = function() {
       literal: "true false null",
       symbol: "if else return"
     };
-    var TITLE_MODE = hljs.inherit(hljs.TITLE_MODE, {
+    hljs.inherit(hljs.TITLE_MODE, {
       begin: "[a-zA-Z](\\.?\\w)*"
     });
     var NUMBERS = {
@@ -5519,7 +5526,7 @@ var demo = function() {
         begin: '""'
       } ]
     };
-    var VERBATIM_STRING_NO_LF = hljs.inherit(VERBATIM_STRING, {
+    hljs.inherit(VERBATIM_STRING, {
       illegal: /\n/
     });
     var SUBST = {
@@ -5558,7 +5565,7 @@ var demo = function() {
         begin: '""'
       }, SUBST ]
     };
-    var INTERPOLATED_VERBATIM_STRING_NO_LF = hljs.inherit(INTERPOLATED_VERBATIM_STRING, {
+    hljs.inherit(INTERPOLATED_VERBATIM_STRING, {
       illegal: /\n/,
       contains: [ {
         begin: "{{"
@@ -17698,7 +17705,7 @@ var demo = function() {
       className: "number",
       begin: "#[0-9A-Fa-f]+"
     };
-    var DEF_INTERNALS = {
+    ({
       className: "attribute",
       begin: "[A-Z\\_\\.\\-]+",
       end: ":",
@@ -17712,7 +17719,7 @@ var demo = function() {
           begin: "!important"
         } ]
       }
-    };
+    });
     return {
       name: "SCSS",
       case_insensitive: true,
@@ -23406,3671 +23413,7 @@ var demo = function() {
   var markdownItDefList =  Object.freeze({
     __proto__: null
   });
-  /*! markdown-it-emoji 1.4.0-6 https://github.com//GerHobbelt/markdown-it-emoji @license MIT */  var grinning = "\ud83d\ude00";
-  var smiley = "\ud83d\ude03";
-  var smile = "\ud83d\ude04";
-  var grin = "\ud83d\ude01";
-  var laughing = "\ud83d\ude06";
-  var satisfied = "\ud83d\ude06";
-  var sweat_smile = "\ud83d\ude05";
-  var rofl = "\ud83e\udd23";
-  var joy = "\ud83d\ude02";
-  var slightly_smiling_face = "\ud83d\ude42";
-  var upside_down_face = "\ud83d\ude43";
-  var wink = "\ud83d\ude09";
-  var blush = "\ud83d\ude0a";
-  var innocent = "\ud83d\ude07";
-  var smiling_face_with_three_hearts = "\ud83e\udd70";
-  var heart_eyes = "\ud83d\ude0d";
-  var star_struck = "\ud83e\udd29";
-  var kissing_heart = "\ud83d\ude18";
-  var kissing = "\ud83d\ude17";
-  var relaxed = "\u263a\ufe0f";
-  var kissing_closed_eyes = "\ud83d\ude1a";
-  var kissing_smiling_eyes = "\ud83d\ude19";
-  var smiling_face_with_tear = "\ud83e\udd72";
-  var yum = "\ud83d\ude0b";
-  var stuck_out_tongue = "\ud83d\ude1b";
-  var stuck_out_tongue_winking_eye = "\ud83d\ude1c";
-  var zany_face = "\ud83e\udd2a";
-  var stuck_out_tongue_closed_eyes = "\ud83d\ude1d";
-  var money_mouth_face = "\ud83e\udd11";
-  var hugs = "\ud83e\udd17";
-  var hand_over_mouth = "\ud83e\udd2d";
-  var shushing_face = "\ud83e\udd2b";
-  var thinking = "\ud83e\udd14";
-  var zipper_mouth_face = "\ud83e\udd10";
-  var raised_eyebrow = "\ud83e\udd28";
-  var neutral_face = "\ud83d\ude10";
-  var expressionless = "\ud83d\ude11";
-  var no_mouth = "\ud83d\ude36";
-  var smirk = "\ud83d\ude0f";
-  var unamused = "\ud83d\ude12";
-  var roll_eyes = "\ud83d\ude44";
-  var grimacing = "\ud83d\ude2c";
-  var lying_face = "\ud83e\udd25";
-  var relieved = "\ud83d\ude0c";
-  var pensive = "\ud83d\ude14";
-  var sleepy = "\ud83d\ude2a";
-  var drooling_face = "\ud83e\udd24";
-  var sleeping = "\ud83d\ude34";
-  var mask = "\ud83d\ude37";
-  var face_with_thermometer = "\ud83e\udd12";
-  var face_with_head_bandage = "\ud83e\udd15";
-  var nauseated_face = "\ud83e\udd22";
-  var vomiting_face = "\ud83e\udd2e";
-  var sneezing_face = "\ud83e\udd27";
-  var hot_face = "\ud83e\udd75";
-  var cold_face = "\ud83e\udd76";
-  var woozy_face = "\ud83e\udd74";
-  var dizzy_face = "\ud83d\ude35";
-  var exploding_head = "\ud83e\udd2f";
-  var cowboy_hat_face = "\ud83e\udd20";
-  var partying_face = "\ud83e\udd73";
-  var disguised_face = "\ud83e\udd78";
-  var sunglasses = "\ud83d\ude0e";
-  var nerd_face = "\ud83e\udd13";
-  var monocle_face = "\ud83e\uddd0";
-  var confused = "\ud83d\ude15";
-  var worried = "\ud83d\ude1f";
-  var slightly_frowning_face = "\ud83d\ude41";
-  var frowning_face = "\u2639\ufe0f";
-  var open_mouth = "\ud83d\ude2e";
-  var hushed = "\ud83d\ude2f";
-  var astonished = "\ud83d\ude32";
-  var flushed = "\ud83d\ude33";
-  var pleading_face = "\ud83e\udd7a";
-  var frowning = "\ud83d\ude26";
-  var anguished = "\ud83d\ude27";
-  var fearful = "\ud83d\ude28";
-  var cold_sweat = "\ud83d\ude30";
-  var disappointed_relieved = "\ud83d\ude25";
-  var cry = "\ud83d\ude22";
-  var sob = "\ud83d\ude2d";
-  var scream = "\ud83d\ude31";
-  var confounded = "\ud83d\ude16";
-  var persevere = "\ud83d\ude23";
-  var disappointed = "\ud83d\ude1e";
-  var sweat = "\ud83d\ude13";
-  var weary = "\ud83d\ude29";
-  var tired_face = "\ud83d\ude2b";
-  var yawning_face = "\ud83e\udd71";
-  var triumph = "\ud83d\ude24";
-  var rage = "\ud83d\ude21";
-  var pout = "\ud83d\ude21";
-  var angry = "\ud83d\ude20";
-  var cursing_face = "\ud83e\udd2c";
-  var smiling_imp = "\ud83d\ude08";
-  var imp = "\ud83d\udc7f";
-  var skull = "\ud83d\udc80";
-  var skull_and_crossbones = "\u2620\ufe0f";
-  var hankey = "\ud83d\udca9";
-  var poop = "\ud83d\udca9";
-  var shit = "\ud83d\udca9";
-  var clown_face = "\ud83e\udd21";
-  var japanese_ogre = "\ud83d\udc79";
-  var japanese_goblin = "\ud83d\udc7a";
-  var ghost = "\ud83d\udc7b";
-  var alien = "\ud83d\udc7d";
-  var space_invader = "\ud83d\udc7e";
-  var robot = "\ud83e\udd16";
-  var smiley_cat = "\ud83d\ude3a";
-  var smile_cat = "\ud83d\ude38";
-  var joy_cat = "\ud83d\ude39";
-  var heart_eyes_cat = "\ud83d\ude3b";
-  var smirk_cat = "\ud83d\ude3c";
-  var kissing_cat = "\ud83d\ude3d";
-  var scream_cat = "\ud83d\ude40";
-  var crying_cat_face = "\ud83d\ude3f";
-  var pouting_cat = "\ud83d\ude3e";
-  var see_no_evil = "\ud83d\ude48";
-  var hear_no_evil = "\ud83d\ude49";
-  var speak_no_evil = "\ud83d\ude4a";
-  var kiss = "\ud83d\udc8b";
-  var love_letter = "\ud83d\udc8c";
-  var cupid = "\ud83d\udc98";
-  var gift_heart = "\ud83d\udc9d";
-  var sparkling_heart = "\ud83d\udc96";
-  var heartpulse = "\ud83d\udc97";
-  var heartbeat = "\ud83d\udc93";
-  var revolving_hearts = "\ud83d\udc9e";
-  var two_hearts = "\ud83d\udc95";
-  var heart_decoration = "\ud83d\udc9f";
-  var heavy_heart_exclamation = "\u2763\ufe0f";
-  var broken_heart = "\ud83d\udc94";
-  var heart = "\u2764\ufe0f";
-  var orange_heart = "\ud83e\udde1";
-  var yellow_heart = "\ud83d\udc9b";
-  var green_heart = "\ud83d\udc9a";
-  var blue_heart = "\ud83d\udc99";
-  var purple_heart = "\ud83d\udc9c";
-  var brown_heart = "\ud83e\udd0e";
-  var black_heart = "\ud83d\udda4";
-  var white_heart = "\ud83e\udd0d";
-  var anger = "\ud83d\udca2";
-  var boom = "\ud83d\udca5";
-  var collision = "\ud83d\udca5";
-  var dizzy = "\ud83d\udcab";
-  var sweat_drops = "\ud83d\udca6";
-  var dash = "\ud83d\udca8";
-  var hole = "\ud83d\udd73\ufe0f";
-  var bomb = "\ud83d\udca3";
-  var speech_balloon = "\ud83d\udcac";
-  var eye_speech_bubble = "\ud83d\udc41\ufe0f\u200d\ud83d\udde8\ufe0f";
-  var left_speech_bubble = "\ud83d\udde8\ufe0f";
-  var right_anger_bubble = "\ud83d\uddef\ufe0f";
-  var thought_balloon = "\ud83d\udcad";
-  var zzz = "\ud83d\udca4";
-  var wave = "\ud83d\udc4b";
-  var raised_back_of_hand = "\ud83e\udd1a";
-  var raised_hand_with_fingers_splayed = "\ud83d\udd90\ufe0f";
-  var hand = "\u270b";
-  var raised_hand = "\u270b";
-  var vulcan_salute = "\ud83d\udd96";
-  var ok_hand = "\ud83d\udc4c";
-  var pinched_fingers = "\ud83e\udd0c";
-  var pinching_hand = "\ud83e\udd0f";
-  var v = "\u270c\ufe0f";
-  var crossed_fingers = "\ud83e\udd1e";
-  var love_you_gesture = "\ud83e\udd1f";
-  var metal = "\ud83e\udd18";
-  var call_me_hand = "\ud83e\udd19";
-  var point_left = "\ud83d\udc48";
-  var point_right = "\ud83d\udc49";
-  var point_up_2 = "\ud83d\udc46";
-  var middle_finger = "\ud83d\udd95";
-  var fu = "\ud83d\udd95";
-  var point_down = "\ud83d\udc47";
-  var point_up = "\u261d\ufe0f";
-  var thumbsup = "\ud83d\udc4d";
-  var thumbsdown = "\ud83d\udc4e";
-  var fist_raised = "\u270a";
-  var fist = "\u270a";
-  var fist_oncoming = "\ud83d\udc4a";
-  var facepunch = "\ud83d\udc4a";
-  var punch = "\ud83d\udc4a";
-  var fist_left = "\ud83e\udd1b";
-  var fist_right = "\ud83e\udd1c";
-  var clap = "\ud83d\udc4f";
-  var raised_hands = "\ud83d\ude4c";
-  var open_hands = "\ud83d\udc50";
-  var palms_up_together = "\ud83e\udd32";
-  var handshake = "\ud83e\udd1d";
-  var pray = "\ud83d\ude4f";
-  var writing_hand = "\u270d\ufe0f";
-  var nail_care = "\ud83d\udc85";
-  var selfie = "\ud83e\udd33";
-  var muscle = "\ud83d\udcaa";
-  var mechanical_arm = "\ud83e\uddbe";
-  var mechanical_leg = "\ud83e\uddbf";
-  var leg = "\ud83e\uddb5";
-  var foot = "\ud83e\uddb6";
-  var ear = "\ud83d\udc42";
-  var ear_with_hearing_aid = "\ud83e\uddbb";
-  var nose = "\ud83d\udc43";
-  var brain = "\ud83e\udde0";
-  var anatomical_heart = "\ud83e\udec0";
-  var lungs = "\ud83e\udec1";
-  var tooth = "\ud83e\uddb7";
-  var bone = "\ud83e\uddb4";
-  var eyes = "\ud83d\udc40";
-  var eye = "\ud83d\udc41\ufe0f";
-  var tongue = "\ud83d\udc45";
-  var lips = "\ud83d\udc44";
-  var baby = "\ud83d\udc76";
-  var child = "\ud83e\uddd2";
-  var boy = "\ud83d\udc66";
-  var girl = "\ud83d\udc67";
-  var adult = "\ud83e\uddd1";
-  var blond_haired_person = "\ud83d\udc71";
-  var man = "\ud83d\udc68";
-  var bearded_person = "\ud83e\uddd4";
-  var red_haired_man = "\ud83d\udc68\u200d\ud83e\uddb0";
-  var curly_haired_man = "\ud83d\udc68\u200d\ud83e\uddb1";
-  var white_haired_man = "\ud83d\udc68\u200d\ud83e\uddb3";
-  var bald_man = "\ud83d\udc68\u200d\ud83e\uddb2";
-  var woman = "\ud83d\udc69";
-  var red_haired_woman = "\ud83d\udc69\u200d\ud83e\uddb0";
-  var person_red_hair = "\ud83e\uddd1\u200d\ud83e\uddb0";
-  var curly_haired_woman = "\ud83d\udc69\u200d\ud83e\uddb1";
-  var person_curly_hair = "\ud83e\uddd1\u200d\ud83e\uddb1";
-  var white_haired_woman = "\ud83d\udc69\u200d\ud83e\uddb3";
-  var person_white_hair = "\ud83e\uddd1\u200d\ud83e\uddb3";
-  var bald_woman = "\ud83d\udc69\u200d\ud83e\uddb2";
-  var person_bald = "\ud83e\uddd1\u200d\ud83e\uddb2";
-  var blond_haired_woman = "\ud83d\udc71\u200d\u2640\ufe0f";
-  var blonde_woman = "\ud83d\udc71\u200d\u2640\ufe0f";
-  var blond_haired_man = "\ud83d\udc71\u200d\u2642\ufe0f";
-  var older_adult = "\ud83e\uddd3";
-  var older_man = "\ud83d\udc74";
-  var older_woman = "\ud83d\udc75";
-  var frowning_person = "\ud83d\ude4d";
-  var frowning_man = "\ud83d\ude4d\u200d\u2642\ufe0f";
-  var frowning_woman = "\ud83d\ude4d\u200d\u2640\ufe0f";
-  var pouting_face = "\ud83d\ude4e";
-  var pouting_man = "\ud83d\ude4e\u200d\u2642\ufe0f";
-  var pouting_woman = "\ud83d\ude4e\u200d\u2640\ufe0f";
-  var no_good = "\ud83d\ude45";
-  var no_good_man = "\ud83d\ude45\u200d\u2642\ufe0f";
-  var ng_man = "\ud83d\ude45\u200d\u2642\ufe0f";
-  var no_good_woman = "\ud83d\ude45\u200d\u2640\ufe0f";
-  var ng_woman = "\ud83d\ude45\u200d\u2640\ufe0f";
-  var ok_person = "\ud83d\ude46";
-  var ok_man = "\ud83d\ude46\u200d\u2642\ufe0f";
-  var ok_woman = "\ud83d\ude46\u200d\u2640\ufe0f";
-  var tipping_hand_person = "\ud83d\udc81";
-  var information_desk_person = "\ud83d\udc81";
-  var tipping_hand_man = "\ud83d\udc81\u200d\u2642\ufe0f";
-  var sassy_man = "\ud83d\udc81\u200d\u2642\ufe0f";
-  var tipping_hand_woman = "\ud83d\udc81\u200d\u2640\ufe0f";
-  var sassy_woman = "\ud83d\udc81\u200d\u2640\ufe0f";
-  var raising_hand = "\ud83d\ude4b";
-  var raising_hand_man = "\ud83d\ude4b\u200d\u2642\ufe0f";
-  var raising_hand_woman = "\ud83d\ude4b\u200d\u2640\ufe0f";
-  var deaf_person = "\ud83e\uddcf";
-  var deaf_man = "\ud83e\uddcf\u200d\u2642\ufe0f";
-  var deaf_woman = "\ud83e\uddcf\u200d\u2640\ufe0f";
-  var bow = "\ud83d\ude47";
-  var bowing_man = "\ud83d\ude47\u200d\u2642\ufe0f";
-  var bowing_woman = "\ud83d\ude47\u200d\u2640\ufe0f";
-  var facepalm = "\ud83e\udd26";
-  var man_facepalming = "\ud83e\udd26\u200d\u2642\ufe0f";
-  var woman_facepalming = "\ud83e\udd26\u200d\u2640\ufe0f";
-  var shrug = "\ud83e\udd37";
-  var man_shrugging = "\ud83e\udd37\u200d\u2642\ufe0f";
-  var woman_shrugging = "\ud83e\udd37\u200d\u2640\ufe0f";
-  var health_worker = "\ud83e\uddd1\u200d\u2695\ufe0f";
-  var man_health_worker = "\ud83d\udc68\u200d\u2695\ufe0f";
-  var woman_health_worker = "\ud83d\udc69\u200d\u2695\ufe0f";
-  var student = "\ud83e\uddd1\u200d\ud83c\udf93";
-  var man_student = "\ud83d\udc68\u200d\ud83c\udf93";
-  var woman_student = "\ud83d\udc69\u200d\ud83c\udf93";
-  var teacher = "\ud83e\uddd1\u200d\ud83c\udfeb";
-  var man_teacher = "\ud83d\udc68\u200d\ud83c\udfeb";
-  var woman_teacher = "\ud83d\udc69\u200d\ud83c\udfeb";
-  var judge = "\ud83e\uddd1\u200d\u2696\ufe0f";
-  var man_judge = "\ud83d\udc68\u200d\u2696\ufe0f";
-  var woman_judge = "\ud83d\udc69\u200d\u2696\ufe0f";
-  var farmer = "\ud83e\uddd1\u200d\ud83c\udf3e";
-  var man_farmer = "\ud83d\udc68\u200d\ud83c\udf3e";
-  var woman_farmer = "\ud83d\udc69\u200d\ud83c\udf3e";
-  var cook = "\ud83e\uddd1\u200d\ud83c\udf73";
-  var man_cook = "\ud83d\udc68\u200d\ud83c\udf73";
-  var woman_cook = "\ud83d\udc69\u200d\ud83c\udf73";
-  var mechanic = "\ud83e\uddd1\u200d\ud83d\udd27";
-  var man_mechanic = "\ud83d\udc68\u200d\ud83d\udd27";
-  var woman_mechanic = "\ud83d\udc69\u200d\ud83d\udd27";
-  var factory_worker = "\ud83e\uddd1\u200d\ud83c\udfed";
-  var man_factory_worker = "\ud83d\udc68\u200d\ud83c\udfed";
-  var woman_factory_worker = "\ud83d\udc69\u200d\ud83c\udfed";
-  var office_worker = "\ud83e\uddd1\u200d\ud83d\udcbc";
-  var man_office_worker = "\ud83d\udc68\u200d\ud83d\udcbc";
-  var woman_office_worker = "\ud83d\udc69\u200d\ud83d\udcbc";
-  var scientist = "\ud83e\uddd1\u200d\ud83d\udd2c";
-  var man_scientist = "\ud83d\udc68\u200d\ud83d\udd2c";
-  var woman_scientist = "\ud83d\udc69\u200d\ud83d\udd2c";
-  var technologist = "\ud83e\uddd1\u200d\ud83d\udcbb";
-  var man_technologist = "\ud83d\udc68\u200d\ud83d\udcbb";
-  var woman_technologist = "\ud83d\udc69\u200d\ud83d\udcbb";
-  var singer = "\ud83e\uddd1\u200d\ud83c\udfa4";
-  var man_singer = "\ud83d\udc68\u200d\ud83c\udfa4";
-  var woman_singer = "\ud83d\udc69\u200d\ud83c\udfa4";
-  var artist = "\ud83e\uddd1\u200d\ud83c\udfa8";
-  var man_artist = "\ud83d\udc68\u200d\ud83c\udfa8";
-  var woman_artist = "\ud83d\udc69\u200d\ud83c\udfa8";
-  var pilot = "\ud83e\uddd1\u200d\u2708\ufe0f";
-  var man_pilot = "\ud83d\udc68\u200d\u2708\ufe0f";
-  var woman_pilot = "\ud83d\udc69\u200d\u2708\ufe0f";
-  var astronaut = "\ud83e\uddd1\u200d\ud83d\ude80";
-  var man_astronaut = "\ud83d\udc68\u200d\ud83d\ude80";
-  var woman_astronaut = "\ud83d\udc69\u200d\ud83d\ude80";
-  var firefighter = "\ud83e\uddd1\u200d\ud83d\ude92";
-  var man_firefighter = "\ud83d\udc68\u200d\ud83d\ude92";
-  var woman_firefighter = "\ud83d\udc69\u200d\ud83d\ude92";
-  var police_officer = "\ud83d\udc6e";
-  var cop = "\ud83d\udc6e";
-  var policeman = "\ud83d\udc6e\u200d\u2642\ufe0f";
-  var policewoman = "\ud83d\udc6e\u200d\u2640\ufe0f";
-  var detective = "\ud83d\udd75\ufe0f";
-  var male_detective = "\ud83d\udd75\ufe0f\u200d\u2642\ufe0f";
-  var female_detective = "\ud83d\udd75\ufe0f\u200d\u2640\ufe0f";
-  var guard = "\ud83d\udc82";
-  var guardsman = "\ud83d\udc82\u200d\u2642\ufe0f";
-  var guardswoman = "\ud83d\udc82\u200d\u2640\ufe0f";
-  var ninja = "\ud83e\udd77";
-  var construction_worker = "\ud83d\udc77";
-  var construction_worker_man = "\ud83d\udc77\u200d\u2642\ufe0f";
-  var construction_worker_woman = "\ud83d\udc77\u200d\u2640\ufe0f";
-  var prince = "\ud83e\udd34";
-  var princess = "\ud83d\udc78";
-  var person_with_turban = "\ud83d\udc73";
-  var man_with_turban = "\ud83d\udc73\u200d\u2642\ufe0f";
-  var woman_with_turban = "\ud83d\udc73\u200d\u2640\ufe0f";
-  var man_with_gua_pi_mao = "\ud83d\udc72";
-  var woman_with_headscarf = "\ud83e\uddd5";
-  var person_in_tuxedo = "\ud83e\udd35";
-  var man_in_tuxedo = "\ud83e\udd35\u200d\u2642\ufe0f";
-  var woman_in_tuxedo = "\ud83e\udd35\u200d\u2640\ufe0f";
-  var person_with_veil = "\ud83d\udc70";
-  var man_with_veil = "\ud83d\udc70\u200d\u2642\ufe0f";
-  var woman_with_veil = "\ud83d\udc70\u200d\u2640\ufe0f";
-  var bride_with_veil = "\ud83d\udc70\u200d\u2640\ufe0f";
-  var pregnant_woman = "\ud83e\udd30";
-  var breast_feeding = "\ud83e\udd31";
-  var woman_feeding_baby = "\ud83d\udc69\u200d\ud83c\udf7c";
-  var man_feeding_baby = "\ud83d\udc68\u200d\ud83c\udf7c";
-  var person_feeding_baby = "\ud83e\uddd1\u200d\ud83c\udf7c";
-  var angel = "\ud83d\udc7c";
-  var santa = "\ud83c\udf85";
-  var mrs_claus = "\ud83e\udd36";
-  var mx_claus = "\ud83e\uddd1\u200d\ud83c\udf84";
-  var superhero = "\ud83e\uddb8";
-  var superhero_man = "\ud83e\uddb8\u200d\u2642\ufe0f";
-  var superhero_woman = "\ud83e\uddb8\u200d\u2640\ufe0f";
-  var supervillain = "\ud83e\uddb9";
-  var supervillain_man = "\ud83e\uddb9\u200d\u2642\ufe0f";
-  var supervillain_woman = "\ud83e\uddb9\u200d\u2640\ufe0f";
-  var mage = "\ud83e\uddd9";
-  var mage_man = "\ud83e\uddd9\u200d\u2642\ufe0f";
-  var mage_woman = "\ud83e\uddd9\u200d\u2640\ufe0f";
-  var fairy = "\ud83e\uddda";
-  var fairy_man = "\ud83e\uddda\u200d\u2642\ufe0f";
-  var fairy_woman = "\ud83e\uddda\u200d\u2640\ufe0f";
-  var vampire = "\ud83e\udddb";
-  var vampire_man = "\ud83e\udddb\u200d\u2642\ufe0f";
-  var vampire_woman = "\ud83e\udddb\u200d\u2640\ufe0f";
-  var merperson = "\ud83e\udddc";
-  var merman = "\ud83e\udddc\u200d\u2642\ufe0f";
-  var mermaid = "\ud83e\udddc\u200d\u2640\ufe0f";
-  var elf = "\ud83e\udddd";
-  var elf_man = "\ud83e\udddd\u200d\u2642\ufe0f";
-  var elf_woman = "\ud83e\udddd\u200d\u2640\ufe0f";
-  var genie = "\ud83e\uddde";
-  var genie_man = "\ud83e\uddde\u200d\u2642\ufe0f";
-  var genie_woman = "\ud83e\uddde\u200d\u2640\ufe0f";
-  var zombie = "\ud83e\udddf";
-  var zombie_man = "\ud83e\udddf\u200d\u2642\ufe0f";
-  var zombie_woman = "\ud83e\udddf\u200d\u2640\ufe0f";
-  var massage = "\ud83d\udc86";
-  var massage_man = "\ud83d\udc86\u200d\u2642\ufe0f";
-  var massage_woman = "\ud83d\udc86\u200d\u2640\ufe0f";
-  var haircut = "\ud83d\udc87";
-  var haircut_man = "\ud83d\udc87\u200d\u2642\ufe0f";
-  var haircut_woman = "\ud83d\udc87\u200d\u2640\ufe0f";
-  var walking = "\ud83d\udeb6";
-  var walking_man = "\ud83d\udeb6\u200d\u2642\ufe0f";
-  var walking_woman = "\ud83d\udeb6\u200d\u2640\ufe0f";
-  var standing_person = "\ud83e\uddcd";
-  var standing_man = "\ud83e\uddcd\u200d\u2642\ufe0f";
-  var standing_woman = "\ud83e\uddcd\u200d\u2640\ufe0f";
-  var kneeling_person = "\ud83e\uddce";
-  var kneeling_man = "\ud83e\uddce\u200d\u2642\ufe0f";
-  var kneeling_woman = "\ud83e\uddce\u200d\u2640\ufe0f";
-  var person_with_probing_cane = "\ud83e\uddd1\u200d\ud83e\uddaf";
-  var man_with_probing_cane = "\ud83d\udc68\u200d\ud83e\uddaf";
-  var woman_with_probing_cane = "\ud83d\udc69\u200d\ud83e\uddaf";
-  var person_in_motorized_wheelchair = "\ud83e\uddd1\u200d\ud83e\uddbc";
-  var man_in_motorized_wheelchair = "\ud83d\udc68\u200d\ud83e\uddbc";
-  var woman_in_motorized_wheelchair = "\ud83d\udc69\u200d\ud83e\uddbc";
-  var person_in_manual_wheelchair = "\ud83e\uddd1\u200d\ud83e\uddbd";
-  var man_in_manual_wheelchair = "\ud83d\udc68\u200d\ud83e\uddbd";
-  var woman_in_manual_wheelchair = "\ud83d\udc69\u200d\ud83e\uddbd";
-  var runner = "\ud83c\udfc3";
-  var running = "\ud83c\udfc3";
-  var running_man = "\ud83c\udfc3\u200d\u2642\ufe0f";
-  var running_woman = "\ud83c\udfc3\u200d\u2640\ufe0f";
-  var woman_dancing = "\ud83d\udc83";
-  var dancer = "\ud83d\udc83";
-  var man_dancing = "\ud83d\udd7a";
-  var business_suit_levitating = "\ud83d\udd74\ufe0f";
-  var dancers = "\ud83d\udc6f";
-  var dancing_men = "\ud83d\udc6f\u200d\u2642\ufe0f";
-  var dancing_women = "\ud83d\udc6f\u200d\u2640\ufe0f";
-  var sauna_person = "\ud83e\uddd6";
-  var sauna_man = "\ud83e\uddd6\u200d\u2642\ufe0f";
-  var sauna_woman = "\ud83e\uddd6\u200d\u2640\ufe0f";
-  var climbing = "\ud83e\uddd7";
-  var climbing_man = "\ud83e\uddd7\u200d\u2642\ufe0f";
-  var climbing_woman = "\ud83e\uddd7\u200d\u2640\ufe0f";
-  var person_fencing = "\ud83e\udd3a";
-  var horse_racing = "\ud83c\udfc7";
-  var skier = "\u26f7\ufe0f";
-  var snowboarder = "\ud83c\udfc2";
-  var golfing = "\ud83c\udfcc\ufe0f";
-  var golfing_man = "\ud83c\udfcc\ufe0f\u200d\u2642\ufe0f";
-  var golfing_woman = "\ud83c\udfcc\ufe0f\u200d\u2640\ufe0f";
-  var surfer = "\ud83c\udfc4";
-  var surfing_man = "\ud83c\udfc4\u200d\u2642\ufe0f";
-  var surfing_woman = "\ud83c\udfc4\u200d\u2640\ufe0f";
-  var rowboat = "\ud83d\udea3";
-  var rowing_man = "\ud83d\udea3\u200d\u2642\ufe0f";
-  var rowing_woman = "\ud83d\udea3\u200d\u2640\ufe0f";
-  var swimmer = "\ud83c\udfca";
-  var swimming_man = "\ud83c\udfca\u200d\u2642\ufe0f";
-  var swimming_woman = "\ud83c\udfca\u200d\u2640\ufe0f";
-  var bouncing_ball_person = "\u26f9\ufe0f";
-  var bouncing_ball_man = "\u26f9\ufe0f\u200d\u2642\ufe0f";
-  var basketball_man = "\u26f9\ufe0f\u200d\u2642\ufe0f";
-  var bouncing_ball_woman = "\u26f9\ufe0f\u200d\u2640\ufe0f";
-  var basketball_woman = "\u26f9\ufe0f\u200d\u2640\ufe0f";
-  var weight_lifting = "\ud83c\udfcb\ufe0f";
-  var weight_lifting_man = "\ud83c\udfcb\ufe0f\u200d\u2642\ufe0f";
-  var weight_lifting_woman = "\ud83c\udfcb\ufe0f\u200d\u2640\ufe0f";
-  var bicyclist = "\ud83d\udeb4";
-  var biking_man = "\ud83d\udeb4\u200d\u2642\ufe0f";
-  var biking_woman = "\ud83d\udeb4\u200d\u2640\ufe0f";
-  var mountain_bicyclist = "\ud83d\udeb5";
-  var mountain_biking_man = "\ud83d\udeb5\u200d\u2642\ufe0f";
-  var mountain_biking_woman = "\ud83d\udeb5\u200d\u2640\ufe0f";
-  var cartwheeling = "\ud83e\udd38";
-  var man_cartwheeling = "\ud83e\udd38\u200d\u2642\ufe0f";
-  var woman_cartwheeling = "\ud83e\udd38\u200d\u2640\ufe0f";
-  var wrestling = "\ud83e\udd3c";
-  var men_wrestling = "\ud83e\udd3c\u200d\u2642\ufe0f";
-  var women_wrestling = "\ud83e\udd3c\u200d\u2640\ufe0f";
-  var water_polo = "\ud83e\udd3d";
-  var man_playing_water_polo = "\ud83e\udd3d\u200d\u2642\ufe0f";
-  var woman_playing_water_polo = "\ud83e\udd3d\u200d\u2640\ufe0f";
-  var handball_person = "\ud83e\udd3e";
-  var man_playing_handball = "\ud83e\udd3e\u200d\u2642\ufe0f";
-  var woman_playing_handball = "\ud83e\udd3e\u200d\u2640\ufe0f";
-  var juggling_person = "\ud83e\udd39";
-  var man_juggling = "\ud83e\udd39\u200d\u2642\ufe0f";
-  var woman_juggling = "\ud83e\udd39\u200d\u2640\ufe0f";
-  var lotus_position = "\ud83e\uddd8";
-  var lotus_position_man = "\ud83e\uddd8\u200d\u2642\ufe0f";
-  var lotus_position_woman = "\ud83e\uddd8\u200d\u2640\ufe0f";
-  var bath = "\ud83d\udec0";
-  var sleeping_bed = "\ud83d\udecc";
-  var people_holding_hands = "\ud83e\uddd1\u200d\ud83e\udd1d\u200d\ud83e\uddd1";
-  var two_women_holding_hands = "\ud83d\udc6d";
-  var couple = "\ud83d\udc6b";
-  var two_men_holding_hands = "\ud83d\udc6c";
-  var couplekiss = "\ud83d\udc8f";
-  var couplekiss_man_woman = "\ud83d\udc69\u200d\u2764\ufe0f\u200d\ud83d\udc8b\u200d\ud83d\udc68";
-  var couplekiss_man_man = "\ud83d\udc68\u200d\u2764\ufe0f\u200d\ud83d\udc8b\u200d\ud83d\udc68";
-  var couplekiss_woman_woman = "\ud83d\udc69\u200d\u2764\ufe0f\u200d\ud83d\udc8b\u200d\ud83d\udc69";
-  var couple_with_heart = "\ud83d\udc91";
-  var couple_with_heart_woman_man = "\ud83d\udc69\u200d\u2764\ufe0f\u200d\ud83d\udc68";
-  var couple_with_heart_man_man = "\ud83d\udc68\u200d\u2764\ufe0f\u200d\ud83d\udc68";
-  var couple_with_heart_woman_woman = "\ud83d\udc69\u200d\u2764\ufe0f\u200d\ud83d\udc69";
-  var family = "\ud83d\udc6a";
-  var family_man_woman_boy = "\ud83d\udc68\u200d\ud83d\udc69\u200d\ud83d\udc66";
-  var family_man_woman_girl = "\ud83d\udc68\u200d\ud83d\udc69\u200d\ud83d\udc67";
-  var family_man_woman_girl_boy = "\ud83d\udc68\u200d\ud83d\udc69\u200d\ud83d\udc67\u200d\ud83d\udc66";
-  var family_man_woman_boy_boy = "\ud83d\udc68\u200d\ud83d\udc69\u200d\ud83d\udc66\u200d\ud83d\udc66";
-  var family_man_woman_girl_girl = "\ud83d\udc68\u200d\ud83d\udc69\u200d\ud83d\udc67\u200d\ud83d\udc67";
-  var family_man_man_boy = "\ud83d\udc68\u200d\ud83d\udc68\u200d\ud83d\udc66";
-  var family_man_man_girl = "\ud83d\udc68\u200d\ud83d\udc68\u200d\ud83d\udc67";
-  var family_man_man_girl_boy = "\ud83d\udc68\u200d\ud83d\udc68\u200d\ud83d\udc67\u200d\ud83d\udc66";
-  var family_man_man_boy_boy = "\ud83d\udc68\u200d\ud83d\udc68\u200d\ud83d\udc66\u200d\ud83d\udc66";
-  var family_man_man_girl_girl = "\ud83d\udc68\u200d\ud83d\udc68\u200d\ud83d\udc67\u200d\ud83d\udc67";
-  var family_woman_woman_boy = "\ud83d\udc69\u200d\ud83d\udc69\u200d\ud83d\udc66";
-  var family_woman_woman_girl = "\ud83d\udc69\u200d\ud83d\udc69\u200d\ud83d\udc67";
-  var family_woman_woman_girl_boy = "\ud83d\udc69\u200d\ud83d\udc69\u200d\ud83d\udc67\u200d\ud83d\udc66";
-  var family_woman_woman_boy_boy = "\ud83d\udc69\u200d\ud83d\udc69\u200d\ud83d\udc66\u200d\ud83d\udc66";
-  var family_woman_woman_girl_girl = "\ud83d\udc69\u200d\ud83d\udc69\u200d\ud83d\udc67\u200d\ud83d\udc67";
-  var family_man_boy = "\ud83d\udc68\u200d\ud83d\udc66";
-  var family_man_boy_boy = "\ud83d\udc68\u200d\ud83d\udc66\u200d\ud83d\udc66";
-  var family_man_girl = "\ud83d\udc68\u200d\ud83d\udc67";
-  var family_man_girl_boy = "\ud83d\udc68\u200d\ud83d\udc67\u200d\ud83d\udc66";
-  var family_man_girl_girl = "\ud83d\udc68\u200d\ud83d\udc67\u200d\ud83d\udc67";
-  var family_woman_boy = "\ud83d\udc69\u200d\ud83d\udc66";
-  var family_woman_boy_boy = "\ud83d\udc69\u200d\ud83d\udc66\u200d\ud83d\udc66";
-  var family_woman_girl = "\ud83d\udc69\u200d\ud83d\udc67";
-  var family_woman_girl_boy = "\ud83d\udc69\u200d\ud83d\udc67\u200d\ud83d\udc66";
-  var family_woman_girl_girl = "\ud83d\udc69\u200d\ud83d\udc67\u200d\ud83d\udc67";
-  var speaking_head = "\ud83d\udde3\ufe0f";
-  var bust_in_silhouette = "\ud83d\udc64";
-  var busts_in_silhouette = "\ud83d\udc65";
-  var people_hugging = "\ud83e\udec2";
-  var footprints = "\ud83d\udc63";
-  var monkey_face = "\ud83d\udc35";
-  var monkey$1 = "\ud83d\udc12";
-  var gorilla = "\ud83e\udd8d";
-  var orangutan = "\ud83e\udda7";
-  var dog = "\ud83d\udc36";
-  var dog2 = "\ud83d\udc15";
-  var guide_dog = "\ud83e\uddae";
-  var service_dog = "\ud83d\udc15\u200d\ud83e\uddba";
-  var poodle = "\ud83d\udc29";
-  var wolf = "\ud83d\udc3a";
-  var fox_face = "\ud83e\udd8a";
-  var raccoon = "\ud83e\udd9d";
-  var cat = "\ud83d\udc31";
-  var cat2 = "\ud83d\udc08";
-  var black_cat = "\ud83d\udc08\u200d\u2b1b";
-  var lion = "\ud83e\udd81";
-  var tiger = "\ud83d\udc2f";
-  var tiger2 = "\ud83d\udc05";
-  var leopard = "\ud83d\udc06";
-  var horse = "\ud83d\udc34";
-  var racehorse = "\ud83d\udc0e";
-  var unicorn = "\ud83e\udd84";
-  var zebra = "\ud83e\udd93";
-  var deer = "\ud83e\udd8c";
-  var bison = "\ud83e\uddac";
-  var cow = "\ud83d\udc2e";
-  var ox = "\ud83d\udc02";
-  var water_buffalo = "\ud83d\udc03";
-  var cow2 = "\ud83d\udc04";
-  var pig = "\ud83d\udc37";
-  var pig2 = "\ud83d\udc16";
-  var boar = "\ud83d\udc17";
-  var pig_nose = "\ud83d\udc3d";
-  var ram = "\ud83d\udc0f";
-  var sheep = "\ud83d\udc11";
-  var goat = "\ud83d\udc10";
-  var dromedary_camel = "\ud83d\udc2a";
-  var camel = "\ud83d\udc2b";
-  var llama = "\ud83e\udd99";
-  var giraffe = "\ud83e\udd92";
-  var elephant = "\ud83d\udc18";
-  var mammoth = "\ud83e\udda3";
-  var rhinoceros = "\ud83e\udd8f";
-  var hippopotamus = "\ud83e\udd9b";
-  var mouse = "\ud83d\udc2d";
-  var mouse2 = "\ud83d\udc01";
-  var rat = "\ud83d\udc00";
-  var hamster = "\ud83d\udc39";
-  var rabbit = "\ud83d\udc30";
-  var rabbit2 = "\ud83d\udc07";
-  var chipmunk = "\ud83d\udc3f\ufe0f";
-  var beaver = "\ud83e\uddab";
-  var hedgehog = "\ud83e\udd94";
-  var bat = "\ud83e\udd87";
-  var bear = "\ud83d\udc3b";
-  var polar_bear = "\ud83d\udc3b\u200d\u2744\ufe0f";
-  var koala = "\ud83d\udc28";
-  var panda_face = "\ud83d\udc3c";
-  var sloth = "\ud83e\udda5";
-  var otter = "\ud83e\udda6";
-  var skunk = "\ud83e\udda8";
-  var kangaroo = "\ud83e\udd98";
-  var badger = "\ud83e\udda1";
-  var feet = "\ud83d\udc3e";
-  var paw_prints = "\ud83d\udc3e";
-  var turkey = "\ud83e\udd83";
-  var chicken = "\ud83d\udc14";
-  var rooster = "\ud83d\udc13";
-  var hatching_chick = "\ud83d\udc23";
-  var baby_chick = "\ud83d\udc24";
-  var hatched_chick = "\ud83d\udc25";
-  var bird = "\ud83d\udc26";
-  var penguin = "\ud83d\udc27";
-  var dove = "\ud83d\udd4a\ufe0f";
-  var eagle = "\ud83e\udd85";
-  var duck = "\ud83e\udd86";
-  var swan = "\ud83e\udda2";
-  var owl = "\ud83e\udd89";
-  var dodo = "\ud83e\udda4";
-  var feather = "\ud83e\udeb6";
-  var flamingo = "\ud83e\udda9";
-  var peacock = "\ud83e\udd9a";
-  var parrot = "\ud83e\udd9c";
-  var frog = "\ud83d\udc38";
-  var crocodile = "\ud83d\udc0a";
-  var turtle = "\ud83d\udc22";
-  var lizard = "\ud83e\udd8e";
-  var snake = "\ud83d\udc0d";
-  var dragon_face = "\ud83d\udc32";
-  var dragon = "\ud83d\udc09";
-  var sauropod = "\ud83e\udd95";
-  var whale = "\ud83d\udc33";
-  var whale2 = "\ud83d\udc0b";
-  var dolphin = "\ud83d\udc2c";
-  var flipper = "\ud83d\udc2c";
-  var seal = "\ud83e\uddad";
-  var fish = "\ud83d\udc1f";
-  var tropical_fish = "\ud83d\udc20";
-  var blowfish = "\ud83d\udc21";
-  var shark = "\ud83e\udd88";
-  var octopus = "\ud83d\udc19";
-  var shell$1 = "\ud83d\udc1a";
-  var snail = "\ud83d\udc0c";
-  var butterfly = "\ud83e\udd8b";
-  var bug = "\ud83d\udc1b";
-  var ant = "\ud83d\udc1c";
-  var bee = "\ud83d\udc1d";
-  var honeybee = "\ud83d\udc1d";
-  var beetle = "\ud83e\udeb2";
-  var lady_beetle = "\ud83d\udc1e";
-  var cricket = "\ud83e\udd97";
-  var cockroach = "\ud83e\udeb3";
-  var spider = "\ud83d\udd77\ufe0f";
-  var spider_web = "\ud83d\udd78\ufe0f";
-  var scorpion = "\ud83e\udd82";
-  var mosquito = "\ud83e\udd9f";
-  var fly = "\ud83e\udeb0";
-  var worm = "\ud83e\udeb1";
-  var microbe = "\ud83e\udda0";
-  var bouquet = "\ud83d\udc90";
-  var cherry_blossom = "\ud83c\udf38";
-  var white_flower = "\ud83d\udcae";
-  var rosette = "\ud83c\udff5\ufe0f";
-  var rose = "\ud83c\udf39";
-  var wilted_flower = "\ud83e\udd40";
-  var hibiscus = "\ud83c\udf3a";
-  var sunflower = "\ud83c\udf3b";
-  var blossom = "\ud83c\udf3c";
-  var tulip = "\ud83c\udf37";
-  var seedling = "\ud83c\udf31";
-  var potted_plant = "\ud83e\udeb4";
-  var evergreen_tree = "\ud83c\udf32";
-  var deciduous_tree = "\ud83c\udf33";
-  var palm_tree = "\ud83c\udf34";
-  var cactus = "\ud83c\udf35";
-  var ear_of_rice = "\ud83c\udf3e";
-  var herb = "\ud83c\udf3f";
-  var shamrock = "\u2618\ufe0f";
-  var four_leaf_clover = "\ud83c\udf40";
-  var maple_leaf = "\ud83c\udf41";
-  var fallen_leaf = "\ud83c\udf42";
-  var leaves = "\ud83c\udf43";
-  var grapes = "\ud83c\udf47";
-  var melon = "\ud83c\udf48";
-  var watermelon = "\ud83c\udf49";
-  var tangerine = "\ud83c\udf4a";
-  var orange = "\ud83c\udf4a";
-  var mandarin = "\ud83c\udf4a";
-  var lemon = "\ud83c\udf4b";
-  var banana = "\ud83c\udf4c";
-  var pineapple = "\ud83c\udf4d";
-  var mango = "\ud83e\udd6d";
-  var apple = "\ud83c\udf4e";
-  var green_apple = "\ud83c\udf4f";
-  var pear = "\ud83c\udf50";
-  var peach = "\ud83c\udf51";
-  var cherries = "\ud83c\udf52";
-  var strawberry = "\ud83c\udf53";
-  var blueberries = "\ud83e\uded0";
-  var kiwi_fruit = "\ud83e\udd5d";
-  var tomato = "\ud83c\udf45";
-  var olive = "\ud83e\uded2";
-  var coconut = "\ud83e\udd65";
-  var avocado = "\ud83e\udd51";
-  var eggplant = "\ud83c\udf46";
-  var potato = "\ud83e\udd54";
-  var carrot = "\ud83e\udd55";
-  var corn = "\ud83c\udf3d";
-  var hot_pepper = "\ud83c\udf36\ufe0f";
-  var bell_pepper = "\ud83e\uded1";
-  var cucumber = "\ud83e\udd52";
-  var leafy_green = "\ud83e\udd6c";
-  var broccoli = "\ud83e\udd66";
-  var garlic = "\ud83e\uddc4";
-  var onion = "\ud83e\uddc5";
-  var mushroom = "\ud83c\udf44";
-  var peanuts = "\ud83e\udd5c";
-  var chestnut = "\ud83c\udf30";
-  var bread = "\ud83c\udf5e";
-  var croissant = "\ud83e\udd50";
-  var baguette_bread = "\ud83e\udd56";
-  var flatbread = "\ud83e\uded3";
-  var pretzel = "\ud83e\udd68";
-  var bagel = "\ud83e\udd6f";
-  var pancakes = "\ud83e\udd5e";
-  var waffle = "\ud83e\uddc7";
-  var cheese = "\ud83e\uddc0";
-  var meat_on_bone = "\ud83c\udf56";
-  var poultry_leg = "\ud83c\udf57";
-  var cut_of_meat = "\ud83e\udd69";
-  var bacon = "\ud83e\udd53";
-  var hamburger = "\ud83c\udf54";
-  var fries = "\ud83c\udf5f";
-  var pizza = "\ud83c\udf55";
-  var hotdog = "\ud83c\udf2d";
-  var sandwich = "\ud83e\udd6a";
-  var taco = "\ud83c\udf2e";
-  var burrito = "\ud83c\udf2f";
-  var tamale = "\ud83e\uded4";
-  var stuffed_flatbread = "\ud83e\udd59";
-  var falafel = "\ud83e\uddc6";
-  var egg = "\ud83e\udd5a";
-  var fried_egg = "\ud83c\udf73";
-  var shallow_pan_of_food = "\ud83e\udd58";
-  var stew = "\ud83c\udf72";
-  var fondue = "\ud83e\uded5";
-  var bowl_with_spoon = "\ud83e\udd63";
-  var green_salad = "\ud83e\udd57";
-  var popcorn = "\ud83c\udf7f";
-  var butter = "\ud83e\uddc8";
-  var salt = "\ud83e\uddc2";
-  var canned_food = "\ud83e\udd6b";
-  var bento = "\ud83c\udf71";
-  var rice_cracker = "\ud83c\udf58";
-  var rice_ball = "\ud83c\udf59";
-  var rice = "\ud83c\udf5a";
-  var curry = "\ud83c\udf5b";
-  var ramen = "\ud83c\udf5c";
-  var spaghetti = "\ud83c\udf5d";
-  var sweet_potato = "\ud83c\udf60";
-  var oden = "\ud83c\udf62";
-  var sushi = "\ud83c\udf63";
-  var fried_shrimp = "\ud83c\udf64";
-  var fish_cake = "\ud83c\udf65";
-  var moon_cake = "\ud83e\udd6e";
-  var dango = "\ud83c\udf61";
-  var dumpling = "\ud83e\udd5f";
-  var fortune_cookie = "\ud83e\udd60";
-  var takeout_box = "\ud83e\udd61";
-  var crab = "\ud83e\udd80";
-  var lobster = "\ud83e\udd9e";
-  var shrimp = "\ud83e\udd90";
-  var squid = "\ud83e\udd91";
-  var oyster = "\ud83e\uddaa";
-  var icecream = "\ud83c\udf66";
-  var shaved_ice = "\ud83c\udf67";
-  var ice_cream = "\ud83c\udf68";
-  var doughnut = "\ud83c\udf69";
-  var cookie = "\ud83c\udf6a";
-  var birthday = "\ud83c\udf82";
-  var cake = "\ud83c\udf70";
-  var cupcake = "\ud83e\uddc1";
-  var pie = "\ud83e\udd67";
-  var chocolate_bar = "\ud83c\udf6b";
-  var candy = "\ud83c\udf6c";
-  var lollipop = "\ud83c\udf6d";
-  var custard = "\ud83c\udf6e";
-  var honey_pot = "\ud83c\udf6f";
-  var baby_bottle = "\ud83c\udf7c";
-  var milk_glass = "\ud83e\udd5b";
-  var coffee = "\u2615";
-  var teapot = "\ud83e\uded6";
-  var tea = "\ud83c\udf75";
-  var sake = "\ud83c\udf76";
-  var champagne = "\ud83c\udf7e";
-  var wine_glass = "\ud83c\udf77";
-  var cocktail = "\ud83c\udf78";
-  var tropical_drink = "\ud83c\udf79";
-  var beer = "\ud83c\udf7a";
-  var beers = "\ud83c\udf7b";
-  var clinking_glasses = "\ud83e\udd42";
-  var tumbler_glass = "\ud83e\udd43";
-  var cup_with_straw = "\ud83e\udd64";
-  var bubble_tea = "\ud83e\uddcb";
-  var beverage_box = "\ud83e\uddc3";
-  var mate = "\ud83e\uddc9";
-  var ice_cube = "\ud83e\uddca";
-  var chopsticks = "\ud83e\udd62";
-  var plate_with_cutlery = "\ud83c\udf7d\ufe0f";
-  var fork_and_knife = "\ud83c\udf74";
-  var spoon = "\ud83e\udd44";
-  var hocho = "\ud83d\udd2a";
-  var knife = "\ud83d\udd2a";
-  var amphora = "\ud83c\udffa";
-  var earth_africa = "\ud83c\udf0d";
-  var earth_americas = "\ud83c\udf0e";
-  var earth_asia = "\ud83c\udf0f";
-  var globe_with_meridians = "\ud83c\udf10";
-  var world_map = "\ud83d\uddfa\ufe0f";
-  var japan = "\ud83d\uddfe";
-  var compass = "\ud83e\udded";
-  var mountain_snow = "\ud83c\udfd4\ufe0f";
-  var mountain = "\u26f0\ufe0f";
-  var volcano = "\ud83c\udf0b";
-  var mount_fuji = "\ud83d\uddfb";
-  var camping = "\ud83c\udfd5\ufe0f";
-  var beach_umbrella = "\ud83c\udfd6\ufe0f";
-  var desert = "\ud83c\udfdc\ufe0f";
-  var desert_island = "\ud83c\udfdd\ufe0f";
-  var national_park = "\ud83c\udfde\ufe0f";
-  var stadium = "\ud83c\udfdf\ufe0f";
-  var classical_building = "\ud83c\udfdb\ufe0f";
-  var building_construction = "\ud83c\udfd7\ufe0f";
-  var bricks = "\ud83e\uddf1";
-  var rock = "\ud83e\udea8";
-  var wood = "\ud83e\udeb5";
-  var hut = "\ud83d\uded6";
-  var houses = "\ud83c\udfd8\ufe0f";
-  var derelict_house = "\ud83c\udfda\ufe0f";
-  var house = "\ud83c\udfe0";
-  var house_with_garden = "\ud83c\udfe1";
-  var office = "\ud83c\udfe2";
-  var post_office = "\ud83c\udfe3";
-  var european_post_office = "\ud83c\udfe4";
-  var hospital = "\ud83c\udfe5";
-  var bank = "\ud83c\udfe6";
-  var hotel = "\ud83c\udfe8";
-  var love_hotel = "\ud83c\udfe9";
-  var convenience_store = "\ud83c\udfea";
-  var school = "\ud83c\udfeb";
-  var department_store = "\ud83c\udfec";
-  var factory = "\ud83c\udfed";
-  var japanese_castle = "\ud83c\udfef";
-  var european_castle = "\ud83c\udff0";
-  var wedding = "\ud83d\udc92";
-  var tokyo_tower = "\ud83d\uddfc";
-  var statue_of_liberty = "\ud83d\uddfd";
-  var church = "\u26ea";
-  var mosque = "\ud83d\udd4c";
-  var hindu_temple = "\ud83d\uded5";
-  var synagogue = "\ud83d\udd4d";
-  var shinto_shrine = "\u26e9\ufe0f";
-  var kaaba = "\ud83d\udd4b";
-  var fountain = "\u26f2";
-  var tent = "\u26fa";
-  var foggy = "\ud83c\udf01";
-  var night_with_stars = "\ud83c\udf03";
-  var cityscape = "\ud83c\udfd9\ufe0f";
-  var sunrise_over_mountains = "\ud83c\udf04";
-  var sunrise = "\ud83c\udf05";
-  var city_sunset = "\ud83c\udf06";
-  var city_sunrise = "\ud83c\udf07";
-  var bridge_at_night = "\ud83c\udf09";
-  var hotsprings = "\u2668\ufe0f";
-  var carousel_horse = "\ud83c\udfa0";
-  var ferris_wheel = "\ud83c\udfa1";
-  var roller_coaster = "\ud83c\udfa2";
-  var barber = "\ud83d\udc88";
-  var circus_tent = "\ud83c\udfaa";
-  var steam_locomotive = "\ud83d\ude82";
-  var railway_car = "\ud83d\ude83";
-  var bullettrain_side = "\ud83d\ude84";
-  var bullettrain_front = "\ud83d\ude85";
-  var train2 = "\ud83d\ude86";
-  var metro = "\ud83d\ude87";
-  var light_rail = "\ud83d\ude88";
-  var station = "\ud83d\ude89";
-  var tram = "\ud83d\ude8a";
-  var monorail = "\ud83d\ude9d";
-  var mountain_railway = "\ud83d\ude9e";
-  var train = "\ud83d\ude8b";
-  var bus = "\ud83d\ude8c";
-  var oncoming_bus = "\ud83d\ude8d";
-  var trolleybus = "\ud83d\ude8e";
-  var minibus = "\ud83d\ude90";
-  var ambulance = "\ud83d\ude91";
-  var fire_engine = "\ud83d\ude92";
-  var police_car = "\ud83d\ude93";
-  var oncoming_police_car = "\ud83d\ude94";
-  var taxi = "\ud83d\ude95";
-  var oncoming_taxi = "\ud83d\ude96";
-  var car = "\ud83d\ude97";
-  var red_car = "\ud83d\ude97";
-  var oncoming_automobile = "\ud83d\ude98";
-  var blue_car = "\ud83d\ude99";
-  var pickup_truck = "\ud83d\udefb";
-  var truck = "\ud83d\ude9a";
-  var articulated_lorry = "\ud83d\ude9b";
-  var tractor = "\ud83d\ude9c";
-  var racing_car = "\ud83c\udfce\ufe0f";
-  var motorcycle = "\ud83c\udfcd\ufe0f";
-  var motor_scooter = "\ud83d\udef5";
-  var manual_wheelchair = "\ud83e\uddbd";
-  var motorized_wheelchair = "\ud83e\uddbc";
-  var auto_rickshaw = "\ud83d\udefa";
-  var bike = "\ud83d\udeb2";
-  var kick_scooter = "\ud83d\udef4";
-  var skateboard = "\ud83d\udef9";
-  var roller_skate = "\ud83d\udefc";
-  var busstop = "\ud83d\ude8f";
-  var motorway = "\ud83d\udee3\ufe0f";
-  var railway_track = "\ud83d\udee4\ufe0f";
-  var oil_drum = "\ud83d\udee2\ufe0f";
-  var fuelpump = "\u26fd";
-  var rotating_light = "\ud83d\udea8";
-  var traffic_light = "\ud83d\udea5";
-  var vertical_traffic_light = "\ud83d\udea6";
-  var stop_sign = "\ud83d\uded1";
-  var construction = "\ud83d\udea7";
-  var anchor = "\u2693";
-  var boat = "\u26f5";
-  var sailboat = "\u26f5";
-  var canoe = "\ud83d\udef6";
-  var speedboat = "\ud83d\udea4";
-  var passenger_ship = "\ud83d\udef3\ufe0f";
-  var ferry = "\u26f4\ufe0f";
-  var motor_boat = "\ud83d\udee5\ufe0f";
-  var ship = "\ud83d\udea2";
-  var airplane = "\u2708\ufe0f";
-  var small_airplane = "\ud83d\udee9\ufe0f";
-  var flight_departure = "\ud83d\udeeb";
-  var flight_arrival = "\ud83d\udeec";
-  var parachute = "\ud83e\ude82";
-  var seat = "\ud83d\udcba";
-  var helicopter = "\ud83d\ude81";
-  var suspension_railway = "\ud83d\ude9f";
-  var mountain_cableway = "\ud83d\udea0";
-  var aerial_tramway = "\ud83d\udea1";
-  var artificial_satellite = "\ud83d\udef0\ufe0f";
-  var rocket = "\ud83d\ude80";
-  var flying_saucer = "\ud83d\udef8";
-  var bellhop_bell = "\ud83d\udece\ufe0f";
-  var luggage = "\ud83e\uddf3";
-  var hourglass = "\u231b";
-  var hourglass_flowing_sand = "\u23f3";
-  var watch = "\u231a";
-  var alarm_clock = "\u23f0";
-  var stopwatch = "\u23f1\ufe0f";
-  var timer_clock = "\u23f2\ufe0f";
-  var mantelpiece_clock = "\ud83d\udd70\ufe0f";
-  var clock12 = "\ud83d\udd5b";
-  var clock1230 = "\ud83d\udd67";
-  var clock1 = "\ud83d\udd50";
-  var clock130 = "\ud83d\udd5c";
-  var clock2 = "\ud83d\udd51";
-  var clock230 = "\ud83d\udd5d";
-  var clock3 = "\ud83d\udd52";
-  var clock330 = "\ud83d\udd5e";
-  var clock4 = "\ud83d\udd53";
-  var clock430 = "\ud83d\udd5f";
-  var clock5 = "\ud83d\udd54";
-  var clock530 = "\ud83d\udd60";
-  var clock6 = "\ud83d\udd55";
-  var clock630 = "\ud83d\udd61";
-  var clock7 = "\ud83d\udd56";
-  var clock730 = "\ud83d\udd62";
-  var clock8 = "\ud83d\udd57";
-  var clock830 = "\ud83d\udd63";
-  var clock9 = "\ud83d\udd58";
-  var clock930 = "\ud83d\udd64";
-  var clock10 = "\ud83d\udd59";
-  var clock1030 = "\ud83d\udd65";
-  var clock11 = "\ud83d\udd5a";
-  var clock1130 = "\ud83d\udd66";
-  var new_moon = "\ud83c\udf11";
-  var waxing_crescent_moon = "\ud83c\udf12";
-  var first_quarter_moon = "\ud83c\udf13";
-  var moon = "\ud83c\udf14";
-  var waxing_gibbous_moon = "\ud83c\udf14";
-  var full_moon = "\ud83c\udf15";
-  var waning_gibbous_moon = "\ud83c\udf16";
-  var last_quarter_moon = "\ud83c\udf17";
-  var waning_crescent_moon = "\ud83c\udf18";
-  var crescent_moon = "\ud83c\udf19";
-  var new_moon_with_face = "\ud83c\udf1a";
-  var first_quarter_moon_with_face = "\ud83c\udf1b";
-  var last_quarter_moon_with_face = "\ud83c\udf1c";
-  var thermometer = "\ud83c\udf21\ufe0f";
-  var sunny = "\u2600\ufe0f";
-  var full_moon_with_face = "\ud83c\udf1d";
-  var sun_with_face = "\ud83c\udf1e";
-  var ringed_planet = "\ud83e\ude90";
-  var star = "\u2b50";
-  var star2 = "\ud83c\udf1f";
-  var stars = "\ud83c\udf20";
-  var milky_way = "\ud83c\udf0c";
-  var cloud = "\u2601\ufe0f";
-  var partly_sunny = "\u26c5";
-  var cloud_with_lightning_and_rain = "\u26c8\ufe0f";
-  var sun_behind_small_cloud = "\ud83c\udf24\ufe0f";
-  var sun_behind_large_cloud = "\ud83c\udf25\ufe0f";
-  var sun_behind_rain_cloud = "\ud83c\udf26\ufe0f";
-  var cloud_with_rain = "\ud83c\udf27\ufe0f";
-  var cloud_with_snow = "\ud83c\udf28\ufe0f";
-  var cloud_with_lightning = "\ud83c\udf29\ufe0f";
-  var tornado = "\ud83c\udf2a\ufe0f";
-  var fog = "\ud83c\udf2b\ufe0f";
-  var wind_face = "\ud83c\udf2c\ufe0f";
-  var cyclone = "\ud83c\udf00";
-  var rainbow = "\ud83c\udf08";
-  var closed_umbrella = "\ud83c\udf02";
-  var open_umbrella = "\u2602\ufe0f";
-  var umbrella = "\u2614";
-  var parasol_on_ground = "\u26f1\ufe0f";
-  var zap = "\u26a1";
-  var snowflake = "\u2744\ufe0f";
-  var snowman_with_snow = "\u2603\ufe0f";
-  var snowman = "\u26c4";
-  var comet = "\u2604\ufe0f";
-  var fire = "\ud83d\udd25";
-  var droplet = "\ud83d\udca7";
-  var ocean = "\ud83c\udf0a";
-  var jack_o_lantern = "\ud83c\udf83";
-  var christmas_tree = "\ud83c\udf84";
-  var fireworks = "\ud83c\udf86";
-  var sparkler = "\ud83c\udf87";
-  var firecracker = "\ud83e\udde8";
-  var sparkles = "\u2728";
-  var balloon = "\ud83c\udf88";
-  var tada = "\ud83c\udf89";
-  var confetti_ball = "\ud83c\udf8a";
-  var tanabata_tree = "\ud83c\udf8b";
-  var bamboo = "\ud83c\udf8d";
-  var dolls = "\ud83c\udf8e";
-  var flags = "\ud83c\udf8f";
-  var wind_chime = "\ud83c\udf90";
-  var rice_scene = "\ud83c\udf91";
-  var red_envelope = "\ud83e\udde7";
-  var ribbon = "\ud83c\udf80";
-  var gift = "\ud83c\udf81";
-  var reminder_ribbon = "\ud83c\udf97\ufe0f";
-  var tickets = "\ud83c\udf9f\ufe0f";
-  var ticket = "\ud83c\udfab";
-  var medal_military = "\ud83c\udf96\ufe0f";
-  var trophy = "\ud83c\udfc6";
-  var medal_sports = "\ud83c\udfc5";
-  var soccer = "\u26bd";
-  var baseball = "\u26be";
-  var softball = "\ud83e\udd4e";
-  var basketball = "\ud83c\udfc0";
-  var volleyball = "\ud83c\udfd0";
-  var football = "\ud83c\udfc8";
-  var rugby_football = "\ud83c\udfc9";
-  var tennis = "\ud83c\udfbe";
-  var flying_disc = "\ud83e\udd4f";
-  var bowling = "\ud83c\udfb3";
-  var cricket_game = "\ud83c\udfcf";
-  var field_hockey = "\ud83c\udfd1";
-  var ice_hockey = "\ud83c\udfd2";
-  var lacrosse = "\ud83e\udd4d";
-  var ping_pong = "\ud83c\udfd3";
-  var badminton = "\ud83c\udff8";
-  var boxing_glove = "\ud83e\udd4a";
-  var martial_arts_uniform = "\ud83e\udd4b";
-  var goal_net = "\ud83e\udd45";
-  var golf = "\u26f3";
-  var ice_skate = "\u26f8\ufe0f";
-  var fishing_pole_and_fish = "\ud83c\udfa3";
-  var diving_mask = "\ud83e\udd3f";
-  var running_shirt_with_sash = "\ud83c\udfbd";
-  var ski = "\ud83c\udfbf";
-  var sled = "\ud83d\udef7";
-  var curling_stone = "\ud83e\udd4c";
-  var dart$1 = "\ud83c\udfaf";
-  var yo_yo = "\ud83e\ude80";
-  var kite = "\ud83e\ude81";
-  var crystal_ball = "\ud83d\udd2e";
-  var magic_wand = "\ud83e\ude84";
-  var nazar_amulet = "\ud83e\uddff";
-  var video_game = "\ud83c\udfae";
-  var joystick = "\ud83d\udd79\ufe0f";
-  var slot_machine = "\ud83c\udfb0";
-  var game_die = "\ud83c\udfb2";
-  var jigsaw = "\ud83e\udde9";
-  var teddy_bear = "\ud83e\uddf8";
-  var pi_ata = "\ud83e\ude85";
-  var nesting_dolls = "\ud83e\ude86";
-  var spades = "\u2660\ufe0f";
-  var hearts = "\u2665\ufe0f";
-  var diamonds = "\u2666\ufe0f";
-  var clubs = "\u2663\ufe0f";
-  var chess_pawn = "\u265f\ufe0f";
-  var black_joker = "\ud83c\udccf";
-  var mahjong = "\ud83c\udc04";
-  var flower_playing_cards = "\ud83c\udfb4";
-  var performing_arts = "\ud83c\udfad";
-  var framed_picture = "\ud83d\uddbc\ufe0f";
-  var art = "\ud83c\udfa8";
-  var thread = "\ud83e\uddf5";
-  var sewing_needle = "\ud83e\udea1";
-  var yarn = "\ud83e\uddf6";
-  var knot = "\ud83e\udea2";
-  var eyeglasses = "\ud83d\udc53";
-  var dark_sunglasses = "\ud83d\udd76\ufe0f";
-  var goggles = "\ud83e\udd7d";
-  var lab_coat = "\ud83e\udd7c";
-  var safety_vest = "\ud83e\uddba";
-  var necktie = "\ud83d\udc54";
-  var shirt = "\ud83d\udc55";
-  var tshirt = "\ud83d\udc55";
-  var jeans = "\ud83d\udc56";
-  var scarf = "\ud83e\udde3";
-  var gloves = "\ud83e\udde4";
-  var coat = "\ud83e\udde5";
-  var socks = "\ud83e\udde6";
-  var dress = "\ud83d\udc57";
-  var kimono = "\ud83d\udc58";
-  var sari = "\ud83e\udd7b";
-  var one_piece_swimsuit = "\ud83e\ude71";
-  var swim_brief = "\ud83e\ude72";
-  var shorts = "\ud83e\ude73";
-  var bikini = "\ud83d\udc59";
-  var womans_clothes = "\ud83d\udc5a";
-  var purse = "\ud83d\udc5b";
-  var handbag = "\ud83d\udc5c";
-  var pouch = "\ud83d\udc5d";
-  var shopping = "\ud83d\udecd\ufe0f";
-  var school_satchel = "\ud83c\udf92";
-  var thong_sandal = "\ud83e\ude74";
-  var mans_shoe = "\ud83d\udc5e";
-  var shoe = "\ud83d\udc5e";
-  var athletic_shoe = "\ud83d\udc5f";
-  var hiking_boot = "\ud83e\udd7e";
-  var flat_shoe = "\ud83e\udd7f";
-  var high_heel = "\ud83d\udc60";
-  var sandal = "\ud83d\udc61";
-  var ballet_shoes = "\ud83e\ude70";
-  var boot = "\ud83d\udc62";
-  var crown = "\ud83d\udc51";
-  var womans_hat = "\ud83d\udc52";
-  var tophat = "\ud83c\udfa9";
-  var mortar_board = "\ud83c\udf93";
-  var billed_cap = "\ud83e\udde2";
-  var military_helmet = "\ud83e\ude96";
-  var rescue_worker_helmet = "\u26d1\ufe0f";
-  var prayer_beads = "\ud83d\udcff";
-  var lipstick = "\ud83d\udc84";
-  var ring = "\ud83d\udc8d";
-  var gem = "\ud83d\udc8e";
-  var mute = "\ud83d\udd07";
-  var speaker = "\ud83d\udd08";
-  var sound = "\ud83d\udd09";
-  var loud_sound = "\ud83d\udd0a";
-  var loudspeaker = "\ud83d\udce2";
-  var mega = "\ud83d\udce3";
-  var postal_horn = "\ud83d\udcef";
-  var bell = "\ud83d\udd14";
-  var no_bell = "\ud83d\udd15";
-  var musical_score = "\ud83c\udfbc";
-  var musical_note = "\ud83c\udfb5";
-  var notes = "\ud83c\udfb6";
-  var studio_microphone = "\ud83c\udf99\ufe0f";
-  var level_slider = "\ud83c\udf9a\ufe0f";
-  var control_knobs = "\ud83c\udf9b\ufe0f";
-  var microphone = "\ud83c\udfa4";
-  var headphones = "\ud83c\udfa7";
-  var radio = "\ud83d\udcfb";
-  var saxophone = "\ud83c\udfb7";
-  var accordion = "\ud83e\ude97";
-  var guitar = "\ud83c\udfb8";
-  var musical_keyboard = "\ud83c\udfb9";
-  var trumpet = "\ud83c\udfba";
-  var violin = "\ud83c\udfbb";
-  var banjo = "\ud83e\ude95";
-  var drum = "\ud83e\udd41";
-  var long_drum = "\ud83e\ude98";
-  var iphone = "\ud83d\udcf1";
-  var calling = "\ud83d\udcf2";
-  var phone = "\u260e\ufe0f";
-  var telephone = "\u260e\ufe0f";
-  var telephone_receiver = "\ud83d\udcde";
-  var pager = "\ud83d\udcdf";
-  var fax = "\ud83d\udce0";
-  var battery = "\ud83d\udd0b";
-  var electric_plug = "\ud83d\udd0c";
-  var computer = "\ud83d\udcbb";
-  var desktop_computer = "\ud83d\udda5\ufe0f";
-  var printer = "\ud83d\udda8\ufe0f";
-  var keyboard = "\u2328\ufe0f";
-  var computer_mouse = "\ud83d\uddb1\ufe0f";
-  var trackball = "\ud83d\uddb2\ufe0f";
-  var minidisc = "\ud83d\udcbd";
-  var floppy_disk = "\ud83d\udcbe";
-  var cd = "\ud83d\udcbf";
-  var dvd = "\ud83d\udcc0";
-  var abacus = "\ud83e\uddee";
-  var movie_camera = "\ud83c\udfa5";
-  var film_strip = "\ud83c\udf9e\ufe0f";
-  var film_projector = "\ud83d\udcfd\ufe0f";
-  var clapper = "\ud83c\udfac";
-  var tv = "\ud83d\udcfa";
-  var camera = "\ud83d\udcf7";
-  var camera_flash = "\ud83d\udcf8";
-  var video_camera = "\ud83d\udcf9";
-  var vhs = "\ud83d\udcfc";
-  var mag = "\ud83d\udd0d";
-  var mag_right = "\ud83d\udd0e";
-  var candle = "\ud83d\udd6f\ufe0f";
-  var bulb = "\ud83d\udca1";
-  var flashlight = "\ud83d\udd26";
-  var izakaya_lantern = "\ud83c\udfee";
-  var lantern = "\ud83c\udfee";
-  var diya_lamp = "\ud83e\ude94";
-  var notebook_with_decorative_cover = "\ud83d\udcd4";
-  var closed_book = "\ud83d\udcd5";
-  var book = "\ud83d\udcd6";
-  var open_book = "\ud83d\udcd6";
-  var green_book = "\ud83d\udcd7";
-  var blue_book = "\ud83d\udcd8";
-  var orange_book = "\ud83d\udcd9";
-  var books = "\ud83d\udcda";
-  var notebook = "\ud83d\udcd3";
-  var ledger = "\ud83d\udcd2";
-  var page_with_curl = "\ud83d\udcc3";
-  var scroll = "\ud83d\udcdc";
-  var page_facing_up = "\ud83d\udcc4";
-  var newspaper = "\ud83d\udcf0";
-  var newspaper_roll = "\ud83d\uddde\ufe0f";
-  var bookmark_tabs = "\ud83d\udcd1";
-  var bookmark = "\ud83d\udd16";
-  var label = "\ud83c\udff7\ufe0f";
-  var moneybag = "\ud83d\udcb0";
-  var coin = "\ud83e\ude99";
-  var yen = "\ud83d\udcb4";
-  var dollar = "\ud83d\udcb5";
-  var euro = "\ud83d\udcb6";
-  var pound = "\ud83d\udcb7";
-  var money_with_wings = "\ud83d\udcb8";
-  var credit_card = "\ud83d\udcb3";
-  var receipt = "\ud83e\uddfe";
-  var chart = "\ud83d\udcb9";
-  var email = "\u2709\ufe0f";
-  var envelope = "\u2709\ufe0f";
-  var incoming_envelope = "\ud83d\udce8";
-  var envelope_with_arrow = "\ud83d\udce9";
-  var outbox_tray = "\ud83d\udce4";
-  var inbox_tray = "\ud83d\udce5";
-  var mailbox = "\ud83d\udceb";
-  var mailbox_closed = "\ud83d\udcea";
-  var mailbox_with_mail = "\ud83d\udcec";
-  var mailbox_with_no_mail = "\ud83d\udced";
-  var postbox = "\ud83d\udcee";
-  var ballot_box = "\ud83d\uddf3\ufe0f";
-  var pencil2 = "\u270f\ufe0f";
-  var black_nib = "\u2712\ufe0f";
-  var fountain_pen = "\ud83d\udd8b\ufe0f";
-  var pen = "\ud83d\udd8a\ufe0f";
-  var paintbrush = "\ud83d\udd8c\ufe0f";
-  var crayon = "\ud83d\udd8d\ufe0f";
-  var memo = "\ud83d\udcdd";
-  var pencil = "\ud83d\udcdd";
-  var briefcase = "\ud83d\udcbc";
-  var file_folder = "\ud83d\udcc1";
-  var open_file_folder = "\ud83d\udcc2";
-  var card_index_dividers = "\ud83d\uddc2\ufe0f";
-  var date = "\ud83d\udcc5";
-  var calendar = "\ud83d\udcc6";
-  var spiral_notepad = "\ud83d\uddd2\ufe0f";
-  var spiral_calendar = "\ud83d\uddd3\ufe0f";
-  var card_index = "\ud83d\udcc7";
-  var chart_with_upwards_trend = "\ud83d\udcc8";
-  var chart_with_downwards_trend = "\ud83d\udcc9";
-  var bar_chart = "\ud83d\udcca";
-  var clipboard = "\ud83d\udccb";
-  var pushpin = "\ud83d\udccc";
-  var round_pushpin = "\ud83d\udccd";
-  var paperclip = "\ud83d\udcce";
-  var paperclips = "\ud83d\udd87\ufe0f";
-  var straight_ruler = "\ud83d\udccf";
-  var triangular_ruler = "\ud83d\udcd0";
-  var scissors = "\u2702\ufe0f";
-  var card_file_box = "\ud83d\uddc3\ufe0f";
-  var file_cabinet = "\ud83d\uddc4\ufe0f";
-  var wastebasket = "\ud83d\uddd1\ufe0f";
-  var lock = "\ud83d\udd12";
-  var unlock = "\ud83d\udd13";
-  var lock_with_ink_pen = "\ud83d\udd0f";
-  var closed_lock_with_key = "\ud83d\udd10";
-  var key = "\ud83d\udd11";
-  var old_key = "\ud83d\udddd\ufe0f";
-  var hammer = "\ud83d\udd28";
-  var axe = "\ud83e\ude93";
-  var pick = "\u26cf\ufe0f";
-  var hammer_and_pick = "\u2692\ufe0f";
-  var hammer_and_wrench = "\ud83d\udee0\ufe0f";
-  var dagger = "\ud83d\udde1\ufe0f";
-  var crossed_swords = "\u2694\ufe0f";
-  var gun = "\ud83d\udd2b";
-  var boomerang = "\ud83e\ude83";
-  var bow_and_arrow = "\ud83c\udff9";
-  var shield = "\ud83d\udee1\ufe0f";
-  var carpentry_saw = "\ud83e\ude9a";
-  var wrench = "\ud83d\udd27";
-  var screwdriver = "\ud83e\ude9b";
-  var nut_and_bolt = "\ud83d\udd29";
-  var gear = "\u2699\ufe0f";
-  var clamp = "\ud83d\udddc\ufe0f";
-  var balance_scale = "\u2696\ufe0f";
-  var probing_cane = "\ud83e\uddaf";
-  var link = "\ud83d\udd17";
-  var chains = "\u26d3\ufe0f";
-  var hook = "\ud83e\ude9d";
-  var toolbox = "\ud83e\uddf0";
-  var magnet = "\ud83e\uddf2";
-  var ladder = "\ud83e\ude9c";
-  var alembic = "\u2697\ufe0f";
-  var test_tube = "\ud83e\uddea";
-  var petri_dish = "\ud83e\uddeb";
-  var dna = "\ud83e\uddec";
-  var microscope = "\ud83d\udd2c";
-  var telescope = "\ud83d\udd2d";
-  var satellite = "\ud83d\udce1";
-  var syringe = "\ud83d\udc89";
-  var drop_of_blood = "\ud83e\ude78";
-  var pill = "\ud83d\udc8a";
-  var adhesive_bandage = "\ud83e\ude79";
-  var stethoscope = "\ud83e\ude7a";
-  var door = "\ud83d\udeaa";
-  var elevator = "\ud83d\uded7";
-  var mirror = "\ud83e\ude9e";
-  var window$1 = "\ud83e\ude9f";
-  var bed = "\ud83d\udecf\ufe0f";
-  var couch_and_lamp = "\ud83d\udecb\ufe0f";
-  var chair = "\ud83e\ude91";
-  var toilet = "\ud83d\udebd";
-  var plunger = "\ud83e\udea0";
-  var shower = "\ud83d\udebf";
-  var bathtub = "\ud83d\udec1";
-  var mouse_trap = "\ud83e\udea4";
-  var razor$1 = "\ud83e\ude92";
-  var lotion_bottle = "\ud83e\uddf4";
-  var safety_pin = "\ud83e\uddf7";
-  var broom = "\ud83e\uddf9";
-  var basket = "\ud83e\uddfa";
-  var roll_of_paper = "\ud83e\uddfb";
-  var bucket = "\ud83e\udea3";
-  var soap = "\ud83e\uddfc";
-  var toothbrush = "\ud83e\udea5";
-  var sponge = "\ud83e\uddfd";
-  var fire_extinguisher = "\ud83e\uddef";
-  var shopping_cart = "\ud83d\uded2";
-  var smoking = "\ud83d\udeac";
-  var coffin = "\u26b0\ufe0f";
-  var headstone = "\ud83e\udea6";
-  var funeral_urn = "\u26b1\ufe0f";
-  var moyai = "\ud83d\uddff";
-  var placard = "\ud83e\udea7";
-  var atm = "\ud83c\udfe7";
-  var put_litter_in_its_place = "\ud83d\udeae";
-  var potable_water = "\ud83d\udeb0";
-  var wheelchair = "\u267f";
-  var mens = "\ud83d\udeb9";
-  var womens = "\ud83d\udeba";
-  var restroom = "\ud83d\udebb";
-  var baby_symbol = "\ud83d\udebc";
-  var wc = "\ud83d\udebe";
-  var passport_control = "\ud83d\udec2";
-  var customs = "\ud83d\udec3";
-  var baggage_claim = "\ud83d\udec4";
-  var left_luggage = "\ud83d\udec5";
-  var warning = "\u26a0\ufe0f";
-  var children_crossing = "\ud83d\udeb8";
-  var no_entry = "\u26d4";
-  var no_entry_sign = "\ud83d\udeab";
-  var no_bicycles = "\ud83d\udeb3";
-  var no_smoking = "\ud83d\udead";
-  var do_not_litter = "\ud83d\udeaf";
-  var no_pedestrians = "\ud83d\udeb7";
-  var no_mobile_phones = "\ud83d\udcf5";
-  var underage = "\ud83d\udd1e";
-  var radioactive = "\u2622\ufe0f";
-  var biohazard = "\u2623\ufe0f";
-  var arrow_up = "\u2b06\ufe0f";
-  var arrow_upper_right = "\u2197\ufe0f";
-  var arrow_right = "\u27a1\ufe0f";
-  var arrow_lower_right = "\u2198\ufe0f";
-  var arrow_down = "\u2b07\ufe0f";
-  var arrow_lower_left = "\u2199\ufe0f";
-  var arrow_left = "\u2b05\ufe0f";
-  var arrow_upper_left = "\u2196\ufe0f";
-  var arrow_up_down = "\u2195\ufe0f";
-  var left_right_arrow = "\u2194\ufe0f";
-  var leftwards_arrow_with_hook = "\u21a9\ufe0f";
-  var arrow_right_hook = "\u21aa\ufe0f";
-  var arrow_heading_up = "\u2934\ufe0f";
-  var arrow_heading_down = "\u2935\ufe0f";
-  var arrows_clockwise = "\ud83d\udd03";
-  var arrows_counterclockwise = "\ud83d\udd04";
-  var back = "\ud83d\udd19";
-  var end = "\ud83d\udd1a";
-  var on = "\ud83d\udd1b";
-  var soon = "\ud83d\udd1c";
-  var top = "\ud83d\udd1d";
-  var place_of_worship = "\ud83d\uded0";
-  var atom_symbol = "\u269b\ufe0f";
-  var om = "\ud83d\udd49\ufe0f";
-  var star_of_david = "\u2721\ufe0f";
-  var wheel_of_dharma = "\u2638\ufe0f";
-  var yin_yang = "\u262f\ufe0f";
-  var latin_cross = "\u271d\ufe0f";
-  var orthodox_cross = "\u2626\ufe0f";
-  var star_and_crescent = "\u262a\ufe0f";
-  var peace_symbol = "\u262e\ufe0f";
-  var menorah = "\ud83d\udd4e";
-  var six_pointed_star = "\ud83d\udd2f";
-  var aries = "\u2648";
-  var taurus = "\u2649";
-  var gemini = "\u264a";
-  var cancer = "\u264b";
-  var leo = "\u264c";
-  var virgo = "\u264d";
-  var libra = "\u264e";
-  var scorpius = "\u264f";
-  var sagittarius = "\u2650";
-  var capricorn = "\u2651";
-  var aquarius = "\u2652";
-  var pisces = "\u2653";
-  var ophiuchus = "\u26ce";
-  var twisted_rightwards_arrows = "\ud83d\udd00";
-  var repeat = "\ud83d\udd01";
-  var repeat_one = "\ud83d\udd02";
-  var arrow_forward = "\u25b6\ufe0f";
-  var fast_forward = "\u23e9";
-  var next_track_button = "\u23ed\ufe0f";
-  var play_or_pause_button = "\u23ef\ufe0f";
-  var arrow_backward = "\u25c0\ufe0f";
-  var rewind = "\u23ea";
-  var previous_track_button = "\u23ee\ufe0f";
-  var arrow_up_small = "\ud83d\udd3c";
-  var arrow_double_up = "\u23eb";
-  var arrow_down_small = "\ud83d\udd3d";
-  var arrow_double_down = "\u23ec";
-  var pause_button = "\u23f8\ufe0f";
-  var stop_button = "\u23f9\ufe0f";
-  var record_button = "\u23fa\ufe0f";
-  var eject_button = "\u23cf\ufe0f";
-  var cinema = "\ud83c\udfa6";
-  var low_brightness = "\ud83d\udd05";
-  var high_brightness = "\ud83d\udd06";
-  var signal_strength = "\ud83d\udcf6";
-  var vibration_mode = "\ud83d\udcf3";
-  var mobile_phone_off = "\ud83d\udcf4";
-  var female_sign = "\u2640\ufe0f";
-  var male_sign = "\u2642\ufe0f";
-  var transgender_symbol = "\u26a7\ufe0f";
-  var heavy_multiplication_x = "\u2716\ufe0f";
-  var heavy_plus_sign = "\u2795";
-  var heavy_minus_sign = "\u2796";
-  var heavy_division_sign = "\u2797";
-  var infinity = "\u267e\ufe0f";
-  var bangbang = "\u203c\ufe0f";
-  var interrobang = "\u2049\ufe0f";
-  var question = "\u2753";
-  var grey_question = "\u2754";
-  var grey_exclamation = "\u2755";
-  var exclamation = "\u2757";
-  var heavy_exclamation_mark = "\u2757";
-  var wavy_dash = "\u3030\ufe0f";
-  var currency_exchange = "\ud83d\udcb1";
-  var heavy_dollar_sign = "\ud83d\udcb2";
-  var medical_symbol = "\u2695\ufe0f";
-  var recycle = "\u267b\ufe0f";
-  var fleur_de_lis = "\u269c\ufe0f";
-  var trident = "\ud83d\udd31";
-  var name_badge = "\ud83d\udcdb";
-  var beginner = "\ud83d\udd30";
-  var o = "\u2b55";
-  var white_check_mark = "\u2705";
-  var ballot_box_with_check = "\u2611\ufe0f";
-  var heavy_check_mark = "\u2714\ufe0f";
-  var x = "\u274c";
-  var negative_squared_cross_mark = "\u274e";
-  var curly_loop = "\u27b0";
-  var loop = "\u27bf";
-  var part_alternation_mark = "\u303d\ufe0f";
-  var eight_spoked_asterisk = "\u2733\ufe0f";
-  var eight_pointed_black_star = "\u2734\ufe0f";
-  var sparkle = "\u2747\ufe0f";
-  var copyright = "\xa9\ufe0f";
-  var registered = "\xae\ufe0f";
-  var tm = "\u2122\ufe0f";
-  var hash = "#\ufe0f\u20e3";
-  var asterisk = "*\ufe0f\u20e3";
-  var zero = "0\ufe0f\u20e3";
-  var one = "1\ufe0f\u20e3";
-  var two = "2\ufe0f\u20e3";
-  var three = "3\ufe0f\u20e3";
-  var four = "4\ufe0f\u20e3";
-  var five = "5\ufe0f\u20e3";
-  var six = "6\ufe0f\u20e3";
-  var seven = "7\ufe0f\u20e3";
-  var eight = "8\ufe0f\u20e3";
-  var nine = "9\ufe0f\u20e3";
-  var keycap_ten = "\ud83d\udd1f";
-  var capital_abcd = "\ud83d\udd20";
-  var abcd = "\ud83d\udd21";
-  var symbols = "\ud83d\udd23";
-  var abc$1 = "\ud83d\udd24";
-  var a = "\ud83c\udd70\ufe0f";
-  var ab = "\ud83c\udd8e";
-  var b = "\ud83c\udd71\ufe0f";
-  var cl = "\ud83c\udd91";
-  var cool = "\ud83c\udd92";
-  var free = "\ud83c\udd93";
-  var information_source = "\u2139\ufe0f";
-  var id = "\ud83c\udd94";
-  var m = "\u24c2\ufe0f";
-  var ng = "\ud83c\udd96";
-  var o2 = "\ud83c\udd7e\ufe0f";
-  var ok = "\ud83c\udd97";
-  var parking = "\ud83c\udd7f\ufe0f";
-  var sos = "\ud83c\udd98";
-  var up = "\ud83c\udd99";
-  var vs = "\ud83c\udd9a";
-  var koko = "\ud83c\ude01";
-  var sa = "\ud83c\ude02\ufe0f";
-  var ideograph_advantage = "\ud83c\ude50";
-  var accept = "\ud83c\ude51";
-  var congratulations = "\u3297\ufe0f";
-  var secret = "\u3299\ufe0f";
-  var u6e80 = "\ud83c\ude35";
-  var red_circle = "\ud83d\udd34";
-  var orange_circle = "\ud83d\udfe0";
-  var yellow_circle = "\ud83d\udfe1";
-  var green_circle = "\ud83d\udfe2";
-  var large_blue_circle = "\ud83d\udd35";
-  var purple_circle = "\ud83d\udfe3";
-  var brown_circle = "\ud83d\udfe4";
-  var black_circle = "\u26ab";
-  var white_circle = "\u26aa";
-  var red_square = "\ud83d\udfe5";
-  var orange_square = "\ud83d\udfe7";
-  var yellow_square = "\ud83d\udfe8";
-  var green_square = "\ud83d\udfe9";
-  var blue_square = "\ud83d\udfe6";
-  var purple_square = "\ud83d\udfea";
-  var brown_square = "\ud83d\udfeb";
-  var black_large_square = "\u2b1b";
-  var white_large_square = "\u2b1c";
-  var black_medium_square = "\u25fc\ufe0f";
-  var white_medium_square = "\u25fb\ufe0f";
-  var black_medium_small_square = "\u25fe";
-  var white_medium_small_square = "\u25fd";
-  var black_small_square = "\u25aa\ufe0f";
-  var white_small_square = "\u25ab\ufe0f";
-  var large_orange_diamond = "\ud83d\udd36";
-  var large_blue_diamond = "\ud83d\udd37";
-  var small_orange_diamond = "\ud83d\udd38";
-  var small_blue_diamond = "\ud83d\udd39";
-  var small_red_triangle = "\ud83d\udd3a";
-  var small_red_triangle_down = "\ud83d\udd3b";
-  var diamond_shape_with_a_dot_inside = "\ud83d\udca0";
-  var radio_button = "\ud83d\udd18";
-  var white_square_button = "\ud83d\udd33";
-  var black_square_button = "\ud83d\udd32";
-  var checkered_flag = "\ud83c\udfc1";
-  var triangular_flag_on_post = "\ud83d\udea9";
-  var crossed_flags = "\ud83c\udf8c";
-  var black_flag = "\ud83c\udff4";
-  var white_flag = "\ud83c\udff3\ufe0f";
-  var rainbow_flag = "\ud83c\udff3\ufe0f\u200d\ud83c\udf08";
-  var transgender_flag = "\ud83c\udff3\ufe0f\u200d\u26a7\ufe0f";
-  var pirate_flag = "\ud83c\udff4\u200d\u2620\ufe0f";
-  var ascension_island = "\ud83c\udde6\ud83c\udde8";
-  var andorra = "\ud83c\udde6\ud83c\udde9";
-  var united_arab_emirates = "\ud83c\udde6\ud83c\uddea";
-  var afghanistan = "\ud83c\udde6\ud83c\uddeb";
-  var antigua_barbuda = "\ud83c\udde6\ud83c\uddec";
-  var anguilla = "\ud83c\udde6\ud83c\uddee";
-  var albania = "\ud83c\udde6\ud83c\uddf1";
-  var armenia = "\ud83c\udde6\ud83c\uddf2";
-  var angola = "\ud83c\udde6\ud83c\uddf4";
-  var antarctica = "\ud83c\udde6\ud83c\uddf6";
-  var argentina = "\ud83c\udde6\ud83c\uddf7";
-  var american_samoa = "\ud83c\udde6\ud83c\uddf8";
-  var austria = "\ud83c\udde6\ud83c\uddf9";
-  var australia = "\ud83c\udde6\ud83c\uddfa";
-  var aruba = "\ud83c\udde6\ud83c\uddfc";
-  var aland_islands = "\ud83c\udde6\ud83c\uddfd";
-  var azerbaijan = "\ud83c\udde6\ud83c\uddff";
-  var bosnia_herzegovina = "\ud83c\udde7\ud83c\udde6";
-  var barbados = "\ud83c\udde7\ud83c\udde7";
-  var bangladesh = "\ud83c\udde7\ud83c\udde9";
-  var belgium = "\ud83c\udde7\ud83c\uddea";
-  var burkina_faso = "\ud83c\udde7\ud83c\uddeb";
-  var bulgaria = "\ud83c\udde7\ud83c\uddec";
-  var bahrain = "\ud83c\udde7\ud83c\udded";
-  var burundi = "\ud83c\udde7\ud83c\uddee";
-  var benin = "\ud83c\udde7\ud83c\uddef";
-  var st_barthelemy = "\ud83c\udde7\ud83c\uddf1";
-  var bermuda = "\ud83c\udde7\ud83c\uddf2";
-  var brunei = "\ud83c\udde7\ud83c\uddf3";
-  var bolivia = "\ud83c\udde7\ud83c\uddf4";
-  var caribbean_netherlands = "\ud83c\udde7\ud83c\uddf6";
-  var brazil = "\ud83c\udde7\ud83c\uddf7";
-  var bahamas = "\ud83c\udde7\ud83c\uddf8";
-  var bhutan = "\ud83c\udde7\ud83c\uddf9";
-  var bouvet_island = "\ud83c\udde7\ud83c\uddfb";
-  var botswana = "\ud83c\udde7\ud83c\uddfc";
-  var belarus = "\ud83c\udde7\ud83c\uddfe";
-  var belize = "\ud83c\udde7\ud83c\uddff";
-  var canada = "\ud83c\udde8\ud83c\udde6";
-  var cocos_islands = "\ud83c\udde8\ud83c\udde8";
-  var congo_kinshasa = "\ud83c\udde8\ud83c\udde9";
-  var central_african_republic = "\ud83c\udde8\ud83c\uddeb";
-  var congo_brazzaville = "\ud83c\udde8\ud83c\uddec";
-  var switzerland = "\ud83c\udde8\ud83c\udded";
-  var cote_divoire = "\ud83c\udde8\ud83c\uddee";
-  var cook_islands = "\ud83c\udde8\ud83c\uddf0";
-  var chile = "\ud83c\udde8\ud83c\uddf1";
-  var cameroon = "\ud83c\udde8\ud83c\uddf2";
-  var cn = "\ud83c\udde8\ud83c\uddf3";
-  var colombia = "\ud83c\udde8\ud83c\uddf4";
-  var clipperton_island = "\ud83c\udde8\ud83c\uddf5";
-  var costa_rica = "\ud83c\udde8\ud83c\uddf7";
-  var cuba = "\ud83c\udde8\ud83c\uddfa";
-  var cape_verde = "\ud83c\udde8\ud83c\uddfb";
-  var curacao = "\ud83c\udde8\ud83c\uddfc";
-  var christmas_island = "\ud83c\udde8\ud83c\uddfd";
-  var cyprus = "\ud83c\udde8\ud83c\uddfe";
-  var czech_republic = "\ud83c\udde8\ud83c\uddff";
-  var de = "\ud83c\udde9\ud83c\uddea";
-  var diego_garcia = "\ud83c\udde9\ud83c\uddec";
-  var djibouti = "\ud83c\udde9\ud83c\uddef";
-  var denmark = "\ud83c\udde9\ud83c\uddf0";
-  var dominica = "\ud83c\udde9\ud83c\uddf2";
-  var dominican_republic = "\ud83c\udde9\ud83c\uddf4";
-  var algeria = "\ud83c\udde9\ud83c\uddff";
-  var ceuta_melilla = "\ud83c\uddea\ud83c\udde6";
-  var ecuador = "\ud83c\uddea\ud83c\udde8";
-  var estonia = "\ud83c\uddea\ud83c\uddea";
-  var egypt = "\ud83c\uddea\ud83c\uddec";
-  var western_sahara = "\ud83c\uddea\ud83c\udded";
-  var eritrea = "\ud83c\uddea\ud83c\uddf7";
-  var es = "\ud83c\uddea\ud83c\uddf8";
-  var ethiopia = "\ud83c\uddea\ud83c\uddf9";
-  var eu = "\ud83c\uddea\ud83c\uddfa";
-  var european_union = "\ud83c\uddea\ud83c\uddfa";
-  var finland = "\ud83c\uddeb\ud83c\uddee";
-  var fiji = "\ud83c\uddeb\ud83c\uddef";
-  var falkland_islands = "\ud83c\uddeb\ud83c\uddf0";
-  var micronesia = "\ud83c\uddeb\ud83c\uddf2";
-  var faroe_islands = "\ud83c\uddeb\ud83c\uddf4";
-  var fr = "\ud83c\uddeb\ud83c\uddf7";
-  var gabon = "\ud83c\uddec\ud83c\udde6";
-  var gb = "\ud83c\uddec\ud83c\udde7";
-  var uk = "\ud83c\uddec\ud83c\udde7";
-  var grenada = "\ud83c\uddec\ud83c\udde9";
-  var georgia = "\ud83c\uddec\ud83c\uddea";
-  var french_guiana = "\ud83c\uddec\ud83c\uddeb";
-  var guernsey = "\ud83c\uddec\ud83c\uddec";
-  var ghana = "\ud83c\uddec\ud83c\udded";
-  var gibraltar = "\ud83c\uddec\ud83c\uddee";
-  var greenland = "\ud83c\uddec\ud83c\uddf1";
-  var gambia = "\ud83c\uddec\ud83c\uddf2";
-  var guinea = "\ud83c\uddec\ud83c\uddf3";
-  var guadeloupe = "\ud83c\uddec\ud83c\uddf5";
-  var equatorial_guinea = "\ud83c\uddec\ud83c\uddf6";
-  var greece = "\ud83c\uddec\ud83c\uddf7";
-  var south_georgia_south_sandwich_islands = "\ud83c\uddec\ud83c\uddf8";
-  var guatemala = "\ud83c\uddec\ud83c\uddf9";
-  var guam = "\ud83c\uddec\ud83c\uddfa";
-  var guinea_bissau = "\ud83c\uddec\ud83c\uddfc";
-  var guyana = "\ud83c\uddec\ud83c\uddfe";
-  var hong_kong = "\ud83c\udded\ud83c\uddf0";
-  var heard_mcdonald_islands = "\ud83c\udded\ud83c\uddf2";
-  var honduras = "\ud83c\udded\ud83c\uddf3";
-  var croatia = "\ud83c\udded\ud83c\uddf7";
-  var haiti = "\ud83c\udded\ud83c\uddf9";
-  var hungary = "\ud83c\udded\ud83c\uddfa";
-  var canary_islands = "\ud83c\uddee\ud83c\udde8";
-  var indonesia = "\ud83c\uddee\ud83c\udde9";
-  var ireland = "\ud83c\uddee\ud83c\uddea";
-  var israel = "\ud83c\uddee\ud83c\uddf1";
-  var isle_of_man = "\ud83c\uddee\ud83c\uddf2";
-  var india = "\ud83c\uddee\ud83c\uddf3";
-  var british_indian_ocean_territory = "\ud83c\uddee\ud83c\uddf4";
-  var iraq = "\ud83c\uddee\ud83c\uddf6";
-  var iran = "\ud83c\uddee\ud83c\uddf7";
-  var iceland = "\ud83c\uddee\ud83c\uddf8";
-  var it = "\ud83c\uddee\ud83c\uddf9";
-  var jersey = "\ud83c\uddef\ud83c\uddea";
-  var jamaica = "\ud83c\uddef\ud83c\uddf2";
-  var jordan = "\ud83c\uddef\ud83c\uddf4";
-  var jp = "\ud83c\uddef\ud83c\uddf5";
-  var kenya = "\ud83c\uddf0\ud83c\uddea";
-  var kyrgyzstan = "\ud83c\uddf0\ud83c\uddec";
-  var cambodia = "\ud83c\uddf0\ud83c\udded";
-  var kiribati = "\ud83c\uddf0\ud83c\uddee";
-  var comoros = "\ud83c\uddf0\ud83c\uddf2";
-  var st_kitts_nevis = "\ud83c\uddf0\ud83c\uddf3";
-  var north_korea = "\ud83c\uddf0\ud83c\uddf5";
-  var kr = "\ud83c\uddf0\ud83c\uddf7";
-  var kuwait = "\ud83c\uddf0\ud83c\uddfc";
-  var cayman_islands = "\ud83c\uddf0\ud83c\uddfe";
-  var kazakhstan = "\ud83c\uddf0\ud83c\uddff";
-  var laos = "\ud83c\uddf1\ud83c\udde6";
-  var lebanon = "\ud83c\uddf1\ud83c\udde7";
-  var st_lucia = "\ud83c\uddf1\ud83c\udde8";
-  var liechtenstein = "\ud83c\uddf1\ud83c\uddee";
-  var sri_lanka = "\ud83c\uddf1\ud83c\uddf0";
-  var liberia = "\ud83c\uddf1\ud83c\uddf7";
-  var lesotho = "\ud83c\uddf1\ud83c\uddf8";
-  var lithuania = "\ud83c\uddf1\ud83c\uddf9";
-  var luxembourg = "\ud83c\uddf1\ud83c\uddfa";
-  var latvia = "\ud83c\uddf1\ud83c\uddfb";
-  var libya = "\ud83c\uddf1\ud83c\uddfe";
-  var morocco = "\ud83c\uddf2\ud83c\udde6";
-  var monaco = "\ud83c\uddf2\ud83c\udde8";
-  var moldova = "\ud83c\uddf2\ud83c\udde9";
-  var montenegro = "\ud83c\uddf2\ud83c\uddea";
-  var st_martin = "\ud83c\uddf2\ud83c\uddeb";
-  var madagascar = "\ud83c\uddf2\ud83c\uddec";
-  var marshall_islands = "\ud83c\uddf2\ud83c\udded";
-  var macedonia = "\ud83c\uddf2\ud83c\uddf0";
-  var mali = "\ud83c\uddf2\ud83c\uddf1";
-  var myanmar = "\ud83c\uddf2\ud83c\uddf2";
-  var mongolia = "\ud83c\uddf2\ud83c\uddf3";
-  var macau = "\ud83c\uddf2\ud83c\uddf4";
-  var northern_mariana_islands = "\ud83c\uddf2\ud83c\uddf5";
-  var martinique = "\ud83c\uddf2\ud83c\uddf6";
-  var mauritania = "\ud83c\uddf2\ud83c\uddf7";
-  var montserrat = "\ud83c\uddf2\ud83c\uddf8";
-  var malta = "\ud83c\uddf2\ud83c\uddf9";
-  var mauritius = "\ud83c\uddf2\ud83c\uddfa";
-  var maldives = "\ud83c\uddf2\ud83c\uddfb";
-  var malawi = "\ud83c\uddf2\ud83c\uddfc";
-  var mexico = "\ud83c\uddf2\ud83c\uddfd";
-  var malaysia = "\ud83c\uddf2\ud83c\uddfe";
-  var mozambique = "\ud83c\uddf2\ud83c\uddff";
-  var namibia = "\ud83c\uddf3\ud83c\udde6";
-  var new_caledonia = "\ud83c\uddf3\ud83c\udde8";
-  var niger = "\ud83c\uddf3\ud83c\uddea";
-  var norfolk_island = "\ud83c\uddf3\ud83c\uddeb";
-  var nigeria = "\ud83c\uddf3\ud83c\uddec";
-  var nicaragua = "\ud83c\uddf3\ud83c\uddee";
-  var netherlands = "\ud83c\uddf3\ud83c\uddf1";
-  var norway = "\ud83c\uddf3\ud83c\uddf4";
-  var nepal = "\ud83c\uddf3\ud83c\uddf5";
-  var nauru = "\ud83c\uddf3\ud83c\uddf7";
-  var niue = "\ud83c\uddf3\ud83c\uddfa";
-  var new_zealand = "\ud83c\uddf3\ud83c\uddff";
-  var oman = "\ud83c\uddf4\ud83c\uddf2";
-  var panama = "\ud83c\uddf5\ud83c\udde6";
-  var peru = "\ud83c\uddf5\ud83c\uddea";
-  var french_polynesia = "\ud83c\uddf5\ud83c\uddeb";
-  var papua_new_guinea = "\ud83c\uddf5\ud83c\uddec";
-  var philippines = "\ud83c\uddf5\ud83c\udded";
-  var pakistan = "\ud83c\uddf5\ud83c\uddf0";
-  var poland = "\ud83c\uddf5\ud83c\uddf1";
-  var st_pierre_miquelon = "\ud83c\uddf5\ud83c\uddf2";
-  var pitcairn_islands = "\ud83c\uddf5\ud83c\uddf3";
-  var puerto_rico = "\ud83c\uddf5\ud83c\uddf7";
-  var palestinian_territories = "\ud83c\uddf5\ud83c\uddf8";
-  var portugal = "\ud83c\uddf5\ud83c\uddf9";
-  var palau = "\ud83c\uddf5\ud83c\uddfc";
-  var paraguay = "\ud83c\uddf5\ud83c\uddfe";
-  var qatar = "\ud83c\uddf6\ud83c\udde6";
-  var reunion = "\ud83c\uddf7\ud83c\uddea";
-  var romania = "\ud83c\uddf7\ud83c\uddf4";
-  var serbia = "\ud83c\uddf7\ud83c\uddf8";
-  var ru = "\ud83c\uddf7\ud83c\uddfa";
-  var rwanda = "\ud83c\uddf7\ud83c\uddfc";
-  var saudi_arabia = "\ud83c\uddf8\ud83c\udde6";
-  var solomon_islands = "\ud83c\uddf8\ud83c\udde7";
-  var seychelles = "\ud83c\uddf8\ud83c\udde8";
-  var sudan = "\ud83c\uddf8\ud83c\udde9";
-  var sweden = "\ud83c\uddf8\ud83c\uddea";
-  var singapore = "\ud83c\uddf8\ud83c\uddec";
-  var st_helena = "\ud83c\uddf8\ud83c\udded";
-  var slovenia = "\ud83c\uddf8\ud83c\uddee";
-  var svalbard_jan_mayen = "\ud83c\uddf8\ud83c\uddef";
-  var slovakia = "\ud83c\uddf8\ud83c\uddf0";
-  var sierra_leone = "\ud83c\uddf8\ud83c\uddf1";
-  var san_marino = "\ud83c\uddf8\ud83c\uddf2";
-  var senegal = "\ud83c\uddf8\ud83c\uddf3";
-  var somalia = "\ud83c\uddf8\ud83c\uddf4";
-  var suriname = "\ud83c\uddf8\ud83c\uddf7";
-  var south_sudan = "\ud83c\uddf8\ud83c\uddf8";
-  var sao_tome_principe = "\ud83c\uddf8\ud83c\uddf9";
-  var el_salvador = "\ud83c\uddf8\ud83c\uddfb";
-  var sint_maarten = "\ud83c\uddf8\ud83c\uddfd";
-  var syria = "\ud83c\uddf8\ud83c\uddfe";
-  var swaziland = "\ud83c\uddf8\ud83c\uddff";
-  var tristan_da_cunha = "\ud83c\uddf9\ud83c\udde6";
-  var turks_caicos_islands = "\ud83c\uddf9\ud83c\udde8";
-  var chad = "\ud83c\uddf9\ud83c\udde9";
-  var french_southern_territories = "\ud83c\uddf9\ud83c\uddeb";
-  var togo = "\ud83c\uddf9\ud83c\uddec";
-  var thailand = "\ud83c\uddf9\ud83c\udded";
-  var tajikistan = "\ud83c\uddf9\ud83c\uddef";
-  var tokelau = "\ud83c\uddf9\ud83c\uddf0";
-  var timor_leste = "\ud83c\uddf9\ud83c\uddf1";
-  var turkmenistan = "\ud83c\uddf9\ud83c\uddf2";
-  var tunisia = "\ud83c\uddf9\ud83c\uddf3";
-  var tonga = "\ud83c\uddf9\ud83c\uddf4";
-  var tr = "\ud83c\uddf9\ud83c\uddf7";
-  var trinidad_tobago = "\ud83c\uddf9\ud83c\uddf9";
-  var tuvalu = "\ud83c\uddf9\ud83c\uddfb";
-  var taiwan = "\ud83c\uddf9\ud83c\uddfc";
-  var tanzania = "\ud83c\uddf9\ud83c\uddff";
-  var ukraine = "\ud83c\uddfa\ud83c\udde6";
-  var uganda = "\ud83c\uddfa\ud83c\uddec";
-  var us_outlying_islands = "\ud83c\uddfa\ud83c\uddf2";
-  var united_nations = "\ud83c\uddfa\ud83c\uddf3";
-  var us = "\ud83c\uddfa\ud83c\uddf8";
-  var uruguay = "\ud83c\uddfa\ud83c\uddfe";
-  var uzbekistan = "\ud83c\uddfa\ud83c\uddff";
-  var vatican_city = "\ud83c\uddfb\ud83c\udde6";
-  var st_vincent_grenadines = "\ud83c\uddfb\ud83c\udde8";
-  var venezuela = "\ud83c\uddfb\ud83c\uddea";
-  var british_virgin_islands = "\ud83c\uddfb\ud83c\uddec";
-  var us_virgin_islands = "\ud83c\uddfb\ud83c\uddee";
-  var vietnam = "\ud83c\uddfb\ud83c\uddf3";
-  var vanuatu = "\ud83c\uddfb\ud83c\uddfa";
-  var wallis_futuna = "\ud83c\uddfc\ud83c\uddeb";
-  var samoa = "\ud83c\uddfc\ud83c\uddf8";
-  var kosovo = "\ud83c\uddfd\ud83c\uddf0";
-  var yemen = "\ud83c\uddfe\ud83c\uddea";
-  var mayotte = "\ud83c\uddfe\ud83c\uddf9";
-  var south_africa = "\ud83c\uddff\ud83c\udde6";
-  var zambia = "\ud83c\uddff\ud83c\uddf2";
-  var zimbabwe = "\ud83c\uddff\ud83c\uddfc";
-  var england = "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f";
-  var scotland = "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc73\udb40\udc63\udb40\udc74\udb40\udc7f";
-  var wales = "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc77\udb40\udc6c\udb40\udc73\udb40\udc7f";
-  var emojies_defs = {
-    100: "\ud83d\udcaf",
-    1234: "\ud83d\udd22",
-    grinning: grinning,
-    smiley: smiley,
-    smile: smile,
-    grin: grin,
-    laughing: laughing,
-    satisfied: satisfied,
-    sweat_smile: sweat_smile,
-    rofl: rofl,
-    joy: joy,
-    slightly_smiling_face: slightly_smiling_face,
-    upside_down_face: upside_down_face,
-    wink: wink,
-    blush: blush,
-    innocent: innocent,
-    smiling_face_with_three_hearts: smiling_face_with_three_hearts,
-    heart_eyes: heart_eyes,
-    star_struck: star_struck,
-    kissing_heart: kissing_heart,
-    kissing: kissing,
-    relaxed: relaxed,
-    kissing_closed_eyes: kissing_closed_eyes,
-    kissing_smiling_eyes: kissing_smiling_eyes,
-    smiling_face_with_tear: smiling_face_with_tear,
-    yum: yum,
-    stuck_out_tongue: stuck_out_tongue,
-    stuck_out_tongue_winking_eye: stuck_out_tongue_winking_eye,
-    zany_face: zany_face,
-    stuck_out_tongue_closed_eyes: stuck_out_tongue_closed_eyes,
-    money_mouth_face: money_mouth_face,
-    hugs: hugs,
-    hand_over_mouth: hand_over_mouth,
-    shushing_face: shushing_face,
-    thinking: thinking,
-    zipper_mouth_face: zipper_mouth_face,
-    raised_eyebrow: raised_eyebrow,
-    neutral_face: neutral_face,
-    expressionless: expressionless,
-    no_mouth: no_mouth,
-    smirk: smirk,
-    unamused: unamused,
-    roll_eyes: roll_eyes,
-    grimacing: grimacing,
-    lying_face: lying_face,
-    relieved: relieved,
-    pensive: pensive,
-    sleepy: sleepy,
-    drooling_face: drooling_face,
-    sleeping: sleeping,
-    mask: mask,
-    face_with_thermometer: face_with_thermometer,
-    face_with_head_bandage: face_with_head_bandage,
-    nauseated_face: nauseated_face,
-    vomiting_face: vomiting_face,
-    sneezing_face: sneezing_face,
-    hot_face: hot_face,
-    cold_face: cold_face,
-    woozy_face: woozy_face,
-    dizzy_face: dizzy_face,
-    exploding_head: exploding_head,
-    cowboy_hat_face: cowboy_hat_face,
-    partying_face: partying_face,
-    disguised_face: disguised_face,
-    sunglasses: sunglasses,
-    nerd_face: nerd_face,
-    monocle_face: monocle_face,
-    confused: confused,
-    worried: worried,
-    slightly_frowning_face: slightly_frowning_face,
-    frowning_face: frowning_face,
-    open_mouth: open_mouth,
-    hushed: hushed,
-    astonished: astonished,
-    flushed: flushed,
-    pleading_face: pleading_face,
-    frowning: frowning,
-    anguished: anguished,
-    fearful: fearful,
-    cold_sweat: cold_sweat,
-    disappointed_relieved: disappointed_relieved,
-    cry: cry,
-    sob: sob,
-    scream: scream,
-    confounded: confounded,
-    persevere: persevere,
-    disappointed: disappointed,
-    sweat: sweat,
-    weary: weary,
-    tired_face: tired_face,
-    yawning_face: yawning_face,
-    triumph: triumph,
-    rage: rage,
-    pout: pout,
-    angry: angry,
-    cursing_face: cursing_face,
-    smiling_imp: smiling_imp,
-    imp: imp,
-    skull: skull,
-    skull_and_crossbones: skull_and_crossbones,
-    hankey: hankey,
-    poop: poop,
-    shit: shit,
-    clown_face: clown_face,
-    japanese_ogre: japanese_ogre,
-    japanese_goblin: japanese_goblin,
-    ghost: ghost,
-    alien: alien,
-    space_invader: space_invader,
-    robot: robot,
-    smiley_cat: smiley_cat,
-    smile_cat: smile_cat,
-    joy_cat: joy_cat,
-    heart_eyes_cat: heart_eyes_cat,
-    smirk_cat: smirk_cat,
-    kissing_cat: kissing_cat,
-    scream_cat: scream_cat,
-    crying_cat_face: crying_cat_face,
-    pouting_cat: pouting_cat,
-    see_no_evil: see_no_evil,
-    hear_no_evil: hear_no_evil,
-    speak_no_evil: speak_no_evil,
-    kiss: kiss,
-    love_letter: love_letter,
-    cupid: cupid,
-    gift_heart: gift_heart,
-    sparkling_heart: sparkling_heart,
-    heartpulse: heartpulse,
-    heartbeat: heartbeat,
-    revolving_hearts: revolving_hearts,
-    two_hearts: two_hearts,
-    heart_decoration: heart_decoration,
-    heavy_heart_exclamation: heavy_heart_exclamation,
-    broken_heart: broken_heart,
-    heart: heart,
-    orange_heart: orange_heart,
-    yellow_heart: yellow_heart,
-    green_heart: green_heart,
-    blue_heart: blue_heart,
-    purple_heart: purple_heart,
-    brown_heart: brown_heart,
-    black_heart: black_heart,
-    white_heart: white_heart,
-    anger: anger,
-    boom: boom,
-    collision: collision,
-    dizzy: dizzy,
-    sweat_drops: sweat_drops,
-    dash: dash,
-    hole: hole,
-    bomb: bomb,
-    speech_balloon: speech_balloon,
-    eye_speech_bubble: eye_speech_bubble,
-    left_speech_bubble: left_speech_bubble,
-    right_anger_bubble: right_anger_bubble,
-    thought_balloon: thought_balloon,
-    zzz: zzz,
-    wave: wave,
-    raised_back_of_hand: raised_back_of_hand,
-    raised_hand_with_fingers_splayed: raised_hand_with_fingers_splayed,
-    hand: hand,
-    raised_hand: raised_hand,
-    vulcan_salute: vulcan_salute,
-    ok_hand: ok_hand,
-    pinched_fingers: pinched_fingers,
-    pinching_hand: pinching_hand,
-    v: v,
-    crossed_fingers: crossed_fingers,
-    love_you_gesture: love_you_gesture,
-    metal: metal,
-    call_me_hand: call_me_hand,
-    point_left: point_left,
-    point_right: point_right,
-    point_up_2: point_up_2,
-    middle_finger: middle_finger,
-    fu: fu,
-    point_down: point_down,
-    point_up: point_up,
-    "+1": "\ud83d\udc4d",
-    thumbsup: thumbsup,
-    "-1": "\ud83d\udc4e",
-    thumbsdown: thumbsdown,
-    fist_raised: fist_raised,
-    fist: fist,
-    fist_oncoming: fist_oncoming,
-    facepunch: facepunch,
-    punch: punch,
-    fist_left: fist_left,
-    fist_right: fist_right,
-    clap: clap,
-    raised_hands: raised_hands,
-    open_hands: open_hands,
-    palms_up_together: palms_up_together,
-    handshake: handshake,
-    pray: pray,
-    writing_hand: writing_hand,
-    nail_care: nail_care,
-    selfie: selfie,
-    muscle: muscle,
-    mechanical_arm: mechanical_arm,
-    mechanical_leg: mechanical_leg,
-    leg: leg,
-    foot: foot,
-    ear: ear,
-    ear_with_hearing_aid: ear_with_hearing_aid,
-    nose: nose,
-    brain: brain,
-    anatomical_heart: anatomical_heart,
-    lungs: lungs,
-    tooth: tooth,
-    bone: bone,
-    eyes: eyes,
-    eye: eye,
-    tongue: tongue,
-    lips: lips,
-    baby: baby,
-    child: child,
-    boy: boy,
-    girl: girl,
-    adult: adult,
-    blond_haired_person: blond_haired_person,
-    man: man,
-    bearded_person: bearded_person,
-    red_haired_man: red_haired_man,
-    curly_haired_man: curly_haired_man,
-    white_haired_man: white_haired_man,
-    bald_man: bald_man,
-    woman: woman,
-    red_haired_woman: red_haired_woman,
-    person_red_hair: person_red_hair,
-    curly_haired_woman: curly_haired_woman,
-    person_curly_hair: person_curly_hair,
-    white_haired_woman: white_haired_woman,
-    person_white_hair: person_white_hair,
-    bald_woman: bald_woman,
-    person_bald: person_bald,
-    blond_haired_woman: blond_haired_woman,
-    blonde_woman: blonde_woman,
-    blond_haired_man: blond_haired_man,
-    older_adult: older_adult,
-    older_man: older_man,
-    older_woman: older_woman,
-    frowning_person: frowning_person,
-    frowning_man: frowning_man,
-    frowning_woman: frowning_woman,
-    pouting_face: pouting_face,
-    pouting_man: pouting_man,
-    pouting_woman: pouting_woman,
-    no_good: no_good,
-    no_good_man: no_good_man,
-    ng_man: ng_man,
-    no_good_woman: no_good_woman,
-    ng_woman: ng_woman,
-    ok_person: ok_person,
-    ok_man: ok_man,
-    ok_woman: ok_woman,
-    tipping_hand_person: tipping_hand_person,
-    information_desk_person: information_desk_person,
-    tipping_hand_man: tipping_hand_man,
-    sassy_man: sassy_man,
-    tipping_hand_woman: tipping_hand_woman,
-    sassy_woman: sassy_woman,
-    raising_hand: raising_hand,
-    raising_hand_man: raising_hand_man,
-    raising_hand_woman: raising_hand_woman,
-    deaf_person: deaf_person,
-    deaf_man: deaf_man,
-    deaf_woman: deaf_woman,
-    bow: bow,
-    bowing_man: bowing_man,
-    bowing_woman: bowing_woman,
-    facepalm: facepalm,
-    man_facepalming: man_facepalming,
-    woman_facepalming: woman_facepalming,
-    shrug: shrug,
-    man_shrugging: man_shrugging,
-    woman_shrugging: woman_shrugging,
-    health_worker: health_worker,
-    man_health_worker: man_health_worker,
-    woman_health_worker: woman_health_worker,
-    student: student,
-    man_student: man_student,
-    woman_student: woman_student,
-    teacher: teacher,
-    man_teacher: man_teacher,
-    woman_teacher: woman_teacher,
-    judge: judge,
-    man_judge: man_judge,
-    woman_judge: woman_judge,
-    farmer: farmer,
-    man_farmer: man_farmer,
-    woman_farmer: woman_farmer,
-    cook: cook,
-    man_cook: man_cook,
-    woman_cook: woman_cook,
-    mechanic: mechanic,
-    man_mechanic: man_mechanic,
-    woman_mechanic: woman_mechanic,
-    factory_worker: factory_worker,
-    man_factory_worker: man_factory_worker,
-    woman_factory_worker: woman_factory_worker,
-    office_worker: office_worker,
-    man_office_worker: man_office_worker,
-    woman_office_worker: woman_office_worker,
-    scientist: scientist,
-    man_scientist: man_scientist,
-    woman_scientist: woman_scientist,
-    technologist: technologist,
-    man_technologist: man_technologist,
-    woman_technologist: woman_technologist,
-    singer: singer,
-    man_singer: man_singer,
-    woman_singer: woman_singer,
-    artist: artist,
-    man_artist: man_artist,
-    woman_artist: woman_artist,
-    pilot: pilot,
-    man_pilot: man_pilot,
-    woman_pilot: woman_pilot,
-    astronaut: astronaut,
-    man_astronaut: man_astronaut,
-    woman_astronaut: woman_astronaut,
-    firefighter: firefighter,
-    man_firefighter: man_firefighter,
-    woman_firefighter: woman_firefighter,
-    police_officer: police_officer,
-    cop: cop,
-    policeman: policeman,
-    policewoman: policewoman,
-    detective: detective,
-    male_detective: male_detective,
-    female_detective: female_detective,
-    guard: guard,
-    guardsman: guardsman,
-    guardswoman: guardswoman,
-    ninja: ninja,
-    construction_worker: construction_worker,
-    construction_worker_man: construction_worker_man,
-    construction_worker_woman: construction_worker_woman,
-    prince: prince,
-    princess: princess,
-    person_with_turban: person_with_turban,
-    man_with_turban: man_with_turban,
-    woman_with_turban: woman_with_turban,
-    man_with_gua_pi_mao: man_with_gua_pi_mao,
-    woman_with_headscarf: woman_with_headscarf,
-    person_in_tuxedo: person_in_tuxedo,
-    man_in_tuxedo: man_in_tuxedo,
-    woman_in_tuxedo: woman_in_tuxedo,
-    person_with_veil: person_with_veil,
-    man_with_veil: man_with_veil,
-    woman_with_veil: woman_with_veil,
-    bride_with_veil: bride_with_veil,
-    pregnant_woman: pregnant_woman,
-    breast_feeding: breast_feeding,
-    woman_feeding_baby: woman_feeding_baby,
-    man_feeding_baby: man_feeding_baby,
-    person_feeding_baby: person_feeding_baby,
-    angel: angel,
-    santa: santa,
-    mrs_claus: mrs_claus,
-    mx_claus: mx_claus,
-    superhero: superhero,
-    superhero_man: superhero_man,
-    superhero_woman: superhero_woman,
-    supervillain: supervillain,
-    supervillain_man: supervillain_man,
-    supervillain_woman: supervillain_woman,
-    mage: mage,
-    mage_man: mage_man,
-    mage_woman: mage_woman,
-    fairy: fairy,
-    fairy_man: fairy_man,
-    fairy_woman: fairy_woman,
-    vampire: vampire,
-    vampire_man: vampire_man,
-    vampire_woman: vampire_woman,
-    merperson: merperson,
-    merman: merman,
-    mermaid: mermaid,
-    elf: elf,
-    elf_man: elf_man,
-    elf_woman: elf_woman,
-    genie: genie,
-    genie_man: genie_man,
-    genie_woman: genie_woman,
-    zombie: zombie,
-    zombie_man: zombie_man,
-    zombie_woman: zombie_woman,
-    massage: massage,
-    massage_man: massage_man,
-    massage_woman: massage_woman,
-    haircut: haircut,
-    haircut_man: haircut_man,
-    haircut_woman: haircut_woman,
-    walking: walking,
-    walking_man: walking_man,
-    walking_woman: walking_woman,
-    standing_person: standing_person,
-    standing_man: standing_man,
-    standing_woman: standing_woman,
-    kneeling_person: kneeling_person,
-    kneeling_man: kneeling_man,
-    kneeling_woman: kneeling_woman,
-    person_with_probing_cane: person_with_probing_cane,
-    man_with_probing_cane: man_with_probing_cane,
-    woman_with_probing_cane: woman_with_probing_cane,
-    person_in_motorized_wheelchair: person_in_motorized_wheelchair,
-    man_in_motorized_wheelchair: man_in_motorized_wheelchair,
-    woman_in_motorized_wheelchair: woman_in_motorized_wheelchair,
-    person_in_manual_wheelchair: person_in_manual_wheelchair,
-    man_in_manual_wheelchair: man_in_manual_wheelchair,
-    woman_in_manual_wheelchair: woman_in_manual_wheelchair,
-    runner: runner,
-    running: running,
-    running_man: running_man,
-    running_woman: running_woman,
-    woman_dancing: woman_dancing,
-    dancer: dancer,
-    man_dancing: man_dancing,
-    business_suit_levitating: business_suit_levitating,
-    dancers: dancers,
-    dancing_men: dancing_men,
-    dancing_women: dancing_women,
-    sauna_person: sauna_person,
-    sauna_man: sauna_man,
-    sauna_woman: sauna_woman,
-    climbing: climbing,
-    climbing_man: climbing_man,
-    climbing_woman: climbing_woman,
-    person_fencing: person_fencing,
-    horse_racing: horse_racing,
-    skier: skier,
-    snowboarder: snowboarder,
-    golfing: golfing,
-    golfing_man: golfing_man,
-    golfing_woman: golfing_woman,
-    surfer: surfer,
-    surfing_man: surfing_man,
-    surfing_woman: surfing_woman,
-    rowboat: rowboat,
-    rowing_man: rowing_man,
-    rowing_woman: rowing_woman,
-    swimmer: swimmer,
-    swimming_man: swimming_man,
-    swimming_woman: swimming_woman,
-    bouncing_ball_person: bouncing_ball_person,
-    bouncing_ball_man: bouncing_ball_man,
-    basketball_man: basketball_man,
-    bouncing_ball_woman: bouncing_ball_woman,
-    basketball_woman: basketball_woman,
-    weight_lifting: weight_lifting,
-    weight_lifting_man: weight_lifting_man,
-    weight_lifting_woman: weight_lifting_woman,
-    bicyclist: bicyclist,
-    biking_man: biking_man,
-    biking_woman: biking_woman,
-    mountain_bicyclist: mountain_bicyclist,
-    mountain_biking_man: mountain_biking_man,
-    mountain_biking_woman: mountain_biking_woman,
-    cartwheeling: cartwheeling,
-    man_cartwheeling: man_cartwheeling,
-    woman_cartwheeling: woman_cartwheeling,
-    wrestling: wrestling,
-    men_wrestling: men_wrestling,
-    women_wrestling: women_wrestling,
-    water_polo: water_polo,
-    man_playing_water_polo: man_playing_water_polo,
-    woman_playing_water_polo: woman_playing_water_polo,
-    handball_person: handball_person,
-    man_playing_handball: man_playing_handball,
-    woman_playing_handball: woman_playing_handball,
-    juggling_person: juggling_person,
-    man_juggling: man_juggling,
-    woman_juggling: woman_juggling,
-    lotus_position: lotus_position,
-    lotus_position_man: lotus_position_man,
-    lotus_position_woman: lotus_position_woman,
-    bath: bath,
-    sleeping_bed: sleeping_bed,
-    people_holding_hands: people_holding_hands,
-    two_women_holding_hands: two_women_holding_hands,
-    couple: couple,
-    two_men_holding_hands: two_men_holding_hands,
-    couplekiss: couplekiss,
-    couplekiss_man_woman: couplekiss_man_woman,
-    couplekiss_man_man: couplekiss_man_man,
-    couplekiss_woman_woman: couplekiss_woman_woman,
-    couple_with_heart: couple_with_heart,
-    couple_with_heart_woman_man: couple_with_heart_woman_man,
-    couple_with_heart_man_man: couple_with_heart_man_man,
-    couple_with_heart_woman_woman: couple_with_heart_woman_woman,
-    family: family,
-    family_man_woman_boy: family_man_woman_boy,
-    family_man_woman_girl: family_man_woman_girl,
-    family_man_woman_girl_boy: family_man_woman_girl_boy,
-    family_man_woman_boy_boy: family_man_woman_boy_boy,
-    family_man_woman_girl_girl: family_man_woman_girl_girl,
-    family_man_man_boy: family_man_man_boy,
-    family_man_man_girl: family_man_man_girl,
-    family_man_man_girl_boy: family_man_man_girl_boy,
-    family_man_man_boy_boy: family_man_man_boy_boy,
-    family_man_man_girl_girl: family_man_man_girl_girl,
-    family_woman_woman_boy: family_woman_woman_boy,
-    family_woman_woman_girl: family_woman_woman_girl,
-    family_woman_woman_girl_boy: family_woman_woman_girl_boy,
-    family_woman_woman_boy_boy: family_woman_woman_boy_boy,
-    family_woman_woman_girl_girl: family_woman_woman_girl_girl,
-    family_man_boy: family_man_boy,
-    family_man_boy_boy: family_man_boy_boy,
-    family_man_girl: family_man_girl,
-    family_man_girl_boy: family_man_girl_boy,
-    family_man_girl_girl: family_man_girl_girl,
-    family_woman_boy: family_woman_boy,
-    family_woman_boy_boy: family_woman_boy_boy,
-    family_woman_girl: family_woman_girl,
-    family_woman_girl_boy: family_woman_girl_boy,
-    family_woman_girl_girl: family_woman_girl_girl,
-    speaking_head: speaking_head,
-    bust_in_silhouette: bust_in_silhouette,
-    busts_in_silhouette: busts_in_silhouette,
-    people_hugging: people_hugging,
-    footprints: footprints,
-    monkey_face: monkey_face,
-    monkey: monkey$1,
-    gorilla: gorilla,
-    orangutan: orangutan,
-    dog: dog,
-    dog2: dog2,
-    guide_dog: guide_dog,
-    service_dog: service_dog,
-    poodle: poodle,
-    wolf: wolf,
-    fox_face: fox_face,
-    raccoon: raccoon,
-    cat: cat,
-    cat2: cat2,
-    black_cat: black_cat,
-    lion: lion,
-    tiger: tiger,
-    tiger2: tiger2,
-    leopard: leopard,
-    horse: horse,
-    racehorse: racehorse,
-    unicorn: unicorn,
-    zebra: zebra,
-    deer: deer,
-    bison: bison,
-    cow: cow,
-    ox: ox,
-    water_buffalo: water_buffalo,
-    cow2: cow2,
-    pig: pig,
-    pig2: pig2,
-    boar: boar,
-    pig_nose: pig_nose,
-    ram: ram,
-    sheep: sheep,
-    goat: goat,
-    dromedary_camel: dromedary_camel,
-    camel: camel,
-    llama: llama,
-    giraffe: giraffe,
-    elephant: elephant,
-    mammoth: mammoth,
-    rhinoceros: rhinoceros,
-    hippopotamus: hippopotamus,
-    mouse: mouse,
-    mouse2: mouse2,
-    rat: rat,
-    hamster: hamster,
-    rabbit: rabbit,
-    rabbit2: rabbit2,
-    chipmunk: chipmunk,
-    beaver: beaver,
-    hedgehog: hedgehog,
-    bat: bat,
-    bear: bear,
-    polar_bear: polar_bear,
-    koala: koala,
-    panda_face: panda_face,
-    sloth: sloth,
-    otter: otter,
-    skunk: skunk,
-    kangaroo: kangaroo,
-    badger: badger,
-    feet: feet,
-    paw_prints: paw_prints,
-    turkey: turkey,
-    chicken: chicken,
-    rooster: rooster,
-    hatching_chick: hatching_chick,
-    baby_chick: baby_chick,
-    hatched_chick: hatched_chick,
-    bird: bird,
-    penguin: penguin,
-    dove: dove,
-    eagle: eagle,
-    duck: duck,
-    swan: swan,
-    owl: owl,
-    dodo: dodo,
-    feather: feather,
-    flamingo: flamingo,
-    peacock: peacock,
-    parrot: parrot,
-    frog: frog,
-    crocodile: crocodile,
-    turtle: turtle,
-    lizard: lizard,
-    snake: snake,
-    dragon_face: dragon_face,
-    dragon: dragon,
-    sauropod: sauropod,
-    "t-rex": "\ud83e\udd96",
-    whale: whale,
-    whale2: whale2,
-    dolphin: dolphin,
-    flipper: flipper,
-    seal: seal,
-    fish: fish,
-    tropical_fish: tropical_fish,
-    blowfish: blowfish,
-    shark: shark,
-    octopus: octopus,
-    shell: shell$1,
-    snail: snail,
-    butterfly: butterfly,
-    bug: bug,
-    ant: ant,
-    bee: bee,
-    honeybee: honeybee,
-    beetle: beetle,
-    lady_beetle: lady_beetle,
-    cricket: cricket,
-    cockroach: cockroach,
-    spider: spider,
-    spider_web: spider_web,
-    scorpion: scorpion,
-    mosquito: mosquito,
-    fly: fly,
-    worm: worm,
-    microbe: microbe,
-    bouquet: bouquet,
-    cherry_blossom: cherry_blossom,
-    white_flower: white_flower,
-    rosette: rosette,
-    rose: rose,
-    wilted_flower: wilted_flower,
-    hibiscus: hibiscus,
-    sunflower: sunflower,
-    blossom: blossom,
-    tulip: tulip,
-    seedling: seedling,
-    potted_plant: potted_plant,
-    evergreen_tree: evergreen_tree,
-    deciduous_tree: deciduous_tree,
-    palm_tree: palm_tree,
-    cactus: cactus,
-    ear_of_rice: ear_of_rice,
-    herb: herb,
-    shamrock: shamrock,
-    four_leaf_clover: four_leaf_clover,
-    maple_leaf: maple_leaf,
-    fallen_leaf: fallen_leaf,
-    leaves: leaves,
-    grapes: grapes,
-    melon: melon,
-    watermelon: watermelon,
-    tangerine: tangerine,
-    orange: orange,
-    mandarin: mandarin,
-    lemon: lemon,
-    banana: banana,
-    pineapple: pineapple,
-    mango: mango,
-    apple: apple,
-    green_apple: green_apple,
-    pear: pear,
-    peach: peach,
-    cherries: cherries,
-    strawberry: strawberry,
-    blueberries: blueberries,
-    kiwi_fruit: kiwi_fruit,
-    tomato: tomato,
-    olive: olive,
-    coconut: coconut,
-    avocado: avocado,
-    eggplant: eggplant,
-    potato: potato,
-    carrot: carrot,
-    corn: corn,
-    hot_pepper: hot_pepper,
-    bell_pepper: bell_pepper,
-    cucumber: cucumber,
-    leafy_green: leafy_green,
-    broccoli: broccoli,
-    garlic: garlic,
-    onion: onion,
-    mushroom: mushroom,
-    peanuts: peanuts,
-    chestnut: chestnut,
-    bread: bread,
-    croissant: croissant,
-    baguette_bread: baguette_bread,
-    flatbread: flatbread,
-    pretzel: pretzel,
-    bagel: bagel,
-    pancakes: pancakes,
-    waffle: waffle,
-    cheese: cheese,
-    meat_on_bone: meat_on_bone,
-    poultry_leg: poultry_leg,
-    cut_of_meat: cut_of_meat,
-    bacon: bacon,
-    hamburger: hamburger,
-    fries: fries,
-    pizza: pizza,
-    hotdog: hotdog,
-    sandwich: sandwich,
-    taco: taco,
-    burrito: burrito,
-    tamale: tamale,
-    stuffed_flatbread: stuffed_flatbread,
-    falafel: falafel,
-    egg: egg,
-    fried_egg: fried_egg,
-    shallow_pan_of_food: shallow_pan_of_food,
-    stew: stew,
-    fondue: fondue,
-    bowl_with_spoon: bowl_with_spoon,
-    green_salad: green_salad,
-    popcorn: popcorn,
-    butter: butter,
-    salt: salt,
-    canned_food: canned_food,
-    bento: bento,
-    rice_cracker: rice_cracker,
-    rice_ball: rice_ball,
-    rice: rice,
-    curry: curry,
-    ramen: ramen,
-    spaghetti: spaghetti,
-    sweet_potato: sweet_potato,
-    oden: oden,
-    sushi: sushi,
-    fried_shrimp: fried_shrimp,
-    fish_cake: fish_cake,
-    moon_cake: moon_cake,
-    dango: dango,
-    dumpling: dumpling,
-    fortune_cookie: fortune_cookie,
-    takeout_box: takeout_box,
-    crab: crab,
-    lobster: lobster,
-    shrimp: shrimp,
-    squid: squid,
-    oyster: oyster,
-    icecream: icecream,
-    shaved_ice: shaved_ice,
-    ice_cream: ice_cream,
-    doughnut: doughnut,
-    cookie: cookie,
-    birthday: birthday,
-    cake: cake,
-    cupcake: cupcake,
-    pie: pie,
-    chocolate_bar: chocolate_bar,
-    candy: candy,
-    lollipop: lollipop,
-    custard: custard,
-    honey_pot: honey_pot,
-    baby_bottle: baby_bottle,
-    milk_glass: milk_glass,
-    coffee: coffee,
-    teapot: teapot,
-    tea: tea,
-    sake: sake,
-    champagne: champagne,
-    wine_glass: wine_glass,
-    cocktail: cocktail,
-    tropical_drink: tropical_drink,
-    beer: beer,
-    beers: beers,
-    clinking_glasses: clinking_glasses,
-    tumbler_glass: tumbler_glass,
-    cup_with_straw: cup_with_straw,
-    bubble_tea: bubble_tea,
-    beverage_box: beverage_box,
-    mate: mate,
-    ice_cube: ice_cube,
-    chopsticks: chopsticks,
-    plate_with_cutlery: plate_with_cutlery,
-    fork_and_knife: fork_and_knife,
-    spoon: spoon,
-    hocho: hocho,
-    knife: knife,
-    amphora: amphora,
-    earth_africa: earth_africa,
-    earth_americas: earth_americas,
-    earth_asia: earth_asia,
-    globe_with_meridians: globe_with_meridians,
-    world_map: world_map,
-    japan: japan,
-    compass: compass,
-    mountain_snow: mountain_snow,
-    mountain: mountain,
-    volcano: volcano,
-    mount_fuji: mount_fuji,
-    camping: camping,
-    beach_umbrella: beach_umbrella,
-    desert: desert,
-    desert_island: desert_island,
-    national_park: national_park,
-    stadium: stadium,
-    classical_building: classical_building,
-    building_construction: building_construction,
-    bricks: bricks,
-    rock: rock,
-    wood: wood,
-    hut: hut,
-    houses: houses,
-    derelict_house: derelict_house,
-    house: house,
-    house_with_garden: house_with_garden,
-    office: office,
-    post_office: post_office,
-    european_post_office: european_post_office,
-    hospital: hospital,
-    bank: bank,
-    hotel: hotel,
-    love_hotel: love_hotel,
-    convenience_store: convenience_store,
-    school: school,
-    department_store: department_store,
-    factory: factory,
-    japanese_castle: japanese_castle,
-    european_castle: european_castle,
-    wedding: wedding,
-    tokyo_tower: tokyo_tower,
-    statue_of_liberty: statue_of_liberty,
-    church: church,
-    mosque: mosque,
-    hindu_temple: hindu_temple,
-    synagogue: synagogue,
-    shinto_shrine: shinto_shrine,
-    kaaba: kaaba,
-    fountain: fountain,
-    tent: tent,
-    foggy: foggy,
-    night_with_stars: night_with_stars,
-    cityscape: cityscape,
-    sunrise_over_mountains: sunrise_over_mountains,
-    sunrise: sunrise,
-    city_sunset: city_sunset,
-    city_sunrise: city_sunrise,
-    bridge_at_night: bridge_at_night,
-    hotsprings: hotsprings,
-    carousel_horse: carousel_horse,
-    ferris_wheel: ferris_wheel,
-    roller_coaster: roller_coaster,
-    barber: barber,
-    circus_tent: circus_tent,
-    steam_locomotive: steam_locomotive,
-    railway_car: railway_car,
-    bullettrain_side: bullettrain_side,
-    bullettrain_front: bullettrain_front,
-    train2: train2,
-    metro: metro,
-    light_rail: light_rail,
-    station: station,
-    tram: tram,
-    monorail: monorail,
-    mountain_railway: mountain_railway,
-    train: train,
-    bus: bus,
-    oncoming_bus: oncoming_bus,
-    trolleybus: trolleybus,
-    minibus: minibus,
-    ambulance: ambulance,
-    fire_engine: fire_engine,
-    police_car: police_car,
-    oncoming_police_car: oncoming_police_car,
-    taxi: taxi,
-    oncoming_taxi: oncoming_taxi,
-    car: car,
-    red_car: red_car,
-    oncoming_automobile: oncoming_automobile,
-    blue_car: blue_car,
-    pickup_truck: pickup_truck,
-    truck: truck,
-    articulated_lorry: articulated_lorry,
-    tractor: tractor,
-    racing_car: racing_car,
-    motorcycle: motorcycle,
-    motor_scooter: motor_scooter,
-    manual_wheelchair: manual_wheelchair,
-    motorized_wheelchair: motorized_wheelchair,
-    auto_rickshaw: auto_rickshaw,
-    bike: bike,
-    kick_scooter: kick_scooter,
-    skateboard: skateboard,
-    roller_skate: roller_skate,
-    busstop: busstop,
-    motorway: motorway,
-    railway_track: railway_track,
-    oil_drum: oil_drum,
-    fuelpump: fuelpump,
-    rotating_light: rotating_light,
-    traffic_light: traffic_light,
-    vertical_traffic_light: vertical_traffic_light,
-    stop_sign: stop_sign,
-    construction: construction,
-    anchor: anchor,
-    boat: boat,
-    sailboat: sailboat,
-    canoe: canoe,
-    speedboat: speedboat,
-    passenger_ship: passenger_ship,
-    ferry: ferry,
-    motor_boat: motor_boat,
-    ship: ship,
-    airplane: airplane,
-    small_airplane: small_airplane,
-    flight_departure: flight_departure,
-    flight_arrival: flight_arrival,
-    parachute: parachute,
-    seat: seat,
-    helicopter: helicopter,
-    suspension_railway: suspension_railway,
-    mountain_cableway: mountain_cableway,
-    aerial_tramway: aerial_tramway,
-    artificial_satellite: artificial_satellite,
-    rocket: rocket,
-    flying_saucer: flying_saucer,
-    bellhop_bell: bellhop_bell,
-    luggage: luggage,
-    hourglass: hourglass,
-    hourglass_flowing_sand: hourglass_flowing_sand,
-    watch: watch,
-    alarm_clock: alarm_clock,
-    stopwatch: stopwatch,
-    timer_clock: timer_clock,
-    mantelpiece_clock: mantelpiece_clock,
-    clock12: clock12,
-    clock1230: clock1230,
-    clock1: clock1,
-    clock130: clock130,
-    clock2: clock2,
-    clock230: clock230,
-    clock3: clock3,
-    clock330: clock330,
-    clock4: clock4,
-    clock430: clock430,
-    clock5: clock5,
-    clock530: clock530,
-    clock6: clock6,
-    clock630: clock630,
-    clock7: clock7,
-    clock730: clock730,
-    clock8: clock8,
-    clock830: clock830,
-    clock9: clock9,
-    clock930: clock930,
-    clock10: clock10,
-    clock1030: clock1030,
-    clock11: clock11,
-    clock1130: clock1130,
-    new_moon: new_moon,
-    waxing_crescent_moon: waxing_crescent_moon,
-    first_quarter_moon: first_quarter_moon,
-    moon: moon,
-    waxing_gibbous_moon: waxing_gibbous_moon,
-    full_moon: full_moon,
-    waning_gibbous_moon: waning_gibbous_moon,
-    last_quarter_moon: last_quarter_moon,
-    waning_crescent_moon: waning_crescent_moon,
-    crescent_moon: crescent_moon,
-    new_moon_with_face: new_moon_with_face,
-    first_quarter_moon_with_face: first_quarter_moon_with_face,
-    last_quarter_moon_with_face: last_quarter_moon_with_face,
-    thermometer: thermometer,
-    sunny: sunny,
-    full_moon_with_face: full_moon_with_face,
-    sun_with_face: sun_with_face,
-    ringed_planet: ringed_planet,
-    star: star,
-    star2: star2,
-    stars: stars,
-    milky_way: milky_way,
-    cloud: cloud,
-    partly_sunny: partly_sunny,
-    cloud_with_lightning_and_rain: cloud_with_lightning_and_rain,
-    sun_behind_small_cloud: sun_behind_small_cloud,
-    sun_behind_large_cloud: sun_behind_large_cloud,
-    sun_behind_rain_cloud: sun_behind_rain_cloud,
-    cloud_with_rain: cloud_with_rain,
-    cloud_with_snow: cloud_with_snow,
-    cloud_with_lightning: cloud_with_lightning,
-    tornado: tornado,
-    fog: fog,
-    wind_face: wind_face,
-    cyclone: cyclone,
-    rainbow: rainbow,
-    closed_umbrella: closed_umbrella,
-    open_umbrella: open_umbrella,
-    umbrella: umbrella,
-    parasol_on_ground: parasol_on_ground,
-    zap: zap,
-    snowflake: snowflake,
-    snowman_with_snow: snowman_with_snow,
-    snowman: snowman,
-    comet: comet,
-    fire: fire,
-    droplet: droplet,
-    ocean: ocean,
-    jack_o_lantern: jack_o_lantern,
-    christmas_tree: christmas_tree,
-    fireworks: fireworks,
-    sparkler: sparkler,
-    firecracker: firecracker,
-    sparkles: sparkles,
-    balloon: balloon,
-    tada: tada,
-    confetti_ball: confetti_ball,
-    tanabata_tree: tanabata_tree,
-    bamboo: bamboo,
-    dolls: dolls,
-    flags: flags,
-    wind_chime: wind_chime,
-    rice_scene: rice_scene,
-    red_envelope: red_envelope,
-    ribbon: ribbon,
-    gift: gift,
-    reminder_ribbon: reminder_ribbon,
-    tickets: tickets,
-    ticket: ticket,
-    medal_military: medal_military,
-    trophy: trophy,
-    medal_sports: medal_sports,
-    "1st_place_medal": "\ud83e\udd47",
-    "2nd_place_medal": "\ud83e\udd48",
-    "3rd_place_medal": "\ud83e\udd49",
-    soccer: soccer,
-    baseball: baseball,
-    softball: softball,
-    basketball: basketball,
-    volleyball: volleyball,
-    football: football,
-    rugby_football: rugby_football,
-    tennis: tennis,
-    flying_disc: flying_disc,
-    bowling: bowling,
-    cricket_game: cricket_game,
-    field_hockey: field_hockey,
-    ice_hockey: ice_hockey,
-    lacrosse: lacrosse,
-    ping_pong: ping_pong,
-    badminton: badminton,
-    boxing_glove: boxing_glove,
-    martial_arts_uniform: martial_arts_uniform,
-    goal_net: goal_net,
-    golf: golf,
-    ice_skate: ice_skate,
-    fishing_pole_and_fish: fishing_pole_and_fish,
-    diving_mask: diving_mask,
-    running_shirt_with_sash: running_shirt_with_sash,
-    ski: ski,
-    sled: sled,
-    curling_stone: curling_stone,
-    dart: dart$1,
-    yo_yo: yo_yo,
-    kite: kite,
-    "8ball": "\ud83c\udfb1",
-    crystal_ball: crystal_ball,
-    magic_wand: magic_wand,
-    nazar_amulet: nazar_amulet,
-    video_game: video_game,
-    joystick: joystick,
-    slot_machine: slot_machine,
-    game_die: game_die,
-    jigsaw: jigsaw,
-    teddy_bear: teddy_bear,
-    pi_ata: pi_ata,
-    nesting_dolls: nesting_dolls,
-    spades: spades,
-    hearts: hearts,
-    diamonds: diamonds,
-    clubs: clubs,
-    chess_pawn: chess_pawn,
-    black_joker: black_joker,
-    mahjong: mahjong,
-    flower_playing_cards: flower_playing_cards,
-    performing_arts: performing_arts,
-    framed_picture: framed_picture,
-    art: art,
-    thread: thread,
-    sewing_needle: sewing_needle,
-    yarn: yarn,
-    knot: knot,
-    eyeglasses: eyeglasses,
-    dark_sunglasses: dark_sunglasses,
-    goggles: goggles,
-    lab_coat: lab_coat,
-    safety_vest: safety_vest,
-    necktie: necktie,
-    shirt: shirt,
-    tshirt: tshirt,
-    jeans: jeans,
-    scarf: scarf,
-    gloves: gloves,
-    coat: coat,
-    socks: socks,
-    dress: dress,
-    kimono: kimono,
-    sari: sari,
-    one_piece_swimsuit: one_piece_swimsuit,
-    swim_brief: swim_brief,
-    shorts: shorts,
-    bikini: bikini,
-    womans_clothes: womans_clothes,
-    purse: purse,
-    handbag: handbag,
-    pouch: pouch,
-    shopping: shopping,
-    school_satchel: school_satchel,
-    thong_sandal: thong_sandal,
-    mans_shoe: mans_shoe,
-    shoe: shoe,
-    athletic_shoe: athletic_shoe,
-    hiking_boot: hiking_boot,
-    flat_shoe: flat_shoe,
-    high_heel: high_heel,
-    sandal: sandal,
-    ballet_shoes: ballet_shoes,
-    boot: boot,
-    crown: crown,
-    womans_hat: womans_hat,
-    tophat: tophat,
-    mortar_board: mortar_board,
-    billed_cap: billed_cap,
-    military_helmet: military_helmet,
-    rescue_worker_helmet: rescue_worker_helmet,
-    prayer_beads: prayer_beads,
-    lipstick: lipstick,
-    ring: ring,
-    gem: gem,
-    mute: mute,
-    speaker: speaker,
-    sound: sound,
-    loud_sound: loud_sound,
-    loudspeaker: loudspeaker,
-    mega: mega,
-    postal_horn: postal_horn,
-    bell: bell,
-    no_bell: no_bell,
-    musical_score: musical_score,
-    musical_note: musical_note,
-    notes: notes,
-    studio_microphone: studio_microphone,
-    level_slider: level_slider,
-    control_knobs: control_knobs,
-    microphone: microphone,
-    headphones: headphones,
-    radio: radio,
-    saxophone: saxophone,
-    accordion: accordion,
-    guitar: guitar,
-    musical_keyboard: musical_keyboard,
-    trumpet: trumpet,
-    violin: violin,
-    banjo: banjo,
-    drum: drum,
-    long_drum: long_drum,
-    iphone: iphone,
-    calling: calling,
-    phone: phone,
-    telephone: telephone,
-    telephone_receiver: telephone_receiver,
-    pager: pager,
-    fax: fax,
-    battery: battery,
-    electric_plug: electric_plug,
-    computer: computer,
-    desktop_computer: desktop_computer,
-    printer: printer,
-    keyboard: keyboard,
-    computer_mouse: computer_mouse,
-    trackball: trackball,
-    minidisc: minidisc,
-    floppy_disk: floppy_disk,
-    cd: cd,
-    dvd: dvd,
-    abacus: abacus,
-    movie_camera: movie_camera,
-    film_strip: film_strip,
-    film_projector: film_projector,
-    clapper: clapper,
-    tv: tv,
-    camera: camera,
-    camera_flash: camera_flash,
-    video_camera: video_camera,
-    vhs: vhs,
-    mag: mag,
-    mag_right: mag_right,
-    candle: candle,
-    bulb: bulb,
-    flashlight: flashlight,
-    izakaya_lantern: izakaya_lantern,
-    lantern: lantern,
-    diya_lamp: diya_lamp,
-    notebook_with_decorative_cover: notebook_with_decorative_cover,
-    closed_book: closed_book,
-    book: book,
-    open_book: open_book,
-    green_book: green_book,
-    blue_book: blue_book,
-    orange_book: orange_book,
-    books: books,
-    notebook: notebook,
-    ledger: ledger,
-    page_with_curl: page_with_curl,
-    scroll: scroll,
-    page_facing_up: page_facing_up,
-    newspaper: newspaper,
-    newspaper_roll: newspaper_roll,
-    bookmark_tabs: bookmark_tabs,
-    bookmark: bookmark,
-    label: label,
-    moneybag: moneybag,
-    coin: coin,
-    yen: yen,
-    dollar: dollar,
-    euro: euro,
-    pound: pound,
-    money_with_wings: money_with_wings,
-    credit_card: credit_card,
-    receipt: receipt,
-    chart: chart,
-    email: email,
-    envelope: envelope,
-    "e-mail": "\ud83d\udce7",
-    incoming_envelope: incoming_envelope,
-    envelope_with_arrow: envelope_with_arrow,
-    outbox_tray: outbox_tray,
-    inbox_tray: inbox_tray,
-    package: "\ud83d\udce6",
-    mailbox: mailbox,
-    mailbox_closed: mailbox_closed,
-    mailbox_with_mail: mailbox_with_mail,
-    mailbox_with_no_mail: mailbox_with_no_mail,
-    postbox: postbox,
-    ballot_box: ballot_box,
-    pencil2: pencil2,
-    black_nib: black_nib,
-    fountain_pen: fountain_pen,
-    pen: pen,
-    paintbrush: paintbrush,
-    crayon: crayon,
-    memo: memo,
-    pencil: pencil,
-    briefcase: briefcase,
-    file_folder: file_folder,
-    open_file_folder: open_file_folder,
-    card_index_dividers: card_index_dividers,
-    date: date,
-    calendar: calendar,
-    spiral_notepad: spiral_notepad,
-    spiral_calendar: spiral_calendar,
-    card_index: card_index,
-    chart_with_upwards_trend: chart_with_upwards_trend,
-    chart_with_downwards_trend: chart_with_downwards_trend,
-    bar_chart: bar_chart,
-    clipboard: clipboard,
-    pushpin: pushpin,
-    round_pushpin: round_pushpin,
-    paperclip: paperclip,
-    paperclips: paperclips,
-    straight_ruler: straight_ruler,
-    triangular_ruler: triangular_ruler,
-    scissors: scissors,
-    card_file_box: card_file_box,
-    file_cabinet: file_cabinet,
-    wastebasket: wastebasket,
-    lock: lock,
-    unlock: unlock,
-    lock_with_ink_pen: lock_with_ink_pen,
-    closed_lock_with_key: closed_lock_with_key,
-    key: key,
-    old_key: old_key,
-    hammer: hammer,
-    axe: axe,
-    pick: pick,
-    hammer_and_pick: hammer_and_pick,
-    hammer_and_wrench: hammer_and_wrench,
-    dagger: dagger,
-    crossed_swords: crossed_swords,
-    gun: gun,
-    boomerang: boomerang,
-    bow_and_arrow: bow_and_arrow,
-    shield: shield,
-    carpentry_saw: carpentry_saw,
-    wrench: wrench,
-    screwdriver: screwdriver,
-    nut_and_bolt: nut_and_bolt,
-    gear: gear,
-    clamp: clamp,
-    balance_scale: balance_scale,
-    probing_cane: probing_cane,
-    link: link,
-    chains: chains,
-    hook: hook,
-    toolbox: toolbox,
-    magnet: magnet,
-    ladder: ladder,
-    alembic: alembic,
-    test_tube: test_tube,
-    petri_dish: petri_dish,
-    dna: dna,
-    microscope: microscope,
-    telescope: telescope,
-    satellite: satellite,
-    syringe: syringe,
-    drop_of_blood: drop_of_blood,
-    pill: pill,
-    adhesive_bandage: adhesive_bandage,
-    stethoscope: stethoscope,
-    door: door,
-    elevator: elevator,
-    mirror: mirror,
-    window: window$1,
-    bed: bed,
-    couch_and_lamp: couch_and_lamp,
-    chair: chair,
-    toilet: toilet,
-    plunger: plunger,
-    shower: shower,
-    bathtub: bathtub,
-    mouse_trap: mouse_trap,
-    razor: razor$1,
-    lotion_bottle: lotion_bottle,
-    safety_pin: safety_pin,
-    broom: broom,
-    basket: basket,
-    roll_of_paper: roll_of_paper,
-    bucket: bucket,
-    soap: soap,
-    toothbrush: toothbrush,
-    sponge: sponge,
-    fire_extinguisher: fire_extinguisher,
-    shopping_cart: shopping_cart,
-    smoking: smoking,
-    coffin: coffin,
-    headstone: headstone,
-    funeral_urn: funeral_urn,
-    moyai: moyai,
-    placard: placard,
-    atm: atm,
-    put_litter_in_its_place: put_litter_in_its_place,
-    potable_water: potable_water,
-    wheelchair: wheelchair,
-    mens: mens,
-    womens: womens,
-    restroom: restroom,
-    baby_symbol: baby_symbol,
-    wc: wc,
-    passport_control: passport_control,
-    customs: customs,
-    baggage_claim: baggage_claim,
-    left_luggage: left_luggage,
-    warning: warning,
-    children_crossing: children_crossing,
-    no_entry: no_entry,
-    no_entry_sign: no_entry_sign,
-    no_bicycles: no_bicycles,
-    no_smoking: no_smoking,
-    do_not_litter: do_not_litter,
-    "non-potable_water": "\ud83d\udeb1",
-    no_pedestrians: no_pedestrians,
-    no_mobile_phones: no_mobile_phones,
-    underage: underage,
-    radioactive: radioactive,
-    biohazard: biohazard,
-    arrow_up: arrow_up,
-    arrow_upper_right: arrow_upper_right,
-    arrow_right: arrow_right,
-    arrow_lower_right: arrow_lower_right,
-    arrow_down: arrow_down,
-    arrow_lower_left: arrow_lower_left,
-    arrow_left: arrow_left,
-    arrow_upper_left: arrow_upper_left,
-    arrow_up_down: arrow_up_down,
-    left_right_arrow: left_right_arrow,
-    leftwards_arrow_with_hook: leftwards_arrow_with_hook,
-    arrow_right_hook: arrow_right_hook,
-    arrow_heading_up: arrow_heading_up,
-    arrow_heading_down: arrow_heading_down,
-    arrows_clockwise: arrows_clockwise,
-    arrows_counterclockwise: arrows_counterclockwise,
-    back: back,
-    end: end,
-    on: on,
-    soon: soon,
-    top: top,
-    place_of_worship: place_of_worship,
-    atom_symbol: atom_symbol,
-    om: om,
-    star_of_david: star_of_david,
-    wheel_of_dharma: wheel_of_dharma,
-    yin_yang: yin_yang,
-    latin_cross: latin_cross,
-    orthodox_cross: orthodox_cross,
-    star_and_crescent: star_and_crescent,
-    peace_symbol: peace_symbol,
-    menorah: menorah,
-    six_pointed_star: six_pointed_star,
-    aries: aries,
-    taurus: taurus,
-    gemini: gemini,
-    cancer: cancer,
-    leo: leo,
-    virgo: virgo,
-    libra: libra,
-    scorpius: scorpius,
-    sagittarius: sagittarius,
-    capricorn: capricorn,
-    aquarius: aquarius,
-    pisces: pisces,
-    ophiuchus: ophiuchus,
-    twisted_rightwards_arrows: twisted_rightwards_arrows,
-    repeat: repeat,
-    repeat_one: repeat_one,
-    arrow_forward: arrow_forward,
-    fast_forward: fast_forward,
-    next_track_button: next_track_button,
-    play_or_pause_button: play_or_pause_button,
-    arrow_backward: arrow_backward,
-    rewind: rewind,
-    previous_track_button: previous_track_button,
-    arrow_up_small: arrow_up_small,
-    arrow_double_up: arrow_double_up,
-    arrow_down_small: arrow_down_small,
-    arrow_double_down: arrow_double_down,
-    pause_button: pause_button,
-    stop_button: stop_button,
-    record_button: record_button,
-    eject_button: eject_button,
-    cinema: cinema,
-    low_brightness: low_brightness,
-    high_brightness: high_brightness,
-    signal_strength: signal_strength,
-    vibration_mode: vibration_mode,
-    mobile_phone_off: mobile_phone_off,
-    female_sign: female_sign,
-    male_sign: male_sign,
-    transgender_symbol: transgender_symbol,
-    heavy_multiplication_x: heavy_multiplication_x,
-    heavy_plus_sign: heavy_plus_sign,
-    heavy_minus_sign: heavy_minus_sign,
-    heavy_division_sign: heavy_division_sign,
-    infinity: infinity,
-    bangbang: bangbang,
-    interrobang: interrobang,
-    question: question,
-    grey_question: grey_question,
-    grey_exclamation: grey_exclamation,
-    exclamation: exclamation,
-    heavy_exclamation_mark: heavy_exclamation_mark,
-    wavy_dash: wavy_dash,
-    currency_exchange: currency_exchange,
-    heavy_dollar_sign: heavy_dollar_sign,
-    medical_symbol: medical_symbol,
-    recycle: recycle,
-    fleur_de_lis: fleur_de_lis,
-    trident: trident,
-    name_badge: name_badge,
-    beginner: beginner,
-    o: o,
-    white_check_mark: white_check_mark,
-    ballot_box_with_check: ballot_box_with_check,
-    heavy_check_mark: heavy_check_mark,
-    x: x,
-    negative_squared_cross_mark: negative_squared_cross_mark,
-    curly_loop: curly_loop,
-    loop: loop,
-    part_alternation_mark: part_alternation_mark,
-    eight_spoked_asterisk: eight_spoked_asterisk,
-    eight_pointed_black_star: eight_pointed_black_star,
-    sparkle: sparkle,
-    copyright: copyright,
-    registered: registered,
-    tm: tm,
-    hash: hash,
-    asterisk: asterisk,
-    zero: zero,
-    one: one,
-    two: two,
-    three: three,
-    four: four,
-    five: five,
-    six: six,
-    seven: seven,
-    eight: eight,
-    nine: nine,
-    keycap_ten: keycap_ten,
-    capital_abcd: capital_abcd,
-    abcd: abcd,
-    symbols: symbols,
-    abc: abc$1,
-    a: a,
-    ab: ab,
-    b: b,
-    cl: cl,
-    cool: cool,
-    free: free,
-    information_source: information_source,
-    id: id,
-    m: m,
-    new: "\ud83c\udd95",
-    ng: ng,
-    o2: o2,
-    ok: ok,
-    parking: parking,
-    sos: sos,
-    up: up,
-    vs: vs,
-    koko: koko,
-    sa: sa,
-    ideograph_advantage: ideograph_advantage,
-    accept: accept,
-    congratulations: congratulations,
-    secret: secret,
-    u6e80: u6e80,
-    red_circle: red_circle,
-    orange_circle: orange_circle,
-    yellow_circle: yellow_circle,
-    green_circle: green_circle,
-    large_blue_circle: large_blue_circle,
-    purple_circle: purple_circle,
-    brown_circle: brown_circle,
-    black_circle: black_circle,
-    white_circle: white_circle,
-    red_square: red_square,
-    orange_square: orange_square,
-    yellow_square: yellow_square,
-    green_square: green_square,
-    blue_square: blue_square,
-    purple_square: purple_square,
-    brown_square: brown_square,
-    black_large_square: black_large_square,
-    white_large_square: white_large_square,
-    black_medium_square: black_medium_square,
-    white_medium_square: white_medium_square,
-    black_medium_small_square: black_medium_small_square,
-    white_medium_small_square: white_medium_small_square,
-    black_small_square: black_small_square,
-    white_small_square: white_small_square,
-    large_orange_diamond: large_orange_diamond,
-    large_blue_diamond: large_blue_diamond,
-    small_orange_diamond: small_orange_diamond,
-    small_blue_diamond: small_blue_diamond,
-    small_red_triangle: small_red_triangle,
-    small_red_triangle_down: small_red_triangle_down,
-    diamond_shape_with_a_dot_inside: diamond_shape_with_a_dot_inside,
-    radio_button: radio_button,
-    white_square_button: white_square_button,
-    black_square_button: black_square_button,
-    checkered_flag: checkered_flag,
-    triangular_flag_on_post: triangular_flag_on_post,
-    crossed_flags: crossed_flags,
-    black_flag: black_flag,
-    white_flag: white_flag,
-    rainbow_flag: rainbow_flag,
-    transgender_flag: transgender_flag,
-    pirate_flag: pirate_flag,
-    ascension_island: ascension_island,
-    andorra: andorra,
-    united_arab_emirates: united_arab_emirates,
-    afghanistan: afghanistan,
-    antigua_barbuda: antigua_barbuda,
-    anguilla: anguilla,
-    albania: albania,
-    armenia: armenia,
-    angola: angola,
-    antarctica: antarctica,
-    argentina: argentina,
-    american_samoa: american_samoa,
-    austria: austria,
-    australia: australia,
-    aruba: aruba,
-    aland_islands: aland_islands,
-    azerbaijan: azerbaijan,
-    bosnia_herzegovina: bosnia_herzegovina,
-    barbados: barbados,
-    bangladesh: bangladesh,
-    belgium: belgium,
-    burkina_faso: burkina_faso,
-    bulgaria: bulgaria,
-    bahrain: bahrain,
-    burundi: burundi,
-    benin: benin,
-    st_barthelemy: st_barthelemy,
-    bermuda: bermuda,
-    brunei: brunei,
-    bolivia: bolivia,
-    caribbean_netherlands: caribbean_netherlands,
-    brazil: brazil,
-    bahamas: bahamas,
-    bhutan: bhutan,
-    bouvet_island: bouvet_island,
-    botswana: botswana,
-    belarus: belarus,
-    belize: belize,
-    canada: canada,
-    cocos_islands: cocos_islands,
-    congo_kinshasa: congo_kinshasa,
-    central_african_republic: central_african_republic,
-    congo_brazzaville: congo_brazzaville,
-    switzerland: switzerland,
-    cote_divoire: cote_divoire,
-    cook_islands: cook_islands,
-    chile: chile,
-    cameroon: cameroon,
-    cn: cn,
-    colombia: colombia,
-    clipperton_island: clipperton_island,
-    costa_rica: costa_rica,
-    cuba: cuba,
-    cape_verde: cape_verde,
-    curacao: curacao,
-    christmas_island: christmas_island,
-    cyprus: cyprus,
-    czech_republic: czech_republic,
-    de: de,
-    diego_garcia: diego_garcia,
-    djibouti: djibouti,
-    denmark: denmark,
-    dominica: dominica,
-    dominican_republic: dominican_republic,
-    algeria: algeria,
-    ceuta_melilla: ceuta_melilla,
-    ecuador: ecuador,
-    estonia: estonia,
-    egypt: egypt,
-    western_sahara: western_sahara,
-    eritrea: eritrea,
-    es: es,
-    ethiopia: ethiopia,
-    eu: eu,
-    european_union: european_union,
-    finland: finland,
-    fiji: fiji,
-    falkland_islands: falkland_islands,
-    micronesia: micronesia,
-    faroe_islands: faroe_islands,
-    fr: fr,
-    gabon: gabon,
-    gb: gb,
-    uk: uk,
-    grenada: grenada,
-    georgia: georgia,
-    french_guiana: french_guiana,
-    guernsey: guernsey,
-    ghana: ghana,
-    gibraltar: gibraltar,
-    greenland: greenland,
-    gambia: gambia,
-    guinea: guinea,
-    guadeloupe: guadeloupe,
-    equatorial_guinea: equatorial_guinea,
-    greece: greece,
-    south_georgia_south_sandwich_islands: south_georgia_south_sandwich_islands,
-    guatemala: guatemala,
-    guam: guam,
-    guinea_bissau: guinea_bissau,
-    guyana: guyana,
-    hong_kong: hong_kong,
-    heard_mcdonald_islands: heard_mcdonald_islands,
-    honduras: honduras,
-    croatia: croatia,
-    haiti: haiti,
-    hungary: hungary,
-    canary_islands: canary_islands,
-    indonesia: indonesia,
-    ireland: ireland,
-    israel: israel,
-    isle_of_man: isle_of_man,
-    india: india,
-    british_indian_ocean_territory: british_indian_ocean_territory,
-    iraq: iraq,
-    iran: iran,
-    iceland: iceland,
-    it: it,
-    jersey: jersey,
-    jamaica: jamaica,
-    jordan: jordan,
-    jp: jp,
-    kenya: kenya,
-    kyrgyzstan: kyrgyzstan,
-    cambodia: cambodia,
-    kiribati: kiribati,
-    comoros: comoros,
-    st_kitts_nevis: st_kitts_nevis,
-    north_korea: north_korea,
-    kr: kr,
-    kuwait: kuwait,
-    cayman_islands: cayman_islands,
-    kazakhstan: kazakhstan,
-    laos: laos,
-    lebanon: lebanon,
-    st_lucia: st_lucia,
-    liechtenstein: liechtenstein,
-    sri_lanka: sri_lanka,
-    liberia: liberia,
-    lesotho: lesotho,
-    lithuania: lithuania,
-    luxembourg: luxembourg,
-    latvia: latvia,
-    libya: libya,
-    morocco: morocco,
-    monaco: monaco,
-    moldova: moldova,
-    montenegro: montenegro,
-    st_martin: st_martin,
-    madagascar: madagascar,
-    marshall_islands: marshall_islands,
-    macedonia: macedonia,
-    mali: mali,
-    myanmar: myanmar,
-    mongolia: mongolia,
-    macau: macau,
-    northern_mariana_islands: northern_mariana_islands,
-    martinique: martinique,
-    mauritania: mauritania,
-    montserrat: montserrat,
-    malta: malta,
-    mauritius: mauritius,
-    maldives: maldives,
-    malawi: malawi,
-    mexico: mexico,
-    malaysia: malaysia,
-    mozambique: mozambique,
-    namibia: namibia,
-    new_caledonia: new_caledonia,
-    niger: niger,
-    norfolk_island: norfolk_island,
-    nigeria: nigeria,
-    nicaragua: nicaragua,
-    netherlands: netherlands,
-    norway: norway,
-    nepal: nepal,
-    nauru: nauru,
-    niue: niue,
-    new_zealand: new_zealand,
-    oman: oman,
-    panama: panama,
-    peru: peru,
-    french_polynesia: french_polynesia,
-    papua_new_guinea: papua_new_guinea,
-    philippines: philippines,
-    pakistan: pakistan,
-    poland: poland,
-    st_pierre_miquelon: st_pierre_miquelon,
-    pitcairn_islands: pitcairn_islands,
-    puerto_rico: puerto_rico,
-    palestinian_territories: palestinian_territories,
-    portugal: portugal,
-    palau: palau,
-    paraguay: paraguay,
-    qatar: qatar,
-    reunion: reunion,
-    romania: romania,
-    serbia: serbia,
-    ru: ru,
-    rwanda: rwanda,
-    saudi_arabia: saudi_arabia,
-    solomon_islands: solomon_islands,
-    seychelles: seychelles,
-    sudan: sudan,
-    sweden: sweden,
-    singapore: singapore,
-    st_helena: st_helena,
-    slovenia: slovenia,
-    svalbard_jan_mayen: svalbard_jan_mayen,
-    slovakia: slovakia,
-    sierra_leone: sierra_leone,
-    san_marino: san_marino,
-    senegal: senegal,
-    somalia: somalia,
-    suriname: suriname,
-    south_sudan: south_sudan,
-    sao_tome_principe: sao_tome_principe,
-    el_salvador: el_salvador,
-    sint_maarten: sint_maarten,
-    syria: syria,
-    swaziland: swaziland,
-    tristan_da_cunha: tristan_da_cunha,
-    turks_caicos_islands: turks_caicos_islands,
-    chad: chad,
-    french_southern_territories: french_southern_territories,
-    togo: togo,
-    thailand: thailand,
-    tajikistan: tajikistan,
-    tokelau: tokelau,
-    timor_leste: timor_leste,
-    turkmenistan: turkmenistan,
-    tunisia: tunisia,
-    tonga: tonga,
-    tr: tr,
-    trinidad_tobago: trinidad_tobago,
-    tuvalu: tuvalu,
-    taiwan: taiwan,
-    tanzania: tanzania,
-    ukraine: ukraine,
-    uganda: uganda,
-    us_outlying_islands: us_outlying_islands,
-    united_nations: united_nations,
-    us: us,
-    uruguay: uruguay,
-    uzbekistan: uzbekistan,
-    vatican_city: vatican_city,
-    st_vincent_grenadines: st_vincent_grenadines,
-    venezuela: venezuela,
-    british_virgin_islands: british_virgin_islands,
-    us_virgin_islands: us_virgin_islands,
-    vietnam: vietnam,
-    vanuatu: vanuatu,
-    wallis_futuna: wallis_futuna,
-    samoa: samoa,
-    kosovo: kosovo,
-    yemen: yemen,
-    mayotte: mayotte,
-    south_africa: south_africa,
-    zambia: zambia,
-    zimbabwe: zimbabwe,
-    england: england,
-    scotland: scotland,
-    wales: wales
-  };
+  /*! markdown-it-emoji 2.0.0-10 https://github.com//GerHobbelt/markdown-it-emoji @license MIT */
   // Emoticons -> Emoji mapping.
   
   // (!) Some patterns skipped, to avoid collisions
@@ -27215,12 +23558,19 @@ var demo = function() {
       acc[options.shortcuts[key]] = key;
       return acc;
     }), {});
- // Compile regexp
-        let names = Object.keys(emojies).map((function(name) {
-      return ":" + name + ":";
-    })).concat(Object.keys(shortcuts)).sort().reverse().map((function(name) {
-      return quoteRE(name);
-    })).join("|");
+    let keys = Object.keys(emojies);
+    let names;
+ // If no definitions are given, return empty regex to avoid replacements with 'undefined'.
+        if (keys.length === 0) {
+      names = "^$";
+    } else {
+      // Compile regexp
+      names = keys.map((function(name) {
+        return ":" + name + ":";
+      })).concat(Object.keys(shortcuts)).sort().reverse().map((function(name) {
+        return quoteRE(name);
+      })).join("|");
+    }
     let scanRE = RegExp(names);
     let replaceRE = RegExp(names, "g");
     return {
@@ -27232,17 +23582,30 @@ var demo = function() {
   }
   function emoji_plugin(md, options) {
     let defaults = {
-      defs: emojies_defs,
-      shortcuts: emojies_shortcuts,
+      defs: {},
+      shortcuts: {},
       enabled: []
     };
     let opts = normalize_opts(md.utils.assign({}, defaults, options || {}));
     md.renderer.rules.emoji = emoji_html;
     md.core.ruler.push("emoji", create_rule(md, opts.defs, opts.shortcuts, opts.scanRE, opts.replaceRE));
   }
-  var markdownItEmoji =  Object.freeze({
+  const __filename = url.fileURLToPath(document.currentScript && document.currentScript.src || new URL("index.js", document.baseURI).href);
+  const __dirname = path__default["default"].dirname(__filename);
+  const emojies_defs = JSON.parse(fs__default["default"].readFileSync(path__default["default"].normalize(path__default["default"].join(__dirname, "../lib/data/full.json")), "utf8"));
+  function emoji_plugin$1(md, options) {
+    let defaults = {
+      defs: emojies_defs,
+      shortcuts: emojies_shortcuts,
+      enabled: []
+    };
+    let opts = md.utils.assign({}, defaults, options || {});
+    emoji_plugin(md, opts);
+  }
+  //# sourceMappingURL=markdownItEmoji.modern.js.map
+    var markdownItEmoji =  Object.freeze({
     __proto__: null,
-    default: emoji_plugin
+    default: emoji_plugin$1
   });
   /*! markdown-it-fontawesome 0.3.0-3 https://github.com//GerHobbelt/markdown-it-fontawesome @license MIT */  let Plugin = require("@gerhobbelt/markdown-it-regexp");
   module.exports = function fontawesome_plugin(md) {
@@ -27258,7 +23621,7 @@ var demo = function() {
   var markdownItFontAwesome =  Object.freeze({
     __proto__: null
   });
-  /*! markdown-it-footnote 3.0.2-3 https://github.com//GerHobbelt/markdown-it-footnote @license MIT */
+  /*! markdown-it-footnote 3.0.2-5 https://github.com//GerHobbelt/markdown-it-footnote @license MIT */
   // Process footnotes
   
   ////////////////////////////////////////////////////////////////////////////////
@@ -27276,7 +23639,7 @@ var demo = function() {
   function headerFnDefault(state) {
     return "";
   }
-  module.exports = function footnote_plugin(md, plugin_options) {
+  function footnote_plugin(md, plugin_options) {
     let parseLinkLabel = md.helpers.parseLinkLabel, isSpace = md.utils.isSpace;
     let anchorFn = plugin_options && plugin_options.anchor ? plugin_options.anchor : anchorFnDefault;
     let captionFn = plugin_options && plugin_options.caption ? plugin_options.caption : captionFnDefault;
@@ -27301,6 +23664,9 @@ var demo = function() {
       let caption = slf.rules.footnote_caption(tokens, idx, options, env, slf);
       let refid = render_footnote_n(tokens, idx);
       refid = anchorFn(refid, false, tokens, idx, options, env, slf);
+      if (tokens[idx].meta.text) {
+        return '<a href="#fn' + id + '" id="fnref' + refid + '">' + tokens[idx].meta.text + '<sup class="footnote-ref">' + caption + "</sup></a>";
+      }
       return '<sup class="footnote-ref"><a href="#fn' + id + '" id="fnref' + refid + '">' + caption + "</a></sup>";
     }
     function render_footnote_block_open(tokens, idx, options) {
@@ -27316,7 +23682,7 @@ var demo = function() {
         if (tokens[idx].meta.subId > 0) {
           id += ':' + tokens[idx].meta.subId;
         }
-      */      return '<li id="fn' + id + '" class="footnote-item">';
+      */      return '<li tabindex="-1" id="fn' + id + '" class="footnote-item">';
     }
     function render_footnote_close() {
       return "</li>\n";
@@ -27351,7 +23717,8 @@ var demo = function() {
         return false;
       }
       for (pos = start + 2; pos < max; pos++) {
-        if (state.src.charCodeAt(pos) === 32) {
+        if (state.src.charCodeAt(pos) === 32
+        /* space */) {
           return false;
         }
         if (state.src.charCodeAt(pos) === 93
@@ -27471,6 +23838,79 @@ var demo = function() {
         };
       }
       state.pos = labelEnd + 1;
+      state.posMax = max;
+      return true;
+    }
+ // Process footnote references with text ([^label ...])
+        function footnote_ref_with_text(state, silent) {
+      let label, pos, footnoteId, footnoteSubId, token, max = state.posMax, start = state.pos;
+ // should be at least 6 chars - "[^l x]"
+            if (start + 5 > max) {
+        return false;
+      }
+      if (!state.env.footnotes || !state.env.footnotes.refs) {
+        return false;
+      }
+      if (state.src.charCodeAt(start) !== 91
+      /* [ */) {
+        return false;
+      }
+      if (state.src.charCodeAt(start + 1) !== 94
+      /* ^ */) {
+        return false;
+      }
+      for (pos = start + 2; pos < max; pos++) {
+        if (state.src.charCodeAt(pos) === 10
+        /* linefeed */) {
+          return false;
+        }
+        if (state.src.charCodeAt(pos) === 93
+        /* ] */) {
+          break;
+        }
+      }
+      if (pos === start + 2) {
+        return false;
+      }
+ // no empty footnote labels
+            if (pos >= max) {
+        return false;
+      }
+      pos++;
+      label = state.src.slice(start + 2, pos - 1);
+      if (!label || !label.match(/^(\S+)\s+(.+)$/)) {
+        return false;
+      }
+      label = RegExp.$1;
+      let text = RegExp.$2;
+      if (typeof state.env.footnotes.refs[":" + label] === "undefined") {
+        return false;
+      }
+      if (!silent) {
+        if (!state.env.footnotes.list) {
+          state.env.footnotes.list = [];
+        }
+        if (state.env.footnotes.refs[":" + label] < 0) {
+          footnoteId = state.env.footnotes.list.length;
+          state.env.footnotes.list[footnoteId] = {
+            label: label,
+            count: 0
+          };
+          state.env.footnotes.refs[":" + label] = footnoteId;
+        } else {
+          footnoteId = state.env.footnotes.refs[":" + label];
+        }
+        footnoteSubId = state.env.footnotes.list[footnoteId].count;
+        state.env.footnotes.list[footnoteId].count++;
+        token = state.push("footnote_ref", "", 0);
+        token.meta = {
+          id: footnoteId,
+          subId: footnoteSubId,
+          label: label,
+          text: text
+        };
+      }
+      state.pos = pos;
       state.posMax = max;
       return true;
     }
@@ -27625,21 +24065,29 @@ var demo = function() {
       alt: [ "paragraph", "reference" ]
     });
     md.inline.ruler.after("image", "footnote_inline", footnote_inline);
-    md.inline.ruler.after("footnote_inline", "footnote_ref", footnote_ref);
+    md.inline.ruler.after("footnote_inline", "footnote_ref_with_text", footnote_ref_with_text);
+    md.inline.ruler.after("footnote_ref_with_text", "footnote_ref", footnote_ref);
     md.core.ruler.after("inline", "footnote_tail", footnote_tail);
-  };
+  }
   var markdownItFootnote =  Object.freeze({
-    __proto__: null
+    __proto__: null,
+    default: footnote_plugin
   });
-  /*! markdown-it-front-matter 0.2.1-2 https://github.com//GerHobbelt/markdown-it-front-matter @license MIT */  module.exports = function front_matter_plugin(md, opts) {
+  /*! markdown-it-front-matter 0.2.3-3 https://github.com//GerHobbelt/markdown-it-front-matter @license MIT */
+  // Process front matter and pass to cb
+    function front_matter_plugin(md, opts) {
     opts = Object.assign({}, opts);
     let min_markers = 3, marker_str = "-", marker_char = marker_str.charCodeAt(0), marker_len = marker_str.length;
     function frontMatter(state, startLine, endLine, silent) {
       let pos, nextLine, marker_count, token, old_parent, old_line_max, start_content, auto_closed = false, start = state.bMarks[startLine] + state.tShift[startLine], max = state.eMarks[startLine];
-      if (startLine !== 0 || marker_char !== state.src.charCodeAt(0)) {
+ // Check out the first character of the first line quickly,
+      // this should filter out non-front matter
+            if (startLine !== 0 || marker_char !== state.src.charCodeAt(0)) {
         return false;
       }
-      for (pos = start + 1; pos <= max; pos++) {
+ // Check out the rest of the marker string
+      // while pos <= 3
+            for (pos = start + 1; pos <= max; pos++) {
         if (marker_str[(pos - start) % marker_len] !== state.src[pos]) {
           start_content = pos + 1;
           break;
@@ -27650,13 +24098,17 @@ var demo = function() {
         return false;
       }
       pos -= (pos - start) % marker_len;
-      if (silent) {
+ // Since start is found, we can report success here in validation mode
+            if (silent) {
         return true;
       }
-      nextLine = startLine;
+ // Search for the end of the block
+            nextLine = startLine;
       for (;;) {
         nextLine++;
         if (nextLine >= endLine) {
+          // unclosed block should be autoclosed by end of document.
+          // also block seems to be autoclosed by end of parent
           break;
         }
         if (state.src.slice(start, max) === "...") {
@@ -27665,12 +24117,16 @@ var demo = function() {
         start = state.bMarks[nextLine] + state.tShift[nextLine];
         max = state.eMarks[nextLine];
         if (start < max && state.sCount[nextLine] < state.blkIndent) {
+          // non-empty line with negative indent should stop the list:
+          // - ```
+          //  test
           break;
         }
         if (marker_char !== state.src.charCodeAt(start)) {
           continue;
         }
         if (state.sCount[nextLine] - state.blkIndent >= 4) {
+          // closing fence should be indented less than 4 spaces
           continue;
         }
         for (pos = start + 1; pos <= max; pos++) {
@@ -27678,21 +24134,25 @@ var demo = function() {
             break;
           }
         }
-        if (Math.floor((pos - start) / marker_len) < marker_count) {
+ // closing code fence must be at least as long as the opening one
+                if (Math.floor((pos - start) / marker_len) < marker_count) {
           continue;
         }
-        pos -= (pos - start) % marker_len;
+ // make sure tail has spaces only
+                pos -= (pos - start) % marker_len;
         pos = state.skipSpaces(pos);
         if (pos < max) {
           continue;
         }
-        auto_closed = true;
+ // found!
+                auto_closed = true;
         break;
       }
       old_parent = state.parentType;
       old_line_max = state.lineMax;
       state.parentType = "container";
-      state.lineMax = nextLine;
+ // this will prevent lazy continuations from ever going past our end marker
+            state.lineMax = nextLine;
       token = state.push("front_matter", null, 0);
       token.hidden = true;
       token.markup = state.src.slice(startLine, pos);
@@ -27710,9 +24170,10 @@ var demo = function() {
     md.block.ruler.before("table", "front_matter", frontMatter, {
       alt: [ "paragraph", "reference", "blockquote", "list" ]
     });
-  };
-  var markdownItFrontMatter =  Object.freeze({
-    __proto__: null
+  }
+  var markdownitFrontMatter =  Object.freeze({
+    __proto__: null,
+    default: front_matter_plugin
   });
   const renderHashtagOpen = (tokens, idx) => '<a href="/tags/' + tokens[idx].content.toLowerCase() + '" class="tag">', renderHashtagClose = () => "</a>", renderHashtagText = (tokens, idx) => "#" + tokens[idx].content, isLinkOpenRegExp = /^<a[>\s]/i, isLinkCloseRegExp = /^<\/a\s*>/i, isLinkOpen = str => isLinkOpenRegExp.test(str), isLinkClose = str => isLinkCloseRegExp.test(str);
   var markdownItHashtag = function hashtagPlugin(md, options) {
@@ -31712,20 +28173,225 @@ var demo = function() {
     __proto__: null,
     default: markdownItToc
   });
-  /*! markdown-it-wikilinks 1.1.1-8 https://github.com//GerHobbelt/markdown-it-wikilinks @license MIT */  const createPlugin = require("@gerhobbelt/markdown-it-regexp");
-  const sanitize = require("sanitize-filename");
-  function removeInitialSlashes(str) {
+  /*! markdown-it-regexp 0.6.0-12 https://github.com//GerHobbelt/markdown-it-regexp @license MIT */
+  /*!
+   * markdown-it-regexp
+   * Copyright (c) 2014 Alex Kocharin
+   * MIT Licensed
+   */
+  /**
+   * Escape special characters in the given string of html.
+   *
+   * Borrowed from escape-html component, MIT-licensed
+   */  function escape$2(html) {
+    return String(html).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/'/g, "&#39;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+ // code assumes you're wrapping HTML attributes in doublequotes:
+    function encodeHtmlAttr(value) {
+    // https://stackoverflow.com/questions/4015345/how-do-i-properly-escape-quotes-inside-html-attributes
+    return value.replace(/"/g, "&#34;");
+  }
+  /*!
+   * markdown-it-regexp
+   * Copyright (c) 2014 Alex Kocharin
+   * MIT Licensed
+   */
+  /**
+   * Counter for multi usage.
+   */  let counter = 0;
+  let registered_ids = [];
+  function transformRegExpToOnlyMatchFromStart(regexp) {
+    // clone regexp with all the flags
+    let flags = (regexp.global ? "g" : "") + (regexp.multiline ? "m" : "") + (regexp.ignoreCase ? "i" : "") + (regexp.unicode ? "u" : "") + (regexp.sticky ? "y" : "");
+ // make sure compound / erroneous(!) regexes are transformed to ALWAYS only match from the start of the input:
+    // (f.e.: before this, markdown-it-wikilinks exhibited some very duplication-like behaviour)
+        regexp = RegExp("^(?:" + regexp.source + ")", flags);
+    return regexp;
+  }
+  /**
+   * Constructor function
+   */  let createPlugin = function createPluginF(regexp, config) {
+    regexp = transformRegExpToOnlyMatchFromStart(regexp);
+    config = Object.assign({}, {
+      setup: (setup, config) => config,
+      shouldParse: (state, match) => true,
+      postprocessParse: (state, token) => {},
+      escape: escape$2,
+      encodeHtmlAttr: encodeHtmlAttr,
+      regexp: regexp
+    }, typeof config === "function" ? {
+      replacer: config
+    } : config);
+    if (typeof config.replacer !== "function") {
+      throw new Error("createPlugin(re, config): config.replacer MUST be a replacer function.");
+    }
+    if (typeof config.shouldParse !== "function") {
+      throw new Error("createPlugin(re, config): config.shouldParse MUST be a function.");
+    }
+    if (typeof config.postprocessParse !== "function") {
+      throw new Error("createPlugin(re, config): config.postprocessParse MUST be a function.");
+    }
+    if (typeof config.setup !== "function") {
+      throw new Error("createPlugin(re, config): config.setup MUST be a function.");
+    }
+ // this plugin can be inserted multiple times,
+    // so we're generating unique name for it
+        let id = config.pluginId;
+    if (id && registered_ids["p-" + id]) {
+      throw new Error(`Plugin ID '${id}' has already been registered by another plugin or this plugin is registered multiple times.`);
+    }
+    if (!id) {
+      id = "regexp-" + counter;
+      while (registered_ids["p-" + id]) {
+        counter++;
+        id = "regexp-" + counter;
+      }
+      config.pluginId = id;
+    }
+    registered_ids["p-" + id] = true;
+ // closure var
+        let plugin_options;
+ // return value should be a callable function
+    // with strictly defined options passed by markdown-it
+        let handler = function cbHandler(md, options) {
+      // store use(..., options) in closure
+      plugin_options = config.setup(config, options);
+ // when user has provided another regex via `setup()`,
+      // then we MUST clone that one to ensure it only matches
+      // from the start of the input:
+            if (regexp.source !== config.regexp.source) {
+        regexp = config.regexp = transformRegExpToOnlyMatchFromStart(config.regexp);
+      }
+ // register plugin with markdown-it
+            let id = config.pluginId;
+      md.inline.ruler.push(id, parse);
+      md.renderer.rules[id] = render;
+    };
+    function parse(state, silent) {
+      // slowwww... maybe use an advanced regexp engine for this
+      const match = config.regexp.exec(state.src.slice(state.pos));
+      if (!match) return false;
+      if (!config.shouldParse(state, match, config, plugin_options)) {
+        return false;
+      }
+      if (state.pending) {
+        state.pushPending();
+      }
+ // valid match found, now we need to advance cursor
+            const originalPos = state.pos;
+      const matchlen = match[0].length;
+      state.pos += matchlen;
+ // don't insert any tokens in silent mode
+            if (silent) return true;
+      let token = state.push(id, "", 0);
+      token.meta = {
+        match: match
+      };
+      token.position = originalPos;
+      token.size = matchlen;
+      config.postprocessParse(state, token, config, plugin_options);
+      return true;
+    }
+    function render(tokens, id, options, env) {
+      return config.replacer(tokens[id].meta.match, config, plugin_options, env, tokens, id, options);
+    }
+    return handler;
+  };
+  createPlugin.reset = function() {
+    counter = 0;
+    registered_ids = [];
+  };
+  //# sourceMappingURL=markdownItRegexp.modern.js.map
+    function isHighSurrogate(codePoint) {
+    return codePoint >= 55296 && codePoint <= 56319;
+  }
+  function isLowSurrogate(codePoint) {
+    return codePoint >= 56320 && codePoint <= 57343;
+  }
+  // Truncate string by size in bytes
+    var truncate = function truncate(getLength, string, byteLength) {
+    if (typeof string !== "string") {
+      throw new Error("Input must be string");
+    }
+    var charLength = string.length;
+    var curByteLength = 0;
+    var codePoint;
+    var segment;
+    for (var i = 0; i < charLength; i += 1) {
+      codePoint = string.charCodeAt(i);
+      segment = string[i];
+      if (isHighSurrogate(codePoint) && isLowSurrogate(string.charCodeAt(i + 1))) {
+        i += 1;
+        segment += string[i];
+      }
+      curByteLength += getLength(segment);
+      if (curByteLength === byteLength) {
+        return string.slice(0, i + 1);
+      } else if (curByteLength > byteLength) {
+        return string.slice(0, i - segment.length + 1);
+      }
+    }
+    return string;
+  };
+  var getLength = buffer.Buffer.byteLength.bind(buffer.Buffer);
+  var truncateUtf8Bytes = truncate.bind(null, getLength);
+  /*jshint node:true*/
+  /**
+   * Replaces characters in strings that are illegal/unsafe for filenames.
+   * Unsafe characters are either removed or replaced by a substitute set
+   * in the optional `options` object.
+   *
+   * Illegal Characters on Various Operating Systems
+   * / ? < > \ : * | "
+   * https://kb.acronis.com/content/39790
+   *
+   * Unicode Control codes
+   * C0 0x00-0x1f & C1 (0x80-0x9f)
+   * http://en.wikipedia.org/wiki/C0_and_C1_control_codes
+   *
+   * Reserved filenames on Unix-based systems (".", "..")
+   * Reserved filenames in Windows ("CON", "PRN", "AUX", "NUL", "COM1",
+   * "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9",
+   * "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", and
+   * "LPT9") case-insesitively and with or without filename extensions.
+   *
+   * Capped at 255 characters in length.
+   * http://unix.stackexchange.com/questions/32795/what-is-the-maximum-allowed-filename-and-folder-size-with-ecryptfs
+   *
+   * @param  {String} input   Original filename
+   * @param  {Object} options {replacement: String | Function }
+   * @return {String}         Sanitized filename
+   */  var illegalRe = /[\/\?<>\\:\*\|"]/g;
+  var controlRe = /[\x00-\x1f\x80-\x9f]/g;
+  var reservedRe = /^\.+$/;
+  var windowsReservedRe = /^(con|prn|aux|nul|com[0-9]|lpt[0-9])(\..*)?$/i;
+  var windowsTrailingRe = /[\. ]+$/;
+  function sanitize(input, replacement) {
+    if (typeof input !== "string") {
+      throw new Error("Input must be string");
+    }
+    var sanitized = input.replace(illegalRe, replacement).replace(controlRe, replacement).replace(reservedRe, replacement).replace(windowsReservedRe, replacement).replace(windowsTrailingRe, replacement);
+    return truncateUtf8Bytes(sanitized, 255);
+  }
+  var sanitizeFilename = function(input, options) {
+    var replacement = options && options.replacement || "";
+    var output = sanitize(input, replacement);
+    if (replacement === "") {
+      return output;
+    }
+    return sanitize(output, "");
+  };
+  /*! markdown-it-wikilinks 1.1.1-10 https://github.com//GerHobbelt/markdown-it-wikilinks @license MIT */  function removeInitialSlashes(str) {
     return str.replace(/^\/+/g, "");
   }
  // separate the setup/config object from the `md.use(...)` call for code clarity:
     const defaultSetup = {
     pluginId: "wikilink",
-    replacer: function(match, setup, options, env, tokens, id) {
+    replacer: function wikilinksReplacer(match, setup, options, env, tokens, id) {
       let label = "";
       let pageName = "";
       let href = "";
       let htmlAttrs = [];
-      let htmlAttrsString = "";
       const isSplit = !!match[2];
       function isAbsolute(pageName) {
         return options.makeAllLinksAbsolute || pageName.charCodeAt(0) === 47;
@@ -31737,6 +28403,8 @@ var demo = function() {
         label = match[1];
         pageName = options.generatePageNameFromLabel(label);
       }
+      let originalLabel = label;
+      let originalPageName = pageName;
       label = options.postProcessLabel(label);
       pageName = options.postProcessPageName(pageName);
  // make sure none of the values are empty
@@ -31755,18 +28423,28 @@ var demo = function() {
         const attrValue = options.htmlAttributes[attrName];
         htmlAttrs.push(`${attrName}="${setup.encodeHtmlAttr(attrValue)}"`);
       }
-      htmlAttrsString = htmlAttrs.join(" ");
-      return `<a ${htmlAttrsString}>${label}</a>`;
+      return this.renderLink({
+        pageName: pageName,
+        label: label,
+        originalPageName: originalPageName,
+        originalLabel: originalLabel,
+        href: href,
+        htmlAttrs: htmlAttrs
+      }, setup, options, env, tokens, id);
  // - showcase using the `options` passed in via `MarkdownIt.use()`
       // - showcase using the `setup` object
       // - showcase using the `tokens` stream + `id` index to access the token
       // return '\n' + setup.pluginId + ':' + options.opt1 + ':' + setup.escape(url) + ':' + options.opt2 + ':' + (token.wonko || '---') + ':' + token.type + ':' + token.nesting + ':' + token.level;
         },
-    setup: function(config, options) {
+    renderLink: function wikilinksRenderLink(info, setup, options, env, tokens, id) {
+      let htmlAttrsString = info.htmlAttrs.join(" ");
+      return `<a ${htmlAttrsString}>${info.label}</a>`;
+    },
+    setup: function wikilinksSetup(config, options) {
       const defaults = {
         linkPattern: /\[\[([^\x00-\x1f|]+?)(\|([\s\S]+?))?\]\]/,
         // accept anything, except control characters (CR, LF, etc) or |
-        // linkPattern: /\[\[([-\w\s\/]+)(\|([-\w\s\/]+))?\]\]/,  // accept words, dashes and whitespace
+        // linkPattern: /\[\[([-\w\s\/]+)(\|([-\w\s\/]+))?\]\]/,          // accept words, dashes and whitespace
         baseURL: "/",
         relativeBaseURL: "./",
         makeAllLinksAbsolute: false,
@@ -31775,7 +28453,7 @@ var demo = function() {
         generatePageNameFromLabel: label => label,
         postProcessPageName: pageName => {
           pageName = pageName.trim();
-          pageName = pageName.split("/").map(sanitize).join("/");
+          pageName = pageName.split("/").map(sanitizeFilename).join("/");
           pageName = pageName.replace(/\s+/g, "_");
           return pageName;
         },
@@ -31797,11 +28475,25 @@ var demo = function() {
  // only use this for test rigs:
     plugin.createTestInstance = function(setup) {
     createPlugin.reset();
+    let setupObj = null;
+    if (setup) {
+      // allow user-provided setup to 'postprocess' the default setup:
+      setupObj = {
+        setup: function customSetup(config, options) {
+          options = this.originalSetup(config, options);
+          options = this.userSetup(config, options);
+          return options;
+        },
+        originalSetup: defaultSetup.setup,
+        userSetup: setup
+      };
+    }
     const p = createPlugin(// regexp to match: fake one. Will be set up by setup callback instead.
-    /./, Object.assign({}, defaultSetup));
+    /./, Object.assign({}, defaultSetup, setupObj));
     return p;
   };
-  var markdownItWikiLinks =  Object.freeze({
+  //# sourceMappingURL=markdownItWikiLinks.modern.js.map
+    var markdownitWikilinks =  Object.freeze({
     __proto__: null,
     default: plugin
   });
@@ -31812,13 +28504,13 @@ var demo = function() {
   var require$$61 =  getAugmentedNamespace(markdownItEmoji);
   var require$$62 =  getAugmentedNamespace(markdownItFontAwesome);
   var require$$63 =  getAugmentedNamespace(markdownItFootnote);
-  var require$$64 =  getAugmentedNamespace(markdownItFrontMatter);
+  var require$$64 =  getAugmentedNamespace(markdownitFrontMatter);
   var require$$68 =  getAugmentedNamespace(markdownItAbbr$1);
   var require$$70 =  getAugmentedNamespace(markdownItKbd);
   var require$$74 =  getAugmentedNamespace(markdownItPrism$1);
   var require$$81 =  getAugmentedNamespace(markdownIt);
   var require$$82 =  getAugmentedNamespace(markdownIt$1);
-  var require$$83 =  getAugmentedNamespace(markdownItWikiLinks);
+  var require$$83 =  getAugmentedNamespace(markdownitWikilinks);
   /*eslint-env browser*/
   /*global $, _*/  lib.registerLanguage("actionscript", actionscript_1);
   lib.registerLanguage("apache", apache_1);
@@ -31951,7 +28643,7 @@ var demo = function() {
     $("body").addClass("result-as-" + val);
     defaults$1._view = val;
   }
-  function pick$1(pckg1, pckg2, pckg3, pckg4) {
+  function pick(pckg1, pckg2, pckg3, pckg4) {
     let rv;
     console.log("PICK:", defaults$1.pickNumber, "--\x3e", +defaults$1.pickNumber);
     switch (+defaults$1.pickNumber) {
@@ -31976,7 +28668,7 @@ var demo = function() {
   function usePlugins(md) {
     return md.use(require$$56).use(require$$57).use(require$$58, "warning").use(markdownItCheckbox).use(require$$60).use(require$$61).use(require$$62).use(require$$63).use(require$$64, (function processFrontMatter(fm) {
       console.log("FrontMatter:", fm);
-    })).use(markdownItHashtag).use(markdownItHeaderSections).use(markdownItHeadinganchor, {}).use(require$$68).use(markdownItIns).use(require$$70).use(markdownItMark).use(markdownItMathjax).use(markdownItModifyToken).use(pick$1(require$$74, index_es6, markdownItHighlightjs))
+    })).use(markdownItHashtag).use(markdownItHeaderSections).use(markdownItHeadinganchor, {}).use(require$$68).use(markdownItIns).use(require$$70).use(markdownItMark).use(markdownItMathjax).use(markdownItModifyToken).use(pick(require$$74, index_es6, markdownItHighlightjs))
     /*  .use(require('@gerhobbelt/markdown-it-responsive'), {
       responsive: {
         srcset: {
@@ -31997,7 +28689,7 @@ var demo = function() {
         }
       }
     })
-  */ .use(markdownItSamp).use(markdownItStrikethroughAlt).use(markdownItSub).use(markdownItSup).use(pick$1(require$$81, require$$82)).use(require$$83);
+  */ .use(markdownItSamp).use(markdownItStrikethroughAlt).use(markdownItSub).use(markdownItSup).use(pick(require$$81, require$$82)).use(require$$83);
   }
   function mdInit() {
     console.log("SETTINGS:", defaults$1);
@@ -32295,4 +28987,4 @@ var demo = function() {
   }));
   var demo_template = {};
   return demo_template;
-}();
+}(path, fs, url, buffer);
