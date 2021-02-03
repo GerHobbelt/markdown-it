@@ -4427,6 +4427,7 @@ var table = function table(state, startLine, endLine, silent) {
   token.map = [ startLine, startLine + 1 ];
   token.size = 0;
   token.position = state.bMarks[startLine];
+  let headings = [];
   columnVIndex = state.bMarks[startLine] + state.tShift[startLine];
   for (i = 0; i < columns.length; i++) {
     token = state.push("th_open", "th", 1);
@@ -4442,6 +4443,8 @@ var table = function table(state, startLine, endLine, silent) {
     token.position = columnVIndex + trimLeftOffset(columns[i]);
     token.size = token.content.length;
     columnVIndex += columns[i].length;
+    // empty headings get the column index number as a data-label
+        headings[i] = token.content || `col-${i + 1}`;
     token = state.push("th_close", "th", -1);
     token.position = columnVIndex;
     token.size = 0;
@@ -4505,8 +4508,15 @@ var table = function table(state, startLine, endLine, silent) {
       token.size = 1;
       token.position = columnVIndex;
       columnVIndex++;
+      // as MarkDown table rows MAY have more columns than originally set up in the table header
+      // by the user, augment the data-label table as we go along:
+      // empty headings get the column index number as a data-label
+            if (!headings[i]) {
+        headings[i] = `col-${i + 1}`;
+      }
+      token.attrs = [ [ "data-label", headings[i] ] ];
       if (aligns[i]) {
-        token.attrs = [ [ "style", "text-align:" + aligns[i] ] ];
+        token.attrs.push([ "style", "text-align:" + aligns[i] ]);
       }
       let originalContent = columns[i] || "";
       token = state.push("inline", "", 0);

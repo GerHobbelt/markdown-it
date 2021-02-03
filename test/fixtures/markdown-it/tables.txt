@@ -14,12 +14,12 @@ Simple:
 </thead>
 <tbody>
 <tr>
-<td>Cell 1</td>
-<td>Cell 2</td>
+<td data-label="Heading 1">Cell 1</td>
+<td data-label="Heading 2">Cell 2</td>
 </tr>
 <tr>
-<td>Cell 3</td>
-<td>Cell 4</td>
+<td data-label="Heading 1">Cell 3</td>
+<td data-label="Heading 2">Cell 4</td>
 </tr>
 </tbody>
 </table>
@@ -44,16 +44,16 @@ Column alignment:
 </thead>
 <tbody>
 <tr>
-<td style="text-align:center">Cell 1</td>
-<td style="text-align:right">Cell 2</td>
-<td style="text-align:left">Cell 3</td>
-<td>Cell 4</td>
+<td data-label="Header 1" style="text-align:center">Cell 1</td>
+<td data-label="Header 2" style="text-align:right">Cell 2</td>
+<td data-label="Header 3" style="text-align:left">Cell 3</td>
+<td data-label="Header 4">Cell 4</td>
 </tr>
 <tr>
-<td style="text-align:center">Cell 5</td>
-<td style="text-align:right">Cell 6</td>
-<td style="text-align:left">Cell 7</td>
-<td>Cell 8</td>
+<td data-label="Header 1" style="text-align:center">Cell 5</td>
+<td data-label="Header 2" style="text-align:right">Cell 6</td>
+<td data-label="Header 3" style="text-align:left">Cell 7</td>
+<td data-label="Header 4">Cell 8</td>
 </tr>
 </tbody>
 </table>
@@ -78,16 +78,16 @@ Cell 1  |Cell 2  |Cell 3  |Cell 4
 </thead>
 <tbody>
 <tr>
-<td style="text-align:left">Cell 1</td>
-<td style="text-align:center">Cell 2</td>
-<td style="text-align:right">Cell 3</td>
-<td>Cell 4</td>
+<td data-label="Header 1" style="text-align:left">Cell 1</td>
+<td data-label="Header 2" style="text-align:center">Cell 2</td>
+<td data-label="Header 3" style="text-align:right">Cell 3</td>
+<td data-label="Header 4">Cell 4</td>
 </tr>
 <tr>
-<td style="text-align:left"><em>Cell 5</em></td>
-<td style="text-align:center">Cell 6</td>
-<td style="text-align:right">Cell 7</td>
-<td>Cell 8</td>
+<td data-label="Header 1" style="text-align:left"><em>Cell 5</em></td>
+<td data-label="Header 2" style="text-align:center">Cell 6</td>
+<td data-label="Header 3" style="text-align:right">Cell 7</td>
+<td data-label="Header 4">Cell 8</td>
 </tr>
 </tbody>
 </table>
@@ -111,8 +111,8 @@ baz|baz
 </thead>
 <tbody>
 <tr>
-<td>bar</td>
-<td>bar</td>
+<td data-label="foo">bar</td>
+<td data-label="foo">bar</td>
 </tr>
 </tbody>
 </table>
@@ -135,7 +135,7 @@ Minimal one-column:
 </thead>
 <tbody>
 <tr>
-<td>test2</td>
+<td data-label="foo">test2</td>
 </tr>
 </tbody>
 </table>
@@ -157,8 +157,8 @@ bar|bar
 </thead>
 <tbody>
 <tr>
-<td>bar</td>
-<td>bar</td>
+<td data-label="-   foo">bar</td>
+<td data-label="foo">bar</td>
 </tr>
 </tbody>
 </table>
@@ -240,8 +240,8 @@ Allow tabs as a separator on 2nd line
 </thead>
 <tbody>
 <tr>
-<td>baz</td>
-<td>quux</td>
+<td data-label="foo">baz</td>
+<td data-label="bar">quux</td>
 </tr>
 </tbody>
 </table>
@@ -265,8 +265,8 @@ bar|bar
 </thead>
 <tbody>
 <tr>
-<td>bar</td>
-<td>bar</td>
+<td data-label="foo">bar</td>
+<td data-label="foo">bar</td>
 </tr>
 </tbody>
 </table>
@@ -289,12 +289,12 @@ Another complicated backticks case
 </thead>
 <tbody>
 <tr>
-<td>Cell 1</td>
-<td>Cell 2</td>
+<td data-label="Heading 1">Cell 1</td>
+<td data-label="Heading 2">Cell 2</td>
 </tr>
 <tr>
-<td>\`</td>
-<td>\`</td>
+<td data-label="Heading 1">\`</td>
+<td data-label="Heading 2">\`</td>
 </tr>
 </tbody>
 </table>
@@ -316,9 +316,9 @@ x | `\` | `x`
 </thead>
 <tbody>
 <tr>
-<td>x</td>
-<td><code>\</code></td>
-<td><code>x</code></td>
+<td data-label="#">x</td>
+<td data-label="1"><code>\</code></td>
+<td data-label="2"><code>x</code></td>
 </tr>
 </tbody>
 </table>
@@ -340,9 +340,9 @@ x | \`\` | `x`
 </thead>
 <tbody>
 <tr>
-<td>x</td>
-<td>``</td>
-<td><code>x</code></td>
+<td data-label="#">x</td>
+<td data-label="1">``</td>
+<td data-label="2"><code>x</code></td>
 </tr>
 </tbody>
 </table>
@@ -364,10 +364,10 @@ Allow tables with extra cells in a row outside of thead:
 </thead>
 <tbody>
 <tr>
-<td style="text-align:center">3</td>
-<td style="text-align:center">4</td>
-<td>5</td>
-<td>6</td>
+<td data-label="1" style="text-align:center">3</td>
+<td data-label="2" style="text-align:center">4</td>
+<td data-label="col-3">5</td>
+<td data-label="col-4">6</td>
 </tr>
 </tbody>
 </table>
@@ -391,10 +391,10 @@ An amount of rows might be different across the table #2:
 </thead>
 <tbody>
 <tr>
-<td style="text-align:center">5</td>
-<td style="text-align:center">6</td>
-<td style="text-align:center"></td>
-<td style="text-align:center"></td>
+<td data-label="1" style="text-align:center">5</td>
+<td data-label="2" style="text-align:center">6</td>
+<td data-label="3" style="text-align:center"></td>
+<td data-label="4" style="text-align:center"></td>
 </tr>
 </tbody>
 </table>
@@ -415,7 +415,7 @@ Allow one-column tables (issue #171):
 </thead>
 <tbody>
 <tr>
-<td style="text-align:center">bar</td>
+<td data-label="foo" style="text-align:center">bar</td>
 </tr>
 </tbody>
 </table>
@@ -437,8 +437,8 @@ Allow indented tables (issue #325):
 </thead>
 <tbody>
 <tr>
-<td>Col1b</td>
-<td>Col2b</td>
+<td data-label="Col1a">Col1b</td>
+<td data-label="Col2a">Col2b</td>
 </tr>
 </tbody>
 </table>
@@ -532,12 +532,12 @@ Escaped pipes inside backticks don't split cells:
 </thead>
 <tbody>
 <tr>
-<td>Cell 1</td>
-<td>Cell 2</td>
+<td data-label="Heading 1">Cell 1</td>
+<td data-label="Heading 2">Cell 2</td>
 </tr>
 <tr>
-<td><code>Cell 3|</code></td>
-<td>Cell 4</td>
+<td data-label="Heading 1"><code>Cell 3|</code></td>
+<td data-label="Heading 2">Cell 4</td>
 </tr>
 </tbody>
 </table>
@@ -559,12 +559,12 @@ Escape before escaped Pipes inside backticks don't split cells:
 </thead>
 <tbody>
 <tr>
-<td>Cell 1</td>
-<td>Cell 2</td>
+<td data-label="Heading 1">Cell 1</td>
+<td data-label="Heading 2">Cell 2</td>
 </tr>
 <tr>
-<td><code>Cell 3\|</code></td>
-<td>Cell 4</td>
+<td data-label="Heading 1"><code>Cell 3\|</code></td>
+<td data-label="Heading 2">Cell 4</td>
 </tr>
 </tbody>
 </table>
@@ -595,8 +595,8 @@ Regression test for #721, table in a list indented with tabs:
 </thead>
 <tbody>
 <tr>
-<td>abcdefgh</td>
-<td>ijklmnop</td>
+<td data-label="Column 1">abcdefgh</td>
+<td data-label="Column 2">ijklmnop</td>
 </tr>
 </tbody>
 </table>
@@ -634,8 +634,8 @@ GFM 4.10 Tables (extension), Example 198
 </thead>
 <tbody>
 <tr>
-<td>baz</td>
-<td>bim</td>
+<td data-label="foo">baz</td>
+<td data-label="bar">bim</td>
 </tr>
 </tbody>
 </table>
@@ -656,8 +656,8 @@ bar | baz
 </thead>
 <tbody>
 <tr>
-<td style="text-align:center">bar</td>
-<td style="text-align:right">baz</td>
+<td data-label="abc" style="text-align:center">bar</td>
+<td data-label="defghi" style="text-align:right">baz</td>
 </tr>
 </tbody>
 </table>
@@ -678,10 +678,10 @@ GFM 4.10 Tables (extension), Example 200
 </thead>
 <tbody>
 <tr>
-<td>b <code>|</code> az</td>
+<td data-label="f|oo">b <code>|</code> az</td>
 </tr>
 <tr>
-<td>b <strong>|</strong> im</td>
+<td data-label="f|oo">b <strong>|</strong> im</td>
 </tr>
 </tbody>
 </table>
@@ -703,8 +703,8 @@ GFM 4.10 Tables (extension), Example 201
 </thead>
 <tbody>
 <tr>
-<td>bar</td>
-<td>baz</td>
+<td data-label="abc">bar</td>
+<td data-label="def">baz</td>
 </tr>
 </tbody>
 </table>
@@ -731,12 +731,12 @@ bar
 </thead>
 <tbody>
 <tr>
-<td>bar</td>
-<td>baz</td>
+<td data-label="abc">bar</td>
+<td data-label="def">baz</td>
 </tr>
 <tr>
-<td>bar</td>
-<td></td>
+<td data-label="abc">bar</td>
+<td data-label="def"></td>
 </tr>
 </tbody>
 </table>
@@ -770,13 +770,13 @@ GFM 4.10 Tables (extension), Example 204
 </thead>
 <tbody>
 <tr>
-<td>bar</td>
-<td></td>
+<td data-label="abc">bar</td>
+<td data-label="def"></td>
 </tr>
 <tr>
-<td>bar</td>
-<td>baz</td>
-<td>boo</td>
+<td data-label="abc">bar</td>
+<td data-label="def">baz</td>
+<td data-label="col-3">boo</td>
 </tr>
 </tbody>
 </table>
