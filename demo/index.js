@@ -38,12 +38,12 @@ var demo = function(path, fs, url, buffer) {
   //  - exclude      - list of characters to ignore (in addition to a-zA-Z0-9)
   //  - keepEscaped  - don't encode '%' in a correct escape sequence (default: true)
   
-    function encode(string, exclude, keepEscaped) {
+    function encode$1(string, exclude, keepEscaped) {
     var i, l, code, nextCode, cache, result = "";
     if (typeof exclude !== "string") {
       // encode(string, keepEscaped)
       keepEscaped = exclude;
-      exclude = encode.defaultChars;
+      exclude = encode$1.defaultChars;
     }
     if (typeof keepEscaped === "undefined") {
       keepEscaped = true;
@@ -78,9 +78,9 @@ var demo = function(path, fs, url, buffer) {
     }
     return result;
   }
-  encode.defaultChars = ";/?:@&=+$,-_.!~*'()#";
-  encode.componentChars = "-_.!~*'()";
-  var encode_1 = encode;
+  encode$1.defaultChars = ";/?:@&=+$,-_.!~*'()#";
+  encode$1.componentChars = "-_.!~*'()";
+  var encode_1 = encode$1;
   /* eslint-disable no-bitwise */  var decodeCache = {};
   function getDecodeCache(exclude) {
     var i, ch, cache = decodeCache[exclude];
@@ -100,10 +100,10 @@ var demo = function(path, fs, url, buffer) {
   }
   // Decode percent-encoded string.
   
-    function decode(string, exclude) {
+    function decode$1(string, exclude) {
     var cache;
     if (typeof exclude !== "string") {
-      exclude = decode.defaultChars;
+      exclude = decode$1.defaultChars;
     }
     cache = getDecodeCache(exclude);
     return string.replace(/(%[a-f0-9]{2})+/gi, (function(seq) {
@@ -165,10 +165,10 @@ var demo = function(path, fs, url, buffer) {
       return result;
     }));
   }
-  decode.defaultChars = ";/?:@&=+$,#";
-  decode.componentChars = "";
-  var decode_1 = decode;
-  var format = function format(url) {
+  decode$1.defaultChars = ";/?:@&=+$,#";
+  decode$1.componentChars = "";
+  var decode_1 = decode$1;
+  var format$1 = function format(url) {
     var result = "";
     result += url.protocol || "";
     result += url.slashes ? "//" : "";
@@ -439,16 +439,16 @@ var demo = function(path, fs, url, buffer) {
       this.hostname = host;
     }
   };
-  var parse = urlParse;
-  var encode$1 = encode_1;
-  var decode$1 = decode_1;
-  var format$1 = format;
-  var parse$1 = parse;
+  var parse$1 = urlParse;
+  var encode = encode_1;
+  var decode = decode_1;
+  var format = format$1;
+  var parse = parse$1;
   var mdurl = {
-    encode: encode$1,
-    decode: decode$1,
-    format: format$1,
-    parse: parse$1
+    encode: encode,
+    decode: decode,
+    format: format,
+    parse: parse
   };
   // https://github.com/substack/deep-freeze/blob/master/index.js
     function deepFreeze(o) {
@@ -746,16 +746,16 @@ var demo = function(path, fs, url, buffer) {
       return true;
     }
   }
-  function escape(value) {
+  function escape$1(value) {
     return new RegExp(value.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&"), "m");
   }
-  function source(re) {
+  function source$1(re) {
     // if it's a regex get it's source,
     // otherwise it's a string already so just return it
     return re && re.source || re;
   }
-  function concat(...args) {
-    const joined = args.map((x => source(x))).join("");
+  function concat$1(...args) {
+    const joined = args.map((x => source$1(x))).join("");
     return joined;
   }
   function countMatchGroups(re) {
@@ -784,7 +784,7 @@ var demo = function(path, fs, url, buffer) {
     for (var i = 0; i < regexps.length; i++) {
       numCaptures += 1;
       var offset = numCaptures;
-      var re = source(regexps[i]);
+      var re = source$1(regexps[i]);
       if (i > 0) {
         ret += separator;
       }
@@ -812,7 +812,7 @@ var demo = function(path, fs, url, buffer) {
     return ret;
   }
   // Common regexps
-    const IDENT_RE = "[a-zA-Z]\\w*";
+    const IDENT_RE$2 = "[a-zA-Z]\\w*";
   const UNDERSCORE_IDENT_RE = "[a-zA-Z_]\\w*";
   const NUMBER_RE = "\\b\\d+(\\.\\d+)?";
   const C_NUMBER_RE = "(-?)(\\b0[xX][a-fA-F0-9]+|(\\b\\d+(\\.\\d*)?|\\.\\d+)([eE][-+]?\\d+)?)";
@@ -823,7 +823,7 @@ var demo = function(path, fs, url, buffer) {
   const SHEBANG = (opts = {}) => {
     const beginShebang = /^#![ ]*\//;
     if (opts.binary) {
-      opts.begin = concat(beginShebang, /.*\b/, opts.binary, /\b.*/);
+      opts.begin = concat$1(beginShebang, /.*\b/, opts.binary, /\b.*/);
     }
     return inherit({
       className: "meta",
@@ -916,7 +916,7 @@ var demo = function(path, fs, url, buffer) {
   };
   const TITLE_MODE = {
     className: "title",
-    begin: IDENT_RE,
+    begin: IDENT_RE$2,
     relevance: 0
   };
   const UNDERSCORE_TITLE_MODE = {
@@ -941,7 +941,7 @@ var demo = function(path, fs, url, buffer) {
   };
   var MODES =  Object.freeze({
     __proto__: null,
-    IDENT_RE: IDENT_RE,
+    IDENT_RE: IDENT_RE$2,
     UNDERSCORE_IDENT_RE: UNDERSCORE_IDENT_RE,
     NUMBER_RE: NUMBER_RE,
     C_NUMBER_RE: C_NUMBER_RE,
@@ -971,7 +971,7 @@ var demo = function(path, fs, url, buffer) {
   // compilation
     function compileLanguage(language) {
     function langRe(value, global) {
-      return new RegExp(source(value), "m" + (language.case_insensitive ? "i" : "") + (global ? "g" : ""));
+      return new RegExp(source$1(value), "m" + (language.case_insensitive ? "i" : "") + (global ? "g" : ""));
     }
     /**
       Stores multiple regular expressions and allows you to quickly search for
@@ -1188,7 +1188,7 @@ var demo = function(path, fs, url, buffer) {
         if (mode.end) {
           mode.endRe = langRe(mode.end);
         }
-        mode.terminator_end = source(mode.end) || "";
+        mode.terminator_end = source$1(mode.end) || "";
         if (mode.endsWithParent && parent.terminator_end) {
           mode.terminator_end += (mode.end ? "|" : "") + parent.terminator_end;
         }
@@ -1290,7 +1290,7 @@ var demo = function(path, fs, url, buffer) {
   /*
   Syntax highlighting with language autodetection.
   https://highlightjs.org/
-  */  const escape$1 = escapeHTML;
+  */  const escape$1$1 = escapeHTML;
   const inherit$1 = inherit;
   const {nodeStream: nodeStream$1, mergeStreams: mergeStreams$1} = utils;
   const NO_MATCH = Symbol("nomatch");
@@ -1496,7 +1496,7 @@ var demo = function(path, fs, url, buffer) {
           if (resp.ignore) return doIgnore(lexeme);
         }
         if (new_mode && new_mode.endSameAsBegin) {
-          new_mode.endRe = escape(lexeme);
+          new_mode.endRe = escape$1(lexeme);
         }
         if (new_mode.skip) {
           mode_buffer += lexeme;
@@ -1651,7 +1651,7 @@ var demo = function(path, fs, url, buffer) {
         console.error(LANGUAGE_NOT_FOUND.replace("{}", languageName));
         return {
           relevance: 0,
-          value: escape$1(codeToHighlight)
+          value: escape$1$1(codeToHighlight)
         };
       }
       compileLanguage(language);
@@ -1708,13 +1708,13 @@ var demo = function(path, fs, url, buffer) {
             },
             sofar: result,
             relevance: 0,
-            value: escape$1(codeToHighlight),
+            value: escape$1$1(codeToHighlight),
             emitter: emitter
           };
         } else if (SAFE_MODE) {
           return {
             relevance: 0,
-            value: escape$1(codeToHighlight),
+            value: escape$1$1(codeToHighlight),
             emitter: emitter,
             language: languageName,
             top: top,
@@ -1733,7 +1733,7 @@ var demo = function(path, fs, url, buffer) {
       const result = {
         relevance: 0,
         emitter: new options.__emitter(options),
-        value: escape$1(code),
+        value: escape$1$1(code),
         illegal: false,
         top: PLAINTEXT_LANGUAGE
       };
@@ -1832,7 +1832,7 @@ var demo = function(path, fs, url, buffer) {
         var resultPre = document.createElement("pre");
         resultPre.innerHTML = result.value;
         var linesPre = document.createElement("pre");
-        var lines = escape$1(text.trimRight()).replace(/^.*?(\n|$)/gm, '<span class="line">$&</span>');
+        var lines = escape$1$1(text.trimRight()).replace(/^.*?(\n|$)/gm, '<span class="line">$&</span>');
         linesPre.innerHTML = lines;
         result.value = mergeStreams$1(nodeStream$1(linesPre), nodeStream$1(resultPre), text);
       }
@@ -1991,8 +1991,8 @@ var demo = function(path, fs, url, buffer) {
     return hljs;
   };
   // export an "instance" of the highlighter
-    var highlight = HLJS({});
-  var core = highlight;
+    var highlight$2 = HLJS({});
+  var core = highlight$2;
   /*
   Language: 1C:Enterprise
   Author: Stanislav Belov <stbelov@gmail.com>
@@ -4889,18 +4889,18 @@ var demo = function(path, fs, url, buffer) {
     };
   }
   var cmake_1 = cmake;
-  const KEYWORDS = [ "as", // for exports
+  const KEYWORDS$3 = [ "as", // for exports
   "in", "of", "if", "for", "while", "finally", "var", "new", "function", "do", "return", "void", "else", "break", "catch", "instanceof", "with", "throw", "case", "default", "try", "switch", "continue", "typeof", "delete", "let", "yield", "const", "class", 
   // JS handles these with a special rule
   // "get",
   // "set",
   "debugger", "async", "await", "static", "import", "from", "export", "extends" ];
-  const LITERALS = [ "true", "false", "null", "undefined", "NaN", "Infinity" ];
-  const TYPES = [ "Intl", "DataView", "Number", "Math", "Date", "String", "RegExp", "Object", "Function", "Boolean", "Error", "Symbol", "Set", "Map", "WeakSet", "WeakMap", "Proxy", "Reflect", "JSON", "Promise", "Float64Array", "Int16Array", "Int32Array", "Int8Array", "Uint16Array", "Uint32Array", "Float32Array", "Array", "Uint8Array", "Uint8ClampedArray", "ArrayBuffer" ];
-  const ERROR_TYPES = [ "EvalError", "InternalError", "RangeError", "ReferenceError", "SyntaxError", "TypeError", "URIError" ];
-  const BUILT_IN_GLOBALS = [ "setInterval", "setTimeout", "clearInterval", "clearTimeout", "require", "exports", "eval", "isFinite", "isNaN", "parseFloat", "parseInt", "decodeURI", "decodeURIComponent", "encodeURI", "encodeURIComponent", "escape", "unescape" ];
-  const BUILT_IN_VARIABLES = [ "arguments", "this", "super", "console", "window", "document", "localStorage", "module", "global" ];
-  const BUILT_INS = [].concat(BUILT_IN_GLOBALS, BUILT_IN_VARIABLES, TYPES, ERROR_TYPES);
+  const LITERALS$3 = [ "true", "false", "null", "undefined", "NaN", "Infinity" ];
+  const TYPES$3 = [ "Intl", "DataView", "Number", "Math", "Date", "String", "RegExp", "Object", "Function", "Boolean", "Error", "Symbol", "Set", "Map", "WeakSet", "WeakMap", "Proxy", "Reflect", "JSON", "Promise", "Float64Array", "Int16Array", "Int32Array", "Int8Array", "Uint16Array", "Uint32Array", "Float32Array", "Array", "Uint8Array", "Uint8ClampedArray", "ArrayBuffer" ];
+  const ERROR_TYPES$3 = [ "EvalError", "InternalError", "RangeError", "ReferenceError", "SyntaxError", "TypeError", "URIError" ];
+  const BUILT_IN_GLOBALS$3 = [ "setInterval", "setTimeout", "clearInterval", "clearTimeout", "require", "exports", "eval", "isFinite", "isNaN", "parseFloat", "parseInt", "decodeURI", "decodeURIComponent", "encodeURI", "encodeURIComponent", "escape", "unescape" ];
+  const BUILT_IN_VARIABLES$3 = [ "arguments", "this", "super", "console", "window", "document", "localStorage", "module", "global" ];
+  const BUILT_INS$3 = [].concat(BUILT_IN_GLOBALS$3, BUILT_IN_VARIABLES$3, TYPES$3, ERROR_TYPES$3);
   /*
   Language: CoffeeScript
   Author: Dmytrii Nagirniak <dnagir@gmail.com>
@@ -4915,9 +4915,9 @@ var demo = function(path, fs, url, buffer) {
     var NOT_VALID_KEYWORDS = [ "var", "const", "let", "function", "static" ];
     var excluding = list => kw => !list.includes(kw);
     var KEYWORDS$1 = {
-      keyword: KEYWORDS.concat(COFFEE_KEYWORDS).filter(excluding(NOT_VALID_KEYWORDS)).join(" "),
-      literal: LITERALS.concat(COFFEE_LITERALS).join(" "),
-      built_in: BUILT_INS.concat(COFFEE_BUILT_INS).join(" ")
+      keyword: KEYWORDS$3.concat(COFFEE_KEYWORDS).filter(excluding(NOT_VALID_KEYWORDS)).join(" "),
+      literal: LITERALS$3.concat(COFFEE_LITERALS).join(" "),
+      built_in: BUILT_INS$3.concat(COFFEE_BUILT_INS).join(" ")
     };
     var JS_IDENT_RE = "[A-Za-z$_][0-9A-Za-z$_]*";
     var SUBST = {
@@ -10885,28 +10885,28 @@ var demo = function(path, fs, url, buffer) {
   }
   var java_1 = java;
   const IDENT_RE$1 = "[A-Za-z$_][0-9A-Za-z$_]*";
-  const KEYWORDS$1 = [ "as", // for exports
+  const KEYWORDS$2 = [ "as", // for exports
   "in", "of", "if", "for", "while", "finally", "var", "new", "function", "do", "return", "void", "else", "break", "catch", "instanceof", "with", "throw", "case", "default", "try", "switch", "continue", "typeof", "delete", "let", "yield", "const", "class", 
   // JS handles these with a special rule
   // "get",
   // "set",
   "debugger", "async", "await", "static", "import", "from", "export", "extends" ];
-  const LITERALS$1 = [ "true", "false", "null", "undefined", "NaN", "Infinity" ];
-  const TYPES$1 = [ "Intl", "DataView", "Number", "Math", "Date", "String", "RegExp", "Object", "Function", "Boolean", "Error", "Symbol", "Set", "Map", "WeakSet", "WeakMap", "Proxy", "Reflect", "JSON", "Promise", "Float64Array", "Int16Array", "Int32Array", "Int8Array", "Uint16Array", "Uint32Array", "Float32Array", "Array", "Uint8Array", "Uint8ClampedArray", "ArrayBuffer" ];
-  const ERROR_TYPES$1 = [ "EvalError", "InternalError", "RangeError", "ReferenceError", "SyntaxError", "TypeError", "URIError" ];
-  const BUILT_IN_GLOBALS$1 = [ "setInterval", "setTimeout", "clearInterval", "clearTimeout", "require", "exports", "eval", "isFinite", "isNaN", "parseFloat", "parseInt", "decodeURI", "decodeURIComponent", "encodeURI", "encodeURIComponent", "escape", "unescape" ];
-  const BUILT_IN_VARIABLES$1 = [ "arguments", "this", "super", "console", "window", "document", "localStorage", "module", "global" ];
-  const BUILT_INS$1 = [].concat(BUILT_IN_GLOBALS$1, BUILT_IN_VARIABLES$1, TYPES$1, ERROR_TYPES$1);
-  function source$1(re) {
+  const LITERALS$2 = [ "true", "false", "null", "undefined", "NaN", "Infinity" ];
+  const TYPES$2 = [ "Intl", "DataView", "Number", "Math", "Date", "String", "RegExp", "Object", "Function", "Boolean", "Error", "Symbol", "Set", "Map", "WeakSet", "WeakMap", "Proxy", "Reflect", "JSON", "Promise", "Float64Array", "Int16Array", "Int32Array", "Int8Array", "Uint16Array", "Uint32Array", "Float32Array", "Array", "Uint8Array", "Uint8ClampedArray", "ArrayBuffer" ];
+  const ERROR_TYPES$2 = [ "EvalError", "InternalError", "RangeError", "ReferenceError", "SyntaxError", "TypeError", "URIError" ];
+  const BUILT_IN_GLOBALS$2 = [ "setInterval", "setTimeout", "clearInterval", "clearTimeout", "require", "exports", "eval", "isFinite", "isNaN", "parseFloat", "parseInt", "decodeURI", "decodeURIComponent", "encodeURI", "encodeURIComponent", "escape", "unescape" ];
+  const BUILT_IN_VARIABLES$2 = [ "arguments", "this", "super", "console", "window", "document", "localStorage", "module", "global" ];
+  const BUILT_INS$2 = [].concat(BUILT_IN_GLOBALS$2, BUILT_IN_VARIABLES$2, TYPES$2, ERROR_TYPES$2);
+  function source(re) {
     // if it's a regex get it's source,
     // otherwise it's a string already so just return it
     return re && re.source || re;
   }
   function lookahead(regex) {
-    return concat$1("(?=", regex, ")");
+    return concat("(?=", regex, ")");
   }
-  function concat$1(...args) {
-    const joined = args.map((x => source$1(x))).join("");
+  function concat(...args) {
+    const joined = args.map((x => source(x))).join("");
     return joined;
   }
   /*
@@ -10924,11 +10924,11 @@ var demo = function(path, fs, url, buffer) {
       begin: /<[A-Za-z0-9\\._:-]+/,
       end: /\/[A-Za-z0-9\\._:-]+>|\/>/
     };
-    var KEYWORDS$1$1 = {
+    var KEYWORDS$1 = {
       $pattern: IDENT_RE$1,
-      keyword: KEYWORDS$1.join(" "),
-      literal: LITERALS$1.join(" "),
-      built_in: BUILT_INS$1.join(" ")
+      keyword: KEYWORDS$2.join(" "),
+      literal: LITERALS$2.join(" "),
+      built_in: BUILT_INS$2.join(" ")
     };
     var NUMBER = {
       className: "number",
@@ -10945,7 +10945,7 @@ var demo = function(path, fs, url, buffer) {
       className: "subst",
       begin: "\\$\\{",
       end: "\\}",
-      keywords: KEYWORDS$1$1,
+      keywords: KEYWORDS$1,
       contains: []
     };
     var HTML_TEMPLATE = {
@@ -10993,7 +10993,7 @@ var demo = function(path, fs, url, buffer) {
     return {
       name: "JavaScript",
       aliases: [ "js", "jsx", "mjs", "cjs" ],
-      keywords: KEYWORDS$1$1,
+      keywords: KEYWORDS$1,
       contains: [ hljs.SHEBANG({
         binary: "node",
         relevance: 5
@@ -11026,7 +11026,7 @@ var demo = function(path, fs, url, buffer) {
         } ]
       }), hljs.C_BLOCK_COMMENT_MODE, NUMBER, {
         // object attr container
-        begin: concat$1(/[{,\n]\s*/, 
+        begin: concat(/[{,\n]\s*/, 
         // we need to look ahead to make sure that we actually have an
         // attribute coming up so we don't steal a comma from a potential
         // "value" container
@@ -11036,7 +11036,7 @@ var demo = function(path, fs, url, buffer) {
         // fails to find any actual attrs. But this still does the job because
         // it prevents the value contain rule from grabbing this instead and
         // prevening this rule from firing when we actually DO have keys.
-        lookahead(concat$1(
+        lookahead(concat(
         // we also need to allow for multiple possible comments inbetween
         // the first key:value pairing
         /(((\/\/.*)|(\/\*(.|\n)*\*\/))\s*)*/, IDENT_RE$1$1 + "\\s*:"))),
@@ -11071,7 +11071,7 @@ var demo = function(path, fs, url, buffer) {
               end: /\)/,
               excludeBegin: true,
               excludeEnd: true,
-              keywords: KEYWORDS$1$1,
+              keywords: KEYWORDS$1,
               contains: PARAMS_CONTAINS
             } ]
           } ]
@@ -12285,18 +12285,18 @@ var demo = function(path, fs, url, buffer) {
     };
   }
   var livecodeserver_1 = livecodeserver;
-  const KEYWORDS$2 = [ "as", // for exports
+  const KEYWORDS$1 = [ "as", // for exports
   "in", "of", "if", "for", "while", "finally", "var", "new", "function", "do", "return", "void", "else", "break", "catch", "instanceof", "with", "throw", "case", "default", "try", "switch", "continue", "typeof", "delete", "let", "yield", "const", "class", 
   // JS handles these with a special rule
   // "get",
   // "set",
   "debugger", "async", "await", "static", "import", "from", "export", "extends" ];
-  const LITERALS$2 = [ "true", "false", "null", "undefined", "NaN", "Infinity" ];
-  const TYPES$2 = [ "Intl", "DataView", "Number", "Math", "Date", "String", "RegExp", "Object", "Function", "Boolean", "Error", "Symbol", "Set", "Map", "WeakSet", "WeakMap", "Proxy", "Reflect", "JSON", "Promise", "Float64Array", "Int16Array", "Int32Array", "Int8Array", "Uint16Array", "Uint32Array", "Float32Array", "Array", "Uint8Array", "Uint8ClampedArray", "ArrayBuffer" ];
-  const ERROR_TYPES$2 = [ "EvalError", "InternalError", "RangeError", "ReferenceError", "SyntaxError", "TypeError", "URIError" ];
-  const BUILT_IN_GLOBALS$2 = [ "setInterval", "setTimeout", "clearInterval", "clearTimeout", "require", "exports", "eval", "isFinite", "isNaN", "parseFloat", "parseInt", "decodeURI", "decodeURIComponent", "encodeURI", "encodeURIComponent", "escape", "unescape" ];
-  const BUILT_IN_VARIABLES$2 = [ "arguments", "this", "super", "console", "window", "document", "localStorage", "module", "global" ];
-  const BUILT_INS$2 = [].concat(BUILT_IN_GLOBALS$2, BUILT_IN_VARIABLES$2, TYPES$2, ERROR_TYPES$2);
+  const LITERALS$1 = [ "true", "false", "null", "undefined", "NaN", "Infinity" ];
+  const TYPES$1 = [ "Intl", "DataView", "Number", "Math", "Date", "String", "RegExp", "Object", "Function", "Boolean", "Error", "Symbol", "Set", "Map", "WeakSet", "WeakMap", "Proxy", "Reflect", "JSON", "Promise", "Float64Array", "Int16Array", "Int32Array", "Int8Array", "Uint16Array", "Uint32Array", "Float32Array", "Array", "Uint8Array", "Uint8ClampedArray", "ArrayBuffer" ];
+  const ERROR_TYPES$1 = [ "EvalError", "InternalError", "RangeError", "ReferenceError", "SyntaxError", "TypeError", "URIError" ];
+  const BUILT_IN_GLOBALS$1 = [ "setInterval", "setTimeout", "clearInterval", "clearTimeout", "require", "exports", "eval", "isFinite", "isNaN", "parseFloat", "parseInt", "decodeURI", "decodeURIComponent", "encodeURI", "encodeURIComponent", "escape", "unescape" ];
+  const BUILT_IN_VARIABLES$1 = [ "arguments", "this", "super", "console", "window", "document", "localStorage", "module", "global" ];
+  const BUILT_INS$1 = [].concat(BUILT_IN_GLOBALS$1, BUILT_IN_VARIABLES$1, TYPES$1, ERROR_TYPES$1);
   /*
   Language: LiveScript
   Author: Taneli Vatanen <taneli.vatanen@gmail.com>
@@ -12309,10 +12309,10 @@ var demo = function(path, fs, url, buffer) {
     var LIVESCRIPT_BUILT_INS = [ "npm", "print" ];
     var LIVESCRIPT_LITERALS = [ "yes", "no", "on", "off", "it", "that", "void" ];
     var LIVESCRIPT_KEYWORDS = [ "then", "unless", "until", "loop", "of", "by", "when", "and", "or", "is", "isnt", "not", "it", "that", "otherwise", "from", "to", "til", "fallthrough", "case", "enum", "native", "list", "map", "__hasProp", "__extends", "__slice", "__bind", "__indexOf" ];
-    var KEYWORDS$1 = {
-      keyword: KEYWORDS$2.concat(LIVESCRIPT_KEYWORDS).join(" "),
-      literal: LITERALS$2.concat(LIVESCRIPT_LITERALS).join(" "),
-      built_in: BUILT_INS$2.concat(LIVESCRIPT_BUILT_INS).join(" ")
+    var KEYWORDS$1$1 = {
+      keyword: KEYWORDS$1.concat(LIVESCRIPT_KEYWORDS).join(" "),
+      literal: LITERALS$1.concat(LIVESCRIPT_LITERALS).join(" "),
+      built_in: BUILT_INS$1.concat(LIVESCRIPT_BUILT_INS).join(" ")
     };
     var JS_IDENT_RE = "[A-Za-z$_](?:-[0-9A-Za-z$_]|[0-9A-Za-z$_])*";
     var TITLE = hljs.inherit(hljs.TITLE_MODE, {
@@ -12322,13 +12322,13 @@ var demo = function(path, fs, url, buffer) {
       className: "subst",
       begin: /#\{/,
       end: /}/,
-      keywords: KEYWORDS$1
+      keywords: KEYWORDS$1$1
     };
     var SUBST_SIMPLE = {
       className: "subst",
       begin: /#[A-Za-z$_]/,
       end: /(?:\-[0-9A-Za-z$_]|[0-9A-Za-z$_])*/,
-      keywords: KEYWORDS$1
+      keywords: KEYWORDS$1$1
     };
     var EXPRESSIONS = [ hljs.BINARY_NUMBER_MODE, {
       className: "number",
@@ -12391,7 +12391,7 @@ var demo = function(path, fs, url, buffer) {
       contains: [ {
         begin: /\(/,
         end: /\)/,
-        keywords: KEYWORDS$1,
+        keywords: KEYWORDS$1$1,
         contains: [ "self" ].concat(EXPRESSIONS)
       } ]
     };
@@ -12401,7 +12401,7 @@ var demo = function(path, fs, url, buffer) {
     return {
       name: "LiveScript",
       aliases: [ "ls" ],
-      keywords: KEYWORDS$1,
+      keywords: KEYWORDS$1$1,
       illegal: /\/\*/,
       contains: EXPRESSIONS.concat([ hljs.COMMENT("\\/\\*", "\\*\\/"), hljs.HASH_COMMENT_MODE, SYMBOLS, // relevance booster
       {
@@ -19556,19 +19556,19 @@ var demo = function(path, fs, url, buffer) {
     };
   }
   var twig_1 = twig;
-  const IDENT_RE$2 = "[A-Za-z$_][0-9A-Za-z$_]*";
-  const KEYWORDS$3 = [ "as", // for exports
+  const IDENT_RE = "[A-Za-z$_][0-9A-Za-z$_]*";
+  const KEYWORDS = [ "as", // for exports
   "in", "of", "if", "for", "while", "finally", "var", "new", "function", "do", "return", "void", "else", "break", "catch", "instanceof", "with", "throw", "case", "default", "try", "switch", "continue", "typeof", "delete", "let", "yield", "const", "class", 
   // JS handles these with a special rule
   // "get",
   // "set",
   "debugger", "async", "await", "static", "import", "from", "export", "extends" ];
-  const LITERALS$3 = [ "true", "false", "null", "undefined", "NaN", "Infinity" ];
-  const TYPES$3 = [ "Intl", "DataView", "Number", "Math", "Date", "String", "RegExp", "Object", "Function", "Boolean", "Error", "Symbol", "Set", "Map", "WeakSet", "WeakMap", "Proxy", "Reflect", "JSON", "Promise", "Float64Array", "Int16Array", "Int32Array", "Int8Array", "Uint16Array", "Uint32Array", "Float32Array", "Array", "Uint8Array", "Uint8ClampedArray", "ArrayBuffer" ];
-  const ERROR_TYPES$3 = [ "EvalError", "InternalError", "RangeError", "ReferenceError", "SyntaxError", "TypeError", "URIError" ];
-  const BUILT_IN_GLOBALS$3 = [ "setInterval", "setTimeout", "clearInterval", "clearTimeout", "require", "exports", "eval", "isFinite", "isNaN", "parseFloat", "parseInt", "decodeURI", "decodeURIComponent", "encodeURI", "encodeURIComponent", "escape", "unescape" ];
-  const BUILT_IN_VARIABLES$3 = [ "arguments", "this", "super", "console", "window", "document", "localStorage", "module", "global" ];
-  const BUILT_INS$3 = [].concat(BUILT_IN_GLOBALS$3, BUILT_IN_VARIABLES$3, TYPES$3, ERROR_TYPES$3);
+  const LITERALS = [ "true", "false", "null", "undefined", "NaN", "Infinity" ];
+  const TYPES = [ "Intl", "DataView", "Number", "Math", "Date", "String", "RegExp", "Object", "Function", "Boolean", "Error", "Symbol", "Set", "Map", "WeakSet", "WeakMap", "Proxy", "Reflect", "JSON", "Promise", "Float64Array", "Int16Array", "Int32Array", "Int8Array", "Uint16Array", "Uint32Array", "Float32Array", "Array", "Uint8Array", "Uint8ClampedArray", "ArrayBuffer" ];
+  const ERROR_TYPES = [ "EvalError", "InternalError", "RangeError", "ReferenceError", "SyntaxError", "TypeError", "URIError" ];
+  const BUILT_IN_GLOBALS = [ "setInterval", "setTimeout", "clearInterval", "clearTimeout", "require", "exports", "eval", "isFinite", "isNaN", "parseFloat", "parseInt", "decodeURI", "decodeURIComponent", "encodeURI", "encodeURIComponent", "escape", "unescape" ];
+  const BUILT_IN_VARIABLES = [ "arguments", "this", "super", "console", "window", "document", "localStorage", "module", "global" ];
+  const BUILT_INS = [].concat(BUILT_IN_GLOBALS, BUILT_IN_VARIABLES, TYPES, ERROR_TYPES);
   /*
   Language: TypeScript
   Author: Panu Horsmalahti <panu.horsmalahti@iki.fi>
@@ -19577,14 +19577,14 @@ var demo = function(path, fs, url, buffer) {
   Website: https://www.typescriptlang.org
   Category: common, scripting
   */  function typescript(hljs) {
-    var IDENT_RE$1 = IDENT_RE$2;
+    var IDENT_RE$1 = IDENT_RE;
     var TYPES = [ "any", "void", "number", "boolean", "string", "object", "never", "enum" ];
     var TS_SPECIFIC_KEYWORDS = [ "type", "namespace", "typedef", "interface", "public", "private", "protected", "implements", "declare", "abstract" ];
     var KEYWORDS$1 = {
-      $pattern: IDENT_RE$2,
-      keyword: KEYWORDS$3.concat(TS_SPECIFIC_KEYWORDS).join(" "),
-      literal: LITERALS$3.join(" "),
-      built_in: BUILT_INS$3.concat(TYPES).join(" ")
+      $pattern: IDENT_RE,
+      keyword: KEYWORDS.concat(TS_SPECIFIC_KEYWORDS).join(" "),
+      literal: LITERALS.join(" "),
+      built_in: BUILT_INS.concat(TYPES).join(" ")
     };
     var DECORATOR = {
       className: "meta",
@@ -20797,7 +20797,7 @@ var demo = function(path, fs, url, buffer) {
   core.registerLanguage("z80asm", z80asm_1);
   core.registerLanguage("zephir", zephir_1);
   var lib = core;
-  /*! markdown-it-abbr 1.0.4-24 https://github.com//GerHobbelt/markdown-it-abbr @license MIT */
+  /*! markdown-it-abbr 1.0.4-27 https://github.com//GerHobbelt/markdown-it-abbr @license MIT */
   // Enclose abbreviations in <abbr> tags
   
   /**
@@ -20808,7 +20808,7 @@ var demo = function(path, fs, url, buffer) {
   *   inside the markdown files (file definitions overwrite existing list definitions by default).
   * @param {boolean=} [listPriorsFile=false] If false (default) definitions inside the markdown file overwrite
   *   existing list definitions. If true list definitions overwrite existing definitions in the markdown file.
-  */  module.exports = function sub_plugin(md, abbrDefList, listPriorsFile) {
+  */  function sub_plugin(md, abbrDefList, listPriorsFile) {
     const escapeRE = md.utils.escapeRE;
     const arrayReplaceAt = md.utils.arrayReplaceAt;
  // ASCII characters in Cc, Sc, Sm, Sk categories we should terminate on;
@@ -20963,9 +20963,10 @@ var demo = function(path, fs, url, buffer) {
       alt: [ "paragraph", "reference" ]
     });
     md.core.ruler.before("replacements", "abbr_replace", abbr_replace);
-  };
-  var markdownItAbbr =  Object.freeze({
-    __proto__: null
+  }
+  var markdownitAbbr =  Object.freeze({
+    __proto__: null,
+    default: sub_plugin
   });
   /*! markdown-it-attrs 3.0.3-20 https://github.com//GerHobbelt/markdown-it-attrs @license MIT */
   /**
@@ -21379,7 +21380,7 @@ var demo = function(path, fs, url, buffer) {
         let attrs = getAttrs(content, content.lastIndexOf(options.leftDelimiter), options);
         addAttrs(attrs, tokens[i - 2]);
         let trimmed = content.slice(0, content.lastIndexOf(options.leftDelimiter));
-        token.content = last(trimmed) !== " " ? trimmed : trimmed.slice(0, -1);
+        token.content = last$1(trimmed) !== " " ? trimmed : trimmed.slice(0, -1);
       }
     }, {
       /**
@@ -21464,22 +21465,22 @@ var demo = function(path, fs, url, buffer) {
         let openingToken = getMatchingOpeningToken(tokens, ii);
         addAttrs(attrs, openingToken);
         let trimmed = content.slice(0, content.lastIndexOf(options.leftDelimiter));
-        token.content = last(trimmed) !== " " ? trimmed : trimmed.slice(0, -1);
+        token.content = last$1(trimmed) !== " " ? trimmed : trimmed.slice(0, -1);
       }
     } ];
   }
  // get last element of array or string
-    function last(arr) {
+    function last$1(arr) {
     return arr.slice(-1)[0];
   }
-  const defaultOptions = {
+  const defaultOptions$1 = {
     leftDelimiter: "{",
     rightDelimiter: "}",
     allowedAttributes: [],
     ignore: null
   };
   function attributes(md, options_) {
-    let options = Object.assign({}, defaultOptions);
+    let options = Object.assign({}, defaultOptions$1);
     options = Object.assign(options, options_);
     const patterns = patternsConfig(options);
     function curlyAttrs(state) {
@@ -21546,7 +21547,7 @@ var demo = function(path, fs, url, buffer) {
           match = childTests.every((tt => test(children, tt.position, tt, options).match));
           if (match) {
             // we may need position of child in transform
-            let j = last$1(childTests).position;
+            let j = last$1$1(childTests).position;
             res.j = j >= 0 ? j : children.length + j;
           }
         } else {
@@ -21612,7 +21613,7 @@ var demo = function(path, fs, url, buffer) {
     return n >= 0 ? arr[n] : arr[arr.length + n];
   }
  // get last element of array, safe - returns {} if not found
-    function last$1(arr) {
+    function last$1$1(arr) {
     return arr.slice(-1)[0] || {};
   }
  //module.exports = attributes;
@@ -21620,10 +21621,10 @@ var demo = function(path, fs, url, buffer) {
     __proto__: null,
     default: attributes
   });
-  /*! markdown-it-container 3.0.0-6 https://github.com//GerHobbelt/markdown-it-container @license MIT */
+  /*! markdown-it-container 3.0.0-7 https://github.com//GerHobbelt/markdown-it-container @license MIT */
   // Process block-level custom containers
   
-    module.exports = function container_plugin(md, name, options) {
+    function container_plugin(md, name, options) {
     // Second param may be useful if you decide
     // to increase minimal allowed marker length
     function validateDefault(params
@@ -21753,9 +21754,10 @@ var demo = function(path, fs, url, buffer) {
       md.renderer.rules["container_" + name + "_content"] = options.content;
     }
     md.renderer.rules["container_" + name + "_close"] = render;
-  };
-  var markdownItContainer =  Object.freeze({
-    __proto__: null
+  }
+  var markdownitContainer =  Object.freeze({
+    __proto__: null,
+    default: container_plugin
   });
   var commonjsGlobal = typeof globalThis !== "undefined" ? globalThis : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : {};
   function getAugmentedNamespace(n) {
@@ -24284,13 +24286,13 @@ var demo = function(path, fs, url, buffer) {
         return t;
       }
       function closeSections(section) {
-        while (last$2(sections) && section.header <= last$2(sections).header) {
+        while (last(sections) && section.header <= last(sections).header) {
           sections.pop();
           tokens.push(closeSection());
         }
       }
       function closeSectionsToCurrentNesting(nesting) {
-        while (last$2(sections) && nesting < last$2(sections).nesting) {
+        while (last(sections) && nesting < last(sections).nesting) {
           sections.pop();
           tokens.push(closeSection());
         }
@@ -24306,7 +24308,7 @@ var demo = function(path, fs, url, buffer) {
                 if (token.type.search("heading") !== 0) {
           nestedLevel += token.nesting;
         }
-        if (last$2(sections) && nestedLevel < last$2(sections).nesting) {
+        if (last(sections) && nestedLevel < last(sections).nesting) {
           closeSectionsToCurrentNesting(nestedLevel);
         }
         // add sections before headers
@@ -24315,7 +24317,7 @@ var demo = function(path, fs, url, buffer) {
             header: headingLevel(token.tag),
             nesting: nestedLevel
           };
-          if (last$2(sections) && section.header <= last$2(sections).header) {
+          if (last(sections) && section.header <= last(sections).header) {
             closeSections(section);
           }
           tokens.push(openSection(token.attrs));
@@ -24332,14 +24334,14 @@ var demo = function(path, fs, url, buffer) {
   function headingLevel(header) {
     return parseInt(header.charAt(1));
   }
-  function last$2(arr) {
+  function last(arr) {
     return arr.slice(-1)[0];
   }
   /*
    * Copyright Adam Pritchard 2015
    * MIT License : http://adampritchard.mit-license.org/
    */
-  /* jshint node:true */  function slugify(s, md) {
+  /* jshint node:true */  function slugify$1(s, md) {
     // Unicode-friendly
     var spaceRegex = new RegExp(md.utils.lib.ucmicro.Z.source, "g");
     return encodeURIComponent(s.replace(spaceRegex, ""));
@@ -24375,7 +24377,7 @@ var demo = function(path, fs, url, buffer) {
       anchorClass: "markdown-it-headinganchor",
       addHeadingID: true,
       addHeadingAnchor: true,
-      slugify: slugify
+      slugify: slugify$1
     };
     var options = md.utils.assign(defaults, opts);
     md.core.ruler.push("heading_anchors", makeRule(md, options));
@@ -24459,7 +24461,7 @@ var demo = function(path, fs, url, buffer) {
     }
     md.core.ruler.before("replacements", "implicit_figures", implicitFigures);
   }
-  var markdownItAbbr$1 =  Object.freeze({
+  var markdownItAbbr =  Object.freeze({
     __proto__: null,
     default: implicitFiguresPlugin
   });
@@ -24552,71 +24554,129 @@ var demo = function(path, fs, url, buffer) {
     md.inline.ruler.before("emphasis", "ins", tokenize);
     md.inline.ruler2.before("emphasis", "ins", postProcess);
   };
-  /*! markdown-it-kbd 2.0.0-6 https://github.com//GerHobbelt/markdown-it-kbd @license GPL-3.0 */
+  /*! markdown-it-kbd 2.2.0-8 https://github.com//GerHobbelt/markdown-it-kbd @license GPL-3.0 */
   // [[kbd]]
   
-    let options = {
+    const defaultOptions = {
     MARKER_OPEN: "[[",
     MARKER_CLOSE: "]]",
+    ESCAPE_CHARACTER: "\\",
     TAG: "kbd",
     // intern use; derived at time of initialization:
     MARKER_OPEN_1ST_CHR: 0
   };
-  function tokenize(state, silent) {
-    if (silent) {
-      return false;
-    }
-    let start = state.pos;
-    const max = state.posMax;
-    let momChar = state.src.charCodeAt(start);
- // we're looking for two times the open symbol.
-        if (momChar !== options.MARKER_OPEN_1ST_CHR) {
-      return false;
-    }
-    let src = state.src.slice(start);
-    if (!src.startsWith(options.MARKER_OPEN)) {
-      return false;
-    }
-    const startLen = options.MARKER_OPEN.length;
-    start += startLen;
-    src = src.slice(startLen);
- // find the end sequence
-        let end = src.indexOf(options.MARKER_CLOSE);
-    if (end < 0) {
-      // no end marker found,
-      // input ended before closing sequence
-      return false;
-    }
-    let lf = src.indexOf("\n");
-    if (lf >= 0 && lf < end) {
-      // found end of line before the end sequence. Thus, ignore our start sequence!
-      return false;
-    }
-    let second = src.indexOf(options.MARKER_OPEN);
-    if (second >= 0 && second < end) {
-      // found another opening sequence before the end. Thus, ignore ours!
-      return false;
-    }
- // make end position into absolute index
-        end += start;
- // start tag
-        state.push("kbd_open", options.TAG, 1);
- // parse inner
-        state.pos = start;
-    state.posMax = end;
-    state.md.inline.tokenize(state);
-    state.pos = end + options.MARKER_CLOSE.length;
-    state.posMax = max;
- // end tag
-        state.push("kbd_close", options.TAG, -1);
-    return true;
-  }
   function kbdplugin(markdownit, opts) {
-    options = Object.assign(options, opts);
+    const options = Object.assign({}, defaultOptions, opts);
     options.MARKER_OPEN_1ST_CHR = options.MARKER_OPEN.charCodeAt(0);
+    function findNextNonEscapedMarker(src, start, marker) {
+      let end;
+      let searchOffset = start;
+      for (;;) {
+        end = src.indexOf(marker, searchOffset);
+        if (end < 0) {
+          return -1;
+        }
+ // count number of escape characters before marker:
+        // if ODD, then marker is escaped:
+                let escapeCount = 0;
+        for (let i = end - 1; i >= 0 && src.charAt(i) === options.ESCAPE_CHARACTER; i--) {
+          escapeCount++;
+        }
+        if (escapeCount % 2 === 0) {
+          // got a proper end marker now: exit loop
+          break;
+        }
+ // skip first character of escaped end marker and try again:
+                searchOffset = end + 1;
+      }
+      return end;
+    }
+    function findMatchingClose(src, start, level) {
+      let end = findNextNonEscapedMarker(src, start, options.MARKER_CLOSE);
+      if (end < 0) {
+        // no end marker found,
+        // input ended before closing sequence
+        return -1;
+      }
+ // first skip all inner KBD chunks:
+            let innerStart = findNextNonEscapedMarker(src, start, options.MARKER_OPEN);
+      let searchOffset = start;
+      while (innerStart >= 0) {
+        // when there's a START *before* our END, then that MUST be an *inner* START:
+        // we should find *it's* matching END. That doesn't necessarily have to be
+        // the one we found already, as this stuff may be nested several levels!
+        if (innerStart >= 0 && innerStart < end) {
+          searchOffset = innerStart + options.MARKER_OPEN.length;
+ // found one. There may be more. So we move our `end` forward now to ensure the next inner KBD chunk is found as well.
+                    end = findMatchingClose(src, searchOffset);
+          if (end < 0) {
+            return -1;
+          }
+          searchOffset = end + options.MARKER_CLOSE.length;
+          innerStart = findNextNonEscapedMarker(src, searchOffset, options.MARKER_OPEN);
+          end = findNextNonEscapedMarker(src, searchOffset, options.MARKER_CLOSE);
+          if (end < 0) {
+            // no end marker found,
+            // input ended before closing sequence
+            return -1;
+          }
+        } else {
+          // we only found a START that's beyond our END, so it doesn't matter. Stop looking for inner KBD chunks.
+          innerStart = -1;
+        }
+      }
+ // the last END marker found is our own:
+            return end;
+    }
+    /*
+     * Add delimiters for double occurrences of MARKER_SYMBOL.
+     */    function tokenize(state, silent) {
+      if (silent) {
+        return false;
+      }
+      let start = state.pos;
+      const max = state.posMax;
+      const momChar = state.src.charCodeAt(start);
+ // We are looking for two times the open symbol.
+            if (momChar !== options.MARKER_OPEN_1ST_CHR) {
+        return false;
+      }
+      let src = state.src.slice(start);
+      if (!src.startsWith(options.MARKER_OPEN)) {
+        return false;
+      }
+      const startLen = options.MARKER_OPEN.length;
+      start += startLen;
+      src = src.slice(startLen);
+ // find the end sequence
+            let end = findMatchingClose(src, 0);
+      if (end < 0) {
+        // no end marker found,
+        // input ended before closing sequence
+        return false;
+      }
+      const lf = src.indexOf("\n");
+      if (lf >= 0 && lf < end) {
+        // found end of line before the end sequence. Thus, ignore our start sequence!
+        return false;
+      }
+ // make end position into absolute index
+            end += start;
+ // start tag
+            state.push("kbd_open", options.TAG, 1);
+ // parse inner
+            state.pos = start;
+      state.posMax = end;
+      state.md.inline.tokenize(state);
+      state.pos = end + options.MARKER_CLOSE.length;
+      state.posMax = max;
+ // end tag
+            state.push("kbd_close", options.TAG, -1);
+      return true;
+    }
     markdownit.inline.ruler.before("link", "kbd", tokenize);
   }
-  var markdownItKbd =  Object.freeze({
+  var markdownitKbd =  Object.freeze({
     __proto__: null,
     default: kbdplugin
   });
@@ -24834,23 +24894,23 @@ var demo = function(path, fs, url, buffer) {
       };
     }));
   }));
-  function modifyToken(token, modifyFn, env) {
+  /*! markdown-it-modify-token 1.0.2-1 https://github.com//GerHobbelt/markdown-it-modify-token @license MIT */  function modifyToken(token, modifyFn, env) {
     // create attrObj for convenient get/set of attributes
-    var attrObj = token.attrs ? token.attrs.reduce((function(acc, pair) {
+    let attrObj = token.attrs ? token.attrs.reduce((function(acc, pair) {
       acc[pair[0]] = pair[1];
       return acc;
     }), {}) : {};
     token.attrObj = attrObj;
     modifyFn(token, env);
-    // apply any overrides or new attributes from attrObj
+ // apply any overrides or new attributes from attrObj
         Object.keys(token.attrObj).forEach((function(k) {
       token.attrSet(k, token.attrObj[k]);
     }));
   }
   function noop() {}
-  var markdownItModifyToken = function(md) {
+  function index(md) {
     md.core.ruler.push("modify-token", (function(state) {
-      var modifyFn = md.options.modifyToken || noop;
+      let modifyFn = md.options.modifyToken || noop;
       state.tokens.forEach((function(token) {
         if (token.children && token.children.length) {
           token.children.forEach((function(token) {
@@ -24861,7 +24921,11 @@ var demo = function(path, fs, url, buffer) {
       }));
       return false;
     }));
-  };
+  }
+  var markdownitModifyToken =  Object.freeze({
+    __proto__: null,
+    default: index
+  });
   var prism = createCommonjsModule((function(module) {
     /* **********************************************
        Begin prism-core.js
@@ -25768,7 +25832,7 @@ var demo = function(path, fs, url, buffer) {
       }));
     })();
   }));
-  var components_1 = createCommonjsModule((function(module) {
+  var components_1$1 = createCommonjsModule((function(module) {
     var components = {
       core: {
         meta: {
@@ -27392,15 +27456,15 @@ var demo = function(path, fs, url, buffer) {
    * @returns {void}
    */  function loadLanguages(languages) {
     if (languages === undefined) {
-      languages = Object.keys(components_1.languages).filter((l => l != "meta"));
+      languages = Object.keys(components_1$1.languages).filter((l => l != "meta"));
     } else if (!Array.isArray(languages)) {
       languages = [ languages ];
     }
     // the user might have loaded languages via some other way or used `prism.js` which already includes some
     // we don't need to validate the ids because `getLoader` will ignore invalid ones
         const loaded = [ ...loadedLanguages, ...Object.keys(Prism.languages) ];
-    dependencies(components_1, languages, loaded).load((lang => {
-      if (!(lang in components_1.languages)) {
+    dependencies(components_1$1, languages, loaded).load((lang => {
+      if (!(lang in components_1$1.languages)) {
         if (!loadLanguages.silent) {
           console.warn("Language does not exist: " + lang);
         }
@@ -27420,7 +27484,7 @@ var demo = function(path, fs, url, buffer) {
   loadLanguages.getSupportedLanguages = function() {
     return loadedLanguages;
   };
-  var components_1$1 = loadLanguages;
+  var components_1 = loadLanguages;
   /**
    * A callback that can be used to perform custom initialisation of the Prism instance.
    *
@@ -27462,7 +27526,7 @@ var demo = function(path, fs, url, buffer) {
     if (!lang) return undefined;
     let langObject = prism.languages[lang];
     if (langObject === undefined) {
-      components_1$1([ lang ]);
+      components_1([ lang ]);
       langObject = prism.languages[lang];
     }
     return langObject;
@@ -27519,7 +27583,7 @@ var demo = function(path, fs, url, buffer) {
       code = prism.highlight(text, prismLang);
     } else {
       if (options.noKnownLanguageCallback && lang) {
-        options.noKnownLanguageCallback(`There is no Prism language '${lang}' for highlight chunk:\n${text}`, lang, components_1$1.getSupportedLanguages());
+        options.noKnownLanguageCallback(`There is no Prism language '${lang}' for highlight chunk:\n${text}`, lang, components_1.getSupportedLanguages());
       }
       code = markdownit.utils.escapeHtml(text);
     }
@@ -27593,10 +27657,10 @@ var demo = function(path, fs, url, buffer) {
   }))
   // Highlight with given language.
   ;
-  const highlight$2 = (code, lang) => maybe((() => lib.highlight(lang || "plaintext", code, true).value)) || ""
+  const highlight = (code, lang) => maybe((() => lib.highlight(lang || "plaintext", code, true).value)) || ""
   // Highlight with given language or automatically.
   ;
-  const highlightAuto = (code, lang) => lang ? highlight$2(code, lang) : maybe((() => lib.highlightAuto(code).value)) || ""
+  const highlightAuto = (code, lang) => lang ? highlight(code, lang) : maybe((() => lib.highlightAuto(code).value)) || ""
   // Wrap a render function to add `hljs` class to code blocks.
   ;
   const wrap = render => function(...args) {
@@ -27605,7 +27669,7 @@ var demo = function(path, fs, url, buffer) {
   const highlightjs = (md, opts) => {
     opts = Object.assign({}, highlightjs.defaults, opts);
     registerLangs(opts.register);
-    md.options.highlight = opts.auto ? highlightAuto : highlight$2;
+    md.options.highlight = opts.auto ? highlightAuto : highlight;
     md.renderer.rules.fence = wrap(md.renderer.rules.fence);
     if (opts.code) {
       md.renderer.rules.code_block = wrap(md.renderer.rules.code_block);
@@ -27773,7 +27837,7 @@ var demo = function(path, fs, url, buffer) {
   };
   // Process ~subscript~
   // same as UNESCAPE_MD_RE plus a space
-    var UNESCAPE_RE = /\\([ \\!"#$%&'()*+,./:;<=>?@[\]^_`{|}~-])/g;
+    var UNESCAPE_RE$1 = /\\([ \\!"#$%&'()*+,./:;<=>?@[\]^_`{|}~-])/g;
   function subscript(state, silent) {
     var found, content, token, max = state.posMax, start = state.pos;
     if (state.src.charCodeAt(start) !== 126 /* ~ */) {
@@ -27811,7 +27875,7 @@ var demo = function(path, fs, url, buffer) {
         token = state.push("sub_open", "sub", 1);
     token.markup = "~";
     token = state.push("text", "", 0);
-    token.content = content.replace(UNESCAPE_RE, "$1");
+    token.content = content.replace(UNESCAPE_RE$1, "$1");
     token = state.push("sub_close", "sub", -1);
     token.markup = "~";
     state.pos = state.posMax + 1;
@@ -27823,7 +27887,7 @@ var demo = function(path, fs, url, buffer) {
   };
   // Process ^superscript^
   // same as UNESCAPE_MD_RE plus a space
-    var UNESCAPE_RE$1 = /\\([ \\!"#$%&'()*+,./:;<=>?@[\]^_`{|}~-])/g;
+    var UNESCAPE_RE = /\\([ \\!"#$%&'()*+,./:;<=>?@[\]^_`{|}~-])/g;
   function superscript(state, silent) {
     var found, content, token, max = state.posMax, start = state.pos;
     if (state.src.charCodeAt(start) !== 94 /* ^ */) {
@@ -27861,7 +27925,7 @@ var demo = function(path, fs, url, buffer) {
         token = state.push("sup_open", "sup", 1);
     token.markup = "^";
     token = state.push("text", "", 0);
-    token.content = content.replace(UNESCAPE_RE$1, "$1");
+    token.content = content.replace(UNESCAPE_RE, "$1");
     token = state.push("sup_close", "sup", -1);
     token.markup = "^";
     state.pos = state.posMax + 1;
@@ -27871,11 +27935,11 @@ var demo = function(path, fs, url, buffer) {
   var markdownItSup = function sup_plugin(md) {
     md.inline.ruler.after("emphasis", "sup", superscript);
   };
-  const slugify$1 = s => encodeURIComponent(String(s).trim().toLowerCase().replace(/\s+/g, "-"));
-  const defaults = {
+  const slugify = s => encodeURIComponent(String(s).trim().toLowerCase().replace(/\s+/g, "-"));
+  const defaults$1 = {
     includeLevel: [ 1, 2, 3, 4 ],
     containerClass: "table-of-contents",
-    slugify: slugify$1,
+    slugify: slugify,
     markerPattern: /^\[\[toc\]\]/im,
     listType: "ul",
     format: undefined,
@@ -27885,7 +27949,7 @@ var demo = function(path, fs, url, buffer) {
     transformLink: undefined
   };
   var markdownItTableOfContents = (md, o) => {
-    const options = Object.assign({}, defaults, o);
+    const options = Object.assign({}, defaults$1, o);
     const tocRegexp = options.markerPattern;
     let gstate;
     function toc(state, silent) {
@@ -28019,7 +28083,7 @@ var demo = function(path, fs, url, buffer) {
     // Insert TOC
         md.inline.ruler.after("emphasis", "toc", toc);
   };
-  var markdownIt =  Object.freeze({
+  var markdownIt$1 =  Object.freeze({
     __proto__: null,
     default: markdownItTableOfContents
   });
@@ -28169,7 +28233,7 @@ var demo = function(path, fs, url, buffer) {
     //md.block.ruler.after('paragraph', 'toc', toc);
         md.inline.ruler.after("emphasis", "toc", toc);
   };
-  var markdownIt$1 =  Object.freeze({
+  var markdownIt =  Object.freeze({
     __proto__: null,
     default: markdownItToc
   });
@@ -28183,7 +28247,7 @@ var demo = function(path, fs, url, buffer) {
    * Escape special characters in the given string of html.
    *
    * Borrowed from escape-html component, MIT-licensed
-   */  function escape$2(html) {
+   */  function escape(html) {
     return String(html).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/'/g, "&#39;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   }
  // code assumes you're wrapping HTML attributes in doublequotes:
@@ -28216,7 +28280,7 @@ var demo = function(path, fs, url, buffer) {
       setup: (setup, config) => config,
       shouldParse: (state, match) => true,
       postprocessParse: (state, token) => {},
-      escape: escape$2,
+      escape: escape,
       encodeHtmlAttr: encodeHtmlAttr,
       regexp: regexp
     }, typeof config === "function" ? {
@@ -28497,19 +28561,20 @@ var demo = function(path, fs, url, buffer) {
     __proto__: null,
     default: plugin
   });
-  var require$$56 =  getAugmentedNamespace(markdownItAbbr);
+  var require$$56 =  getAugmentedNamespace(markdownitAbbr);
   var require$$57 =  getAugmentedNamespace(markdownItAttrs);
-  var require$$58 =  getAugmentedNamespace(markdownItContainer);
+  var require$$58 =  getAugmentedNamespace(markdownitContainer);
   var require$$60 =  getAugmentedNamespace(markdownItDefList);
   var require$$61 =  getAugmentedNamespace(markdownItEmoji);
   var require$$62 =  getAugmentedNamespace(markdownItFontAwesome);
   var require$$63 =  getAugmentedNamespace(markdownItFootnote);
   var require$$64 =  getAugmentedNamespace(markdownitFrontMatter);
-  var require$$68 =  getAugmentedNamespace(markdownItAbbr$1);
-  var require$$70 =  getAugmentedNamespace(markdownItKbd);
+  var require$$68 =  getAugmentedNamespace(markdownItAbbr);
+  var require$$70 =  getAugmentedNamespace(markdownitKbd);
+  var require$$73 =  getAugmentedNamespace(markdownitModifyToken);
   var require$$74 =  getAugmentedNamespace(markdownItPrism$1);
-  var require$$81 =  getAugmentedNamespace(markdownIt);
-  var require$$82 =  getAugmentedNamespace(markdownIt$1);
+  var require$$81 =  getAugmentedNamespace(markdownIt$1);
+  var require$$82 =  getAugmentedNamespace(markdownIt);
   var require$$83 =  getAugmentedNamespace(markdownitWikilinks);
   /*eslint-env browser*/
   /*global $, _*/  lib.registerLanguage("actionscript", actionscript_1);
@@ -28570,7 +28635,7 @@ var demo = function(path, fs, url, buffer) {
   lib.registerLanguage("vhdl", vhdl_1);
   lib.registerLanguage("yaml", yaml_1);
   let mdHtml, mdSrc, permalink, scrollMap;
-  let defaults$1 = {
+  let defaults = {
     html: false,
     // Enable HTML tags in source
     xhtmlOut: false,
@@ -28613,10 +28678,10 @@ var demo = function(path, fs, url, buffer) {
       // }
         }
   };
-  defaults$1.highlight = function(str, lang) {
+  defaults.highlight = function(str, lang) {
     let esc = mdHtml.utils.escapeHtml;
     try {
-      if (!defaults$1._highlight) {
+      if (!defaults._highlight) {
         throw "highlighting disabled";
       }
       if (lang && lang !== "auto" && lib.getLanguage(lang)) {
@@ -28641,12 +28706,12 @@ var demo = function(path, fs, url, buffer) {
     $("body").removeClass("result-as-src");
     $("body").removeClass("result-as-debug");
     $("body").addClass("result-as-" + val);
-    defaults$1._view = val;
+    defaults._view = val;
   }
   function pick(pckg1, pckg2, pckg3, pckg4) {
     let rv;
-    console.log("PICK:", defaults$1.pickNumber, "--\x3e", +defaults$1.pickNumber);
-    switch (+defaults$1.pickNumber) {
+    console.log("PICK:", defaults.pickNumber, "--\x3e", +defaults.pickNumber);
+    switch (+defaults.pickNumber) {
      case 1:
       rv = pckg1;
       break;
@@ -28668,7 +28733,7 @@ var demo = function(path, fs, url, buffer) {
   function usePlugins(md) {
     return md.use(require$$56).use(require$$57).use(require$$58, "warning").use(markdownItCheckbox).use(require$$60).use(require$$61).use(require$$62).use(require$$63).use(require$$64, (function processFrontMatter(fm) {
       console.log("FrontMatter:", fm);
-    })).use(markdownItHashtag).use(markdownItHeaderSections).use(markdownItHeadinganchor, {}).use(require$$68).use(markdownItIns).use(require$$70).use(markdownItMark).use(markdownItMathjax).use(markdownItModifyToken).use(pick(require$$74, index_es6, markdownItHighlightjs))
+    })).use(markdownItHashtag).use(markdownItHeaderSections).use(markdownItHeadinganchor, {}).use(require$$68).use(markdownItIns).use(require$$70).use(markdownItMark).use(markdownItMathjax).use(require$$73).use(pick(require$$74, index_es6, markdownItHighlightjs))
     /*  .use(require('@gerhobbelt/markdown-it-responsive'), {
       responsive: {
         srcset: {
@@ -28692,13 +28757,13 @@ var demo = function(path, fs, url, buffer) {
   */ .use(markdownItSamp).use(markdownItStrikethroughAlt).use(markdownItSub).use(markdownItSup).use(pick(require$$81, require$$82)).use(require$$83);
   }
   function mdInit() {
-    console.log("SETTINGS:", defaults$1);
-    if (defaults$1._strict) {
+    console.log("SETTINGS:", defaults);
+    if (defaults._strict) {
       mdHtml = window.markdownit("commonmark");
       mdSrc = window.markdownit("commonmark");
     } else {
-      mdHtml = usePlugins(window.markdownit(defaults$1));
-      mdSrc = usePlugins(window.markdownit(defaults$1));
+      mdHtml = usePlugins(window.markdownit(defaults));
+      mdSrc = usePlugins(window.markdownit(defaults));
     }
     // Beautify output of parser for html content
         mdHtml.renderer.rules.table_open = function() {
@@ -28735,9 +28800,9 @@ var demo = function(path, fs, url, buffer) {
     let source = $(".source").val();
     // Update only active view to avoid slowdowns
     // (debug & src view with highlighting are a bit slow)
-        if (defaults$1._view === "src") {
+        if (defaults._view === "src") {
       setHighlightedlContent(".result-src-content", mdSrc.render(source), "html");
-    } else if (defaults$1._view === "debug") {
+    } else if (defaults._view === "debug") {
       setHighlightedlContent(".result-debug-content", JSON.stringify(mdSrc.parse(source, {
         references: {}
       }), null, 2), "json");
@@ -28752,7 +28817,7 @@ var demo = function(path, fs, url, buffer) {
         // serialize state - source and options
         permalink.href = "#md3=" + mdurl.encode(JSON.stringify({
           source: source,
-          defaults: _.omit(defaults$1, "highlight")
+          defaults: _.omit(defaults, "highlight")
         }), "-_.!~", false);
       } else {
         permalink.href = "";
@@ -28889,21 +28954,21 @@ var demo = function(path, fs, url, buffer) {
     // copy config to defaults, but only if key exists
     // and value has the same type
         _.forOwn(opts, (function(val, key) {
-      if (!_.has(defaults$1, key)) {
+      if (!_.has(defaults, key)) {
         return;
       }
       // Legacy, for old links
             if (key === "_src") {
-        defaults$1._view = val ? "src" : "html";
+        defaults._view = val ? "src" : "html";
         return;
       }
-      if (_.isBoolean(defaults$1[key]) && _.isBoolean(val) || _.isString(defaults$1[key]) && _.isString(val)) {
-        defaults$1[key] = val;
+      if (_.isBoolean(defaults[key]) && _.isBoolean(val) || _.isString(defaults[key]) && _.isString(val)) {
+        defaults[key] = val;
       }
     }));
     // sanitize for sure
-        if ([ "html", "src", "debug" ].indexOf(defaults$1._view) === -1) {
-      defaults$1._view = "html";
+        if ([ "html", "src", "debug" ].indexOf(defaults._view) === -1) {
+      defaults._view = "html";
     }
   }
   //////////////////////////////////////////////////////////////////////////////
@@ -28922,7 +28987,7 @@ var demo = function(path, fs, url, buffer) {
       container: "body"
     });
     // Set default option values and option listeners
-        _.forOwn(defaults$1, (function(val, key) {
+        _.forOwn(defaults, (function(val, key) {
       if (key === "highlight") {
         return;
       }
@@ -28936,7 +29001,7 @@ var demo = function(path, fs, url, buffer) {
         $el.on("change", (function() {
           let value = Boolean($el.prop("checked"));
           setOptionClass(key, value);
-          defaults$1[key] = value;
+          defaults[key] = value;
           mdInit();
           updateResult();
         }));
@@ -28944,13 +29009,13 @@ var demo = function(path, fs, url, buffer) {
       } else {
         $(el).val(val);
         $el.on("change update keyup", (function() {
-          defaults$1[key] = String($(el).val());
+          defaults[key] = String($(el).val());
           mdInit();
           updateResult();
         }));
       }
     }));
-    setResultView(defaults$1._view);
+    setResultView(defaults._view);
     mdInit();
     permalink = document.getElementById("permalink");
     // Setup listeners
