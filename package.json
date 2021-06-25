@@ -52,7 +52,7 @@
     "uc.micro": "1.0.6"
   },
   "devDependencies": {
-    "@gerhobbelt/highlight.js": "10.0.2-18",
+    "@gerhobbelt/highlight.js": "11.0.0-20",
     "@gerhobbelt/markdown-it-abbr": "1.0.4-27",
     "@gerhobbelt/markdown-it-anchor": "7.0.2-27",
     "@gerhobbelt/markdown-it-attrs": "3.0.3-20",
