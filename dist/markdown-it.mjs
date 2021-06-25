@@ -8328,7 +8328,7 @@ function normalizeLinkText(url) {
  *   highlight: function (str, lang, attrs) {
  *     if (lang && hljs.getLanguage(lang)) {
  *       try {
- *         return hljs.highlight(lang, str, true).value;
+ *         return hljs.highlight(str, { language: lang, ignoreIllegals: true }).value;
  *       } catch (__) {}
  *     }
  *
@@ -8348,7 +8348,7 @@ function normalizeLinkText(url) {
  *     if (lang && hljs.getLanguage(lang)) {
  *       try {
  *         return '<pre class="hljs"><code>' +
- *                hljs.highlight(lang, str, true).value +
+ *                hljs.highlight(str, { language: lang, ignoreIllegals: true }).value +
  *                '</code></pre>';
  *       } catch (__) {}
  *     }
