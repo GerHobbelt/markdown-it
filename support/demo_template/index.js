@@ -20,7 +20,6 @@ hljs.registerLanguage('cmake',        require('@gerhobbelt/highlight.js/lib/lang
 hljs.registerLanguage('coffeescript', require('@gerhobbelt/highlight.js/lib/languages/coffeescript'));
 hljs.registerLanguage('cpp',          require('@gerhobbelt/highlight.js/lib/languages/cpp'));
 hljs.registerLanguage('c',            require('@gerhobbelt/highlight.js/lib/languages/c'));
-hljs.registerLanguage('c-like',       require('@gerhobbelt/highlight.js/lib/languages/c-like'));
 hljs.registerLanguage('csharp',       require('@gerhobbelt/highlight.js/lib/languages/csharp'));
 hljs.registerLanguage('arduino',      require('@gerhobbelt/highlight.js/lib/languages/arduino'));
 hljs.registerLanguage('css',          require('@gerhobbelt/highlight.js/lib/languages/css'));
