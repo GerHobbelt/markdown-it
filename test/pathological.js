@@ -3,7 +3,7 @@
 const needle = require('needle');
 const assert = require('assert');
 const crypto = require('crypto');
-const Worker = require('jest-worker').default;
+const Worker = require('jest-worker').Worker;
 const marky = require('marky');
 const chalk = require('chalk');
 
