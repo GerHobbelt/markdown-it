@@ -1,4 +1,4 @@
-var demo = function(path, fs, url, buffer) {
+var demo = function(path, fs, url) {
   "use strict";
   function _interopDefaultLegacy(e) {
     return e && typeof e === "object" && "default" in e ? e : {
@@ -7,6 +7,28 @@ var demo = function(path, fs, url, buffer) {
   }
   var path__default =  _interopDefaultLegacy(path);
   var fs__default =  _interopDefaultLegacy(fs);
+  var commonjsGlobal = typeof globalThis !== "undefined" ? globalThis : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : {};
+  function getAugmentedNamespace(n) {
+    if (n.__esModule) return n;
+    var a = Object.defineProperty({}, "__esModule", {
+      value: true
+    });
+    Object.keys(n).forEach((function(k) {
+      var d = Object.getOwnPropertyDescriptor(n, k);
+      Object.defineProperty(a, k, d.get ? d : {
+        enumerable: true,
+        get: function() {
+          return n[k];
+        }
+      });
+    }));
+    return a;
+  }
+  function commonjsRequire(path) {
+    throw new Error('Could not dynamically require "' + path + '". Please configure the dynamicRequireTargets or/and ignoreDynamicRequires option of @rollup/plugin-commonjs appropriately for this require call to work.');
+  }
+  var demo_template = {};
+  var mdurl$1 = {};
   var encodeCache = {};
   // Create a lookup array where anything but characters in `chars` string
   // and alphanumeric chars is percent-encoded.
@@ -38,12 +60,12 @@ var demo = function(path, fs, url, buffer) {
   //  - exclude      - list of characters to ignore (in addition to a-zA-Z0-9)
   //  - keepEscaped  - don't encode '%' in a correct escape sequence (default: true)
   
-    function encode$1(string, exclude, keepEscaped) {
+    function encode(string, exclude, keepEscaped) {
     var i, l, code, nextCode, cache, result = "";
     if (typeof exclude !== "string") {
       // encode(string, keepEscaped)
       keepEscaped = exclude;
-      exclude = encode$1.defaultChars;
+      exclude = encode.defaultChars;
     }
     if (typeof keepEscaped === "undefined") {
       keepEscaped = true;
@@ -78,9 +100,9 @@ var demo = function(path, fs, url, buffer) {
     }
     return result;
   }
-  encode$1.defaultChars = ";/?:@&=+$,-_.!~*'()#";
-  encode$1.componentChars = "-_.!~*'()";
-  var encode_1 = encode$1;
+  encode.defaultChars = ";/?:@&=+$,-_.!~*'()#";
+  encode.componentChars = "-_.!~*'()";
+  var encode_1 = encode;
   /* eslint-disable no-bitwise */  var decodeCache = {};
   function getDecodeCache(exclude) {
     var i, ch, cache = decodeCache[exclude];
@@ -100,10 +122,10 @@ var demo = function(path, fs, url, buffer) {
   }
   // Decode percent-encoded string.
   
-    function decode$1(string, exclude) {
+    function decode(string, exclude) {
     var cache;
     if (typeof exclude !== "string") {
-      exclude = decode$1.defaultChars;
+      exclude = decode.defaultChars;
     }
     cache = getDecodeCache(exclude);
     return string.replace(/(%[a-f0-9]{2})+/gi, (function(seq) {
@@ -165,10 +187,10 @@ var demo = function(path, fs, url, buffer) {
       return result;
     }));
   }
-  decode$1.defaultChars = ";/?:@&=+$,#";
-  decode$1.componentChars = "";
-  var decode_1 = decode$1;
-  var format$1 = function format(url) {
+  decode.defaultChars = ";/?:@&=+$,#";
+  decode.componentChars = "";
+  var decode_1 = decode;
+  var format = function format(url) {
     var result = "";
     result += url.protocol || "";
     result += url.slashes ? "//" : "";
@@ -185,7 +207,6 @@ var demo = function(path, fs, url, buffer) {
     result += url.hash || "";
     return result;
   };
-  // Copyright Joyent, Inc. and other Node contributors.
   
   // Changes from joyent/node:
   
@@ -439,17 +460,11 @@ var demo = function(path, fs, url, buffer) {
       this.hostname = host;
     }
   };
-  var parse$1 = urlParse;
-  var encode = encode_1;
-  var decode = decode_1;
-  var format = format$1;
-  var parse = parse$1;
-  var mdurl = {
-    encode: encode,
-    decode: decode,
-    format: format,
-    parse: parse
-  };
+  var parse = urlParse;
+  mdurl$1.encode = encode_1;
+  mdurl$1.decode = decode_1;
+  mdurl$1.format = format;
+  mdurl$1.parse = parse;
   // https://github.com/substack/deep-freeze/blob/master/index.js
     function deepFreeze(o) {
     Object.freeze(o);
@@ -479,11 +494,11 @@ var demo = function(path, fs, url, buffer) {
     return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   }
   /**
-   * performs a shallow merge of multiple objects into one
-   *
-   * @arguments list of objects with properties to merge
-   * @returns a single new object
-   */  function inherit(parent) {
+	 * performs a shallow merge of multiple objects into one
+	 *
+	 * @arguments list of objects with properties to merge
+	 * @returns a single new object
+	 */  function inherit(parent) {
     // inherit(parent, override_obj, override_obj, ...)
     var result = {};
     var objects = Array.prototype.slice.call(arguments, 1);
@@ -541,20 +556,20 @@ var demo = function(path, fs, url, buffer) {
         return original[0].offset < highlighted[0].offset ? original : highlighted;
       }
       /*
-      To avoid starting the stream just before it should stop the order is
-      ensured that original always starts first and closes last:
+	    To avoid starting the stream just before it should stop the order is
+	    ensured that original always starts first and closes last:
 
-      if (event1 == 'start' && event2 == 'start')
-        return original;
-      if (event1 == 'start' && event2 == 'stop')
-        return highlighted;
-      if (event1 == 'stop' && event2 == 'start')
-        return original;
-      if (event1 == 'stop' && event2 == 'stop')
-        return highlighted;
+	    if (event1 == 'start' && event2 == 'start')
+	      return original;
+	    if (event1 == 'start' && event2 == 'stop')
+	      return highlighted;
+	    if (event1 == 'stop' && event2 == 'start')
+	      return original;
+	    if (event1 == 'stop' && event2 == 'stop')
+	      return highlighted;
 
-      ... which is collapsed to:
-      */      return highlighted[0].event === "start" ? original : highlighted;
+	    ... which is collapsed to:
+	    */      return highlighted[0].event === "start" ? original : highlighted;
     }
     function open(node) {
       function attr_str(a) {
@@ -574,11 +589,11 @@ var demo = function(path, fs, url, buffer) {
       processed = stream[0].offset;
       if (stream === original) {
         /*
-        On any opening or closing tag of the original markup we first close
-        the entire highlighted node stack, then render the original tag along
-        with all the following original tags at the same offset and then
-        reopen all the tags on the highlighted stack.
-        */
+	      On any opening or closing tag of the original markup we first close
+	      the entire highlighted node stack, then render the original tag along
+	      with all the following original tags at the same offset and then
+	      reopen all the tags on the highlighted stack.
+	      */
         nodeStack.reverse().forEach(close);
         do {
           render(stream.splice(0, 1)[0]);
@@ -699,21 +714,21 @@ var demo = function(path, fs, url, buffer) {
     }
   }
   /**
-    Currently this is all private API, but this is the minimal API necessary
-    that an Emitter must implement to fully support the parser.
+	  Currently this is all private API, but this is the minimal API necessary
+	  that an Emitter must implement to fully support the parser.
 
-    Minimal interface:
+	  Minimal interface:
 
-    - addKeyword(text, kind)
-    - addText(text)
-    - addSublanguage(emitter, subLanguageName)
-    - finalize()
-    - openNode(kind)
-    - closeNode()
-    - closeAllNodes()
-    - toHTML()
+	  - addKeyword(text, kind)
+	  - addText(text)
+	  - addSublanguage(emitter, subLanguageName)
+	  - finalize()
+	  - openNode(kind)
+	  - closeNode()
+	  - closeAllNodes()
+	  - toHTML()
 
-  */  class TokenTreeEmitter extends TokenTree {
+	*/  class TokenTreeEmitter extends TokenTree {
     constructor(options) {
       super();
       this.options = options;
@@ -974,18 +989,18 @@ var demo = function(path, fs, url, buffer) {
       return new RegExp(source$1(value), "m" + (language.case_insensitive ? "i" : "") + (global ? "g" : ""));
     }
     /**
-      Stores multiple regular expressions and allows you to quickly search for
-      them all in a string simultaneously - returning the first match.  It does
-      this by creating a huge (a|b|c) regex - each individual item wrapped with ()
-      and joined by `|` - using match groups to track position.  When a match is
-      found checking which position in the array has content allows us to figure
-      out which of the original regexes / match groups triggered the match.
+	    Stores multiple regular expressions and allows you to quickly search for
+	    them all in a string simultaneously - returning the first match.  It does
+	    this by creating a huge (a|b|c) regex - each individual item wrapped with ()
+	    and joined by `|` - using match groups to track position.  When a match is
+	    found checking which position in the array has content allows us to figure
+	    out which of the original regexes / match groups triggered the match.
 
-      The match object itself (the result of `Regex.exec`) is returned but also
-      enhanced by merging in any meta-data that was registered with the regex.
-      This is how we keep track of which mode matched, and what type of rule
-      (`illegal`, `begin`, end, etc).
-    */    class MultiRegex {
+	    The match object itself (the result of `Regex.exec`) is returned but also
+	    enhanced by merging in any meta-data that was registered with the regex.
+	    This is how we keep track of which mode matched, and what type of rule
+	    (`illegal`, `begin`, end, etc).
+	  */    class MultiRegex {
       constructor() {
         this.matchIndexes = {};
         this.regexes = [];
@@ -1023,36 +1038,36 @@ var demo = function(path, fs, url, buffer) {
       }
     }
     /*
-      Created to solve the key deficiently with MultiRegex - there is no way to
-      test for multiple matches at a single location.  Why would we need to do
-      that?  In the future a more dynamic engine will allow certain matches to be
-      ignored.  An example: if we matched say the 3rd regex in a large group but
-      decided to ignore it - we'd need to started testing again at the 4th
-      regex... but MultiRegex itself gives us no real way to do that.
+	    Created to solve the key deficiently with MultiRegex - there is no way to
+	    test for multiple matches at a single location.  Why would we need to do
+	    that?  In the future a more dynamic engine will allow certain matches to be
+	    ignored.  An example: if we matched say the 3rd regex in a large group but
+	    decided to ignore it - we'd need to started testing again at the 4th
+	    regex... but MultiRegex itself gives us no real way to do that.
 
-      So what this class creates MultiRegexs on the fly for whatever search
-      position they are needed.
+	    So what this class creates MultiRegexs on the fly for whatever search
+	    position they are needed.
 
-      NOTE: These additional MultiRegex objects are created dynamically.  For most
-      grammars most of the time we will never actually need anything more than the
-      first MultiRegex - so this shouldn't have too much overhead.
+	    NOTE: These additional MultiRegex objects are created dynamically.  For most
+	    grammars most of the time we will never actually need anything more than the
+	    first MultiRegex - so this shouldn't have too much overhead.
 
-      Say this is our search group, and we match regex3, but wish to ignore it.
+	    Say this is our search group, and we match regex3, but wish to ignore it.
 
-        regex1 | regex2 | regex3 | regex4 | regex5    ' ie, startAt = 0
+	      regex1 | regex2 | regex3 | regex4 | regex5    ' ie, startAt = 0
 
-      What we need is a new MultiRegex that only includes the remaining
-      possibilities:
+	    What we need is a new MultiRegex that only includes the remaining
+	    possibilities:
 
-        regex4 | regex5                               ' ie, startAt = 3
+	      regex4 | regex5                               ' ie, startAt = 3
 
-      This class wraps all that complexity up in a simple API... `startAt` decides
-      where in the array of expressions to start doing the matching. It
-      auto-increments, so if a match is found at position 2, then startAt will be
-      set to 3.  If the end is reached startAt will return to 0.
+	    This class wraps all that complexity up in a simple API... `startAt` decides
+	    where in the array of expressions to start doing the matching. It
+	    auto-increments, so if a match is found at position 2, then startAt will be
+	    set to 3.  If the end is reached startAt will return to 0.
 
-      MOST of the time the parser will be setting startAt manually to 0.
-    */    class ResumableMultiRegex {
+	    MOST of the time the parser will be setting startAt manually to 0.
+	  */    class ResumableMultiRegex {
       constructor() {
         this.rules = [];
         this.multiRegexes = [];
@@ -1117,34 +1132,34 @@ var demo = function(path, fs, url, buffer) {
       }
     }
     /** skip vs abort vs ignore
-     *
-     * @skip   - The mode is still entered and exited normally (and contains rules apply),
-     *           but all content is held and added to the parent buffer rather than being
-     *           output when the mode ends.  Mostly used with `sublanguage` to build up
-     *           a single large buffer than can be parsed by sublanguage.
-     *
-     *             - The mode begin ands ends normally.
-     *             - Content matched is added to the parent mode buffer.
-     *             - The parser cursor is moved forward normally.
-     *
-     * @abort  - A hack placeholder until we have ignore.  Aborts the mode (as if it
-     *           never matched) but DOES NOT continue to match subsequent `contains`
-     *           modes.  Abort is bad/suboptimal because it can result in modes
-     *           farther down not getting applied because an earlier rule eats the
-     *           content but then aborts.
-     *
-     *             - The mode does not begin.
-     *             - Content matched by `begin` is added to the mode buffer.
-     *             - The parser cursor is moved forward accordingly.
-     *
-     * @ignore - Ignores the mode (as if it never matched) and continues to match any
-     *           subsequent `contains` modes.  Ignore isn't technically possible with
-     *           the current parser implementation.
-     *
-     *             - The mode does not begin.
-     *             - Content matched by `begin` is ignored.
-     *             - The parser cursor is not moved forward.
-     */    function compileMode(mode, parent) {
+	   *
+	   * @skip   - The mode is still entered and exited normally (and contains rules apply),
+	   *           but all content is held and added to the parent buffer rather than being
+	   *           output when the mode ends.  Mostly used with `sublanguage` to build up
+	   *           a single large buffer than can be parsed by sublanguage.
+	   *
+	   *             - The mode begin ands ends normally.
+	   *             - Content matched is added to the parent mode buffer.
+	   *             - The parser cursor is moved forward normally.
+	   *
+	   * @abort  - A hack placeholder until we have ignore.  Aborts the mode (as if it
+	   *           never matched) but DOES NOT continue to match subsequent `contains`
+	   *           modes.  Abort is bad/suboptimal because it can result in modes
+	   *           farther down not getting applied because an earlier rule eats the
+	   *           content but then aborts.
+	   *
+	   *             - The mode does not begin.
+	   *             - Content matched by `begin` is added to the mode buffer.
+	   *             - The parser cursor is moved forward accordingly.
+	   *
+	   * @ignore - Ignores the mode (as if it never matched) and continues to match any
+	   *           subsequent `contains` modes.  Ignore isn't technically possible with
+	   *           the current parser implementation.
+	   *
+	   *             - The mode does not begin.
+	   *             - Content matched by `begin` is ignored.
+	   *             - The parser cursor is not moved forward.
+	   */    function compileMode(mode, parent) {
       if (mode.compiled) return;
       mode.compiled = true;
       // __beforeBegin is considered private API, internal use only
@@ -1288,9 +1303,9 @@ var demo = function(path, fs, url, buffer) {
   }
   var version = "10.0.2-18";
   /*
-  Syntax highlighting with language autodetection.
-  https://highlightjs.org/
-  */  const escape$1$1 = escapeHTML;
+	Syntax highlighting with language autodetection.
+	https://highlightjs.org/
+	*/  const escape$1$1 = escapeHTML;
   const inherit$1 = inherit;
   const {nodeStream: nodeStream$1, mergeStreams: mergeStreams$1} = utils;
   const NO_MATCH = Symbol("nomatch");
@@ -1345,21 +1360,21 @@ var demo = function(path, fs, url, buffer) {
       return classes.split(/\s+/).find((_class => shouldNotHighlight(_class) || getLanguage(_class)));
     }
     /**
-     * Core highlighting function.
-     *
-     * @param {string} languageName - the language to use for highlighting
-     * @param {string} code - the code to highlight
-     * @param {boolean} ignoreIllegals - whether to ignore illegal matches, default is to bail
-     * @param {array<mode>} continuation - array of continuation modes
-     *
-     * @returns an object that represents the result
-     * @property {string} language - the language name
-     * @property {number} relevance - the relevance score
-     * @property {string} value - the highlighted HTML code
-     * @property {string} code - the original raw code
-     * @property {mode} top - top of the current mode stack
-     * @property {boolean} illegal - indicates whether any illegal matches were found
-    */    function highlight(languageName, code, ignoreIllegals, continuation) {
+	   * Core highlighting function.
+	   *
+	   * @param {string} languageName - the language to use for highlighting
+	   * @param {string} code - the code to highlight
+	   * @param {boolean} ignoreIllegals - whether to ignore illegal matches, default is to bail
+	   * @param {array<mode>} continuation - array of continuation modes
+	   *
+	   * @returns an object that represents the result
+	   * @property {string} language - the language name
+	   * @property {number} relevance - the relevance score
+	   * @property {string} value - the highlighted HTML code
+	   * @property {string} code - the original raw code
+	   * @property {mode} top - top of the current mode stack
+	   * @property {boolean} illegal - indicates whether any illegal matches were found
+	  */    function highlight(languageName, code, ignoreIllegals, continuation) {
       var context = {
         code: code,
         language: languageName
@@ -1633,16 +1648,16 @@ var demo = function(path, fs, url, buffer) {
           throw err;
         }
         /*
-        Why might be find ourselves here?  Only one occasion now.  An end match that was
-        triggered but could not be completed.  When might this happen?  When an `endSameasBegin`
-        rule sets the end rule to a specific match.  Since the overall mode termination rule that's
-        being used to scan the text isn't recompiled that means that any match that LOOKS like
-        the end (but is not, because it is not an exact match to the beginning) will
-        end up here.  A definite end match, but when `doEndMatch` tries to "reapply"
-        the end rule and fails to match, we wind up here, and just silently ignore the end.
+	      Why might be find ourselves here?  Only one occasion now.  An end match that was
+	      triggered but could not be completed.  When might this happen?  When an `endSameasBegin`
+	      rule sets the end rule to a specific match.  Since the overall mode termination rule that's
+	      being used to scan the text isn't recompiled that means that any match that LOOKS like
+	      the end (but is not, because it is not an exact match to the beginning) will
+	      end up here.  A definite end match, but when `doEndMatch` tries to "reapply"
+	      the end rule and fails to match, we wind up here, and just silently ignore the end.
 
-        This causes no real harm other than stopping a few times too many.
-        */        mode_buffer += lexeme;
+	      This causes no real harm other than stopping a few times too many.
+	      */        mode_buffer += lexeme;
         return lexeme.length;
       }
       var language = getLanguage(languageName);
@@ -1741,16 +1756,16 @@ var demo = function(path, fs, url, buffer) {
       return result;
     }
     /*
-    Highlighting with language detection. Accepts a string with the code to
-    highlight. Returns an object with the following properties:
+	  Highlighting with language detection. Accepts a string with the code to
+	  highlight. Returns an object with the following properties:
 
-    - language (detected language)
-    - relevance (int)
-    - value (an HTML string with highlighting markup)
-    - second_best (object with the same structure for second-best heuristically
-      detected language, may be absent)
+	  - language (detected language)
+	  - relevance (int)
+	  - value (an HTML string with highlighting markup)
+	  - second_best (object with the same structure for second-best heuristically
+	    detected language, may be absent)
 
-    */    function highlightAuto(code, languageSubset) {
+	  */    function highlightAuto(code, languageSubset) {
       languageSubset = languageSubset || options.languages || Object.keys(languages);
       var result = justTextHighlightResult(code);
       var secondBest = result;
@@ -1773,12 +1788,12 @@ var demo = function(path, fs, url, buffer) {
       return result;
     }
     /*
-    Post-processing of the highlighted markup:
+	  Post-processing of the highlighted markup:
 
-    - replace TABs with something more useful
-    - replace real line-breaks with '<br>' for non-pre containers
+	  - replace TABs with something more useful
+	  - replace real line-breaks with '<br>' for non-pre containers
 
-    */    function fixMarkup(value) {
+	  */    function fixMarkup(value) {
       if (!(options.tabReplace || options.useBR)) {
         return value;
       }
@@ -1803,9 +1818,9 @@ var demo = function(path, fs, url, buffer) {
       return result.join(" ").trim();
     }
     /*
-    Applies highlighting to a DOM node containing code. Accepts a DOM node and
-    two optional parameters for fixMarkup.
-    */    function highlightBlock(block) {
+	  Applies highlighting to a DOM node containing code. Accepts a DOM node and
+	  two optional parameters for fixMarkup.
+	  */    function highlightBlock(block) {
       let node = null;
       const language = blockLanguage(block);
       if (shouldNotHighlight(language)) return;
@@ -1858,26 +1873,26 @@ var demo = function(path, fs, url, buffer) {
       }
     }
     /*
-    Resets highlight.js global options with values passed in the form of an object.
-    */    function reset(userOptions) {
+	  Resets highlight.js global options with values passed in the form of an object.
+	  */    function reset(userOptions) {
       options = inherit$1(default_options, userOptions);
     }
     /*
-    Updates highlight.js global options with values passed in the form of an object.
-    */    function configure(userOptions) {
+	  Updates highlight.js global options with values passed in the form of an object.
+	  */    function configure(userOptions) {
       options = inherit$1(options, userOptions);
     }
     /*
-    Applies highlighting to all <pre><code>..</code></pre> blocks on a page.
-    */    function initHighlighting() {
+	  Applies highlighting to all <pre><code>..</code></pre> blocks on a page.
+	  */    function initHighlighting() {
       if (initHighlighting.called) return;
       initHighlighting.called = true;
       var blocks = document.querySelectorAll(options.selector);
       ArrayProto.forEach.call(blocks, highlightBlock);
     }
     /*
-    Attaches highlighting to the page load event.
-    */    function initHighlightingOnLoad() {
+	  Attaches highlighting to the page load event.
+	  */    function initHighlightingOnLoad() {
       window.addEventListener("DOMContentLoaded", initHighlighting, false);
     }
     const PLAINTEXT_LANGUAGE = {
@@ -1916,11 +1931,11 @@ var demo = function(path, fs, url, buffer) {
       return Object.keys(languages);
     }
     /*
-      intended usage: When one language truly requires another
+	    intended usage: When one language truly requires another
 
-      Unlike `getLanguage`, this will throw when the requested language
-      is not available.
-    */    function requireLanguage(name) {
+	    Unlike `getLanguage`, this will throw when the requested language
+	    is not available.
+	  */    function requireLanguage(name) {
       var lang = getLanguage(name);
       if (lang) {
         return lang;
@@ -1994,11 +2009,11 @@ var demo = function(path, fs, url, buffer) {
     var highlight$2 = HLJS({});
   var core = highlight$2;
   /*
-  Language: 1C:Enterprise
-  Author: Stanislav Belov <stbelov@gmail.com>
-  Description: built-in language 1C:Enterprise (v7, v8)
-  Category: enterprise
-  */  function _1c(hljs) {
+	Language: 1C:Enterprise
+	Author: Stanislav Belov <stbelov@gmail.com>
+	Description: built-in language 1C:Enterprise (v7, v8)
+	Category: enterprise
+	*/  function _1c(hljs) {
     // общий паттерн для определения идентификаторов
     var UNDERSCORE_IDENT_RE = "[A-Za-z\u0410-\u042f\u0430-\u044f\u0451\u0401_][A-Za-z\u0410-\u042f\u0430-\u044f\u0451\u0401_0-9]+";
     // v7 уникальные ключевые слова, отсутствующие в v8 ==> keyword
@@ -2169,10 +2184,10 @@ var demo = function(path, fs, url, buffer) {
   }
   var _1c_1 = _1c;
   /*
-  Language: ABAP
-  Author: Cassio Binkowski <cassioiks@live.com>
-  Description: SAP ABAP language description
-  */  function abap(hljs) {
+	Language: ABAP
+	Author: Cassio Binkowski <cassioiks@live.com>
+	Description: SAP ABAP language description
+	*/  function abap(hljs) {
     return {
       case_insensitive: true,
       keywords: {
@@ -2195,11 +2210,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var abap_1 = abap;
   /*
-  Language: Abc
-  Authors: Andrea Crawford <andrea.crawford13@gmail.com>
-  Category: markup
-  Description: Abc is a text-based music notation system
-  */  function abc(hljs) {
+	Language: Abc
+	Authors: Andrea Crawford <andrea.crawford13@gmail.com>
+	Category: markup
+	Description: Abc is a text-based music notation system
+	*/  function abc(hljs) {
     function continuation(parentClassName) {
       return {
         begin: "\\n(\\+\\:|  )",
@@ -2339,10 +2354,10 @@ var demo = function(path, fs, url, buffer) {
   }
   var abc_1 = abc;
   /*
-  Language: Augmented Backus-Naur Form
-  Author: Alex McKibben <alex@nullscope.net>
-  Website: https://tools.ietf.org/html/rfc5234
-  */  function abnf(hljs) {
+	Language: Augmented Backus-Naur Form
+	Author: Alex McKibben <alex@nullscope.net>
+	Website: https://tools.ietf.org/html/rfc5234
+	*/  function abnf(hljs) {
     var regexes = {
       ruleDeclaration: "^[a-zA-Z][a-zA-Z0-9-]*",
       unexpectedChars: "[!@#$^&',?+~`|:]"
@@ -2378,11 +2393,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var abnf_1 = abnf;
   /*
-   Language: Apache Access Log
-   Author: Oleg Efimov <efimovov@gmail.com>
-   Description: Apache/Nginx Access Logs
-   Website: https://httpd.apache.org/docs/2.4/logs.html#accesslog
-   */  function accesslog(hljs) {
+	 Language: Apache Access Log
+	 Author: Oleg Efimov <efimovov@gmail.com>
+	 Description: Apache/Nginx Access Logs
+	 Website: https://httpd.apache.org/docs/2.4/logs.html#accesslog
+	 */  function accesslog(hljs) {
     // https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods
     var HTTP_VERBS = [ "GET", "POST", "HEAD", "PUT", "DELETE", "CONNECT", "OPTIONS", "PATCH", "TRACE" ];
     return {
@@ -2449,10 +2464,10 @@ var demo = function(path, fs, url, buffer) {
   }
   var accesslog_1 = accesslog;
   /*
-  Language: ActionScript
-  Author: Alexander Myadzel <myadzel@gmail.com>
-  Category: scripting
-  */  function actionscript(hljs) {
+	Language: ActionScript
+	Author: Alexander Myadzel <myadzel@gmail.com>
+	Category: scripting
+	*/  function actionscript(hljs) {
     var IDENT_RE = "[a-zA-Z_$][a-zA-Z0-9_$]*";
     var IDENT_FUNC_RETURN_TYPE_RE = "([*]|[a-zA-Z_$][a-zA-Z0-9_$]*)";
     var AS3_REST_ARG_MODE = {
@@ -2508,13 +2523,13 @@ var demo = function(path, fs, url, buffer) {
   }
   var actionscript_1 = actionscript;
   /*
-  Language: Ada
-  Author: Lars Schulna <kartoffelbrei.mit.muskatnuss@gmail.org>
-  Description: Ada is a general-purpose programming language that has great support for saftey critical and real-time applications.
-               It has been developed by the DoD and thus has been used in military and safety-critical applications (like civil aviation).
-               The first version appeared in the 80s, but it's still actively developed today with
-               the newest standard being Ada2012.
-  */
+	Language: Ada
+	Author: Lars Schulna <kartoffelbrei.mit.muskatnuss@gmail.org>
+	Description: Ada is a general-purpose programming language that has great support for saftey critical and real-time applications.
+	             It has been developed by the DoD and thus has been used in military and safety-critical applications (like civil aviation).
+	             The first version appeared in the 80s, but it's still actively developed today with
+	             the newest standard being Ada2012.
+	*/
   // We try to support full Ada2012
   
   // We highlight all appearances of types, keywords, literals (string, char, number, bool)
@@ -2658,11 +2673,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var ada_1 = ada;
   /*
-  Language: AngelScript
-  Author: Melissa Geels <melissa@nimble.tools>
-  Category: scripting
-  Website: https://www.angelcode.com/angelscript/
-  */  function angelscript(hljs) {
+	Language: AngelScript
+	Author: Melissa Geels <melissa@nimble.tools>
+	Category: scripting
+	Website: https://www.angelcode.com/angelscript/
+	*/  function angelscript(hljs) {
     var builtInTypeMode = {
       className: "built_in",
       begin: "\\b(void|bool|int|int8|int16|int32|int64|uint|uint8|uint16|uint32|uint64|string|ref|array|double|float|auto|dictionary)"
@@ -2751,11 +2766,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var angelscript_1 = angelscript;
   /*
-  Language: Antlr
-  Author: Bill Wagner <wiwagn@microsoft.com>
-  Website: http://thebillwagner.com/
-  Description: Language definition for grammar described using ANTLR
-  */  function antlr(hljs) {
+	Language: Antlr
+	Author: Bill Wagner <wiwagn@microsoft.com>
+	Website: http://thebillwagner.com/
+	Description: Language definition for grammar described using ANTLR
+	*/  function antlr(hljs) {
     return {
       keywords: [ "parser", "grammar", "options" ],
       aliases: [ "antlr" ],
@@ -2772,13 +2787,13 @@ var demo = function(path, fs, url, buffer) {
   }
   var antlr_1 = antlr;
   /*
-  Language: Apache config
-  Author: Ruslan Keba <rukeba@gmail.com>
-  Contributors: Ivan Sagalaev <maniac@softwaremaniacs.org>
-  Website: https://httpd.apache.org
-  Description: language definition for Apache configuration files (httpd.conf & .htaccess)
-  Category: common, config
-  */  function apache(hljs) {
+	Language: Apache config
+	Author: Ruslan Keba <rukeba@gmail.com>
+	Contributors: Ivan Sagalaev <maniac@softwaremaniacs.org>
+	Website: https://httpd.apache.org
+	Description: language definition for Apache configuration files (httpd.conf & .htaccess)
+	Category: common, config
+	*/  function apache(hljs) {
     var NUMBER_REF = {
       className: "number",
       begin: "[\\$%]\\d+"
@@ -2841,11 +2856,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var apache_1 = apache;
   /*
-  Language: AppleScript
-  Authors: Nathan Grigg <nathan@nathanamy.org>, Dr. Drang <drdrang@gmail.com>
-  Category: scripting
-  Website: https://developer.apple.com/library/archive/documentation/AppleScript/Conceptual/AppleScriptLangGuide/introduction/ASLR_intro.html
-  */  function applescript(hljs) {
+	Language: AppleScript
+	Authors: Nathan Grigg <nathan@nathanamy.org>, Dr. Drang <drdrang@gmail.com>
+	Category: scripting
+	Website: https://developer.apple.com/library/archive/documentation/AppleScript/Conceptual/AppleScriptLangGuide/introduction/ASLR_intro.html
+	*/  function applescript(hljs) {
     var STRING = hljs.inherit(hljs.QUOTE_STRING_MODE, {
       illegal: ""
     });
@@ -2887,12 +2902,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var applescript_1 = applescript;
   /*
-   Language: ArcGIS Arcade
-   Category: scripting
-   Author: John Foster <jfoster@esri.com>
-   Website: https://developers.arcgis.com/arcade/
-   Description: ArcGIS Arcade is an expression language used in many Esri ArcGIS products such as Pro, Online, Server, Runtime, JavaScript, and Python
-  */  function arcade(hljs) {
+	 Language: ArcGIS Arcade
+	 Category: scripting
+	 Author: John Foster <jfoster@esri.com>
+	 Website: https://developers.arcgis.com/arcade/
+	 Description: ArcGIS Arcade is an expression language used in many Esri ArcGIS products such as Pro, Online, Server, Runtime, JavaScript, and Python
+	*/  function arcade(hljs) {
     var IDENT_RE = "[A-Za-z_][0-9A-Za-z_]*";
     var KEYWORDS = {
       keyword: "if for while var new function do return void else break",
@@ -2997,18 +3012,18 @@ var demo = function(path, fs, url, buffer) {
   }
   var arcade_1 = arcade;
   /*
-  Language: C-like foundation grammar for C/C++ grammars
-  Author: Ivan Sagalaev <maniac@softwaremaniacs.org>
-  Contributors: Evgeny Stepanischev <imbolk@gmail.com>, Zaven Muradyan <megalivoithos@gmail.com>, Roel Deckers <admin@codingcat.nl>, Sam Wu <samsam2310@gmail.com>, Jordi Petit <jordi.petit@gmail.com>, Pieter Vantorre <pietervantorre@gmail.com>, Google Inc. (David Benjamin) <davidben@google.com>
-  Category: common, system
-  */
+	Language: C-like foundation grammar for C/C++ grammars
+	Author: Ivan Sagalaev <maniac@softwaremaniacs.org>
+	Contributors: Evgeny Stepanischev <imbolk@gmail.com>, Zaven Muradyan <megalivoithos@gmail.com>, Roel Deckers <admin@codingcat.nl>, Sam Wu <samsam2310@gmail.com>, Jordi Petit <jordi.petit@gmail.com>, Pieter Vantorre <pietervantorre@gmail.com>, Google Inc. (David Benjamin) <davidben@google.com>
+	Category: common, system
+	*/
   /* In the future the intention is to split out the C/C++ grammars distinctly
-  since they are separate languages.  They will likely share a common foundation
-  though, and this file sets the groundwork for that - so that we get the breaking
-  change in v10 and don't have to change the requirements again later.
+	since they are separate languages.  They will likely share a common foundation
+	though, and this file sets the groundwork for that - so that we get the breaking
+	change in v10 and don't have to change the requirements again later.
 
-  See: https://github.com/highlightjs/highlight.js/issues/2146
-  */  function cLike(hljs) {
+	See: https://github.com/highlightjs/highlight.js/issues/2146
+	*/  function cLike(hljs) {
     function optional(s) {
       return "(?:" + s + ")?";
     }
@@ -3176,11 +3191,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var cLike_1 = cLike;
   /*
-  Language: C++
-  Category: common, system
-  Website: https://isocpp.org
-  Requires: c-like.js
-  */  function cpp(hljs) {
+	Language: C++
+	Category: common, system
+	Website: https://isocpp.org
+	Requires: c-like.js
+	*/  function cpp(hljs) {
     var lang = hljs.getLanguage("c-like").rawDefinition();
     // return auto-detection back on
         lang.disableAutodetect = false;
@@ -3190,12 +3205,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var cpp_1 = cpp;
   /*
-  Language: Arduino
-  Author: Stefania Mellai <s.mellai@arduino.cc>
-  Description: The Arduino® Language is a superset of C++. This rules are designed to highlight the Arduino® source code. For info about language see http://www.arduino.cc.
-  Requires: cpp.js
-  Website: https://www.arduino.cc
-  */  function arduino(hljs) {
+	Language: Arduino
+	Author: Stefania Mellai <s.mellai@arduino.cc>
+	Description: The Arduino® Language is a superset of C++. This rules are designed to highlight the Arduino® source code. For info about language see http://www.arduino.cc.
+	Requires: cpp.js
+	Website: https://www.arduino.cc
+	*/  function arduino(hljs) {
     var ARDUINO_KW = {
       keyword: "boolean byte word String",
       built_in: "setup loop " + "KeyboardController MouseController SoftwareSerial " + "EthernetServer EthernetClient LiquidCrystal " + "RobotControl GSMVoiceCall EthernetUDP EsploraTFT " + "HttpClient RobotMotor WiFiClient GSMScanner " + "FileSystem Scheduler GSMServer YunClient YunServer " + "IPAddress GSMClient GSMModem Keyboard Ethernet " + "Console GSMBand Esplora Stepper Process " + "WiFiUDP GSM_SMS Mailbox USBHost Firmata PImage " + "Client Server GSMPIN FileIO Bridge Serial " + "EEPROM Stream Mouse Audio Servo File Task " + "GPRS WiFi Wire TFT GSM SPI SD " + "runShellCommandAsynchronously analogWriteResolution " + "retrieveCallingNumber printFirmwareVersion " + "analogReadResolution sendDigitalPortPair " + "noListenOnLocalhost readJoystickButton setFirmwareVersion " + "readJoystickSwitch scrollDisplayRight getVoiceCallStatus " + "scrollDisplayLeft writeMicroseconds delayMicroseconds " + "beginTransmission getSignalStrength runAsynchronously " + "getAsynchronously listenOnLocalhost getCurrentCarrier " + "readAccelerometer messageAvailable sendDigitalPorts " + "lineFollowConfig countryNameWrite runShellCommand " + "readStringUntil rewindDirectory readTemperature " + "setClockDivider readLightSensor endTransmission " + "analogReference detachInterrupt countryNameRead " + "attachInterrupt encryptionType readBytesUntil " + "robotNameWrite readMicrophone robotNameRead cityNameWrite " + "userNameWrite readJoystickY readJoystickX mouseReleased " + "openNextFile scanNetworks noInterrupts digitalWrite " + "beginSpeaker mousePressed isActionDone mouseDragged " + "displayLogos noAutoscroll addParameter remoteNumber " + "getModifiers keyboardRead userNameRead waitContinue " + "processInput parseCommand printVersion readNetworks " + "writeMessage blinkVersion cityNameRead readMessage " + "setDataMode parsePacket isListening setBitOrder " + "beginPacket isDirectory motorsWrite drawCompass " + "digitalRead clearScreen serialEvent rightToLeft " + "setTextSize leftToRight requestFrom keyReleased " + "compassRead analogWrite interrupts WiFiServer " + "disconnect playMelody parseFloat autoscroll " + "getPINUsed setPINUsed setTimeout sendAnalog " + "readSlider analogRead beginWrite createChar " + "motorsStop keyPressed tempoWrite readButton " + "subnetMask debugPrint macAddress writeGreen " + "randomSeed attachGPRS readString sendString " + "remotePort releaseAll mouseMoved background " + "getXChange getYChange answerCall getResult " + "voiceCall endPacket constrain getSocket writeJSON " + "getButton available connected findUntil readBytes " + "exitValue readGreen writeBlue startLoop IPAddress " + "isPressed sendSysex pauseMode gatewayIP setCursor " + "getOemKey tuneWrite noDisplay loadImage switchPIN " + "onRequest onReceive changePIN playFile noBuffer " + "parseInt overflow checkPIN knobRead beginTFT " + "bitClear updateIR bitWrite position writeRGB " + "highByte writeRed setSpeed readBlue noStroke " + "remoteIP transfer shutdown hangCall beginSMS " + "endWrite attached maintain noCursor checkReg " + "checkPUK shiftOut isValid shiftIn pulseIn " + "connect println localIP pinMode getIMEI " + "display noBlink process getBand running beginSD " + "drawBMP lowByte setBand release bitRead prepare " + "pointTo readRed setMode noFill remove listen " + "stroke detach attach noTone exists buffer " + "height bitSet circle config cursor random " + "IRread setDNS endSMS getKey micros " + "millis begin print write ready flush width " + "isPIN blink clear press mkdir rmdir close " + "point yield image BSSID click delay " + "read text move peek beep rect line open " + "seek fill size turn stop home find " + "step tone sqrt RSSI SSID " + "end bit tan cos sin pow map abs max " + "min get run put",
@@ -3211,11 +3226,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var arduino_1 = arduino;
   /*
-  Language: ARM Assembly
-  Author: Dan Panzarella <alsoelp@gmail.com>
-  Description: ARM Assembly including Thumb and Thumb2 instructions
-  Category: assembler
-  */  function armasm(hljs) {
+	Language: ARM Assembly
+	Author: Dan Panzarella <alsoelp@gmail.com>
+	Description: ARM Assembly including Thumb and Thumb2 instructions
+	Category: assembler
+	*/  function armasm(hljs) {
     //local labels: %?[FB]?[AT]?\d{1,2}\w+
     const COMMENT = {
       variants: [ hljs.COMMENT("^[ \\t]*(?=#)", "$", {
@@ -3296,10 +3311,10 @@ var demo = function(path, fs, url, buffer) {
   }
   var armasm_1 = armasm;
   /*
-  Language: HTML, XML
-  Website: https://www.w3.org/XML/
-  Category: common
-  */  function xml(hljs) {
+	Language: HTML, XML
+	Website: https://www.w3.org/XML/
+	Category: common
+	*/  function xml(hljs) {
     var XML_IDENT_RE = "[A-Za-z0-9\\._:-]+";
     var XML_ENTITIES = {
       className: "symbol",
@@ -3384,11 +3399,11 @@ var demo = function(path, fs, url, buffer) {
       }, {
         className: "tag",
         /*
-          The lookahead pattern (?=...) ensures that 'begin' only matches
-          '<style' as a single word, followed by a whitespace or an
-          ending braket. The '$' is needed for the lexeme to be recognized
-          by hljs.subMode() that tests lexemes outside the stream.
-          */
+	        The lookahead pattern (?=...) ensures that 'begin' only matches
+	        '<style' as a single word, followed by a whitespace or an
+	        ending braket. The '$' is needed for the lexeme to be recognized
+	        by hljs.subMode() that tests lexemes outside the stream.
+	        */
         begin: "<style(?=\\s|>)",
         end: ">",
         keywords: {
@@ -3428,13 +3443,13 @@ var demo = function(path, fs, url, buffer) {
   }
   var xml_1 = xml;
   /*
-  Language: AsciiDoc
-  Requires: xml.js
-  Author: Dan Allen <dan.j.allen@gmail.com>
-  Website: http://asciidoc.org
-  Description: A semantic, text-based document format that can be exported to HTML, DocBook and other backends.
-  Category: markup
-  */  function asciidoc(hljs) {
+	Language: AsciiDoc
+	Requires: xml.js
+	Author: Dan Allen <dan.j.allen@gmail.com>
+	Website: http://asciidoc.org
+	Description: A semantic, text-based document format that can be exported to HTML, DocBook and other backends.
+	Category: markup
+	*/  function asciidoc(hljs) {
     return {
       name: "AsciiDoc",
       aliases: [ "adoc" ],
@@ -3609,11 +3624,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var asciidoc_1 = asciidoc;
   /*
-  Language: AspectJ
-  Author: Hakan Ozler <ozler.hakan@gmail.com>
-  Website: https://www.eclipse.org/aspectj/
-  Description: Syntax Highlighting for the AspectJ Language which is a general-purpose aspect-oriented extension to the Java programming language.
-   */  function aspectj(hljs) {
+	Language: AspectJ
+	Author: Hakan Ozler <ozler.hakan@gmail.com>
+	Website: https://www.eclipse.org/aspectj/
+	Description: Syntax Highlighting for the AspectJ Language which is a general-purpose aspect-oriented extension to the Java programming language.
+	 */  function aspectj(hljs) {
     var KEYWORDS = "false synchronized int abstract float private char boolean static null if const " + "for true while long throw strictfp finally protected import native final return void " + "enum else extends implements break transient new catch instanceof byte super volatile case " + "assert short package default double public try this switch continue throws privileged " + "aspectOf adviceexecution proceed cflowbelow cflow initialization preinitialization " + "staticinitialization withincode target within execution getWithinTypeName handler " + "thisJoinPoint thisJoinPointStaticPart thisEnclosingJoinPointStaticPart declare parents " + "warning error soft precedence thisAspectInstance";
     var SHORTKEYS = "get set args call";
     return {
@@ -3713,11 +3728,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var aspectj_1 = aspectj;
   /*
-  Language: ATS2
-  Author:: Ryan King <rtking@bu.edu>
-  Description: ATS language definition.
-  Category: functional
-  */  function ats(hljs) {
+	Language: ATS2
+	Author:: Ryan King <rtking@bu.edu>
+	Description: ATS language definition.
+	Category: functional
+	*/  function ats(hljs) {
     var NUMBERS = {
       className: "number",
       variants: [ {
@@ -3792,11 +3807,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var ats_1 = ats;
   /*
-  Language: AutoHotkey
-  Author: Seongwon Lee <dlimpid@gmail.com>
-  Description: AutoHotkey language definition
-  Category: scripting
-  */  function autohotkey(hljs) {
+	Language: AutoHotkey
+	Author: Seongwon Lee <dlimpid@gmail.com>
+	Description: AutoHotkey language definition
+	Category: scripting
+	*/  function autohotkey(hljs) {
     var BACKTICK_ESCAPE = {
       begin: "`[\\s\\S]"
     };
@@ -3850,11 +3865,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var autohotkey_1 = autohotkey;
   /*
-  Language: AutoIt
-  Author: Manh Tuan <junookyo@gmail.com>
-  Description: AutoIt language definition
-  Category: scripting
-  */  function autoit(hljs) {
+	Language: AutoIt
+	Author: Manh Tuan <junookyo@gmail.com>
+	Description: AutoIt language definition
+	Category: scripting
+	*/  function autoit(hljs) {
     var KEYWORDS = "ByRef Case Const ContinueCase ContinueLoop " + "Default Dim Do Else ElseIf EndFunc EndIf EndSelect " + "EndSwitch EndWith Enum Exit ExitLoop For Func " + "Global If In Local Next ReDim Return Select Static " + "Step Switch Then To Until Volatile WEnd While With", LITERAL = "True False And Null Not Or", BUILT_IN = "Abs ACos AdlibRegister AdlibUnRegister Asc AscW ASin Assign ATan AutoItSetOption AutoItWinGetTitle AutoItWinSetTitle Beep Binary BinaryLen BinaryMid BinaryToString BitAND BitNOT BitOR BitRotate BitShift BitXOR BlockInput Break Call CDTray Ceiling Chr ChrW ClipGet ClipPut ConsoleRead ConsoleWrite ConsoleWriteError ControlClick ControlCommand ControlDisable ControlEnable ControlFocus ControlGetFocus ControlGetHandle ControlGetPos ControlGetText ControlHide ControlListView ControlMove ControlSend ControlSetText ControlShow ControlTreeView Cos Dec DirCopy DirCreate DirGetSize DirMove DirRemove DllCall DllCallAddress DllCallbackFree DllCallbackGetPtr DllCallbackRegister DllClose DllOpen DllStructCreate DllStructGetData DllStructGetPtr DllStructGetSize DllStructSetData DriveGetDrive DriveGetFileSystem DriveGetLabel DriveGetSerial DriveGetType DriveMapAdd DriveMapDel DriveMapGet DriveSetLabel DriveSpaceFree DriveSpaceTotal DriveStatus EnvGet EnvSet EnvUpdate Eval Execute Exp FileChangeDir FileClose FileCopy FileCreateNTFSLink FileCreateShortcut FileDelete FileExists FileFindFirstFile FileFindNextFile FileFlush FileGetAttrib FileGetEncoding FileGetLongName FileGetPos FileGetShortcut FileGetShortName FileGetSize FileGetTime FileGetVersion FileInstall FileMove FileOpen FileOpenDialog FileRead FileReadLine FileReadToArray FileRecycle FileRecycleEmpty FileSaveDialog FileSelectFolder FileSetAttrib FileSetEnd FileSetPos FileSetTime FileWrite FileWriteLine Floor FtpSetProxy FuncName GUICreate GUICtrlCreateAvi GUICtrlCreateButton GUICtrlCreateCheckbox GUICtrlCreateCombo GUICtrlCreateContextMenu GUICtrlCreateDate GUICtrlCreateDummy GUICtrlCreateEdit GUICtrlCreateGraphic GUICtrlCreateGroup GUICtrlCreateIcon GUICtrlCreateInput GUICtrlCreateLabel GUICtrlCreateList GUICtrlCreateListView GUICtrlCreateListViewItem GUICtrlCreateMenu GUICtrlCreateMenuItem GUICtrlCreateMonthCal GUICtrlCreateObj GUICtrlCreatePic GUICtrlCreateProgress GUICtrlCreateRadio GUICtrlCreateSlider GUICtrlCreateTab GUICtrlCreateTabItem GUICtrlCreateTreeView GUICtrlCreateTreeViewItem GUICtrlCreateUpdown GUICtrlDelete GUICtrlGetHandle GUICtrlGetState GUICtrlRead GUICtrlRecvMsg GUICtrlRegisterListViewSort GUICtrlSendMsg GUICtrlSendToDummy GUICtrlSetBkColor GUICtrlSetColor GUICtrlSetCursor GUICtrlSetData GUICtrlSetDefBkColor GUICtrlSetDefColor GUICtrlSetFont GUICtrlSetGraphic GUICtrlSetImage GUICtrlSetLimit GUICtrlSetOnEvent GUICtrlSetPos GUICtrlSetResizing GUICtrlSetState GUICtrlSetStyle GUICtrlSetTip GUIDelete GUIGetCursorInfo GUIGetMsg GUIGetStyle GUIRegisterMsg GUISetAccelerators GUISetBkColor GUISetCoord GUISetCursor GUISetFont GUISetHelp GUISetIcon GUISetOnEvent GUISetState GUISetStyle GUIStartGroup GUISwitch Hex HotKeySet HttpSetProxy HttpSetUserAgent HWnd InetClose InetGet InetGetInfo InetGetSize InetRead IniDelete IniRead IniReadSection IniReadSectionNames IniRenameSection IniWrite IniWriteSection InputBox Int IsAdmin IsArray IsBinary IsBool IsDeclared IsDllStruct IsFloat IsFunc IsHWnd IsInt IsKeyword IsNumber IsObj IsPtr IsString Log MemGetStats Mod MouseClick MouseClickDrag MouseDown MouseGetCursor MouseGetPos MouseMove MouseUp MouseWheel MsgBox Number ObjCreate ObjCreateInterface ObjEvent ObjGet ObjName OnAutoItExitRegister OnAutoItExitUnRegister Ping PixelChecksum PixelGetColor PixelSearch ProcessClose ProcessExists ProcessGetStats ProcessList ProcessSetPriority ProcessWait ProcessWaitClose ProgressOff ProgressOn ProgressSet Ptr Random RegDelete RegEnumKey RegEnumVal RegRead RegWrite Round Run RunAs RunAsWait RunWait Send SendKeepActive SetError SetExtended ShellExecute ShellExecuteWait Shutdown Sin Sleep SoundPlay SoundSetWaveVolume SplashImageOn SplashOff SplashTextOn Sqrt SRandom StatusbarGetText StderrRead StdinWrite StdioClose StdoutRead String StringAddCR StringCompare StringFormat StringFromASCIIArray StringInStr StringIsAlNum StringIsAlpha StringIsASCII StringIsDigit StringIsFloat StringIsInt StringIsLower StringIsSpace StringIsUpper StringIsXDigit StringLeft StringLen StringLower StringMid StringRegExp StringRegExpReplace StringReplace StringReverse StringRight StringSplit StringStripCR StringStripWS StringToASCIIArray StringToBinary StringTrimLeft StringTrimRight StringUpper Tan TCPAccept TCPCloseSocket TCPConnect TCPListen TCPNameToIP TCPRecv TCPSend TCPShutdown, UDPShutdown TCPStartup, UDPStartup TimerDiff TimerInit ToolTip TrayCreateItem TrayCreateMenu TrayGetMsg TrayItemDelete TrayItemGetHandle TrayItemGetState TrayItemGetText TrayItemSetOnEvent TrayItemSetState TrayItemSetText TraySetClick TraySetIcon TraySetOnEvent TraySetPauseIcon TraySetState TraySetToolTip TrayTip UBound UDPBind UDPCloseSocket UDPOpen UDPRecv UDPSend VarGetType WinActivate WinActive WinClose WinExists WinFlash WinGetCaretPos WinGetClassList WinGetClientSize WinGetHandle WinGetPos WinGetProcess WinGetState WinGetText WinGetTitle WinKill WinList WinMenuSelectItem WinMinimizeAll WinMinimizeAllUndo WinMove WinSetOnTop WinSetState WinSetTitle WinSetTrans WinWait", COMMENT = {
       variants: [ hljs.COMMENT(";", "$", {
         relevance: 0
@@ -3951,11 +3966,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var autoit_1 = autoit;
   /*
-  Language: AVR Assembly
-  Author: Vladimir Ermakov <vooon341@gmail.com>
-  Category: assembler
-  Website: https://www.microchip.com/webdoc/avrassembler/avrassembler.wb_instruction_list.html
-  */  function avrasm(hljs) {
+	Language: AVR Assembly
+	Author: Vladimir Ermakov <vooon341@gmail.com>
+	Category: assembler
+	Website: https://www.microchip.com/webdoc/avrassembler/avrassembler.wb_instruction_list.html
+	*/  function avrasm(hljs) {
     return {
       name: "AVR Assembly",
       case_insensitive: true,
@@ -3999,11 +4014,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var avrasm_1 = avrasm;
   /*
-  Language: Awk
-  Author: Matthew Daly <matthewbdaly@gmail.com>
-  Website: https://www.gnu.org/software/gawk/manual/gawk.html
-  Description: language definition for Awk scripts
-  */  function awk(hljs) {
+	Language: Awk
+	Author: Matthew Daly <matthewbdaly@gmail.com>
+	Website: https://www.gnu.org/software/gawk/manual/gawk.html
+	Description: language definition for Awk scripts
+	*/  function awk(hljs) {
     var VARIABLE = {
       className: "variable",
       variants: [ {
@@ -4050,11 +4065,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var awk_1 = awk;
   /*
-  Language: Microsoft Axapta (now Dynamics 365)
-  Author: Dmitri Roudakov <dmitri@roudakov.ru>
-  Website: https://dynamics.microsoft.com/en-us/ax-overview/
-  Category: enterprise
-  */  function axapta(hljs) {
+	Language: Microsoft Axapta (now Dynamics 365)
+	Author: Dmitri Roudakov <dmitri@roudakov.ru>
+	Website: https://dynamics.microsoft.com/en-us/ax-overview/
+	Category: enterprise
+	*/  function axapta(hljs) {
     return {
       name: "Dynamics 365",
       keywords: "false int abstract private char boolean static null if for true " + "while long throw finally protected final return void enum else " + "break new catch byte super case short default double public try this switch " + "continue reverse firstfast firstonly forupdate nofetch sum avg minof maxof count " + "order group by asc desc index hint like dispaly edit client server ttsbegin " + "ttscommit str real date container anytype common div mod",
@@ -4076,9 +4091,9 @@ var demo = function(path, fs, url, buffer) {
   }
   var axapta_1 = axapta;
   /*
-  Language: AzureCLI
-  Author: Duncan Mackenzie <duncanma@duncanmackenzie.net>
-  */  function azurecli(hljs) {
+	Language: AzureCLI
+	Author: Duncan Mackenzie <duncanma@duncanmackenzie.net>
+	*/  function azurecli(hljs) {
     var VAR = {
       className: "variable",
       variants: [ {
@@ -4139,11 +4154,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var azurecli_1 = azurecli;
   /*
-  Language: Ballerina
-  Author: Shan Mahanama <gambit1024@gmail.com>
-  Category: integration
-  Description: Ballerina language (ballerinalang). For more info about language see https://ballerinalang.org/
-  */  function ballerina(hljs) {
+	Language: Ballerina
+	Author: Shan Mahanama <gambit1024@gmail.com>
+	Category: integration
+	Description: Ballerina language (ballerinalang). For more info about language see https://ballerinalang.org/
+	*/  function ballerina(hljs) {
     var BALLERINA_KEYWORDS = {
       keyword: "package import as public native service resource function connector action struct " + "annotation enum parameter const typemapper worker xmlns returns version int float " + "boolean string blob map json xml datatable any type var create attach transform if " + "else iterate while next break fork join some all timeout try catch finally throw " + "return reply transaction abort aborted committed failed retry lengthof typeof with",
       literal: "true false null",
@@ -4184,12 +4199,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var ballerina_1 = ballerina;
   /*
-  Language: Bash
-  Author: vah <vahtenberg@gmail.com>
-  Contributrors: Benjamin Pannell <contact@sierrasoftworks.com>
-  Website: https://www.gnu.org/software/bash/
-  Category: common
-  */  function bash(hljs) {
+	Language: Bash
+	Author: vah <vahtenberg@gmail.com>
+	Contributrors: Benjamin Pannell <contact@sierrasoftworks.com>
+	Website: https://www.gnu.org/software/bash/
+	Category: common
+	*/  function bash(hljs) {
     const VAR = {};
     const BRACED_VAR = {
       begin: /\$\{/,
@@ -4275,11 +4290,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var bash_1 = bash;
   /*
-  Language: BASIC
-  Author: Raphaël Assénat <raph@raphnet.net>
-  Description: Based on the BASIC reference from the Tandy 1000 guide
-  Website: https://en.wikipedia.org/wiki/Tandy_1000
-  */  function basic(hljs) {
+	Language: BASIC
+	Author: Raphaël Assénat <raph@raphnet.net>
+	Description: Based on the BASIC reference from the Tandy 1000 guide
+	Website: https://en.wikipedia.org/wiki/Tandy_1000
+	*/  function basic(hljs) {
     return {
       name: "BASIC",
       case_insensitive: true,
@@ -4316,10 +4331,10 @@ var demo = function(path, fs, url, buffer) {
   }
   var basic_1 = basic;
   /*
-  Language: Beancount
-  Author: Henrique Bastos <henrique@bastos.net>
-  Description: Double-Entry Accounting from Text Files
-  */  function beancount(hljs) {
+	Language: Beancount
+	Author: Henrique Bastos <henrique@bastos.net>
+	Description: Double-Entry Accounting from Text Files
+	*/  function beancount(hljs) {
     var ACCOUNT_RE = "[A-Z][A-Za-z0-9-]*";
     var ACCOUNT = {
       className: "type",
@@ -4422,10 +4437,10 @@ var demo = function(path, fs, url, buffer) {
   }
   var beancount_1 = beancount;
   /*
-  Language: Backus–Naur Form
-  Website: https://en.wikipedia.org/wiki/Backus–Naur_form
-  Author: Oleg Efimov <efimovov@gmail.com>
-  */  function bnf(hljs) {
+	Language: Backus–Naur Form
+	Website: https://en.wikipedia.org/wiki/Backus–Naur_form
+	Author: Oleg Efimov <efimovov@gmail.com>
+	*/  function bnf(hljs) {
     return {
       name: "Backus\u2013Naur Form",
       contains: [ 
@@ -4450,12 +4465,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var bnf_1 = bnf;
   /*
-  Language: botlang
-  Author: Mathias Schilling <m@matchilling>
-  Category: scripting
-  Description: A scripting language for conversational chat bots
-  Homepage: https://botlang.org/
-  */  function botlang(hljs) {
+	Language: botlang
+	Author: Mathias Schilling <m@matchilling>
+	Category: scripting
+	Description: A scripting language for conversational chat bots
+	Homepage: https://botlang.org/
+	*/  function botlang(hljs) {
     const BUILT_IN = {
       multipleChoice: {
         className: "literal",
@@ -4503,10 +4518,10 @@ var demo = function(path, fs, url, buffer) {
   }
   var botlang_1 = botlang;
   /*
-  Language: Brainfuck
-  Author: Evgeny Stepanischev <imbolk@gmail.com>
-  Website: https://esolangs.org/wiki/Brainfuck
-  */  function brainfuck(hljs) {
+	Language: Brainfuck
+	Author: Evgeny Stepanischev <imbolk@gmail.com>
+	Website: https://esolangs.org/wiki/Brainfuck
+	*/  function brainfuck(hljs) {
     var LITERAL = {
       className: "literal",
       begin: "[\\+\\-]",
@@ -4535,11 +4550,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var brainfuck_1 = brainfuck;
   /*
-  Language: C
-  Category: common, system
-  Website: https://en.wikipedia.org/wiki/C_(programming_language)
-  Requires: c-like.js
-  */  function c(hljs) {
+	Language: C
+	Category: common, system
+	Website: https://en.wikipedia.org/wiki/C_(programming_language)
+	Requires: c-like.js
+	*/  function c(hljs) {
     var lang = hljs.getLanguage("c-like").rawDefinition();
     // Until C is actually different than C++ there is no reason to auto-detect C
     // as it's own language since it would just fail auto-detect testing or
@@ -4553,11 +4568,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var c_1 = c;
   /*
-  Language: C/AL
-  Author: Kenneth Fuglsang Christensen <kfuglsang@gmail.com>
-  Description: Provides highlighting of Microsoft Dynamics NAV C/AL code files
-  Website: https://docs.microsoft.com/en-us/dynamics-nav/programming-in-c-al
-  */  function cal(hljs) {
+	Language: C/AL
+	Author: Kenneth Fuglsang Christensen <kfuglsang@gmail.com>
+	Description: Provides highlighting of Microsoft Dynamics NAV C/AL code files
+	Website: https://docs.microsoft.com/en-us/dynamics-nav/programming-in-c-al
+	*/  function cal(hljs) {
     var KEYWORDS = "div mod in and or not xor asserterror begin case do downto else end exit for if of repeat then to " + "until while with var";
     var LITERALS = "false true";
     var COMMENT_MODES = [ hljs.C_LINE_COMMENT_MODE, hljs.COMMENT(/\{/, /\}/, {
@@ -4620,12 +4635,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var cal_1 = cal;
   /*
-  Language: Cap’n Proto
-  Author: Oleg Efimov <efimovov@gmail.com>
-  Description: Cap’n Proto message definition format
-  Website: https://capnproto.org/capnp-tool.html
-  Category: protocols
-  */  function capnproto(hljs) {
+	Language: Cap’n Proto
+	Author: Oleg Efimov <efimovov@gmail.com>
+	Description: Cap’n Proto message definition format
+	Website: https://capnproto.org/capnp-tool.html
+	Category: protocols
+	*/  function capnproto(hljs) {
     return {
       name: "Cap\u2019n Proto",
       aliases: [ "capnp" ],
@@ -4668,10 +4683,10 @@ var demo = function(path, fs, url, buffer) {
   }
   var capnproto_1 = capnproto;
   /*
-  Language: Ceylon
-  Author: Lucas Werkmeister <mail@lucaswerkmeister.de>
-  Website: https://ceylon-lang.org
-  */  function ceylon(hljs) {
+	Language: Ceylon
+	Author: Lucas Werkmeister <mail@lucaswerkmeister.de>
+	Website: https://ceylon-lang.org
+	*/  function ceylon(hljs) {
     // 2.3. Identifiers and keywords
     var KEYWORDS = "assembly module package import alias class interface object given value " + "assign void function new of extends satisfies abstracts in out return " + "break continue throw assert dynamic if else switch case for while try " + "catch finally then let this outer super is exists nonempty";
     // 7.4.1 Declaration Modifiers
@@ -4729,11 +4744,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var ceylon_1 = ceylon;
   /*
-  Language: Clean
-  Author: Camil Staps <info@camilstaps.nl>
-  Category: functional
-  Website: http://clean.cs.ru.nl
-  */  function clean(hljs) {
+	Language: Clean
+	Author: Camil Staps <info@camilstaps.nl>
+	Category: functional
+	Website: http://clean.cs.ru.nl
+	*/  function clean(hljs) {
     return {
       name: "Clean",
       aliases: [ "clean", "icl", "dcl" ],
@@ -4749,12 +4764,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var clean_1 = clean;
   /*
-  Language: Clojure
-  Description: Clojure syntax (based on lisp.js)
-  Author: mfornos
-  Website: https://clojure.org
-  Category: lisp
-  */  function clojure(hljs) {
+	Language: Clojure
+	Description: Clojure syntax (based on lisp.js)
+	Author: mfornos
+	Website: https://clojure.org
+	Category: lisp
+	*/  function clojure(hljs) {
     var SYMBOLSTART = "a-zA-Z_\\-!.?+*=<>&#'";
     var SYMBOL_RE = "[" + SYMBOLSTART + "][" + SYMBOLSTART + "0-9/;:]*";
     var globals = "def defonce defprotocol defstruct defmulti defmethod defn- defn defmacro deftype defrecord";
@@ -4838,13 +4853,13 @@ var demo = function(path, fs, url, buffer) {
   }
   var clojure_1 = clojure;
   /*
-  Language: Clojure REPL
-  Description: Clojure REPL sessions
-  Author: Ivan Sagalaev <maniac@softwaremaniacs.org>
-  Requires: clojure.js
-  Website: https://clojure.org
-  Category: lisp
-  */  function clojureRepl(hljs) {
+	Language: Clojure REPL
+	Description: Clojure REPL sessions
+	Author: Ivan Sagalaev <maniac@softwaremaniacs.org>
+	Requires: clojure.js
+	Website: https://clojure.org
+	Category: lisp
+	*/  function clojureRepl(hljs) {
     return {
       name: "Clojure REPL",
       contains: [ {
@@ -4859,11 +4874,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var clojureRepl_1 = clojureRepl;
   /*
-  Language: CMake
-  Description: CMake is an open-source cross-platform system for build automation.
-  Author: Igor Kalnitsky <igor@kalnitsky.org>
-  Website: https://cmake.org
-  */  function cmake(hljs) {
+	Language: CMake
+	Description: CMake is an open-source cross-platform system for build automation.
+	Author: Igor Kalnitsky <igor@kalnitsky.org>
+	Website: https://cmake.org
+	*/  function cmake(hljs) {
     return {
       name: "CMake",
       aliases: [ "cmake.in" ],
@@ -4902,13 +4917,13 @@ var demo = function(path, fs, url, buffer) {
   const BUILT_IN_VARIABLES$3 = [ "arguments", "this", "super", "console", "window", "document", "localStorage", "module", "global" ];
   const BUILT_INS$3 = [].concat(BUILT_IN_GLOBALS$3, BUILT_IN_VARIABLES$3, TYPES$3, ERROR_TYPES$3);
   /*
-  Language: CoffeeScript
-  Author: Dmytrii Nagirniak <dnagir@gmail.com>
-  Contributors: Oleg Efimov <efimovov@gmail.com>, Cédric Néhémie <cedric.nehemie@gmail.com>
-  Description: CoffeeScript is a programming language that transcompiles to JavaScript. For info about language see http://coffeescript.org/
-  Category: common, scripting
-  Website: https://coffeescript.org
-  */  function coffeescript(hljs) {
+	Language: CoffeeScript
+	Author: Dmytrii Nagirniak <dnagir@gmail.com>
+	Contributors: Oleg Efimov <efimovov@gmail.com>, Cédric Néhémie <cedric.nehemie@gmail.com>
+	Description: CoffeeScript is a programming language that transcompiles to JavaScript. For info about language see http://coffeescript.org/
+	Category: common, scripting
+	Website: https://coffeescript.org
+	*/  function coffeescript(hljs) {
     var COFFEE_BUILT_INS = [ "npm", "print" ];
     var COFFEE_LITERALS = [ "yes", "no", "on", "off" ];
     var COFFEE_KEYWORDS = [ "then", "unless", "until", "loop", "by", "when", "and", "or", "is", "isnt", "not" ];
@@ -4989,7 +5004,7 @@ var demo = function(path, fs, url, buffer) {
       begin: "\\([^\\(]",
       returnBegin: true,
       /* We need another contained nameless mode to not have every nested
-      pair of parens to be called "params" */
+	    pair of parens to be called "params" */
       contains: [ {
         begin: /\(/,
         end: /\)/,
@@ -5041,11 +5056,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var coffeescript_1 = coffeescript;
   /*
-  Language: Coq
-  Author: Stephan Boyer <stephan@stephanboyer.com>
-  Category: functional
-  Website: https://coq.inria.fr
-  */  function coq(hljs) {
+	Language: Coq
+	Author: Stephan Boyer <stephan@stephanboyer.com>
+	Category: functional
+	Website: https://coq.inria.fr
+	*/  function coq(hljs) {
     return {
       name: "Coq",
       keywords: {
@@ -5064,11 +5079,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var coq_1 = coq;
   /*
-  Language: Caché Object Script
-  Author: Nikita Savchenko <zitros.lab@gmail.com>
-  Category: enterprise, scripting
-  Website: https://cedocs.intersystems.com/latest/csp/docbook/DocBook.UI.Page.cls
-  */  function cos(hljs) {
+	Language: Caché Object Script
+	Author: Nikita Savchenko <zitros.lab@gmail.com>
+	Category: enterprise, scripting
+	Website: https://cedocs.intersystems.com/latest/csp/docbook/DocBook.UI.Page.cls
+	*/  function cos(hljs) {
     var STRINGS = {
       className: "string",
       variants: [ {
@@ -5177,12 +5192,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var cos_1 = cos;
   /*
-  Language: crmsh
-  Author: Kristoffer Gronlund <kgronlund@suse.com>
-  Website: http://crmsh.github.io
-  Description: Syntax Highlighting for the crmsh DSL
-  Category: config
-  */  function crmsh(hljs) {
+	Language: crmsh
+	Author: Kristoffer Gronlund <kgronlund@suse.com>
+	Website: http://crmsh.github.io
+	Description: Syntax Highlighting for the crmsh DSL
+	Category: config
+	*/  function crmsh(hljs) {
     var RESOURCES = "primitive rsc_template";
     var COMMANDS = "group clone ms master location colocation order fencing_topology " + "rsc_ticket acl_target acl_group user role " + "tag xml";
     var PROPERTY_SETS = "property rsc_defaults op_defaults";
@@ -5255,10 +5270,10 @@ var demo = function(path, fs, url, buffer) {
   }
   var crmsh_1 = crmsh;
   /*
-  Language: Crystal
-  Author: TSUYUSATO Kitsune <make.just.on@gmail.com>
-  Website: https://crystal-lang.org
-  */  function crystal(hljs) {
+	Language: Crystal
+	Author: TSUYUSATO Kitsune <make.just.on@gmail.com>
+	Website: https://crystal-lang.org
+	*/  function crystal(hljs) {
     var INT_SUFFIX = "(_*[ui](8|16|32|64|128))?";
     var FLOAT_SUFFIX = "(_*f(32|64))?";
     var CRYSTAL_IDENT_RE = "[a-zA-Z_]\\w*[!?=]?";
@@ -5489,12 +5504,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var crystal_1 = crystal;
   /*
-  Language: C#
-  Author: Jason Diamond <jason@diamond.name>
-  Contributor: Nicolas LLOBERA <nicolas@bananeatomic.fr>, Pieter Vantorre <pietervantorre@gmail.com>
-  Website: https://docs.microsoft.com/en-us/dotnet/csharp/
-  Category: common
-  */  function csharp(hljs) {
+	Language: C#
+	Author: Jason Diamond <jason@diamond.name>
+	Contributor: Nicolas LLOBERA <nicolas@bananeatomic.fr>, Pieter Vantorre <pietervantorre@gmail.com>
+	Website: https://docs.microsoft.com/en-us/dotnet/csharp/
+	Category: common
+	*/  function csharp(hljs) {
     var KEYWORDS = {
       keyword: 
       // Normal keywords.
@@ -5758,11 +5773,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var csharp_1 = csharp;
   /*
-  Language: CSHTML
-  Requires: xml.js, csharp.js
-  Author: Roman Resh <romanresh@live.com>
-  Category: common
-  */  function cshtml(hljs) {
+	Language: CSHTML
+	Requires: xml.js, csharp.js
+	Author: Roman Resh <romanresh@live.com>
+	Category: common
+	*/  function cshtml(hljs) {
     var SPECIAL_SYMBOL_CLASSNAME = "built_in";
     var BLOCK_TEXT = {
       begin: "[@]{0,1}<text>",
@@ -6043,13 +6058,13 @@ var demo = function(path, fs, url, buffer) {
   }
   var cshtml_1 = cshtml;
   /*
-  Language: CSP
-  Description: Content Security Policy definition highlighting
-  Author: Taras <oxdef@oxdef.info>
-  Website: https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
+	Language: CSP
+	Description: Content Security Policy definition highlighting
+	Author: Taras <oxdef@oxdef.info>
+	Website: https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
 
-  vim: ts=2 sw=2 st=2
-  */  function csp(hljs) {
+	vim: ts=2 sw=2 st=2
+	*/  function csp(hljs) {
     return {
       name: "CSP",
       case_insensitive: false,
@@ -6071,10 +6086,10 @@ var demo = function(path, fs, url, buffer) {
   }
   var csp_1 = csp;
   /*
-  Language: CSS
-  Category: common, css
-  Website: https://developer.mozilla.org/en-US/docs/Web/CSS
-  */  function css(hljs) {
+	Language: CSS
+	Category: common, css
+	Website: https://developer.mozilla.org/en-US/docs/Web/CSS
+	*/  function css(hljs) {
     var FUNCTION_LIKE = {
       begin: /[\w-]+\(/,
       returnBegin: true,
@@ -6182,9 +6197,9 @@ var demo = function(path, fs, url, buffer) {
   }
   var css_1 = css;
   /*
-   Language: Cypher
-   Contributors: Johannes Wienke <languitar@semipol.de>
-   */  function cypher(hljs) {
+	 Language: Cypher
+	 Contributors: Johannes Wienke <languitar@semipol.de>
+	 */  function cypher(hljs) {
     return {
       case_insensitive: true,
       keywords: {
@@ -6209,33 +6224,33 @@ var demo = function(path, fs, url, buffer) {
   }
   var cypher_1 = cypher;
   /*
-  Language: D
-  Author: Aleksandar Ruzicic <aleksandar@ruzicic.info>
-  Description: D is a language with C-like syntax and static typing. It pragmatically combines efficiency, control, and modeling power, with safety and programmer productivity.
-  Version: 1.0a
-  Website: https://dlang.org
-  Date: 2012-04-08
-  */
+	Language: D
+	Author: Aleksandar Ruzicic <aleksandar@ruzicic.info>
+	Description: D is a language with C-like syntax and static typing. It pragmatically combines efficiency, control, and modeling power, with safety and programmer productivity.
+	Version: 1.0a
+	Website: https://dlang.org
+	Date: 2012-04-08
+	*/
   /**
-   * Known issues:
-   *
-   * - invalid hex string literals will be recognized as a double quoted strings
-   *   but 'x' at the beginning of string will not be matched
-   *
-   * - delimited string literals are not checked for matching end delimiter
-   *   (not possible to do with js regexp)
-   *
-   * - content of token string is colored as a string (i.e. no keyword coloring inside a token string)
-   *   also, content of token string is not validated to contain only valid D tokens
-   *
-   * - special token sequence rule is not strictly following D grammar (anything following #line
-   *   up to the end of line is matched as special token sequence)
-   */  function d(hljs) {
+	 * Known issues:
+	 *
+	 * - invalid hex string literals will be recognized as a double quoted strings
+	 *   but 'x' at the beginning of string will not be matched
+	 *
+	 * - delimited string literals are not checked for matching end delimiter
+	 *   (not possible to do with js regexp)
+	 *
+	 * - content of token string is colored as a string (i.e. no keyword coloring inside a token string)
+	 *   also, content of token string is not validated to contain only valid D tokens
+	 *
+	 * - special token sequence rule is not strictly following D grammar (anything following #line
+	 *   up to the end of line is matched as special token sequence)
+	 */  function d(hljs) {
     /**
-     * Language keywords
-     *
-     * @type {Object}
-     */
+	   * Language keywords
+	   *
+	   * @type {Object}
+	   */
     var D_KEYWORDS = {
       $pattern: hljs.UNDERSCORE_IDENT_RE,
       keyword: "abstract alias align asm assert auto body break byte case cast catch class " + "const continue debug default delete deprecated do else enum export extern final " + "finally for foreach foreach_reverse|10 goto if immutable import in inout int " + "interface invariant is lazy macro mixin module new nothrow out override package " + "pragma private protected public pure ref return scope shared static struct " + "super switch synchronized template this throw try typedef typeid typeof union " + "unittest version void volatile while with __FILE__ __LINE__ __gshared|10 " + "__thread __traits __DATE__ __EOF__ __TIME__ __TIMESTAMP__ __VENDOR__ __VERSION__",
@@ -6243,15 +6258,15 @@ var demo = function(path, fs, url, buffer) {
       literal: "false null true"
     };
     /**
-     * Number literal regexps
-     *
-     * @type {String}
-     */    var decimal_integer_re = "(0|[1-9][\\d_]*)", decimal_integer_nosus_re = "(0|[1-9][\\d_]*|\\d[\\d_]*|[\\d_]+?\\d)", binary_integer_re = "0[bB][01_]+", hexadecimal_digits_re = "([\\da-fA-F][\\da-fA-F_]*|_[\\da-fA-F][\\da-fA-F_]*)", hexadecimal_integer_re = "0[xX]" + hexadecimal_digits_re, decimal_exponent_re = "([eE][+-]?" + decimal_integer_nosus_re + ")", decimal_float_re = "(" + decimal_integer_nosus_re + "(\\.\\d*|" + decimal_exponent_re + ")|" + "\\d+\\." + decimal_integer_nosus_re + decimal_integer_nosus_re + "|" + "\\." + decimal_integer_re + decimal_exponent_re + "?" + ")", hexadecimal_float_re = "(0[xX](" + hexadecimal_digits_re + "\\." + hexadecimal_digits_re + "|" + "\\.?" + hexadecimal_digits_re + ")[pP][+-]?" + decimal_integer_nosus_re + ")", integer_re = "(" + decimal_integer_re + "|" + binary_integer_re + "|" + hexadecimal_integer_re + ")", float_re = "(" + hexadecimal_float_re + "|" + decimal_float_re + ")";
+	   * Number literal regexps
+	   *
+	   * @type {String}
+	   */    var decimal_integer_re = "(0|[1-9][\\d_]*)", decimal_integer_nosus_re = "(0|[1-9][\\d_]*|\\d[\\d_]*|[\\d_]+?\\d)", binary_integer_re = "0[bB][01_]+", hexadecimal_digits_re = "([\\da-fA-F][\\da-fA-F_]*|_[\\da-fA-F][\\da-fA-F_]*)", hexadecimal_integer_re = "0[xX]" + hexadecimal_digits_re, decimal_exponent_re = "([eE][+-]?" + decimal_integer_nosus_re + ")", decimal_float_re = "(" + decimal_integer_nosus_re + "(\\.\\d*|" + decimal_exponent_re + ")|" + "\\d+\\." + decimal_integer_nosus_re + decimal_integer_nosus_re + "|" + "\\." + decimal_integer_re + decimal_exponent_re + "?" + ")", hexadecimal_float_re = "(0[xX](" + hexadecimal_digits_re + "\\." + hexadecimal_digits_re + "|" + "\\.?" + hexadecimal_digits_re + ")[pP][+-]?" + decimal_integer_nosus_re + ")", integer_re = "(" + decimal_integer_re + "|" + binary_integer_re + "|" + hexadecimal_integer_re + ")", float_re = "(" + hexadecimal_float_re + "|" + decimal_float_re + ")";
     /**
-     * Escape sequence supported in D string and character literals
-     *
-     * @type {String}
-     */    var escape_sequence_re = "\\\\(" + "['\"\\?\\\\abfnrtv]|" + // common escapes
+	   * Escape sequence supported in D string and character literals
+	   *
+	   * @type {String}
+	   */    var escape_sequence_re = "\\\\(" + "['\"\\?\\\\abfnrtv]|" + // common escapes
     "u[\\dA-Fa-f]{4}|" + // four hex digit unicode codepoint
     "[0-7]{1,3}|" + // one to three octal digit ascii char code
     "x[\\dA-Fa-f]{2}|" + // two hex digit ascii char code
@@ -6259,120 +6274,120 @@ var demo = function(path, fs, url, buffer) {
     ")|" + "&[a-zA-Z\\d]{2,};";
  // named character entity
     /**
-     * D integer number literals
-     *
-     * @type {Object}
-     */    var D_INTEGER_MODE = {
+	   * D integer number literals
+	   *
+	   * @type {Object}
+	   */    var D_INTEGER_MODE = {
       className: "number",
       begin: "\\b" + integer_re + "(L|u|U|Lu|LU|uL|UL)?",
       relevance: 0
     };
     /**
-     * [D_FLOAT_MODE description]
-     * @type {Object}
-     */    var D_FLOAT_MODE = {
+	   * [D_FLOAT_MODE description]
+	   * @type {Object}
+	   */    var D_FLOAT_MODE = {
       className: "number",
       begin: "\\b(" + float_re + "([fF]|L|i|[fF]i|Li)?|" + integer_re + "(i|[fF]i|Li)" + ")",
       relevance: 0
     };
     /**
-     * D character literal
-     *
-     * @type {Object}
-     */    var D_CHARACTER_MODE = {
+	   * D character literal
+	   *
+	   * @type {Object}
+	   */    var D_CHARACTER_MODE = {
       className: "string",
       begin: "'(" + escape_sequence_re + "|.)",
       end: "'",
       illegal: "."
     };
     /**
-     * D string escape sequence
-     *
-     * @type {Object}
-     */    var D_ESCAPE_SEQUENCE = {
+	   * D string escape sequence
+	   *
+	   * @type {Object}
+	   */    var D_ESCAPE_SEQUENCE = {
       begin: escape_sequence_re,
       relevance: 0
     };
     /**
-     * D double quoted string literal
-     *
-     * @type {Object}
-     */    var D_STRING_MODE = {
+	   * D double quoted string literal
+	   *
+	   * @type {Object}
+	   */    var D_STRING_MODE = {
       className: "string",
       begin: '"',
       contains: [ D_ESCAPE_SEQUENCE ],
       end: '"[cwd]?'
     };
     /**
-     * D wysiwyg and delimited string literals
-     *
-     * @type {Object}
-     */    var D_WYSIWYG_DELIMITED_STRING_MODE = {
+	   * D wysiwyg and delimited string literals
+	   *
+	   * @type {Object}
+	   */    var D_WYSIWYG_DELIMITED_STRING_MODE = {
       className: "string",
       begin: '[rq]"',
       end: '"[cwd]?',
       relevance: 5
     };
     /**
-     * D alternate wysiwyg string literal
-     *
-     * @type {Object}
-     */    var D_ALTERNATE_WYSIWYG_STRING_MODE = {
+	   * D alternate wysiwyg string literal
+	   *
+	   * @type {Object}
+	   */    var D_ALTERNATE_WYSIWYG_STRING_MODE = {
       className: "string",
       begin: "`",
       end: "`[cwd]?"
     };
     /**
-     * D hexadecimal string literal
-     *
-     * @type {Object}
-     */    var D_HEX_STRING_MODE = {
+	   * D hexadecimal string literal
+	   *
+	   * @type {Object}
+	   */    var D_HEX_STRING_MODE = {
       className: "string",
       begin: 'x"[\\da-fA-F\\s\\n\\r]*"[cwd]?',
       relevance: 10
     };
     /**
-     * D delimited string literal
-     *
-     * @type {Object}
-     */    var D_TOKEN_STRING_MODE = {
+	   * D delimited string literal
+	   *
+	   * @type {Object}
+	   */    var D_TOKEN_STRING_MODE = {
       className: "string",
       begin: 'q"\\{',
       end: '\\}"'
     };
     /**
-     * Hashbang support
-     *
-     * @type {Object}
-     */    var D_HASHBANG_MODE = {
+	   * Hashbang support
+	   *
+	   * @type {Object}
+	   */    var D_HASHBANG_MODE = {
       className: "meta",
       begin: "^#!",
       end: "$",
       relevance: 5
     };
     /**
-     * D special token sequence
-     *
-     * @type {Object}
-     */    var D_SPECIAL_TOKEN_SEQUENCE_MODE = {
+	   * D special token sequence
+	   *
+	   * @type {Object}
+	   */    var D_SPECIAL_TOKEN_SEQUENCE_MODE = {
       className: "meta",
       begin: "#(line)",
       end: "$",
       relevance: 5
     };
     /**
-     * D attributes
-     *
-     * @type {Object}
-     */    var D_ATTRIBUTE_MODE = {
+	   * D attributes
+	   *
+	   * @type {Object}
+	   */    var D_ATTRIBUTE_MODE = {
       className: "keyword",
       begin: "@[a-zA-Z_][a-zA-Z_\\d]*"
     };
     /**
-     * D nesting comment
-     *
-     * @type {Object}
-     */    var D_NESTING_COMMENT_MODE = hljs.COMMENT("\\/\\+", "\\+\\/", {
+	   * D nesting comment
+	   *
+	   * @type {Object}
+	   */    var D_NESTING_COMMENT_MODE = hljs.COMMENT("\\/\\+", "\\+\\/", {
       contains: [ "self" ],
       relevance: 10
     });
@@ -6384,12 +6399,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var d_1 = d;
   /*
-  Language: Markdown
-  Requires: xml.js
-  Author: John Crepezzi <john.crepezzi@gmail.com>
-  Website: https://daringfireball.net/projects/markdown/
-  Category: common, markup
-  */  function markdown(hljs) {
+	Language: Markdown
+	Requires: xml.js
+	Author: John Crepezzi <john.crepezzi@gmail.com>
+	Website: https://daringfireball.net/projects/markdown/
+	Category: common, markup
+	*/  function markdown(hljs) {
     const INLINE_HTML = {
       begin: "<",
       end: ">",
@@ -6536,13 +6551,13 @@ var demo = function(path, fs, url, buffer) {
   }
   var markdown_1 = markdown;
   /*
-  Language: Dart
-  Requires: markdown.js
-  Author: Maxim Dikun <dikmax@gmail.com>
-  Description: Dart a modern, object-oriented language developed by Google. For more information see https://www.dartlang.org/
-  Website: https://dart.dev
-  Category: scripting
-  */  function dart(hljs) {
+	Language: Dart
+	Requires: markdown.js
+	Author: Maxim Dikun <dikmax@gmail.com>
+	Description: Dart a modern, object-oriented language developed by Google. For more information see https://www.dartlang.org/
+	Website: https://dart.dev
+	Category: scripting
+	*/  function dart(hljs) {
     var SUBST = {
       className: "subst",
       variants: [ {
@@ -6633,12 +6648,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var dart_1 = dart;
   /*
-  Language: Data Analysis Expressions (DAX)
-  Author: Stanislaw Swierc <stanislaw.swierc@gmail.com>
-  Description: Data Analysis Expressions (DAX) is a library of functions and operators that can be combined to build formulas and expressions in Microsoft SQL Server Analysis Services, Power Pivot in Excel, and Power BI Desktop.
-  Website: https://msdn.microsoft.com/en-us/library/ee634217.aspx
-  Category: scientific
-  */  function dax(hljs) {
+	Language: Data Analysis Expressions (DAX)
+	Author: Stanislaw Swierc <stanislaw.swierc@gmail.com>
+	Description: Data Analysis Expressions (DAX) is a library of functions and operators that can be combined to build formulas and expressions in Microsoft SQL Server Analysis Services, Power Pivot in Excel, and Power BI Desktop.
+	Website: https://msdn.microsoft.com/en-us/library/ee634217.aspx
+	Category: scientific
+	*/  function dax(hljs) {
     var IDENT_RE = "[a-zA-Z][a-zA-Z0-9._]*";
     return {
       case_insensitive: true,
@@ -6679,10 +6694,10 @@ var demo = function(path, fs, url, buffer) {
   }
   var dax_1 = dax;
   /*
-  Language: dBase
-  Author: Hanna Goodbar <hanna.goodbar@gmail.com>
-  Description: Ashton-Tate/Borland dBase IV database application language.
-  */  function dbase(hljs) {
+	Language: dBase
+	Author: Hanna Goodbar <hanna.goodbar@gmail.com>
+	Description: Ashton-Tate/Borland dBase IV database application language.
+	*/  function dbase(hljs) {
     var DBASE_KEYWORDS = {
       keyword: "accept activate append application array assist average bar " + "begin box browse calculate call cancel case change clear close " + "command compile continue convert copy count create deactivate " + "debug declare define delete dir display do edit eject else " + "end endcase enddo endif endprintjob " + "environment erase error escape export extended file " + "files fill find form from function go goto help history if " + "import index indexes input insert join key label list load " + "locate logout macro macros memo memory menu modify move of off " + "on pack pad page parameters play popup print printjob private " + "procedure " + "protect public query quit read readerror recall reindex release " + "rename replace report reset restore resume retry return rollback " + "run save say scan screen seek select selection show skip sort " + "status store structure sum suspend tag text to total transaction " + "type unlock update use users using view view wait while window " + "with zap",
       built_in: "abs access acos alias asc asin at atan atn2 bar bof call " + "cdow ceiling change chr cmonth col completed cos ctodo date day " + "dbf deleted dereference diskspace dmy dow dtoc dtor dtos eof " + "error exp field file fixed fklabel fkmax float flock floor found " + "fv getenv iif inkey int isalpha iscolor islower ismarked isupper " + "key lastkey left len like lineno lksys log logio lookup lower " + "ltrim lupdate max mdx mdy memlines memory menu message min mline " + "mod month ndx network order os pad payment pcol pi popup " + "printstatus program prompt prow pv rand readkey reccount recno " + "recsize replicate right rlock lock rollback round row rtod rtrim " + "seek select set sign sin soundex space sqrt str stuff substr tag " + "tan time transform type upper user val varread version year ",
@@ -6737,9 +6752,9 @@ var demo = function(path, fs, url, buffer) {
   }
   var dbase_1 = dbase;
   /*
-  Language: Delphi
-  Website: https://www.embarcadero.com/products/delphi
-  */  function delphi(hljs) {
+	Language: Delphi
+	Website: https://www.embarcadero.com/products/delphi
+	*/  function delphi(hljs) {
     var KEYWORDS = "exports register file shl array record property for mod while set ally label uses raise not " + "stored class safecall var interface or private static exit index inherited to else stdcall " + "override shr asm far resourcestring finalization packed virtual out and protected library do " + "xorwrite goto near function end div overload object unit begin string on inline repeat until " + "destructor write message program with read initialization except default nil if case cdecl in " + "downto threadvar of try pascal const external constructor type public then implementation " + "finally published procedure absolute reintroduce operator as is abstract alias assembler " + "bitpacked break continue cppdecl cvar enumerator experimental platform deprecated " + "unimplemented dynamic export far16 forward generic helper implements interrupt iochecks " + "local name nodefault noreturn nostackframe oldfpccall otherwise saveregisters softfloat " + "specialize strict unaligned varargs ";
     var COMMENT_MODES = [ hljs.C_LINE_COMMENT_MODE, hljs.COMMENT(/\{/, /\}/, {
       relevance: 0
@@ -6812,12 +6827,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var delphi_1 = delphi;
   /*
-  Language: Diff
-  Description: Unified and context diff
-  Author: Vasily Polovnyov <vast@whiteants.net>
-  Website: https://www.gnu.org/software/diffutils/
-  Category: common
-  */  function diff(hljs) {
+	Language: Diff
+	Description: Unified and context diff
+	Author: Vasily Polovnyov <vast@whiteants.net>
+	Website: https://www.gnu.org/software/diffutils/
+	Category: common
+	*/  function diff(hljs) {
     return {
       name: "Diff",
       aliases: [ "patch" ],
@@ -6868,14 +6883,14 @@ var demo = function(path, fs, url, buffer) {
   }
   var diff_1 = diff;
   /*
-  Language: Django
-  Description: Django is a high-level Python Web framework that encourages rapid development and clean, pragmatic design.
-  Requires: xml.js
-  Author: Ivan Sagalaev <maniac@softwaremaniacs.org>
-  Contributors: Ilya Baryshev <baryshev@gmail.com>
-  Website: https://www.djangoproject.com
-  Category: template
-  */  function django(hljs) {
+	Language: Django
+	Description: Django is a high-level Python Web framework that encourages rapid development and clean, pragmatic design.
+	Requires: xml.js
+	Author: Ivan Sagalaev <maniac@softwaremaniacs.org>
+	Contributors: Ilya Baryshev <baryshev@gmail.com>
+	Website: https://www.djangoproject.com
+	Category: template
+	*/  function django(hljs) {
     var FILTER = {
       begin: /\|[A-Za-z]+:?/,
       keywords: {
@@ -6915,11 +6930,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var django_1 = django;
   /*
-  Language: DNS Zone
-  Author: Tim Schumacher <tim@datenknoten.me>
-  Category: config
-  Website: https://en.wikipedia.org/wiki/Zone_file
-  */  function dns(hljs) {
+	Language: DNS Zone
+	Author: Tim Schumacher <tim@datenknoten.me>
+	Category: config
+	Website: https://en.wikipedia.org/wiki/Zone_file
+	*/  function dns(hljs) {
     return {
       name: "DNS Zone",
       aliases: [ "bind", "zone" ],
@@ -6948,13 +6963,13 @@ var demo = function(path, fs, url, buffer) {
   }
   var dns_1 = dns;
   /*
-  Language: Dockerfile
-  Requires: bash.js
-  Author: Alexis Hénaut <alexis@henaut.net>
-  Description: language definition for Dockerfile files
-  Website: https://docs.docker.com/engine/reference/builder/
-  Category: config
-  */  function dockerfile(hljs) {
+	Language: Dockerfile
+	Requires: bash.js
+	Author: Alexis Hénaut <alexis@henaut.net>
+	Description: language definition for Dockerfile files
+	Website: https://docs.docker.com/engine/reference/builder/
+	Category: config
+	*/  function dockerfile(hljs) {
     return {
       name: "Dockerfile",
       aliases: [ "docker" ],
@@ -6972,11 +6987,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var dockerfile_1 = dockerfile;
   /*
-  Language: Batch file (DOS)
-  Author: Alexander Makarov <sam@rmcreative.ru>
-  Contributors: Anton Kochkov <anton.kochkov@gmail.com>
-  Website: https://en.wikipedia.org/wiki/Batch_file
-  */  function dos(hljs) {
+	Language: Batch file (DOS)
+	Author: Alexander Makarov <sam@rmcreative.ru>
+	Contributors: Anton Kochkov <anton.kochkov@gmail.com>
+	Website: https://en.wikipedia.org/wiki/Batch_file
+	*/  function dos(hljs) {
     var COMMENT = hljs.COMMENT(/^\s*@?rem\b/, /$/, {
       relevance: 10
     });
@@ -7015,11 +7030,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var dos_1 = dos;
   /*
-   Language: dsconfig
-   Description: dsconfig batch configuration language for LDAP directory servers
-   Contributors: Jacob Childress <jacobc@gmail.com>
-   Category: enterprise, config
-   */  function dsconfig(hljs) {
+	 Language: dsconfig
+	 Description: dsconfig batch configuration language for LDAP directory servers
+	 Contributors: Jacob Childress <jacobc@gmail.com>
+	 Category: enterprise, config
+	 */  function dsconfig(hljs) {
     var QUOTED_PROPERTY = {
       className: "string",
       begin: /"/,
@@ -7067,12 +7082,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var dsconfig_1 = dsconfig;
   /*
-  Language: Device Tree
-  Description: *.dts files used in the Linux kernel
-  Author: Martin Braun <martin.braun@ettus.com>, Moritz Fischer <moritz.fischer@ettus.com>
-  Website: https://elinux.org/Device_Tree_Reference
-  Category: config
-  */  function dts(hljs) {
+	Language: Device Tree
+	Description: *.dts files used in the Linux kernel
+	Author: Martin Braun <martin.braun@ettus.com>, Moritz Fischer <moritz.fischer@ettus.com>
+	Website: https://elinux.org/Device_Tree_Reference
+	Category: config
+	*/  function dts(hljs) {
     var STRINGS = {
       className: "string",
       variants: [ hljs.inherit(hljs.QUOTE_STRING_MODE, {
@@ -7165,13 +7180,13 @@ var demo = function(path, fs, url, buffer) {
   }
   var dts_1 = dts;
   /*
-  Language: Dust
-  Requires: xml.js
-  Author: Michael Allen <michael.allen@benefitfocus.com>
-  Description: Matcher for dust.js templates.
-  Website: https://www.dustjs.com
-  Category: template
-  */  function dust(hljs) {
+	Language: Dust
+	Requires: xml.js
+	Author: Michael Allen <michael.allen@benefitfocus.com>
+	Description: Matcher for dust.js templates.
+	Website: https://www.dustjs.com
+	Category: template
+	*/  function dust(hljs) {
     var EXPRESSION_KEYWORDS = "if eq ne lt lte gt gte select default math sep";
     return {
       name: "Dust",
@@ -7203,10 +7218,10 @@ var demo = function(path, fs, url, buffer) {
   }
   var dust_1 = dust;
   /*
-  Language: Extended Backus-Naur Form
-  Author: Alex McKibben <alex@nullscope.net>
-  Website: https://en.wikipedia.org/wiki/Extended_Backus–Naur_form
-  */  function ebnf(hljs) {
+	Language: Extended Backus-Naur Form
+	Author: Alex McKibben <alex@nullscope.net>
+	Website: https://en.wikipedia.org/wiki/Extended_Backus–Naur_form
+	*/  function ebnf(hljs) {
     var commentMode = hljs.COMMENT(/\(\*/, /\*\)/);
     var nonTerminalMode = {
       className: "attribute",
@@ -7236,12 +7251,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var ebnf_1 = ebnf;
   /*
-  Language: Elixir
-  Author: Josh Adams <josh@isotope11.com>
-  Description: language definition for Elixir source code files (.ex and .exs).  Based on ruby language support.
-  Category: functional
-  Website: https://elixir-lang.org
-  */  function elixir(hljs) {
+	Language: Elixir
+	Author: Josh Adams <josh@isotope11.com>
+	Description: language definition for Elixir source code files (.ex and .exs).  Based on ruby language support.
+	Category: functional
+	Website: https://elixir-lang.org
+	*/  function elixir(hljs) {
     var ELIXIR_IDENT_RE = "[a-zA-Z_][a-zA-Z0-9_.]*(\\!|\\?)?";
     var ELIXIR_METHOD_RE = "[a-zA-Z_]\\w*[!?=]?|[-+~]\\@|<<|>>|=~|===?|<=>|[<>]=?|\\*\\*|[-/+%^&*~`|]|\\[\\]=?";
     var ELIXIR_KEYWORDS = {
@@ -7422,11 +7437,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var elixir_1 = elixir;
   /*
-  Language: Elm
-  Author: Janis Voigtlaender <janis.voigtlaender@gmail.com>
-  Website: https://elm-lang.org
-  Category: functional
-  */  function elm(hljs) {
+	Language: Elm
+	Author: Janis Voigtlaender <janis.voigtlaender@gmail.com>
+	Website: https://elm-lang.org
+	Category: functional
+	*/  function elm(hljs) {
     var COMMENT = {
       variants: [ hljs.COMMENT("--", "$"), hljs.COMMENT("{-", "-}", {
         contains: [ "self" ]
@@ -7501,11 +7516,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var elm_1 = elm;
   /*
-  Language: Puppet
-  Author: Jose Molina Colmenero <gaudy41@gmail.com>
-  Website: https://puppet.com/docs
-  Category: config
-  */  function puppet(hljs) {
+	Language: Puppet
+	Author: Jose Molina Colmenero <gaudy41@gmail.com>
+	Website: https://puppet.com/docs
+	Category: config
+	*/  function puppet(hljs) {
     var PUPPET_KEYWORDS = {
       keyword: 
       /* language keywords */
@@ -7587,12 +7602,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var puppet_1 = puppet;
   /*
-  Language: EPP (Embedded Puppet templating language)
-  Requires: xml.js, puppet.js
-  Author: Ben Ford <ben.ford@puppet.com>
-  Description: "Bridge" language defining fragments of Puppet in plain text within <% .. %>
-  Category: template
-  */  function epp(hljs) {
+	Language: EPP (Embedded Puppet templating language)
+	Requires: xml.js, puppet.js
+	Author: Ben Ford <ben.ford@puppet.com>
+	Description: "Bridge" language defining fragments of Puppet in plain text within <% .. %>
+	Category: template
+	*/  function epp(hljs) {
     return {
       subLanguage: "xml",
       contains: [ hljs.COMMENT("<%#", "%>"), {
@@ -7606,13 +7621,13 @@ var demo = function(path, fs, url, buffer) {
   }
   var epp_1 = epp;
   /*
-  Language: Ruby
-  Description: Ruby is a dynamic, open source programming language with a focus on simplicity and productivity.
-  Website: https://www.ruby-lang.org/
-  Author: Anton Kovalyov <anton@kovalyov.net>
-  Contributors: Peter Leonov <gojpeg@yandex.ru>, Vasily Polovnyov <vast@whiteants.net>, Loren Segal <lsegal@soen.ca>, Pascal Hurni <phi@ruby-reactive.org>, Cedric Sohrauer <sohrauer@googlemail.com>
-  Category: common
-  */  function ruby(hljs) {
+	Language: Ruby
+	Description: Ruby is a dynamic, open source programming language with a focus on simplicity and productivity.
+	Website: https://www.ruby-lang.org/
+	Author: Anton Kovalyov <anton@kovalyov.net>
+	Contributors: Peter Leonov <gojpeg@yandex.ru>, Vasily Polovnyov <vast@whiteants.net>, Loren Segal <lsegal@soen.ca>, Pascal Hurni <phi@ruby-reactive.org>, Cedric Sohrauer <sohrauer@googlemail.com>
+	Category: common
+	*/  function ruby(hljs) {
     var RUBY_METHOD_RE = "[a-zA-Z_]\\w*[!?=]?|[-+~]\\@|<<|>>|=~|===?|<=>|[<>]=?|\\*\\*|[-/+%^&*~`|]|\\[\\]=?";
     var RUBY_KEYWORDS = {
       keyword: "and then defined module in return redo if BEGIN retry end for self when " + "next until do begin unless END rescue else break undef not super class case " + "require yield alias while ensure elsif or include attr_reader attr_writer attr_accessor",
@@ -7799,14 +7814,14 @@ var demo = function(path, fs, url, buffer) {
   }
   var ruby_1 = ruby;
   /*
-  Language: ERB (Embedded Ruby)
-  Requires: xml.js, ruby.js
-  Author: Lucas Mazza <lucastmazza@gmail.com>
-  Contributors: Kassio Borges <kassioborgesm@gmail.com>
-  Description: "Bridge" language defining fragments of Ruby in HTML within <% .. %>
-  Website: https://ruby-doc.org/stdlib-2.6.5/libdoc/erb/rdoc/ERB.html
-  Category: template
-  */  function erb(hljs) {
+	Language: ERB (Embedded Ruby)
+	Requires: xml.js, ruby.js
+	Author: Lucas Mazza <lucastmazza@gmail.com>
+	Contributors: Kassio Borges <kassioborgesm@gmail.com>
+	Description: "Bridge" language defining fragments of Ruby in HTML within <% .. %>
+	Website: https://ruby-doc.org/stdlib-2.6.5/libdoc/erb/rdoc/ERB.html
+	Category: template
+	*/  function erb(hljs) {
     return {
       name: "ERB",
       subLanguage: "xml",
@@ -7821,11 +7836,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var erb_1 = erb;
   /*
-  Language: Erlang REPL
-  Author: Sergey Ignatov <sergey@ignatov.spb.su>
-  Website: https://www.erlang.org
-  Category: functional
-  */  function erlangRepl(hljs) {
+	Language: Erlang REPL
+	Author: Sergey Ignatov <sergey@ignatov.spb.su>
+	Website: https://www.erlang.org
+	Category: functional
+	*/  function erlangRepl(hljs) {
     return {
       name: "Erlang REPL",
       keywords: {
@@ -7859,12 +7874,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var erlangRepl_1 = erlangRepl;
   /*
-  Language: Erlang
-  Description: Erlang is a general-purpose functional language, with strict evaluation, single assignment, and dynamic typing.
-  Author: Nikolay Zakharov <nikolay.desh@gmail.com>, Dmitry Kovega <arhibot@gmail.com>
-  Website: https://www.erlang.org
-  Category: functional
-  */  function erlang(hljs) {
+	Language: Erlang
+	Description: Erlang is a general-purpose functional language, with strict evaluation, single assignment, and dynamic typing.
+	Author: Nikolay Zakharov <nikolay.desh@gmail.com>, Dmitry Kovega <arhibot@gmail.com>
+	Website: https://www.erlang.org
+	Category: functional
+	*/  function erlang(hljs) {
     var BASIC_ATOM_RE = "[a-z'][a-zA-Z0-9_']*";
     var FUNCTION_NAME_RE = "(" + BASIC_ATOM_RE + ":" + BASIC_ATOM_RE + "|" + BASIC_ATOM_RE + ")";
     var ERLANG_RESERVED = {
@@ -7977,11 +7992,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var erlang_1 = erlang;
   /*
-  Language: Excel formulae
-  Author: Victor Zhou <OiCMudkips@users.noreply.github.com>
-  Description: Excel formulae
-  Website: https://products.office.com/en-us/excel/
-  */  function excel(hljs) {
+	Language: Excel formulae
+	Author: Victor Zhou <OiCMudkips@users.noreply.github.com>
+	Description: Excel formulae
+	Website: https://products.office.com/en-us/excel/
+	*/  function excel(hljs) {
     return {
       name: "Excel formulae",
       aliases: [ "xlsx", "xls" ],
@@ -8028,11 +8043,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var excel_1 = excel;
   /*
-  Language: FASM (Flat Assembler)
-  Author: Tristano Ajmone <tajmone@gmail.com>
-  Description: x86 assembly language using Intel's mnemonic and NASM syntax
-  Category: assembler
-  */
+	Language: FASM (Flat Assembler)
+	Author: Tristano Ajmone <tajmone@gmail.com>
+	Description: x86 assembly language using Intel's mnemonic and NASM syntax
+	Category: assembler
+	*/
   //  v0.1 WIP (Alpha) — same as "x86asm.js", unchanged yet!
   //  ==============================================================================
   //                                 Acknowledgments                                
@@ -8170,9 +8185,9 @@ var demo = function(path, fs, url, buffer) {
   }
   var fasm_1 = fasm;
   /*
-  Language: FIX
-  Author: Brent Bradbury <brent@brentium.com>
-  */  function fix(hljs) {
+	Language: FIX
+	Author: Brent Bradbury <brent@brentium.com>
+	*/  function fix(hljs) {
     return {
       name: "FIX",
       contains: [ {
@@ -8200,11 +8215,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var fix_1 = fix;
   /*
-   Language: Flix
-   Category: functional
-   Author: Magnus Madsen <mmadsen@uwaterloo.ca>
-   Website: https://flix.dev/
-   */  function flix(hljs) {
+	 Language: Flix
+	 Category: functional
+	 Author: Magnus Madsen <mmadsen@uwaterloo.ca>
+	 Website: https://flix.dev/
+	 */  function flix(hljs) {
     var CHAR = {
       className: "string",
       begin: /'(.|\\[xXuU][a-zA-Z0-9]+)'/
@@ -8238,11 +8253,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var flix_1 = flix;
   /*
-  Language: Fortran
-  Author: Anthony Scemama <scemama@irsamc.ups-tlse.fr>
-  Website: https://en.wikipedia.org/wiki/Fortran
-  Category: scientific
-  */  function fortran(hljs) {
+	Language: Fortran
+	Author: Anthony Scemama <scemama@irsamc.ups-tlse.fr>
+	Website: https://en.wikipedia.org/wiki/Fortran
+	Category: scientific
+	*/  function fortran(hljs) {
     const PARAMS = {
       className: "params",
       begin: "\\(",
@@ -8296,12 +8311,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var fortran_1 = fortran;
   /*
-  Language: F#
-  Author: Jonas Follesø <jonas@follesoe.no>
-  Contributors: Troy Kershaw <hello@troykershaw.com>, Henrik Feldt <henrik@haf.se>
-  Website: https://docs.microsoft.com/en-us/dotnet/fsharp/
-  Category: functional
-  */  function fsharp(hljs) {
+	Language: F#
+	Author: Jonas Follesø <jonas@follesoe.no>
+	Contributors: Troy Kershaw <hello@troykershaw.com>, Henrik Feldt <henrik@haf.se>
+	Website: https://docs.microsoft.com/en-us/dotnet/fsharp/
+	Category: functional
+	*/  function fsharp(hljs) {
     var TYPEPARAM = {
       begin: "<",
       end: ">",
@@ -8351,13 +8366,13 @@ var demo = function(path, fs, url, buffer) {
   }
   var fsharp_1 = fsharp;
   /*
-   Language: GAMS
-   Author: Stefan Bechert <stefan.bechert@gmx.net>
-   Contributors: Oleg Efimov <efimovov@gmail.com>, Mikko Kouhia <mikko.kouhia@iki.fi>
-   Description: The General Algebraic Modeling System language
-   Website: https://www.gams.com
-   Category: scientific
-   */  function gams(hljs) {
+	 Language: GAMS
+	 Author: Stefan Bechert <stefan.bechert@gmx.net>
+	 Contributors: Oleg Efimov <efimovov@gmail.com>, Mikko Kouhia <mikko.kouhia@iki.fi>
+	 Description: The General Algebraic Modeling System language
+	 Website: https://www.gams.com
+	 Category: scientific
+	 */  function gams(hljs) {
     var KEYWORDS = {
       keyword: "abort acronym acronyms alias all and assign binary card diag display " + "else eq file files for free ge gt if integer le loop lt maximizing " + "minimizing model models ne negative no not option options or ord " + "positive prod put putpage puttl repeat sameas semicont semiint smax " + "smin solve sos1 sos2 sum system table then until using while xor yes",
       literal: "eps inf na",
@@ -8456,12 +8471,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var gams_1 = gams;
   /*
-  Language: GAUSS
-  Author: Matt Evans <matt@aptech.com>
-  Description: GAUSS Mathematical and Statistical language
-  Website: https://www.aptech.com
-  Category: scientific
-  */  function gauss(hljs) {
+	Language: GAUSS
+	Author: Matt Evans <matt@aptech.com>
+	Description: GAUSS Mathematical and Statistical language
+	Website: https://www.aptech.com
+	Category: scientific
+	*/  function gauss(hljs) {
     var KEYWORDS = {
       keyword: "bool break call callexe checkinterrupt clear clearg closeall cls comlog compile " + "continue create debug declare delete disable dlibrary dllcall do dos ed edit else " + "elseif enable end endfor endif endp endo errorlog errorlogat expr external fn " + "for format goto gosub graph if keyword let lib library line load loadarray loadexe " + "loadf loadk loadm loadp loads loadx local locate loopnextindex lprint lpwidth lshow " + "matrix msym ndpclex new open output outwidth plot plotsym pop prcsn print " + "printdos proc push retp return rndcon rndmod rndmult rndseed run save saveall screen " + "scroll setarray show sparse stop string struct system trace trap threadfor " + "threadendfor threadbegin threadjoin threadstat threadend until use while winprint " + "ne ge le gt lt and xor or not eq eqv",
       built_in: "abs acf aconcat aeye amax amean AmericanBinomCall AmericanBinomCall_Greeks AmericanBinomCall_ImpVol " + "AmericanBinomPut AmericanBinomPut_Greeks AmericanBinomPut_ImpVol AmericanBSCall AmericanBSCall_Greeks " + "AmericanBSCall_ImpVol AmericanBSPut AmericanBSPut_Greeks AmericanBSPut_ImpVol amin amult annotationGetDefaults " + "annotationSetBkd annotationSetFont annotationSetLineColor annotationSetLineStyle annotationSetLineThickness " + "annualTradingDays arccos arcsin areshape arrayalloc arrayindex arrayinit arraytomat asciiload asclabel astd " + "astds asum atan atan2 atranspose axmargin balance band bandchol bandcholsol bandltsol bandrv bandsolpd bar " + "base10 begwind besselj bessely beta box boxcox cdfBeta cdfBetaInv cdfBinomial cdfBinomialInv cdfBvn cdfBvn2 " + "cdfBvn2e cdfCauchy cdfCauchyInv cdfChic cdfChii cdfChinc cdfChincInv cdfExp cdfExpInv cdfFc cdfFnc cdfFncInv " + "cdfGam cdfGenPareto cdfHyperGeo cdfLaplace cdfLaplaceInv cdfLogistic cdfLogisticInv cdfmControlCreate cdfMvn " + "cdfMvn2e cdfMvnce cdfMvne cdfMvt2e cdfMvtce cdfMvte cdfN cdfN2 cdfNc cdfNegBinomial cdfNegBinomialInv cdfNi " + "cdfPoisson cdfPoissonInv cdfRayleigh cdfRayleighInv cdfTc cdfTci cdfTnc cdfTvn cdfWeibull cdfWeibullInv cdir " + "ceil ChangeDir chdir chiBarSquare chol choldn cholsol cholup chrs close code cols colsf combinate combinated " + "complex con cond conj cons ConScore contour conv convertsatostr convertstrtosa corrm corrms corrvc corrx corrxs " + "cos cosh counts countwts crossprd crout croutp csrcol csrlin csvReadM csvReadSA cumprodc cumsumc curve cvtos " + "datacreate datacreatecomplex datalist dataload dataloop dataopen datasave date datestr datestring datestrymd " + "dayinyr dayofweek dbAddDatabase dbClose dbCommit dbCreateQuery dbExecQuery dbGetConnectOptions dbGetDatabaseName " + "dbGetDriverName dbGetDrivers dbGetHostName dbGetLastErrorNum dbGetLastErrorText dbGetNumericalPrecPolicy " + "dbGetPassword dbGetPort dbGetTableHeaders dbGetTables dbGetUserName dbHasFeature dbIsDriverAvailable dbIsOpen " + "dbIsOpenError dbOpen dbQueryBindValue dbQueryClear dbQueryCols dbQueryExecPrepared dbQueryFetchAllM dbQueryFetchAllSA " + "dbQueryFetchOneM dbQueryFetchOneSA dbQueryFinish dbQueryGetBoundValue dbQueryGetBoundValues dbQueryGetField " + "dbQueryGetLastErrorNum dbQueryGetLastErrorText dbQueryGetLastInsertID dbQueryGetLastQuery dbQueryGetPosition " + "dbQueryIsActive dbQueryIsForwardOnly dbQueryIsNull dbQueryIsSelect dbQueryIsValid dbQueryPrepare dbQueryRows " + "dbQuerySeek dbQuerySeekFirst dbQuerySeekLast dbQuerySeekNext dbQuerySeekPrevious dbQuerySetForwardOnly " + "dbRemoveDatabase dbRollback dbSetConnectOptions dbSetDatabaseName dbSetHostName dbSetNumericalPrecPolicy " + "dbSetPort dbSetUserName dbTransaction DeleteFile delif delrows denseToSp denseToSpRE denToZero design det detl " + "dfft dffti diag diagrv digamma doswin DOSWinCloseall DOSWinOpen dotfeq dotfeqmt dotfge dotfgemt dotfgt dotfgtmt " + "dotfle dotflemt dotflt dotfltmt dotfne dotfnemt draw drop dsCreate dstat dstatmt dstatmtControlCreate dtdate dtday " + "dttime dttodtv dttostr dttoutc dtvnormal dtvtodt dtvtoutc dummy dummybr dummydn eig eigh eighv eigv elapsedTradingDays " + "endwind envget eof eqSolve eqSolvemt eqSolvemtControlCreate eqSolvemtOutCreate eqSolveset erf erfc erfccplx erfcplx error " + "etdays ethsec etstr EuropeanBinomCall EuropeanBinomCall_Greeks EuropeanBinomCall_ImpVol EuropeanBinomPut " + "EuropeanBinomPut_Greeks EuropeanBinomPut_ImpVol EuropeanBSCall EuropeanBSCall_Greeks EuropeanBSCall_ImpVol " + "EuropeanBSPut EuropeanBSPut_Greeks EuropeanBSPut_ImpVol exctsmpl exec execbg exp extern eye fcheckerr fclearerr feq " + "feqmt fflush fft ffti fftm fftmi fftn fge fgemt fgets fgetsa fgetsat fgetst fgt fgtmt fileinfo filesa fle flemt " + "floor flt fltmt fmod fne fnemt fonts fopen formatcv formatnv fputs fputst fseek fstrerror ftell ftocv ftos ftostrC " + "gamma gammacplx gammaii gausset gdaAppend gdaCreate gdaDStat gdaDStatMat gdaGetIndex gdaGetName gdaGetNames gdaGetOrders " + "gdaGetType gdaGetTypes gdaGetVarInfo gdaIsCplx gdaLoad gdaPack gdaRead gdaReadByIndex gdaReadSome gdaReadSparse " + "gdaReadStruct gdaReportVarInfo gdaSave gdaUpdate gdaUpdateAndPack gdaVars gdaWrite gdaWrite32 gdaWriteSome getarray " + "getdims getf getGAUSShome getmatrix getmatrix4D getname getnamef getNextTradingDay getNextWeekDay getnr getorders " + "getpath getPreviousTradingDay getPreviousWeekDay getRow getscalar3D getscalar4D getTrRow getwind glm gradcplx gradMT " + "gradMTm gradMTT gradMTTm gradp graphprt graphset hasimag header headermt hess hessMT hessMTg hessMTgw hessMTm " + "hessMTmw hessMTT hessMTTg hessMTTgw hessMTTm hessMTw hessp hist histf histp hsec imag indcv indexcat indices indices2 " + "indicesf indicesfn indnv indsav integrate1d integrateControlCreate intgrat2 intgrat3 inthp1 inthp2 inthp3 inthp4 " + "inthpControlCreate intquad1 intquad2 intquad3 intrleav intrleavsa intrsect intsimp inv invpd invswp iscplx iscplxf " + "isden isinfnanmiss ismiss key keyav keyw lag lag1 lagn lapEighb lapEighi lapEighvb lapEighvi lapgEig lapgEigh lapgEighv " + "lapgEigv lapgSchur lapgSvdcst lapgSvds lapgSvdst lapSvdcusv lapSvds lapSvdusv ldlp ldlsol linSolve listwise ln lncdfbvn " + "lncdfbvn2 lncdfmvn lncdfn lncdfn2 lncdfnc lnfact lngammacplx lnpdfmvn lnpdfmvt lnpdfn lnpdft loadd loadstruct loadwind " + "loess loessmt loessmtControlCreate log loglog logx logy lower lowmat lowmat1 ltrisol lu lusol machEpsilon make makevars " + "makewind margin matalloc matinit mattoarray maxbytes maxc maxindc maxv maxvec mbesselei mbesselei0 mbesselei1 mbesseli " + "mbesseli0 mbesseli1 meanc median mergeby mergevar minc minindc minv miss missex missrv moment momentd movingave " + "movingaveExpwgt movingaveWgt nextindex nextn nextnevn nextwind ntos null null1 numCombinations ols olsmt olsmtControlCreate " + "olsqr olsqr2 olsqrmt ones optn optnevn orth outtyp pacf packedToSp packr parse pause pdfCauchy pdfChi pdfExp pdfGenPareto " + "pdfHyperGeo pdfLaplace pdfLogistic pdfn pdfPoisson pdfRayleigh pdfWeibull pi pinv pinvmt plotAddArrow plotAddBar plotAddBox " + "plotAddHist plotAddHistF plotAddHistP plotAddPolar plotAddScatter plotAddShape plotAddTextbox plotAddTS plotAddXY plotArea " + "plotBar plotBox plotClearLayout plotContour plotCustomLayout plotGetDefaults plotHist plotHistF plotHistP plotLayout " + "plotLogLog plotLogX plotLogY plotOpenWindow plotPolar plotSave plotScatter plotSetAxesPen plotSetBar plotSetBarFill " + "plotSetBarStacked plotSetBkdColor plotSetFill plotSetGrid plotSetLegend plotSetLineColor plotSetLineStyle plotSetLineSymbol " + "plotSetLineThickness plotSetNewWindow plotSetTitle plotSetWhichYAxis plotSetXAxisShow plotSetXLabel plotSetXRange " + "plotSetXTicInterval plotSetXTicLabel plotSetYAxisShow plotSetYLabel plotSetYRange plotSetZAxisShow plotSetZLabel " + "plotSurface plotTS plotXY polar polychar polyeval polygamma polyint polymake polymat polymroot polymult polyroot " + "pqgwin previousindex princomp printfm printfmt prodc psi putarray putf putvals pvCreate pvGetIndex pvGetParNames " + "pvGetParVector pvLength pvList pvPack pvPacki pvPackm pvPackmi pvPacks pvPacksi pvPacksm pvPacksmi pvPutParVector " + "pvTest pvUnpack QNewton QNewtonmt QNewtonmtControlCreate QNewtonmtOutCreate QNewtonSet QProg QProgmt QProgmtInCreate " + "qqr qqre qqrep qr qre qrep qrsol qrtsol qtyr qtyre qtyrep quantile quantiled qyr qyre qyrep qz rank rankindx readr " + "real reclassify reclassifyCuts recode recserar recsercp recserrc rerun rescale reshape rets rev rfft rffti rfftip rfftn " + "rfftnp rfftp rndBernoulli rndBeta rndBinomial rndCauchy rndChiSquare rndCon rndCreateState rndExp rndGamma rndGeo rndGumbel " + "rndHyperGeo rndi rndKMbeta rndKMgam rndKMi rndKMn rndKMnb rndKMp rndKMu rndKMvm rndLaplace rndLCbeta rndLCgam rndLCi rndLCn " + "rndLCnb rndLCp rndLCu rndLCvm rndLogNorm rndMTu rndMVn rndMVt rndn rndnb rndNegBinomial rndp rndPoisson rndRayleigh " + "rndStateSkip rndu rndvm rndWeibull rndWishart rotater round rows rowsf rref sampleData satostrC saved saveStruct savewind " + "scale scale3d scalerr scalinfnanmiss scalmiss schtoc schur searchsourcepath seekr select selif seqa seqm setdif setdifsa " + "setvars setvwrmode setwind shell shiftr sin singleindex sinh sleep solpd sortc sortcc sortd sorthc sorthcc sortind " + "sortindc sortmc sortr sortrc spBiconjGradSol spChol spConjGradSol spCreate spDenseSubmat spDiagRvMat spEigv spEye spLDL " + "spline spLU spNumNZE spOnes spreadSheetReadM spreadSheetReadSA spreadSheetWrite spScale spSubmat spToDense spTrTDense " + "spTScalar spZeros sqpSolve sqpSolveMT sqpSolveMTControlCreate sqpSolveMTlagrangeCreate sqpSolveMToutCreate sqpSolveSet " + "sqrt statements stdc stdsc stocv stof strcombine strindx strlen strput strrindx strsect strsplit strsplitPad strtodt " + "strtof strtofcplx strtriml strtrimr strtrunc strtruncl strtruncpad strtruncr submat subscat substute subvec sumc sumr " + "surface svd svd1 svd2 svdcusv svds svdusv sysstate tab tan tanh tempname " + "time timedt timestr timeutc title tkf2eps tkf2ps tocart todaydt toeplitz token topolar trapchk " + "trigamma trimr trunc type typecv typef union unionsa uniqindx uniqindxsa unique uniquesa upmat upmat1 upper utctodt " + "utctodtv utrisol vals varCovMS varCovXS varget vargetl varmall varmares varput varputl vartypef vcm vcms vcx vcxs " + "vec vech vecr vector vget view viewxyz vlist vnamecv volume vput vread vtypecv wait waitc walkindex where window " + "writer xlabel xlsGetSheetCount xlsGetSheetSize xlsGetSheetTypes xlsMakeRange xlsReadM xlsReadSA xlsWrite xlsWriteM " + "xlsWriteSA xpnd xtics xy xyz ylabel ytics zeros zeta zlabel ztics cdfEmpirical dot h5create h5open h5read h5readAttribute " + "h5write h5writeAttribute ldl plotAddErrorBar plotAddSurface plotCDFEmpirical plotSetColormap plotSetContourLabels " + "plotSetLegendFont plotSetTextInterpreter plotSetXTicCount plotSetYTicCount plotSetZLevels powerm strjoin sylvester " + "strtrim",
@@ -8605,11 +8620,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var gauss_1 = gauss;
   /*
-   Language: G-code (ISO 6983)
-   Contributors: Adam Joseph Cook <adam.joseph.cook@gmail.com>
-   Description: G-code syntax highlighter for Fanuc and other common CNC machine tool controls.
-   Website: https://www.sis.se/api/document/preview/911952/
-   */  function gcode(hljs) {
+	 Language: G-code (ISO 6983)
+	 Contributors: Adam Joseph Cook <adam.joseph.cook@gmail.com>
+	 Description: G-code syntax highlighter for Fanuc and other common CNC machine tool controls.
+	 Website: https://www.sis.se/api/document/preview/911952/
+	 */  function gcode(hljs) {
     var GCODE_IDENT_RE = "[A-Z_][A-Z0-9_.]*";
     var GCODE_CLOSE_RE = "\\%";
     var GCODE_KEYWORDS = {
@@ -8666,11 +8681,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var gcode_1 = gcode;
   /*
-  Language: GDScript
-  Author: Geequlim <geequlim@gmail.com>
-  Contributors: Geequlim
-  Description: Language definition for GDScript. This language highlight is forked from python language.
-  */  function gdscript(hljs) {
+	Language: GDScript
+	Author: Geequlim <geequlim@gmail.com>
+	Contributors: Geequlim
+	Description: Language definition for GDScript. This language highlight is forked from python language.
+	*/  function gdscript(hljs) {
     var PROMPT = {
       className: "meta",
       begin: /^(>>>|\.\.\.) /
@@ -8757,11 +8772,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var gdscript_1 = gdscript;
   /*
-   Language: Gherkin
-   Author: Sam Pikesley (@pikesley) <sam.pikesley@theodi.org>
-   Description: Gherkin is the format for cucumber specifications. It is a domain specific language which helps you to describe business behavior without the need to go into detail of implementation.
-   Website: https://cucumber.io/docs/gherkin/
-   */  function gherkin(hljs) {
+	 Language: Gherkin
+	 Author: Sam Pikesley (@pikesley) <sam.pikesley@theodi.org>
+	 Description: Gherkin is the format for cucumber specifications. It is a domain specific language which helps you to describe business behavior without the need to go into detail of implementation.
+	 Website: https://cucumber.io/docs/gherkin/
+	 */  function gherkin(hljs) {
     return {
       name: "Gherkin",
       aliases: [ "feature" ],
@@ -8793,12 +8808,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var gherkin_1 = gherkin;
   /*
-  Language: GLSL
-  Description: OpenGL Shading Language
-  Author: Sergey Tikhomirov <sergey@tikhomirov.io>
-  Website: https://en.wikipedia.org/wiki/OpenGL_Shading_Language
-  Category: graphics
-  */  function glsl(hljs) {
+	Language: GLSL
+	Description: OpenGL Shading Language
+	Author: Sergey Tikhomirov <sergey@tikhomirov.io>
+	Website: https://en.wikipedia.org/wiki/OpenGL_Shading_Language
+	Category: graphics
+	*/  function glsl(hljs) {
     return {
       name: "GLSL",
       keywords: {
@@ -8827,12 +8842,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var glsl_1 = glsl;
   /*
-  Language: GML
-  Author: Meseta <meseta@gmail.com>
-  Description: Game Maker Language for GameMaker Studio 2
-  Website: https://docs2.yoyogames.com
-  Category: scripting
-  */  function gml(hljs) {
+	Language: GML
+	Author: Meseta <meseta@gmail.com>
+	Description: Game Maker Language for GameMaker Studio 2
+	Website: https://docs2.yoyogames.com
+	Category: scripting
+	*/  function gml(hljs) {
     var GML_KEYWORDS = {
       keyword: "begin end if then else while do for break continue with until " + "repeat exit and or xor not return mod div switch case default var " + "globalvar enum #macro #region #endregion",
       built_in: "is_real is_string is_array is_undefined is_int32 is_int64 " + "is_ptr is_vec3 is_vec4 is_matrix is_bool typeof " + "variable_global_exists variable_global_get variable_global_set " + "variable_instance_exists variable_instance_get variable_instance_set " + "variable_instance_get_names array_length_1d array_length_2d " + "array_height_2d array_equals array_create array_copy random " + "random_range irandom irandom_range random_set_seed random_get_seed " + "randomize randomise choose abs round floor ceil sign frac sqrt sqr " + "exp ln log2 log10 sin cos tan arcsin arccos arctan arctan2 dsin dcos " + "dtan darcsin darccos darctan darctan2 degtorad radtodeg power logn " + "min max mean median clamp lerp dot_product dot_product_3d " + "dot_product_normalised dot_product_3d_normalised " + "dot_product_normalized dot_product_3d_normalized math_set_epsilon " + "math_get_epsilon angle_difference point_distance_3d point_distance " + "point_direction lengthdir_x lengthdir_y real string int64 ptr " + "string_format chr ansi_char ord string_length string_byte_length " + "string_pos string_copy string_char_at string_ord_at string_byte_at " + "string_set_byte_at string_delete string_insert string_lower " + "string_upper string_repeat string_letters string_digits " + "string_lettersdigits string_replace string_replace_all string_count " + "string_hash_to_newline clipboard_has_text clipboard_set_text " + "clipboard_get_text date_current_datetime date_create_datetime " + "date_valid_datetime date_inc_year date_inc_month date_inc_week " + "date_inc_day date_inc_hour date_inc_minute date_inc_second " + "date_get_year date_get_month date_get_week date_get_day " + "date_get_hour date_get_minute date_get_second date_get_weekday " + "date_get_day_of_year date_get_hour_of_year date_get_minute_of_year " + "date_get_second_of_year date_year_span date_month_span " + "date_week_span date_day_span date_hour_span date_minute_span " + "date_second_span date_compare_datetime date_compare_date " + "date_compare_time date_date_of date_time_of date_datetime_string " + "date_date_string date_time_string date_days_in_month " + "date_days_in_year date_leap_year date_is_today date_set_timezone " + "date_get_timezone game_set_speed game_get_speed motion_set " + "motion_add place_free place_empty place_meeting place_snapped " + "move_random move_snap move_towards_point move_contact_solid " + "move_contact_all move_outside_solid move_outside_all " + "move_bounce_solid move_bounce_all move_wrap distance_to_point " + "distance_to_object position_empty position_meeting path_start " + "path_end mp_linear_step mp_potential_step mp_linear_step_object " + "mp_potential_step_object mp_potential_settings mp_linear_path " + "mp_potential_path mp_linear_path_object mp_potential_path_object " + "mp_grid_create mp_grid_destroy mp_grid_clear_all mp_grid_clear_cell " + "mp_grid_clear_rectangle mp_grid_add_cell mp_grid_get_cell " + "mp_grid_add_rectangle mp_grid_add_instances mp_grid_path " + "mp_grid_draw mp_grid_to_ds_grid collision_point collision_rectangle " + "collision_circle collision_ellipse collision_line " + "collision_point_list collision_rectangle_list collision_circle_list " + "collision_ellipse_list collision_line_list instance_position_list " + "instance_place_list point_in_rectangle " + "point_in_triangle point_in_circle rectangle_in_rectangle " + "rectangle_in_triangle rectangle_in_circle instance_find " + "instance_exists instance_number instance_position instance_nearest " + "instance_furthest instance_place instance_create_depth " + "instance_create_layer instance_copy instance_change instance_destroy " + "position_destroy position_change instance_id_get " + "instance_deactivate_all instance_deactivate_object " + "instance_deactivate_region instance_activate_all " + "instance_activate_object instance_activate_region room_goto " + "room_goto_previous room_goto_next room_previous room_next " + "room_restart game_end game_restart game_load game_save " + "game_save_buffer game_load_buffer event_perform event_user " + "event_perform_object event_inherited show_debug_message " + "show_debug_overlay debug_event debug_get_callstack alarm_get " + "alarm_set font_texture_page_size keyboard_set_map keyboard_get_map " + "keyboard_unset_map keyboard_check keyboard_check_pressed " + "keyboard_check_released keyboard_check_direct keyboard_get_numlock " + "keyboard_set_numlock keyboard_key_press keyboard_key_release " + "keyboard_clear io_clear mouse_check_button " + "mouse_check_button_pressed mouse_check_button_released " + "mouse_wheel_up mouse_wheel_down mouse_clear draw_self draw_sprite " + "draw_sprite_pos draw_sprite_ext draw_sprite_stretched " + "draw_sprite_stretched_ext draw_sprite_tiled draw_sprite_tiled_ext " + "draw_sprite_part draw_sprite_part_ext draw_sprite_general draw_clear " + "draw_clear_alpha draw_point draw_line draw_line_width draw_rectangle " + "draw_roundrect draw_roundrect_ext draw_triangle draw_circle " + "draw_ellipse draw_set_circle_precision draw_arrow draw_button " + "draw_path draw_healthbar draw_getpixel draw_getpixel_ext " + "draw_set_colour draw_set_color draw_set_alpha draw_get_colour " + "draw_get_color draw_get_alpha merge_colour make_colour_rgb " + "make_colour_hsv colour_get_red colour_get_green colour_get_blue " + "colour_get_hue colour_get_saturation colour_get_value merge_color " + "make_color_rgb make_color_hsv color_get_red color_get_green " + "color_get_blue color_get_hue color_get_saturation color_get_value " + "merge_color screen_save screen_save_part draw_set_font " + "draw_set_halign draw_set_valign draw_text draw_text_ext string_width " + "string_height string_width_ext string_height_ext " + "draw_text_transformed draw_text_ext_transformed draw_text_colour " + "draw_text_ext_colour draw_text_transformed_colour " + "draw_text_ext_transformed_colour draw_text_color draw_text_ext_color " + "draw_text_transformed_color draw_text_ext_transformed_color " + "draw_point_colour draw_line_colour draw_line_width_colour " + "draw_rectangle_colour draw_roundrect_colour " + "draw_roundrect_colour_ext draw_triangle_colour draw_circle_colour " + "draw_ellipse_colour draw_point_color draw_line_color " + "draw_line_width_color draw_rectangle_color draw_roundrect_color " + "draw_roundrect_color_ext draw_triangle_color draw_circle_color " + "draw_ellipse_color draw_primitive_begin draw_vertex " + "draw_vertex_colour draw_vertex_color draw_primitive_end " + "sprite_get_uvs font_get_uvs sprite_get_texture font_get_texture " + "texture_get_width texture_get_height texture_get_uvs " + "draw_primitive_begin_texture draw_vertex_texture " + "draw_vertex_texture_colour draw_vertex_texture_color " + "texture_global_scale surface_create surface_create_ext " + "surface_resize surface_free surface_exists surface_get_width " + "surface_get_height surface_get_texture surface_set_target " + "surface_set_target_ext surface_reset_target surface_depth_disable " + "surface_get_depth_disable draw_surface draw_surface_stretched " + "draw_surface_tiled draw_surface_part draw_surface_ext " + "draw_surface_stretched_ext draw_surface_tiled_ext " + "draw_surface_part_ext draw_surface_general surface_getpixel " + "surface_getpixel_ext surface_save surface_save_part surface_copy " + "surface_copy_part application_surface_draw_enable " + "application_get_position application_surface_enable " + "application_surface_is_enabled display_get_width display_get_height " + "display_get_orientation display_get_gui_width display_get_gui_height " + "display_reset display_mouse_get_x display_mouse_get_y " + "display_mouse_set display_set_ui_visibility " + "window_set_fullscreen window_get_fullscreen " + "window_set_caption window_set_min_width window_set_max_width " + "window_set_min_height window_set_max_height window_get_visible_rects " + "window_get_caption window_set_cursor window_get_cursor " + "window_set_colour window_get_colour window_set_color " + "window_get_color window_set_position window_set_size " + "window_set_rectangle window_center window_get_x window_get_y " + "window_get_width window_get_height window_mouse_get_x " + "window_mouse_get_y window_mouse_set window_view_mouse_get_x " + "window_view_mouse_get_y window_views_mouse_get_x " + "window_views_mouse_get_y audio_listener_position " + "audio_listener_velocity audio_listener_orientation " + "audio_emitter_position audio_emitter_create audio_emitter_free " + "audio_emitter_exists audio_emitter_pitch audio_emitter_velocity " + "audio_emitter_falloff audio_emitter_gain audio_play_sound " + "audio_play_sound_on audio_play_sound_at audio_stop_sound " + "audio_resume_music audio_music_is_playing audio_resume_sound " + "audio_pause_sound audio_pause_music audio_channel_num " + "audio_sound_length audio_get_type audio_falloff_set_model " + "audio_play_music audio_stop_music audio_master_gain audio_music_gain " + "audio_sound_gain audio_sound_pitch audio_stop_all audio_resume_all " + "audio_pause_all audio_is_playing audio_is_paused audio_exists " + "audio_sound_set_track_position audio_sound_get_track_position " + "audio_emitter_get_gain audio_emitter_get_pitch audio_emitter_get_x " + "audio_emitter_get_y audio_emitter_get_z audio_emitter_get_vx " + "audio_emitter_get_vy audio_emitter_get_vz " + "audio_listener_set_position audio_listener_set_velocity " + "audio_listener_set_orientation audio_listener_get_data " + "audio_set_master_gain audio_get_master_gain audio_sound_get_gain " + "audio_sound_get_pitch audio_get_name audio_sound_set_track_position " + "audio_sound_get_track_position audio_create_stream " + "audio_destroy_stream audio_create_sync_group " + "audio_destroy_sync_group audio_play_in_sync_group " + "audio_start_sync_group audio_stop_sync_group audio_pause_sync_group " + "audio_resume_sync_group audio_sync_group_get_track_pos " + "audio_sync_group_debug audio_sync_group_is_playing audio_debug " + "audio_group_load audio_group_unload audio_group_is_loaded " + "audio_group_load_progress audio_group_name audio_group_stop_all " + "audio_group_set_gain audio_create_buffer_sound " + "audio_free_buffer_sound audio_create_play_queue " + "audio_free_play_queue audio_queue_sound audio_get_recorder_count " + "audio_get_recorder_info audio_start_recording audio_stop_recording " + "audio_sound_get_listener_mask audio_emitter_get_listener_mask " + "audio_get_listener_mask audio_sound_set_listener_mask " + "audio_emitter_set_listener_mask audio_set_listener_mask " + "audio_get_listener_count audio_get_listener_info audio_system " + "show_message show_message_async clickable_add clickable_add_ext " + "clickable_change clickable_change_ext clickable_delete " + "clickable_exists clickable_set_style show_question " + "show_question_async get_integer get_string get_integer_async " + "get_string_async get_login_async get_open_filename get_save_filename " + "get_open_filename_ext get_save_filename_ext show_error " + "highscore_clear highscore_add highscore_value highscore_name " + "draw_highscore sprite_exists sprite_get_name sprite_get_number " + "sprite_get_width sprite_get_height sprite_get_xoffset " + "sprite_get_yoffset sprite_get_bbox_left sprite_get_bbox_right " + "sprite_get_bbox_top sprite_get_bbox_bottom sprite_save " + "sprite_save_strip sprite_set_cache_size sprite_set_cache_size_ext " + "sprite_get_tpe sprite_prefetch sprite_prefetch_multi sprite_flush " + "sprite_flush_multi sprite_set_speed sprite_get_speed_type " + "sprite_get_speed font_exists font_get_name font_get_fontname " + "font_get_bold font_get_italic font_get_first font_get_last " + "font_get_size font_set_cache_size path_exists path_get_name " + "path_get_length path_get_time path_get_kind path_get_closed " + "path_get_precision path_get_number path_get_point_x path_get_point_y " + "path_get_point_speed path_get_x path_get_y path_get_speed " + "script_exists script_get_name timeline_add timeline_delete " + "timeline_clear timeline_exists timeline_get_name " + "timeline_moment_clear timeline_moment_add_script timeline_size " + "timeline_max_moment object_exists object_get_name object_get_sprite " + "object_get_solid object_get_visible object_get_persistent " + "object_get_mask object_get_parent object_get_physics " + "object_is_ancestor room_exists room_get_name sprite_set_offset " + "sprite_duplicate sprite_assign sprite_merge sprite_add " + "sprite_replace sprite_create_from_surface sprite_add_from_surface " + "sprite_delete sprite_set_alpha_from_sprite sprite_collision_mask " + "font_add_enable_aa font_add_get_enable_aa font_add font_add_sprite " + "font_add_sprite_ext font_replace font_replace_sprite " + "font_replace_sprite_ext font_delete path_set_kind path_set_closed " + "path_set_precision path_add path_assign path_duplicate path_append " + "path_delete path_add_point path_insert_point path_change_point " + "path_delete_point path_clear_points path_reverse path_mirror " + "path_flip path_rotate path_rescale path_shift script_execute " + "object_set_sprite object_set_solid object_set_visible " + "object_set_persistent object_set_mask room_set_width room_set_height " + "room_set_persistent room_set_background_colour " + "room_set_background_color room_set_view room_set_viewport " + "room_get_viewport room_set_view_enabled room_add room_duplicate " + "room_assign room_instance_add room_instance_clear room_get_camera " + "room_set_camera asset_get_index asset_get_type " + "file_text_open_from_string file_text_open_read file_text_open_write " + "file_text_open_append file_text_close file_text_write_string " + "file_text_write_real file_text_writeln file_text_read_string " + "file_text_read_real file_text_readln file_text_eof file_text_eoln " + "file_exists file_delete file_rename file_copy directory_exists " + "directory_create directory_destroy file_find_first file_find_next " + "file_find_close file_attributes filename_name filename_path " + "filename_dir filename_drive filename_ext filename_change_ext " + "file_bin_open file_bin_rewrite file_bin_close file_bin_position " + "file_bin_size file_bin_seek file_bin_write_byte file_bin_read_byte " + "parameter_count parameter_string environment_get_variable " + "ini_open_from_string ini_open ini_close ini_read_string " + "ini_read_real ini_write_string ini_write_real ini_key_exists " + "ini_section_exists ini_key_delete ini_section_delete " + "ds_set_precision ds_exists ds_stack_create ds_stack_destroy " + "ds_stack_clear ds_stack_copy ds_stack_size ds_stack_empty " + "ds_stack_push ds_stack_pop ds_stack_top ds_stack_write ds_stack_read " + "ds_queue_create ds_queue_destroy ds_queue_clear ds_queue_copy " + "ds_queue_size ds_queue_empty ds_queue_enqueue ds_queue_dequeue " + "ds_queue_head ds_queue_tail ds_queue_write ds_queue_read " + "ds_list_create ds_list_destroy ds_list_clear ds_list_copy " + "ds_list_size ds_list_empty ds_list_add ds_list_insert " + "ds_list_replace ds_list_delete ds_list_find_index ds_list_find_value " + "ds_list_mark_as_list ds_list_mark_as_map ds_list_sort " + "ds_list_shuffle ds_list_write ds_list_read ds_list_set ds_map_create " + "ds_map_destroy ds_map_clear ds_map_copy ds_map_size ds_map_empty " + "ds_map_add ds_map_add_list ds_map_add_map ds_map_replace " + "ds_map_replace_map ds_map_replace_list ds_map_delete ds_map_exists " + "ds_map_find_value ds_map_find_previous ds_map_find_next " + "ds_map_find_first ds_map_find_last ds_map_write ds_map_read " + "ds_map_secure_save ds_map_secure_load ds_map_secure_load_buffer " + "ds_map_secure_save_buffer ds_map_set ds_priority_create " + "ds_priority_destroy ds_priority_clear ds_priority_copy " + "ds_priority_size ds_priority_empty ds_priority_add " + "ds_priority_change_priority ds_priority_find_priority " + "ds_priority_delete_value ds_priority_delete_min ds_priority_find_min " + "ds_priority_delete_max ds_priority_find_max ds_priority_write " + "ds_priority_read ds_grid_create ds_grid_destroy ds_grid_copy " + "ds_grid_resize ds_grid_width ds_grid_height ds_grid_clear " + "ds_grid_set ds_grid_add ds_grid_multiply ds_grid_set_region " + "ds_grid_add_region ds_grid_multiply_region ds_grid_set_disk " + "ds_grid_add_disk ds_grid_multiply_disk ds_grid_set_grid_region " + "ds_grid_add_grid_region ds_grid_multiply_grid_region ds_grid_get " + "ds_grid_get_sum ds_grid_get_max ds_grid_get_min ds_grid_get_mean " + "ds_grid_get_disk_sum ds_grid_get_disk_min ds_grid_get_disk_max " + "ds_grid_get_disk_mean ds_grid_value_exists ds_grid_value_x " + "ds_grid_value_y ds_grid_value_disk_exists ds_grid_value_disk_x " + "ds_grid_value_disk_y ds_grid_shuffle ds_grid_write ds_grid_read " + "ds_grid_sort ds_grid_set ds_grid_get effect_create_below " + "effect_create_above effect_clear part_type_create part_type_destroy " + "part_type_exists part_type_clear part_type_shape part_type_sprite " + "part_type_size part_type_scale part_type_orientation part_type_life " + "part_type_step part_type_death part_type_speed part_type_direction " + "part_type_gravity part_type_colour1 part_type_colour2 " + "part_type_colour3 part_type_colour_mix part_type_colour_rgb " + "part_type_colour_hsv part_type_color1 part_type_color2 " + "part_type_color3 part_type_color_mix part_type_color_rgb " + "part_type_color_hsv part_type_alpha1 part_type_alpha2 " + "part_type_alpha3 part_type_blend part_system_create " + "part_system_create_layer part_system_destroy part_system_exists " + "part_system_clear part_system_draw_order part_system_depth " + "part_system_position part_system_automatic_update " + "part_system_automatic_draw part_system_update part_system_drawit " + "part_system_get_layer part_system_layer part_particles_create " + "part_particles_create_colour part_particles_create_color " + "part_particles_clear part_particles_count part_emitter_create " + "part_emitter_destroy part_emitter_destroy_all part_emitter_exists " + "part_emitter_clear part_emitter_region part_emitter_burst " + "part_emitter_stream external_call external_define external_free " + "window_handle window_device matrix_get matrix_set " + "matrix_build_identity matrix_build matrix_build_lookat " + "matrix_build_projection_ortho matrix_build_projection_perspective " + "matrix_build_projection_perspective_fov matrix_multiply " + "matrix_transform_vertex matrix_stack_push matrix_stack_pop " + "matrix_stack_multiply matrix_stack_set matrix_stack_clear " + "matrix_stack_top matrix_stack_is_empty browser_input_capture " + "os_get_config os_get_info os_get_language os_get_region " + "os_lock_orientation display_get_dpi_x display_get_dpi_y " + "display_set_gui_size display_set_gui_maximise " + "display_set_gui_maximize device_mouse_dbclick_enable " + "display_set_timing_method display_get_timing_method " + "display_set_sleep_margin display_get_sleep_margin virtual_key_add " + "virtual_key_hide virtual_key_delete virtual_key_show " + "draw_enable_drawevent draw_enable_swf_aa draw_set_swf_aa_level " + "draw_get_swf_aa_level draw_texture_flush draw_flush " + "gpu_set_blendenable gpu_set_ztestenable gpu_set_zfunc " + "gpu_set_zwriteenable gpu_set_lightingenable gpu_set_fog " + "gpu_set_cullmode gpu_set_blendmode gpu_set_blendmode_ext " + "gpu_set_blendmode_ext_sepalpha gpu_set_colorwriteenable " + "gpu_set_colourwriteenable gpu_set_alphatestenable " + "gpu_set_alphatestref gpu_set_alphatestfunc gpu_set_texfilter " + "gpu_set_texfilter_ext gpu_set_texrepeat gpu_set_texrepeat_ext " + "gpu_set_tex_filter gpu_set_tex_filter_ext gpu_set_tex_repeat " + "gpu_set_tex_repeat_ext gpu_set_tex_mip_filter " + "gpu_set_tex_mip_filter_ext gpu_set_tex_mip_bias " + "gpu_set_tex_mip_bias_ext gpu_set_tex_min_mip gpu_set_tex_min_mip_ext " + "gpu_set_tex_max_mip gpu_set_tex_max_mip_ext gpu_set_tex_max_aniso " + "gpu_set_tex_max_aniso_ext gpu_set_tex_mip_enable " + "gpu_set_tex_mip_enable_ext gpu_get_blendenable gpu_get_ztestenable " + "gpu_get_zfunc gpu_get_zwriteenable gpu_get_lightingenable " + "gpu_get_fog gpu_get_cullmode gpu_get_blendmode gpu_get_blendmode_ext " + "gpu_get_blendmode_ext_sepalpha gpu_get_blendmode_src " + "gpu_get_blendmode_dest gpu_get_blendmode_srcalpha " + "gpu_get_blendmode_destalpha gpu_get_colorwriteenable " + "gpu_get_colourwriteenable gpu_get_alphatestenable " + "gpu_get_alphatestref gpu_get_alphatestfunc gpu_get_texfilter " + "gpu_get_texfilter_ext gpu_get_texrepeat gpu_get_texrepeat_ext " + "gpu_get_tex_filter gpu_get_tex_filter_ext gpu_get_tex_repeat " + "gpu_get_tex_repeat_ext gpu_get_tex_mip_filter " + "gpu_get_tex_mip_filter_ext gpu_get_tex_mip_bias " + "gpu_get_tex_mip_bias_ext gpu_get_tex_min_mip gpu_get_tex_min_mip_ext " + "gpu_get_tex_max_mip gpu_get_tex_max_mip_ext gpu_get_tex_max_aniso " + "gpu_get_tex_max_aniso_ext gpu_get_tex_mip_enable " + "gpu_get_tex_mip_enable_ext gpu_push_state gpu_pop_state " + "gpu_get_state gpu_set_state draw_light_define_ambient " + "draw_light_define_direction draw_light_define_point " + "draw_light_enable draw_set_lighting draw_light_get_ambient " + "draw_light_get draw_get_lighting shop_leave_rating url_get_domain " + "url_open url_open_ext url_open_full get_timer achievement_login " + "achievement_logout achievement_post achievement_increment " + "achievement_post_score achievement_available " + "achievement_show_achievements achievement_show_leaderboards " + "achievement_load_friends achievement_load_leaderboard " + "achievement_send_challenge achievement_load_progress " + "achievement_reset achievement_login_status achievement_get_pic " + "achievement_show_challenge_notifications achievement_get_challenges " + "achievement_event achievement_show achievement_get_info " + "cloud_file_save cloud_string_save cloud_synchronise ads_enable " + "ads_disable ads_setup ads_engagement_launch ads_engagement_available " + "ads_engagement_active ads_event ads_event_preload " + "ads_set_reward_callback ads_get_display_height ads_get_display_width " + "ads_move ads_interstitial_available ads_interstitial_display " + "device_get_tilt_x device_get_tilt_y device_get_tilt_z " + "device_is_keypad_open device_mouse_check_button " + "device_mouse_check_button_pressed device_mouse_check_button_released " + "device_mouse_x device_mouse_y device_mouse_raw_x device_mouse_raw_y " + "device_mouse_x_to_gui device_mouse_y_to_gui iap_activate iap_status " + "iap_enumerate_products iap_restore_all iap_acquire iap_consume " + "iap_product_details iap_purchase_details facebook_init " + "facebook_login facebook_status facebook_graph_request " + "facebook_dialog facebook_logout facebook_launch_offerwall " + "facebook_post_message facebook_send_invite facebook_user_id " + "facebook_accesstoken facebook_check_permission " + "facebook_request_read_permissions " + "facebook_request_publish_permissions gamepad_is_supported " + "gamepad_get_device_count gamepad_is_connected " + "gamepad_get_description gamepad_get_button_threshold " + "gamepad_set_button_threshold gamepad_get_axis_deadzone " + "gamepad_set_axis_deadzone gamepad_button_count gamepad_button_check " + "gamepad_button_check_pressed gamepad_button_check_released " + "gamepad_button_value gamepad_axis_count gamepad_axis_value " + "gamepad_set_vibration gamepad_set_colour gamepad_set_color " + "os_is_paused window_has_focus code_is_compiled http_get " + "http_get_file http_post_string http_request json_encode json_decode " + "zip_unzip load_csv base64_encode base64_decode md5_string_unicode " + "md5_string_utf8 md5_file os_is_network_connected sha1_string_unicode " + "sha1_string_utf8 sha1_file os_powersave_enable analytics_event " + "analytics_event_ext win8_livetile_tile_notification " + "win8_livetile_tile_clear win8_livetile_badge_notification " + "win8_livetile_badge_clear win8_livetile_queue_enable " + "win8_secondarytile_pin win8_secondarytile_badge_notification " + "win8_secondarytile_delete win8_livetile_notification_begin " + "win8_livetile_notification_secondary_begin " + "win8_livetile_notification_expiry win8_livetile_notification_tag " + "win8_livetile_notification_text_add " + "win8_livetile_notification_image_add win8_livetile_notification_end " + "win8_appbar_enable win8_appbar_add_element " + "win8_appbar_remove_element win8_settingscharm_add_entry " + "win8_settingscharm_add_html_entry win8_settingscharm_add_xaml_entry " + "win8_settingscharm_set_xaml_property " + "win8_settingscharm_get_xaml_property win8_settingscharm_remove_entry " + "win8_share_image win8_share_screenshot win8_share_file " + "win8_share_url win8_share_text win8_search_enable " + "win8_search_disable win8_search_add_suggestions " + "win8_device_touchscreen_available win8_license_initialize_sandbox " + "win8_license_trial_version winphone_license_trial_version " + "winphone_tile_title winphone_tile_count winphone_tile_back_title " + "winphone_tile_back_content winphone_tile_back_content_wide " + "winphone_tile_front_image winphone_tile_front_image_small " + "winphone_tile_front_image_wide winphone_tile_back_image " + "winphone_tile_back_image_wide winphone_tile_background_colour " + "winphone_tile_background_color winphone_tile_icon_image " + "winphone_tile_small_icon_image winphone_tile_wide_content " + "winphone_tile_cycle_images winphone_tile_small_background_image " + "physics_world_create physics_world_gravity " + "physics_world_update_speed physics_world_update_iterations " + "physics_world_draw_debug physics_pause_enable physics_fixture_create " + "physics_fixture_set_kinematic physics_fixture_set_density " + "physics_fixture_set_awake physics_fixture_set_restitution " + "physics_fixture_set_friction physics_fixture_set_collision_group " + "physics_fixture_set_sensor physics_fixture_set_linear_damping " + "physics_fixture_set_angular_damping physics_fixture_set_circle_shape " + "physics_fixture_set_box_shape physics_fixture_set_edge_shape " + "physics_fixture_set_polygon_shape physics_fixture_set_chain_shape " + "physics_fixture_add_point physics_fixture_bind " + "physics_fixture_bind_ext physics_fixture_delete physics_apply_force " + "physics_apply_impulse physics_apply_angular_impulse " + "physics_apply_local_force physics_apply_local_impulse " + "physics_apply_torque physics_mass_properties physics_draw_debug " + "physics_test_overlap physics_remove_fixture physics_set_friction " + "physics_set_density physics_set_restitution physics_get_friction " + "physics_get_density physics_get_restitution " + "physics_joint_distance_create physics_joint_rope_create " + "physics_joint_revolute_create physics_joint_prismatic_create " + "physics_joint_pulley_create physics_joint_wheel_create " + "physics_joint_weld_create physics_joint_friction_create " + "physics_joint_gear_create physics_joint_enable_motor " + "physics_joint_get_value physics_joint_set_value physics_joint_delete " + "physics_particle_create physics_particle_delete " + "physics_particle_delete_region_circle " + "physics_particle_delete_region_box " + "physics_particle_delete_region_poly physics_particle_set_flags " + "physics_particle_set_category_flags physics_particle_draw " + "physics_particle_draw_ext physics_particle_count " + "physics_particle_get_data physics_particle_get_data_particle " + "physics_particle_group_begin physics_particle_group_circle " + "physics_particle_group_box physics_particle_group_polygon " + "physics_particle_group_add_point physics_particle_group_end " + "physics_particle_group_join physics_particle_group_delete " + "physics_particle_group_count physics_particle_group_get_data " + "physics_particle_group_get_mass physics_particle_group_get_inertia " + "physics_particle_group_get_centre_x " + "physics_particle_group_get_centre_y physics_particle_group_get_vel_x " + "physics_particle_group_get_vel_y physics_particle_group_get_ang_vel " + "physics_particle_group_get_x physics_particle_group_get_y " + "physics_particle_group_get_angle physics_particle_set_group_flags " + "physics_particle_get_group_flags physics_particle_get_max_count " + "physics_particle_get_radius physics_particle_get_density " + "physics_particle_get_damping physics_particle_get_gravity_scale " + "physics_particle_set_max_count physics_particle_set_radius " + "physics_particle_set_density physics_particle_set_damping " + "physics_particle_set_gravity_scale network_create_socket " + "network_create_socket_ext network_create_server " + "network_create_server_raw network_connect network_connect_raw " + "network_send_packet network_send_raw network_send_broadcast " + "network_send_udp network_send_udp_raw network_set_timeout " + "network_set_config network_resolve network_destroy buffer_create " + "buffer_write buffer_read buffer_seek buffer_get_surface " + "buffer_set_surface buffer_delete buffer_exists buffer_get_type " + "buffer_get_alignment buffer_poke buffer_peek buffer_save " + "buffer_save_ext buffer_load buffer_load_ext buffer_load_partial " + "buffer_copy buffer_fill buffer_get_size buffer_tell buffer_resize " + "buffer_md5 buffer_sha1 buffer_base64_encode buffer_base64_decode " + "buffer_base64_decode_ext buffer_sizeof buffer_get_address " + "buffer_create_from_vertex_buffer " + "buffer_create_from_vertex_buffer_ext buffer_copy_from_vertex_buffer " + "buffer_async_group_begin buffer_async_group_option " + "buffer_async_group_end buffer_load_async buffer_save_async " + "gml_release_mode gml_pragma steam_activate_overlay " + "steam_is_overlay_enabled steam_is_overlay_activated " + "steam_get_persona_name steam_initialised " + "steam_is_cloud_enabled_for_app steam_is_cloud_enabled_for_account " + "steam_file_persisted steam_get_quota_total steam_get_quota_free " + "steam_file_write steam_file_write_file steam_file_read " + "steam_file_delete steam_file_exists steam_file_size steam_file_share " + "steam_is_screenshot_requested steam_send_screenshot " + "steam_is_user_logged_on steam_get_user_steam_id steam_user_owns_dlc " + "steam_user_installed_dlc steam_set_achievement steam_get_achievement " + "steam_clear_achievement steam_set_stat_int steam_set_stat_float " + "steam_set_stat_avg_rate steam_get_stat_int steam_get_stat_float " + "steam_get_stat_avg_rate steam_reset_all_stats " + "steam_reset_all_stats_achievements steam_stats_ready " + "steam_create_leaderboard steam_upload_score steam_upload_score_ext " + "steam_download_scores_around_user steam_download_scores " + "steam_download_friends_scores steam_upload_score_buffer " + "steam_upload_score_buffer_ext steam_current_game_language " + "steam_available_languages steam_activate_overlay_browser " + "steam_activate_overlay_user steam_activate_overlay_store " + "steam_get_user_persona_name steam_get_app_id " + "steam_get_user_account_id steam_ugc_download steam_ugc_create_item " + "steam_ugc_start_item_update steam_ugc_set_item_title " + "steam_ugc_set_item_description steam_ugc_set_item_visibility " + "steam_ugc_set_item_tags steam_ugc_set_item_content " + "steam_ugc_set_item_preview steam_ugc_submit_item_update " + "steam_ugc_get_item_update_progress steam_ugc_subscribe_item " + "steam_ugc_unsubscribe_item steam_ugc_num_subscribed_items " + "steam_ugc_get_subscribed_items steam_ugc_get_item_install_info " + "steam_ugc_get_item_update_info steam_ugc_request_item_details " + "steam_ugc_create_query_user steam_ugc_create_query_user_ex " + "steam_ugc_create_query_all steam_ugc_create_query_all_ex " + "steam_ugc_query_set_cloud_filename_filter " + "steam_ugc_query_set_match_any_tag steam_ugc_query_set_search_text " + "steam_ugc_query_set_ranked_by_trend_days " + "steam_ugc_query_add_required_tag steam_ugc_query_add_excluded_tag " + "steam_ugc_query_set_return_long_description " + "steam_ugc_query_set_return_total_only " + "steam_ugc_query_set_allow_cached_response steam_ugc_send_query " + "shader_set shader_get_name shader_reset shader_current " + "shader_is_compiled shader_get_sampler_index shader_get_uniform " + "shader_set_uniform_i shader_set_uniform_i_array shader_set_uniform_f " + "shader_set_uniform_f_array shader_set_uniform_matrix " + "shader_set_uniform_matrix_array shader_enable_corner_id " + "texture_set_stage texture_get_texel_width texture_get_texel_height " + "shaders_are_supported vertex_format_begin vertex_format_end " + "vertex_format_delete vertex_format_add_position " + "vertex_format_add_position_3d vertex_format_add_colour " + "vertex_format_add_color vertex_format_add_normal " + "vertex_format_add_texcoord vertex_format_add_textcoord " + "vertex_format_add_custom vertex_create_buffer " + "vertex_create_buffer_ext vertex_delete_buffer vertex_begin " + "vertex_end vertex_position vertex_position_3d vertex_colour " + "vertex_color vertex_argb vertex_texcoord vertex_normal vertex_float1 " + "vertex_float2 vertex_float3 vertex_float4 vertex_ubyte4 " + "vertex_submit vertex_freeze vertex_get_number vertex_get_buffer_size " + "vertex_create_buffer_from_buffer " + "vertex_create_buffer_from_buffer_ext push_local_notification " + "push_get_first_local_notification push_get_next_local_notification " + "push_cancel_local_notification skeleton_animation_set " + "skeleton_animation_get skeleton_animation_mix " + "skeleton_animation_set_ext skeleton_animation_get_ext " + "skeleton_animation_get_duration skeleton_animation_get_frames " + "skeleton_animation_clear skeleton_skin_set skeleton_skin_get " + "skeleton_attachment_set skeleton_attachment_get " + "skeleton_attachment_create skeleton_collision_draw_set " + "skeleton_bone_data_get skeleton_bone_data_set " + "skeleton_bone_state_get skeleton_bone_state_set skeleton_get_minmax " + "skeleton_get_num_bounds skeleton_get_bounds " + "skeleton_animation_get_frame skeleton_animation_set_frame " + "draw_skeleton draw_skeleton_time draw_skeleton_instance " + "draw_skeleton_collision skeleton_animation_list skeleton_skin_list " + "skeleton_slot_data layer_get_id layer_get_id_at_depth " + "layer_get_depth layer_create layer_destroy layer_destroy_instances " + "layer_add_instance layer_has_instance layer_set_visible " + "layer_get_visible layer_exists layer_x layer_y layer_get_x " + "layer_get_y layer_hspeed layer_vspeed layer_get_hspeed " + "layer_get_vspeed layer_script_begin layer_script_end layer_shader " + "layer_get_script_begin layer_get_script_end layer_get_shader " + "layer_set_target_room layer_get_target_room layer_reset_target_room " + "layer_get_all layer_get_all_elements layer_get_name layer_depth " + "layer_get_element_layer layer_get_element_type layer_element_move " + "layer_force_draw_depth layer_is_draw_depth_forced " + "layer_get_forced_depth layer_background_get_id " + "layer_background_exists layer_background_create " + "layer_background_destroy layer_background_visible " + "layer_background_change layer_background_sprite " + "layer_background_htiled layer_background_vtiled " + "layer_background_stretch layer_background_yscale " + "layer_background_xscale layer_background_blend " + "layer_background_alpha layer_background_index layer_background_speed " + "layer_background_get_visible layer_background_get_sprite " + "layer_background_get_htiled layer_background_get_vtiled " + "layer_background_get_stretch layer_background_get_yscale " + "layer_background_get_xscale layer_background_get_blend " + "layer_background_get_alpha layer_background_get_index " + "layer_background_get_speed layer_sprite_get_id layer_sprite_exists " + "layer_sprite_create layer_sprite_destroy layer_sprite_change " + "layer_sprite_index layer_sprite_speed layer_sprite_xscale " + "layer_sprite_yscale layer_sprite_angle layer_sprite_blend " + "layer_sprite_alpha layer_sprite_x layer_sprite_y " + "layer_sprite_get_sprite layer_sprite_get_index " + "layer_sprite_get_speed layer_sprite_get_xscale " + "layer_sprite_get_yscale layer_sprite_get_angle " + "layer_sprite_get_blend layer_sprite_get_alpha layer_sprite_get_x " + "layer_sprite_get_y layer_tilemap_get_id layer_tilemap_exists " + "layer_tilemap_create layer_tilemap_destroy tilemap_tileset tilemap_x " + "tilemap_y tilemap_set tilemap_set_at_pixel tilemap_get_tileset " + "tilemap_get_tile_width tilemap_get_tile_height tilemap_get_width " + "tilemap_get_height tilemap_get_x tilemap_get_y tilemap_get " + "tilemap_get_at_pixel tilemap_get_cell_x_at_pixel " + "tilemap_get_cell_y_at_pixel tilemap_clear draw_tilemap draw_tile " + "tilemap_set_global_mask tilemap_get_global_mask tilemap_set_mask " + "tilemap_get_mask tilemap_get_frame tile_set_empty tile_set_index " + "tile_set_flip tile_set_mirror tile_set_rotate tile_get_empty " + "tile_get_index tile_get_flip tile_get_mirror tile_get_rotate " + "layer_tile_exists layer_tile_create layer_tile_destroy " + "layer_tile_change layer_tile_xscale layer_tile_yscale " + "layer_tile_blend layer_tile_alpha layer_tile_x layer_tile_y " + "layer_tile_region layer_tile_visible layer_tile_get_sprite " + "layer_tile_get_xscale layer_tile_get_yscale layer_tile_get_blend " + "layer_tile_get_alpha layer_tile_get_x layer_tile_get_y " + "layer_tile_get_region layer_tile_get_visible " + "layer_instance_get_instance instance_activate_layer " + "instance_deactivate_layer camera_create camera_create_view " + "camera_destroy camera_apply camera_get_active camera_get_default " + "camera_set_default camera_set_view_mat camera_set_proj_mat " + "camera_set_update_script camera_set_begin_script " + "camera_set_end_script camera_set_view_pos camera_set_view_size " + "camera_set_view_speed camera_set_view_border camera_set_view_angle " + "camera_set_view_target camera_get_view_mat camera_get_proj_mat " + "camera_get_update_script camera_get_begin_script " + "camera_get_end_script camera_get_view_x camera_get_view_y " + "camera_get_view_width camera_get_view_height camera_get_view_speed_x " + "camera_get_view_speed_y camera_get_view_border_x " + "camera_get_view_border_y camera_get_view_angle " + "camera_get_view_target view_get_camera view_get_visible " + "view_get_xport view_get_yport view_get_wport view_get_hport " + "view_get_surface_id view_set_camera view_set_visible view_set_xport " + "view_set_yport view_set_wport view_set_hport view_set_surface_id " + "gesture_drag_time gesture_drag_distance gesture_flick_speed " + "gesture_double_tap_time gesture_double_tap_distance " + "gesture_pinch_distance gesture_pinch_angle_towards " + "gesture_pinch_angle_away gesture_rotate_time gesture_rotate_angle " + "gesture_tap_count gesture_get_drag_time gesture_get_drag_distance " + "gesture_get_flick_speed gesture_get_double_tap_time " + "gesture_get_double_tap_distance gesture_get_pinch_distance " + "gesture_get_pinch_angle_towards gesture_get_pinch_angle_away " + "gesture_get_rotate_time gesture_get_rotate_angle " + "gesture_get_tap_count keyboard_virtual_show keyboard_virtual_hide " + "keyboard_virtual_status keyboard_virtual_height",
@@ -8850,10 +8865,10 @@ var demo = function(path, fs, url, buffer) {
   }
   var gml_1 = gml;
   /*
-  Language: Expression 2
-  Author: Simen Wiik <simenwiik@hotmail.com>
-  Description: A language used in the Wiremod add-on for Garry's Mod
-  */  function gmod_wire_e2(hljs) {
+	Language: Expression 2
+	Author: Simen Wiik <simenwiik@hotmail.com>
+	Description: A language used in the Wiremod add-on for Garry's Mod
+	*/  function gmod_wire_e2(hljs) {
     return {
       alias: [ "e2", "wire_e2", "gmod_wire_e2", "expression2" ],
       keywords: "if|0 elseif|0 else|0 for|0 foreach|0 while|0 break|0 continue|0 local|0 switch|0 case|0 default|0 function|0 return|0",
@@ -8918,13 +8933,13 @@ var demo = function(path, fs, url, buffer) {
   }
   var gmod_wire_e2_1 = gmod_wire_e2;
   /*
-  Language: Go
-  Author: Stephan Kountso aka StepLg <steplg@gmail.com>
-  Contributors: Evgeny Stepanischev <imbolk@gmail.com>
-  Description: Google go language (golang). For info about language
-  Website: http://golang.org/
-  Category: common, system
-  */  function go(hljs) {
+	Language: Go
+	Author: Stephan Kountso aka StepLg <steplg@gmail.com>
+	Contributors: Evgeny Stepanischev <imbolk@gmail.com>
+	Description: Google go language (golang). For info about language
+	Website: http://golang.org/
+	Category: common, system
+	*/  function go(hljs) {
     var GO_KEYWORDS = {
       keyword: "break default func interface select case map struct chan else goto package switch " + "const fallthrough if range type continue for import return var go defer " + "bool byte complex64 complex128 float32 float64 int8 int16 int32 int64 string uint8 " + "uint16 uint32 uint64 int uint uintptr rune",
       literal: "true false iota nil",
@@ -8966,11 +8981,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var go_1 = go;
   /*
-  Language: Golo
-  Author: Philippe Charriere <ph.charriere@gmail.com>
-  Description: a lightweight dynamic language for the JVM
-  Website: http://golo-lang.org/
-  */  function golo(hljs) {
+	Language: Golo
+	Author: Philippe Charriere <ph.charriere@gmail.com>
+	Description: a lightweight dynamic language for the JVM
+	Website: http://golo-lang.org/
+	*/  function golo(hljs) {
     return {
       name: "Golo",
       keywords: {
@@ -8985,11 +9000,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var golo_1 = golo;
   /*
-  Language: Gradle
-  Description: Gradle is an open-source build automation tool focused on flexibility and performance.
-  Website: https://gradle.org
-  Author: Damian Mee <mee.damian@gmail.com>
-  */  function gradle(hljs) {
+	Language: Gradle
+	Description: Gradle is an open-source build automation tool focused on flexibility and performance.
+	Website: https://gradle.org
+	Author: Damian Mee <mee.damian@gmail.com>
+	*/  function gradle(hljs) {
     return {
       name: "Gradle",
       case_insensitive: true,
@@ -9001,10 +9016,10 @@ var demo = function(path, fs, url, buffer) {
   }
   var gradle_1 = gradle;
   /*
-  Language: GraphQL
-  Author: David Peek <mail@dpeek.com>
-  Description: GraphQL schema, query, mutation and subscription
-  */  function graphql(hljs) {
+	Language: GraphQL
+	Author: David Peek <mail@dpeek.com>
+	Description: GraphQL schema, query, mutation and subscription
+	*/  function graphql(hljs) {
     return {
       aliases: [ "gql" ],
       keywords: {
@@ -9041,11 +9056,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var graphql_1 = graphql;
   /*
-   Language: Groovy
-   Author: Guillaume Laforge <glaforge@gmail.com>
-   Description: Groovy programming language implementation inspired from Vsevolod's Java mode
-   Website: https://groovy-lang.org
-   */  function groovy(hljs) {
+	 Language: Groovy
+	 Author: Guillaume Laforge <glaforge@gmail.com>
+	 Description: Groovy programming language implementation inspired from Vsevolod's Java mode
+	 Website: https://groovy-lang.org
+	 */  function groovy(hljs) {
     return {
       name: "Groovy",
       keywords: {
@@ -9119,11 +9134,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var groovy_1 = groovy;
   /*
-  Language: Hakaru
-  Author: Rob Zinkov <rob@zinkov.com>
-   Category: scientific
-  Description: Syntax highlighting for the Hakaru probabilistic programming language
-  */  function hakaru(hljs) {
+	Language: Hakaru
+	Author: Rob Zinkov <rob@zinkov.com>
+	 Category: scientific
+	Description: Syntax highlighting for the Hakaru probabilistic programming language
+	*/  function hakaru(hljs) {
     return {
       contains: [ hljs.HASH_COMMENT_MODE, {
         begin: hljs.UNDERSCORE_IDENT_RE,
@@ -9158,12 +9173,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var hakaru_1 = hakaru;
   /*
-  Language: HAML
-  Requires: ruby.js
-  Author: Dan Allen <dan.j.allen@gmail.com>
-  Website: http://haml.info
-  Category: template
-  */
+	Language: HAML
+	Requires: ruby.js
+	Author: Dan Allen <dan.j.allen@gmail.com>
+	Website: http://haml.info
+	Category: template
+	*/
   // TODO support filter tags like :javascript, support inline HTML
     function haml(hljs) {
     return {
@@ -9243,13 +9258,13 @@ var demo = function(path, fs, url, buffer) {
   }
   var haml_1 = haml;
   /*
-  Language: Handlebars
-  Requires: xml.js
-  Author: Robin Ward <robin.ward@gmail.com>
-  Description: Matcher for Handlebars as well as EmberJS additions.
-  Website: https://handlebarsjs.com
-  Category: template
-  */  function handlebars(hljs) {
+	Language: Handlebars
+	Requires: xml.js
+	Author: Robin Ward <robin.ward@gmail.com>
+	Description: Matcher for Handlebars as well as EmberJS additions.
+	Website: https://handlebarsjs.com
+	Category: template
+	*/  function handlebars(hljs) {
     var BUILT_INS = {
       "builtin-name": "action bindattr collection component concat debugger " + "each each-in get hash if in input link-to loc log lookup " + "mut outlet partial query-params render template textarea unbound " + "unless view with yield"
     };
@@ -9395,12 +9410,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var handlebars_1 = handlebars;
   /*
-  Language: Haskell
-  Author: Jeremy Hull <sourdrums@gmail.com>
-  Contributors: Zena Treep <zena.treep@gmail.com>
-  Website: https://www.haskell.org
-  Category: functional
-  */  function haskell(hljs) {
+	Language: Haskell
+	Author: Jeremy Hull <sourdrums@gmail.com>
+	Contributors: Zena Treep <zena.treep@gmail.com>
+	Website: https://www.haskell.org
+	Category: functional
+	*/  function haskell(hljs) {
     var COMMENT = {
       variants: [ hljs.COMMENT("--", "$"), hljs.COMMENT("{-", "-}", {
         contains: [ "self" ]
@@ -9499,12 +9514,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var haskell_1 = haskell;
   /*
-  Language: Haxe
-  Description: Haxe is an open source toolkit based on a modern, high level, strictly typed programming language.
-  Author: Christopher Kaster <ikasoki@gmail.com> (Based on the actionscript.js language file by Alexander Myadzel)
-  Contributors: Kenton Hamaluik <kentonh@gmail.com>
-  Website: https://haxe.org
-  */  function haxe(hljs) {
+	Language: Haxe
+	Description: Haxe is an open source toolkit based on a modern, high level, strictly typed programming language.
+	Author: Christopher Kaster <ikasoki@gmail.com> (Based on the actionscript.js language file by Alexander Myadzel)
+	Contributors: Kenton Hamaluik <kentonh@gmail.com>
+	Website: https://haxe.org
+	*/  function haxe(hljs) {
     var HAXE_BASIC_TYPES = "Int Float String Bool Dynamic Void Array ";
     return {
       name: "Haxe",
@@ -9628,11 +9643,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var haxe_1 = haxe;
   /*
-  Language: HCL
-  Author: Brian Hicks <brian@brianthicks.com>
-  Description: Hashicorp Configuration Language. For info about language see https://github.com/hashicorp/hcl.
-  Category: config
-  */  function hcl(hljs) {
+	Language: HCL
+	Author: Brian Hicks <brian@brianthicks.com>
+	Description: Hashicorp Configuration Language. For info about language see https://github.com/hashicorp/hcl.
+	Category: config
+	*/  function hcl(hljs) {
     BACKTICK_STRING = {
       className: "string",
       begin: /[`"]/,
@@ -9676,11 +9691,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var hcl_1 = hcl;
   /*
-  Language: HSP
-  Author: prince <MC.prince.0203@gmail.com>
-  Website: https://en.wikipedia.org/wiki/Hot_Soup_Processor
-  Category: scripting
-  */  function hsp(hljs) {
+	Language: HSP
+	Author: prince <MC.prince.0203@gmail.com>
+	Website: https://en.wikipedia.org/wiki/Hot_Soup_Processor
+	Category: scripting
+	*/  function hsp(hljs) {
     return {
       name: "HSP",
       case_insensitive: true,
@@ -9716,12 +9731,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var hsp_1 = hsp;
   /*
-  Language: HTTP
-  Description: HTTP request and response headers with automatic body highlighting
-  Author: Ivan Sagalaev <maniac@softwaremaniacs.org>
-  Category: common, protocols
-  Website: https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview
-  */  function http(hljs) {
+	Language: HTTP
+	Description: HTTP request and response headers with automatic body highlighting
+	Author: Ivan Sagalaev <maniac@softwaremaniacs.org>
+	Category: common, protocols
+	Website: https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview
+	*/  function http(hljs) {
     var VERSION = "HTTP/[0-9\\.]+";
     return {
       name: "HTTP",
@@ -9771,12 +9786,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var http_1 = http;
   /*
-  Language: Hy
-  Description: Hy is a wonderful dialect of Lisp that’s embedded in Python.
-  Author: Sergey Sobko <s.sobko@profitware.ru>
-  Website: http://docs.hylang.org/en/stable/
-  Category: lisp
-  */  function hy(hljs) {
+	Language: Hy
+	Description: Hy is a wonderful dialect of Lisp that’s embedded in Python.
+	Author: Sergey Sobko <s.sobko@profitware.ru>
+	Website: http://docs.hylang.org/en/stable/
+	Category: lisp
+	*/  function hy(hljs) {
     var SYMBOLSTART = "a-zA-Z_\\-!.?+*=<>&#'";
     var SYMBOL_RE = "[" + SYMBOLSTART + "][" + SYMBOLSTART + "0-9/;:]*";
     var keywords = {
@@ -9845,10 +9860,10 @@ var demo = function(path, fs, url, buffer) {
   }
   var hy_1 = hy;
   /*
-  Language: IBM UIM
-  Author: Hanna Goodbar <hanna.goodbar@gmail.com>
-  Description: IBM User Interface Manager markup language. Modifed from xml.js language file.
-  */  function ibmuim(hljs) {
+	Language: IBM UIM
+	Author: Hanna Goodbar <hanna.goodbar@gmail.com>
+	Description: IBM User Interface Manager markup language. Modifed from xml.js language file.
+	*/  function ibmuim(hljs) {
     var XML_IDENT_RE = "[A-Za-z0-9]+";
     var TAG_INTERNALS = {
       endsWithParent: true,
@@ -9899,13 +9914,13 @@ var demo = function(path, fs, url, buffer) {
   }
   var ibmuim_1 = ibmuim;
   /*
-   * Language: Igor Pro
-   * Author: Adam Light <adam@wavemetrics.com>,
-   *         Thomas Braun <thomas.braun@byte-physics.de>
-   * Contributors:
-   * Category: scientific
-   * Description: Programming language used by Igor Pro (www.igorpro.net)
-   */  function igorpro(hljs) {
+	 * Language: Igor Pro
+	 * Author: Adam Light <adam@wavemetrics.com>,
+	 *         Thomas Braun <thomas.braun@byte-physics.de>
+	 * Contributors:
+	 * Category: scientific
+	 * Description: Programming language used by Igor Pro (www.igorpro.net)
+	 */  function igorpro(hljs) {
     var WAVE_DECLARATION = {
       className: "keyword",
       relevance: 10,
@@ -9933,11 +9948,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var igorpro_1 = igorpro;
   /*
-  Language: Inform 7
-  Author: Bruno Dias <bruno.r.dias@gmail.com>
-  Description: Language definition for Inform 7, a DSL for writing parser interactive fiction.
-  Website: http://inform7.com
-  */  function inform7(hljs) {
+	Language: Inform 7
+	Author: Bruno Dias <bruno.r.dias@gmail.com>
+	Description: Language definition for Inform 7, a DSL for writing parser interactive fiction.
+	Website: http://inform7.com
+	*/  function inform7(hljs) {
     var START_BRACKET = "\\[";
     var END_BRACKET = "\\]";
     return {
@@ -9990,12 +10005,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var inform7_1 = inform7;
   /*
-  Language: TOML, also INI
-  Description: TOML aims to be a minimal configuration file format that's easy to read due to obvious semantics.
-  Contributors: Guillaume Gomez <guillaume1.gomez@gmail.com>
-  Category: common, config
-  Website: https://github.com/toml-lang/toml
-  */  function ini(hljs) {
+	Language: TOML, also INI
+	Description: TOML aims to be a minimal configuration file format that's easy to read due to obvious semantics.
+	Contributors: Guillaume Gomez <guillaume1.gomez@gmail.com>
+	Category: common, config
+	Website: https://github.com/toml-lang/toml
+	*/  function ini(hljs) {
     var NUMBERS = {
       className: "number",
       relevance: 0,
@@ -10071,10 +10086,10 @@ var demo = function(path, fs, url, buffer) {
   }
   var ini_1 = ini;
   /*
-  Language: ion
-  Author: glendc <contact@glendc.com>
-  Category: scripting
-  */  function ion(hljs) {
+	Language: ion
+	Author: glendc <contact@glendc.com>
+	Category: scripting
+	*/  function ion(hljs) {
     var VAR = {
       className: "variable",
       variants: [ {
@@ -10121,10 +10136,10 @@ var demo = function(path, fs, url, buffer) {
   }
   var ion_1 = ion;
   /*
-  Language: IRC
-  Author: Nicolas LLOBERA <nllobera@gmail.com>
-  Description: language definition for IRC commands
-  */  function irc(hljs) {
+	Language: IRC
+	Author: Nicolas LLOBERA <nllobera@gmail.com>
+	Description: language definition for IRC commands
+	*/  function irc(hljs) {
     return {
       keywords: "NickServ VERIFY REGISTER GROUP",
       contains: [ hljs.COMMENT("-!-", "$"), {
@@ -10138,12 +10153,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var irc_1 = irc;
   /*
-  Language: IRPF90
-  Author: Anthony Scemama <scemama@irsamc.ups-tlse.fr>
-  Description: IRPF90 is an open-source Fortran code generator
-  Website: http://irpf90.ups-tlse.fr
-  Category: scientific
-  */  function irpf90(hljs) {
+	Language: IRPF90
+	Author: Anthony Scemama <scemama@irsamc.ups-tlse.fr>
+	Description: IRPF90 is an open-source Fortran code generator
+	Website: http://irpf90.ups-tlse.fr
+	Category: scientific
+	*/  function irpf90(hljs) {
     var PARAMS = {
       className: "params",
       begin: "\\(",
@@ -10188,11 +10203,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var irpf90_1 = irpf90;
   /*
-  Language: ISBL
-  Author: Dmitriy Tarasov <dimatar@gmail.com>
-  Description: built-in language DIRECTUM
-  Category: enterprise
-  */  function isbl(hljs) {
+	Language: ISBL
+	Author: Dmitriy Tarasov <dimatar@gmail.com>
+	Description: built-in language DIRECTUM
+	Category: enterprise
+	*/  function isbl(hljs) {
     // Определение идентификаторов
     var UNDERSCORE_IDENT_RE = "[A-Za-z\u0410-\u042f\u0430-\u044f\u0451\u0401_!][A-Za-z\u0410-\u042f\u0430-\u044f\u0451\u0401_0-9]*";
     // Определение имен функций
@@ -10569,10 +10584,10 @@ var demo = function(path, fs, url, buffer) {
   }
   var isbl_1 = isbl;
   /*
-  Language: Jade
-  Author: Tomas Aparicio <tomas@aparicio.me>
-  Description: Jade is a high performance template engine heavily influenced by Haml and implemented with JavaScript for node.
-  */
+	Language: Jade
+	Author: Tomas Aparicio <tomas@aparicio.me>
+	Description: Jade is a high performance template engine heavily influenced by Haml and implemented with JavaScript for node.
+	*/
   // TODO work in process: detect indentation (comments, multiline), attributes with classes
     function jade(hljs) {
     return {
@@ -10679,9 +10694,9 @@ var demo = function(path, fs, url, buffer) {
   }
   var jade_1 = jade;
   /*
-  Language: Jam
-  Author: Rene Rivera <grafikrobot@gmail.com>
-  */  function jam(hljs) {
+	Language: Jam
+	Author: Rene Rivera <grafikrobot@gmail.com>
+	*/  function jam(hljs) {
     var KEYWORD_MODE = {
       className: "keyword",
       beginKeywords: "local include return break continue for in switch " + "if else module class while rule on actions case bind " + "updated together ignore quietly piecemeal existing"
@@ -10788,11 +10803,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var jam_1 = jam;
   /*
-  Language: Java
-  Author: Vsevolod Solovyov <vsevolod.solovyov@gmail.com>
-  Category: common, enterprise
-  Website: https://www.java.com/
-  */  function java(hljs) {
+	Language: Java
+	Author: Vsevolod Solovyov <vsevolod.solovyov@gmail.com>
+	Category: common, enterprise
+	Website: https://www.java.com/
+	*/  function java(hljs) {
     var JAVA_IDENT_RE = "[\xc0-\u02b8a-zA-Z_$][\xc0-\u02b8a-zA-Z_$0-9]*";
     var GENERIC_IDENT_RE = JAVA_IDENT_RE + "(<" + JAVA_IDENT_RE + "(\\s*,\\s*" + JAVA_IDENT_RE + ")*>)?";
     var KEYWORDS = "false synchronized int abstract float private char boolean var static null if const " + "for true while long strictfp finally protected import native final void " + "enum else break transient catch instanceof byte super volatile case assert short " + "package default double public try this switch continue throws protected public private " + "module requires exports do";
@@ -10910,11 +10925,11 @@ var demo = function(path, fs, url, buffer) {
     return joined;
   }
   /*
-  Language: JavaScript
-  Description: JavaScript (JS) is a lightweight, interpreted, or just-in-time compiled programming language with first-class functions.
-  Category: common, scripting
-  Website: https://developer.mozilla.org/en-US/docs/Web/JavaScript
-  */  function javascript(hljs) {
+	Language: JavaScript
+	Description: JavaScript (JS) is a lightweight, interpreted, or just-in-time compiled programming language with first-class functions.
+	Category: common, scripting
+	Website: https://developer.mozilla.org/en-US/docs/Web/JavaScript
+	*/  function javascript(hljs) {
     var IDENT_RE$1$1 = IDENT_RE$1;
     var FRAGMENT = {
       begin: "<>",
@@ -11143,12 +11158,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var javascript_1 = javascript;
   /*
-   Language: JBoss CLI
-   Author: Raphaël Parrëe <rparree@edc4it.com>
-   Description: language definition jboss cli
-   Website: https://docs.jboss.org/author/display/WFLY/Command+Line+Interface
-   Category: config
-   */  function jbossCli(hljs) {
+	 Language: JBoss CLI
+	 Author: Raphaël Parrëe <rparree@edc4it.com>
+	 Description: language definition jboss cli
+	 Website: https://docs.jboss.org/author/display/WFLY/Command+Line+Interface
+	 Category: config
+	 */  function jbossCli(hljs) {
     var PARAM = {
       begin: /[\w-]+ *=/,
       returnBegin: true,
@@ -11192,12 +11207,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var jbossCli_1 = jbossCli;
   /*
-  Language: JSON
-  Description: JSON (JavaScript Object Notation) is a lightweight data-interchange format.
-  Author: Ivan Sagalaev <maniac@softwaremaniacs.org>
-  Website: http://www.json.org
-  Category: common, protocols
-  */  function json(hljs) {
+	Language: JSON
+	Description: JSON (JavaScript Object Notation) is a lightweight data-interchange format.
+	Author: Ivan Sagalaev <maniac@softwaremaniacs.org>
+	Website: http://www.json.org
+	Category: common, protocols
+	*/  function json(hljs) {
     var LITERALS = {
       literal: "true false null"
     };
@@ -11244,12 +11259,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var json_1 = json;
   /*
-  Language: Julia
-  Description: Julia is a high-level, high-performance, dynamic programming language.
-  Author: Kenta Sato <bicycle1885@gmail.com>
-  Contributors: Alex Arslan <ararslan@comcast.net>
-  Website: https://julialang.org
-  */  function julia(hljs) {
+	Language: Julia
+	Description: Julia is a high-level, high-performance, dynamic programming language.
+	Author: Kenta Sato <bicycle1885@gmail.com>
+	Contributors: Alex Arslan <ararslan@comcast.net>
+	Website: https://julialang.org
+	*/  function julia(hljs) {
     // Since there are numerous special names in Julia, it is too much trouble
     // to maintain them by hand. Hence these names (i.e. keywords, literals and
     // built-ins) are automatically generated from Julia v0.6 itself through
@@ -11369,28 +11384,28 @@ var demo = function(path, fs, url, buffer) {
   }
   var julia_1 = julia;
   /*
-  Language: Julia REPL
-  Description: Julia REPL sessions
-  Author: Morten Piibeleht <morten.piibeleht@gmail.com>
-  Website: https://julialang.org
-  Requires: julia.js
+	Language: Julia REPL
+	Description: Julia REPL sessions
+	Author: Morten Piibeleht <morten.piibeleht@gmail.com>
+	Website: https://julialang.org
+	Requires: julia.js
 
-  The Julia REPL code blocks look something like the following:
+	The Julia REPL code blocks look something like the following:
 
-    julia> function foo(x)
-               x + 1
-           end
-    foo (generic function with 1 method)
+	  julia> function foo(x)
+	             x + 1
+	         end
+	  foo (generic function with 1 method)
 
-  They start on a new line with "julia>". Usually there should also be a space after this, but
-  we also allow the code to start right after the > character. The code may run over multiple
-  lines, but the additional lines must start with six spaces (i.e. be indented to match
-  "julia>"). The rest of the code is assumed to be output from the executed code and will be
-  left un-highlighted.
+	They start on a new line with "julia>". Usually there should also be a space after this, but
+	we also allow the code to start right after the > character. The code may run over multiple
+	lines, but the additional lines must start with six spaces (i.e. be indented to match
+	"julia>"). The rest of the code is assumed to be output from the executed code and will be
+	left un-highlighted.
 
-  Using simply spaces to identify line continuations may get a false-positive if the output
-  also prints out six spaces, but such cases should be rare.
-  */  function juliaRepl(hljs) {
+	Using simply spaces to identify line continuations may get a false-positive if the output
+	also prints out six spaces, but such cases should be rare.
+	*/  function juliaRepl(hljs) {
     return {
       name: "Julia REPL",
       contains: [ {
@@ -11414,12 +11429,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var juliaRepl_1 = juliaRepl;
   /*
-   Language: Kotlin
-   Description: Kotlin is an OSS statically typed programming language that targets the JVM, Android, JavaScript and Native.
-   Author: Sergey Mashkov <cy6erGn0m@gmail.com>
-   Website: https://kotlinlang.org
-   Category: common
-   */  function kotlin(hljs) {
+	 Language: Kotlin
+	 Description: Kotlin is an OSS statically typed programming language that targets the JVM, Android, JavaScript and Native.
+	 Author: Sergey Mashkov <cy6erGn0m@gmail.com>
+	 Website: https://kotlinlang.org
+	 Category: common
+	 */  function kotlin(hljs) {
     var KEYWORDS = {
       keyword: "abstract as val var vararg get set class object open private protected public noinline " + "crossinline dynamic final enum if else do while for when throw try catch finally " + "import package is in fun override companion reified inline lateinit init " + "interface annotation data sealed internal infix operator out by constructor super " + "tailrec where const inner suspend typealias external expect actual " + 
       // to be deleted soon
@@ -11596,12 +11611,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var kotlin_1 = kotlin;
   /*
-  Language: Kusto
-  Description: Kusto is a service for storing and running interactive analytics over Big Data.
-  Author: Marat Kopytjuk <kopytjuk@gmail.com>
-  Website: https://docs.microsoft.com/en-us/azure/kusto/query/
-  Category: common
-  */  function kusto(hljs) {
+	Language: Kusto
+	Description: Kusto is a service for storing and running interactive analytics over Big Data.
+	Author: Marat Kopytjuk <kopytjuk@gmail.com>
+	Website: https://docs.microsoft.com/en-us/azure/kusto/query/
+	Category: common
+	*/  function kusto(hljs) {
     var MISC_OPS = "let datatable range ";
     var TABULAR_OPS = "as consume count distinct evaluate extend externaldata " + "facet find fork getschema invoke join limit lookup make-series mv-apply " + "mv-expand order project project-away project-rename project-reorder parse " + "parse-where partition print reduce render sample sample-distinct search " + "serialize sort summarize take top top-nested top-hitters union where ";
     var AGGFUNCS = "any anyif arg_max arg_min avg avgif binary_all_and " + "binary_all_or binary_all_xor buildschema count countif dcount dcountif " + "hll hll_merge make_bag make_bag_if make_list make_list_if make_list_with_nulls " + "make_set make_set_if max maxif min minif percentiles stdev stdevif stdevp " + "sum sumif tdigest tdigest tdigest_merge variance varianceif variancep ";
@@ -11635,11 +11650,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var kusto_1 = kusto;
   /*
-  Language: Lasso
-  Author: Eric Knibbe <eric@lassosoft.com>
-  Description: Lasso is a language and server platform for database-driven web applications. This definition handles Lasso 9 syntax and LassoScript for Lasso 8.6 and earlier.
-  Website: http://www.lassosoft.com/What-Is-Lasso
-  */  function lasso(hljs) {
+	Language: Lasso
+	Author: Eric Knibbe <eric@lassosoft.com>
+	Description: Lasso is a language and server platform for database-driven web applications. This definition handles Lasso 9 syntax and LassoScript for Lasso 8.6 and earlier.
+	Website: http://www.lassosoft.com/What-Is-Lasso
+	*/  function lasso(hljs) {
     var LASSO_IDENT_RE = "[a-zA-Z_][\\w.]*";
     var LASSO_ANGLE_RE = "<\\?(lasso(script)?|=)";
     var LASSO_CLOSE_RE = "\\]|\\?>";
@@ -11762,11 +11777,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var lasso_1 = lasso;
   /*
-  Language: LaTeX
-  Author: Vladimir Moskva <vladmos@gmail.com>
-  Website: https://www.latex-project.org
-  Category: markup
-  */  function latex(hljs) {
+	Language: LaTeX
+	Author: Vladimir Moskva <vladmos@gmail.com>
+	Website: https://www.latex-project.org
+	Category: markup
+	*/  function latex(hljs) {
     var COMMAND = {
       className: "tag",
       begin: /\\/,
@@ -11824,11 +11839,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var latex_1 = latex;
   /*
-  Language: LDIF
-  Contributors: Jacob Childress <jacobc@gmail.com>
-  Category: enterprise, config
-  Website: https://en.wikipedia.org/wiki/LDAP_Data_Interchange_Format
-  */  function ldif(hljs) {
+	Language: LDIF
+	Contributors: Jacob Childress <jacobc@gmail.com>
+	Category: enterprise, config
+	Website: https://en.wikipedia.org/wiki/LDAP_Data_Interchange_Format
+	*/  function ldif(hljs) {
     return {
       name: "LDIF",
       contains: [ {
@@ -11859,10 +11874,10 @@ var demo = function(path, fs, url, buffer) {
   }
   var ldif_1 = ldif;
   /*
-  Language: Leaf
-  Author: Hale Chan <halechan@qq.com>
-  Description: Based on the Leaf reference from https://vapor.github.io/documentation/guide/leaf.html.
-  */  function leaf(hljs) {
+	Language: Leaf
+	Author: Hale Chan <halechan@qq.com>
+	Description: Based on the Leaf reference from https://vapor.github.io/documentation/guide/leaf.html.
+	*/  function leaf(hljs) {
     return {
       name: "Leaf",
       contains: [ {
@@ -11896,11 +11911,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var leaf_1 = leaf;
   /*
-  Language: Lean
-  Author: Patrick Massot
-  Category: scientific
-  Description: Language definition for Lean theorem prover
-  */  function lean(hljs) {
+	Language: Lean
+	Author: Patrick Massot
+	Category: scientific
+	Description: Language definition for Lean theorem prover
+	*/  function lean(hljs) {
     var LEAN_KEYWORDS = {
       keyword: "theorem|10 lemma|10 definition def class structure instance " + "example inductive coinductive " + "axiom axioms hypothesis constant constants " + "universe universes variable variables parameter parameters " + "begin end " + "import open theory prelude renaming hiding exposing " + "calc  match do  by let in extends " + "fun assume " + "#check #eval #reduce #print",
       built_in: "Type Prop|10 Sort rw|10 rewrite rwa erw subst substs " + "simp dsimp simpa simp_intros finish " + "unfold unfold1 dunfold unfold_projs unfold_coes " + "delta cc ac_reflexivity ac_refl " + "existsi|10 cases rcases with intro intros introv by_cases " + "refl rfl funext propext exact exacts " + "refine apply eapply fapply apply_with apply_instance " + "induction rename assumption revert generalize specialize clear " + "contradiction by_contradiction by_contra trivial exfalso " + "symmetry transitivity destruct constructor econstructor " + "left right split injection injections " + "repeat try continue skip swap solve1 abstract all_goals any_goals done " + "fail_if_success success_if_fail guard_target guard_hyp " + "have replace at suffices show from " + "congr congr_n congr_arg norm_num ring ",
@@ -11959,12 +11974,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var lean_1 = lean;
   /*
-  Language: Less
-  Description: It's CSS, with just a little more.
-  Author:   Max Mikhailov <seven.phases.max@gmail.com>
-  Website: http://lesscss.org
-  Category: common, css
-  */  function less(hljs) {
+	Language: Less
+	Description: It's CSS, with just a little more.
+	Author:   Max Mikhailov <seven.phases.max@gmail.com>
+	Website: http://lesscss.org
+	Category: common, css
+	*/  function less(hljs) {
     var IDENT_RE = "[\\w-]+";
  // yes, Less identifiers may begin with a digit
         var INTERP_IDENT_RE = "(" + IDENT_RE + "|@{" + IDENT_RE + "})";
@@ -12115,11 +12130,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var less_1 = less;
   /*
-  Language: Lisp
-  Description: Generic lisp syntax
-  Author: Vasily Polovnyov <vast@whiteants.net>
-  Category: lisp
-  */  function lisp(hljs) {
+	Language: Lisp
+	Description: Generic lisp syntax
+	Author: Vasily Polovnyov <vast@whiteants.net>
+	Category: lisp
+	*/  function lisp(hljs) {
     var LISP_IDENT_RE = "[a-zA-Z_\\-\\+\\*\\/\\<\\=\\>\\&\\#][a-zA-Z0-9_\\-\\+\\*\\/\\<\\=\\>\\&\\#!]*";
     var MEC_RE = "\\|[^]*?\\|";
     var LISP_SIMPLE_NUMBER_RE = "(\\-|\\+)?\\d+(\\.\\d+|\\/\\d+)?((d|e|f|l|s|D|E|F|L|S)(\\+|\\-)?\\d+)?";
@@ -12216,13 +12231,13 @@ var demo = function(path, fs, url, buffer) {
   }
   var lisp_1 = lisp;
   /*
-  Language: LiveCode
-  Author: Ralf Bitter <rabit@revigniter.com>
-  Description: Language definition for LiveCode server accounting for revIgniter (a web application framework) characteristics.
-  Version: 1.1
-  Date: 2019-04-17
-  Category: enterprise
-  */  function livecodeserver(hljs) {
+	Language: LiveCode
+	Author: Ralf Bitter <rabit@revigniter.com>
+	Description: Language definition for LiveCode server accounting for revIgniter (a web application framework) characteristics.
+	Version: 1.1
+	Date: 2019-04-17
+	Category: enterprise
+	*/  function livecodeserver(hljs) {
     var VARIABLE = {
       className: "variable",
       variants: [ {
@@ -12298,14 +12313,14 @@ var demo = function(path, fs, url, buffer) {
   const BUILT_IN_VARIABLES$1 = [ "arguments", "this", "super", "console", "window", "document", "localStorage", "module", "global" ];
   const BUILT_INS$1 = [].concat(BUILT_IN_GLOBALS$1, BUILT_IN_VARIABLES$1, TYPES$1, ERROR_TYPES$1);
   /*
-  Language: LiveScript
-  Author: Taneli Vatanen <taneli.vatanen@gmail.com>
-  Contributors: Jen Evers-Corvina <jen@sevvie.net>
-  Origin: coffeescript.js
-  Description: LiveScript is a programming language that transcompiles to JavaScript. For info about language see http://livescript.net/
-  Website: https://livescript.net
-  Category: scripting
-  */  function livescript(hljs) {
+	Language: LiveScript
+	Author: Taneli Vatanen <taneli.vatanen@gmail.com>
+	Contributors: Jen Evers-Corvina <jen@sevvie.net>
+	Origin: coffeescript.js
+	Description: LiveScript is a programming language that transcompiles to JavaScript. For info about language see http://livescript.net/
+	Website: https://livescript.net
+	Category: scripting
+	*/  function livescript(hljs) {
     var LIVESCRIPT_BUILT_INS = [ "npm", "print" ];
     var LIVESCRIPT_LITERALS = [ "yes", "no", "on", "off", "it", "that", "void" ];
     var LIVESCRIPT_KEYWORDS = [ "then", "unless", "until", "loop", "of", "by", "when", "and", "or", "is", "isnt", "not", "it", "that", "otherwise", "from", "to", "til", "fallthrough", "case", "enum", "native", "list", "map", "__hasProp", "__extends", "__slice", "__bind", "__indexOf" ];
@@ -12387,7 +12402,7 @@ var demo = function(path, fs, url, buffer) {
       begin: "\\(",
       returnBegin: true,
       /* We need another contained nameless mode to not have every nested
-      pair of parens to be called "params" */
+	    pair of parens to be called "params" */
       contains: [ {
         begin: /\(/,
         end: /\)/,
@@ -12440,12 +12455,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var livescript_1 = livescript;
   /*
-  Language: LLVM IR
-  Author: Michael Rodler <contact@f0rki.at>
-  Description: language used as intermediate representation in the LLVM compiler framework
-  Website: https://llvm.org/docs/LangRef.html
-  Category: assembler
-  */  function llvm(hljs) {
+	Language: LLVM IR
+	Author: Michael Rodler <contact@f0rki.at>
+	Description: language used as intermediate representation in the LLVM compiler framework
+	Website: https://llvm.org/docs/LangRef.html
+	Category: assembler
+	*/  function llvm(hljs) {
     var identifier = "([-a-zA-Z$._][\\w\\-$.]*)";
     return {
       name: "LLVM IR",
@@ -12499,10 +12514,10 @@ var demo = function(path, fs, url, buffer) {
   }
   var llvm_1 = llvm;
   /*
-  Language: Logtalk
-  Author: Paulo Moura <pmoura@logtalk.org>
-  Description: Logtalk is an object-oriented logic programming language that extends and leverages the Prolog language with a feature set suitable for programming in the large.
-  */  function logtalk(hljs) {
+	Language: Logtalk
+	Author: Paulo Moura <pmoura@logtalk.org>
+	Description: Logtalk is an object-oriented logic programming language that extends and leverages the Prolog language with a feature set suitable for programming in the large.
+	*/  function logtalk(hljs) {
     var ATOMS = {
       className: "atom",
       begin: /[a-z][A-Za-z0-9_]*/,
@@ -12584,12 +12599,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var logtalk_1 = logtalk;
   /*
-  Language: LSL (Linden Scripting Language)
-  Description: The Linden Scripting Language is used in Second Life by Linden Labs.
-  Author: Builder's Brewery <buildersbrewery@gmail.com>
-  Website: http://wiki.secondlife.com/wiki/LSL_Portal
-  Category: scripting
-  */  function lsl(hljs) {
+	Language: LSL (Linden Scripting Language)
+	Description: The Linden Scripting Language is used in Second Life by Linden Labs.
+	Author: Builder's Brewery <buildersbrewery@gmail.com>
+	Website: http://wiki.secondlife.com/wiki/LSL_Portal
+	Category: scripting
+	*/  function lsl(hljs) {
     var LSL_STRING_ESCAPE_CHARS = {
       className: "subst",
       begin: /\\[tn"\\]/
@@ -12646,12 +12661,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var lsl_1 = lsl;
   /*
-  Language: Lua
-  Description: Lua is a powerful, efficient, lightweight, embeddable scripting language.
-  Author: Andrew Fedorov <dmmdrs@mail.ru>
-  Category: common, scripting
-  Website: https://www.lua.org
-  */  function lua(hljs) {
+	Language: Lua
+	Description: Lua is a powerful, efficient, lightweight, embeddable scripting language.
+	Author: Andrew Fedorov <dmmdrs@mail.ru>
+	Category: common, scripting
+	Website: https://www.lua.org
+	*/  function lua(hljs) {
     var OPENING_LONG_BRACKET = "\\[=*\\[";
     var CLOSING_LONG_BRACKET = "\\]=*\\]";
     var LONG_BRACKETS = {
@@ -12700,12 +12715,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var lua_1 = lua;
   /*
-  Language: Makefile
-  Author: Ivan Sagalaev <maniac@softwaremaniacs.org>
-  Contributors: Joël Porquet <joel@porquet.org>
-  Website: https://www.gnu.org/software/make/manual/html_node/Introduction.html
-  Category: common
-  */  function makefile(hljs) {
+	Language: Makefile
+	Author: Ivan Sagalaev <maniac@softwaremaniacs.org>
+	Contributors: Joël Porquet <joel@porquet.org>
+	Website: https://www.gnu.org/software/make/manual/html_node/Introduction.html
+	Category: common
+	*/  function makefile(hljs) {
     /* Variables: simple (eg $(var)) and special (eg $@) */
     var VARIABLE = {
       className: "variable",
@@ -12761,12 +12776,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var makefile_1 = makefile;
   /*
-  Language: Mathematica
-  Description: Wolfram Mathematica (usually termed Mathematica) is a modern technical computing system spanning most areas of technical computing.
-  Authors: Daniel Kvasnicka <dkvasnicka@vendavo.com>, Jan Poeschko <jan@poeschko.com>
-  Website: https://www.wolfram.com/mathematica/
-  Category: scientific
-  */  function mathematica(hljs) {
+	Language: Mathematica
+	Description: Wolfram Mathematica (usually termed Mathematica) is a modern technical computing system spanning most areas of technical computing.
+	Authors: Daniel Kvasnicka <dkvasnicka@vendavo.com>, Jan Poeschko <jan@poeschko.com>
+	Website: https://www.wolfram.com/mathematica/
+	Category: scientific
+	*/  function mathematica(hljs) {
     return {
       name: "Mathematica",
       aliases: [ "mma", "wl" ],
@@ -12788,16 +12803,16 @@ var demo = function(path, fs, url, buffer) {
   }
   var mathematica_1 = mathematica;
   /*
-  Language: Matlab
-  Author: Denis Bardadym <bardadymchik@gmail.com>
-  Contributors: Eugene Nizhibitsky <nizhibitsky@ya.ru>, Egor Rogov <e.rogov@postgrespro.ru>
-  Website: https://www.mathworks.com/products/matlab.html
-  Category: scientific
-  */
+	Language: Matlab
+	Author: Denis Bardadym <bardadymchik@gmail.com>
+	Contributors: Eugene Nizhibitsky <nizhibitsky@ya.ru>, Egor Rogov <e.rogov@postgrespro.ru>
+	Website: https://www.mathworks.com/products/matlab.html
+	Category: scientific
+	*/
   /*
-    Formal syntax is not published, helpful link:
-    https://github.com/kornilova-l/matlab-IntelliJ-plugin/blob/master/src/main/grammar/Matlab.bnf
-  */  function matlab(hljs) {
+	  Formal syntax is not published, helpful link:
+	  https://github.com/kornilova-l/matlab-IntelliJ-plugin/blob/master/src/main/grammar/Matlab.bnf
+	*/  function matlab(hljs) {
     var TRANSPOSE_RE = "('|\\.')+";
     var TRANSPOSE = {
       relevance: 0,
@@ -12863,11 +12878,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var matlab_1 = matlab;
   /*
-  Language: Maxima
-  Author: Robert Dodier <robert.dodier@gmail.com>
-  Website: http://maxima.sourceforge.net
-  Category: scientific
-  */  function maxima(hljs) {
+	Language: Maxima
+	Author: Robert Dodier <robert.dodier@gmail.com>
+	Website: http://maxima.sourceforge.net
+	Category: scientific
+	*/  function maxima(hljs) {
     var KEYWORDS = "if then else elseif for thru do while unless step in and or not";
     var LITERALS = "true false unknown inf minf ind und %e %i %pi %phi %gamma";
     var BUILTIN_FUNCTIONS = " abasep abs absint absolute_real_time acos acosh acot acoth acsc acsch activate" + " addcol add_edge add_edges addmatrices addrow add_vertex add_vertices adjacency_matrix" + " adjoin adjoint af agd airy airy_ai airy_bi airy_dai airy_dbi algsys alg_type" + " alias allroots alphacharp alphanumericp amortization %and annuity_fv" + " annuity_pv antid antidiff AntiDifference append appendfile apply apply1 apply2" + " applyb1 apropos args arit_amortization arithmetic arithsum array arrayapply" + " arrayinfo arraymake arraysetapply ascii asec asech asin asinh askinteger" + " asksign assoc assoc_legendre_p assoc_legendre_q assume assume_external_byte_order" + " asympa at atan atan2 atanh atensimp atom atvalue augcoefmatrix augmented_lagrangian_method" + " av average_degree backtrace bars barsplot barsplot_description base64 base64_decode" + " bashindices batch batchload bc2 bdvac belln benefit_cost bern bernpoly bernstein_approx" + " bernstein_expand bernstein_poly bessel bessel_i bessel_j bessel_k bessel_simplify" + " bessel_y beta beta_incomplete beta_incomplete_generalized beta_incomplete_regularized" + " bezout bfallroots bffac bf_find_root bf_fmin_cobyla bfhzeta bfloat bfloatp" + " bfpsi bfpsi0 bfzeta biconnected_components bimetric binomial bipartition" + " block blockmatrixp bode_gain bode_phase bothcoef box boxplot boxplot_description" + " break bug_report build_info|10 buildq build_sample burn cabs canform canten" + " cardinality carg cartan cartesian_product catch cauchy_matrix cbffac cdf_bernoulli" + " cdf_beta cdf_binomial cdf_cauchy cdf_chi2 cdf_continuous_uniform cdf_discrete_uniform" + " cdf_exp cdf_f cdf_gamma cdf_general_finite_discrete cdf_geometric cdf_gumbel" + " cdf_hypergeometric cdf_laplace cdf_logistic cdf_lognormal cdf_negative_binomial" + " cdf_noncentral_chi2 cdf_noncentral_student_t cdf_normal cdf_pareto cdf_poisson" + " cdf_rank_sum cdf_rayleigh cdf_signed_rank cdf_student_t cdf_weibull cdisplay" + " ceiling central_moment cequal cequalignore cf cfdisrep cfexpand cgeodesic" + " cgreaterp cgreaterpignore changename changevar chaosgame charat charfun charfun2" + " charlist charp charpoly chdir chebyshev_t chebyshev_u checkdiv check_overlaps" + " chinese cholesky christof chromatic_index chromatic_number cint circulant_graph" + " clear_edge_weight clear_rules clear_vertex_label clebsch_gordan clebsch_graph" + " clessp clesspignore close closefile cmetric coeff coefmatrix cograd col collapse" + " collectterms columnop columnspace columnswap columnvector combination combine" + " comp2pui compare compfile compile compile_file complement_graph complete_bipartite_graph" + " complete_graph complex_number_p components compose_functions concan concat" + " conjugate conmetderiv connected_components connect_vertices cons constant" + " constantp constituent constvalue cont2part content continuous_freq contortion" + " contour_plot contract contract_edge contragrad contrib_ode convert coord" + " copy copy_file copy_graph copylist copymatrix cor cos cosh cot coth cov cov1" + " covdiff covect covers crc24sum create_graph create_list csc csch csetup cspline" + " ctaylor ct_coordsys ctransform ctranspose cube_graph cuboctahedron_graph" + " cunlisp cv cycle_digraph cycle_graph cylindrical days360 dblint deactivate" + " declare declare_constvalue declare_dimensions declare_fundamental_dimensions" + " declare_fundamental_units declare_qty declare_translated declare_unit_conversion" + " declare_units declare_weights decsym defcon define define_alt_display define_variable" + " defint defmatch defrule defstruct deftaylor degree_sequence del delete deleten" + " delta demo demoivre denom depends derivdegree derivlist describe desolve" + " determinant dfloat dgauss_a dgauss_b dgeev dgemm dgeqrf dgesv dgesvd diag" + " diagmatrix diag_matrix diagmatrixp diameter diff digitcharp dimacs_export" + " dimacs_import dimension dimensionless dimensions dimensions_as_list direct" + " directory discrete_freq disjoin disjointp disolate disp dispcon dispform" + " dispfun dispJordan display disprule dispterms distrib divide divisors divsum" + " dkummer_m dkummer_u dlange dodecahedron_graph dotproduct dotsimp dpart" + " draw draw2d draw3d drawdf draw_file draw_graph dscalar echelon edge_coloring" + " edge_connectivity edges eigens_by_jacobi eigenvalues eigenvectors eighth" + " einstein eivals eivects elapsed_real_time elapsed_run_time ele2comp ele2polynome" + " ele2pui elem elementp elevation_grid elim elim_allbut eliminate eliminate_using" + " ellipse elliptic_e elliptic_ec elliptic_eu elliptic_f elliptic_kc elliptic_pi" + " ematrix empty_graph emptyp endcons entermatrix entertensor entier equal equalp" + " equiv_classes erf erfc erf_generalized erfi errcatch error errormsg errors" + " euler ev eval_string evenp every evolution evolution2d evundiff example exp" + " expand expandwrt expandwrt_factored expint expintegral_chi expintegral_ci" + " expintegral_e expintegral_e1 expintegral_ei expintegral_e_simplify expintegral_li" + " expintegral_shi expintegral_si explicit explose exponentialize express expt" + " exsec extdiff extract_linear_equations extremal_subset ezgcd %f f90 facsum" + " factcomb factor factorfacsum factorial factorout factorsum facts fast_central_elements" + " fast_linsolve fasttimes featurep fernfale fft fib fibtophi fifth filename_merge" + " file_search file_type fillarray findde find_root find_root_abs find_root_error" + " find_root_rel first fix flatten flength float floatnump floor flower_snark" + " flush flush1deriv flushd flushnd flush_output fmin_cobyla forget fortran" + " fourcos fourexpand fourier fourier_elim fourint fourintcos fourintsin foursimp" + " foursin fourth fposition frame_bracket freeof freshline fresnel_c fresnel_s" + " from_adjacency_matrix frucht_graph full_listify fullmap fullmapl fullratsimp" + " fullratsubst fullsetify funcsolve fundamental_dimensions fundamental_units" + " fundef funmake funp fv g0 g1 gamma gamma_greek gamma_incomplete gamma_incomplete_generalized" + " gamma_incomplete_regularized gauss gauss_a gauss_b gaussprob gcd gcdex gcdivide" + " gcfac gcfactor gd generalized_lambert_w genfact gen_laguerre genmatrix gensym" + " geo_amortization geo_annuity_fv geo_annuity_pv geomap geometric geometric_mean" + " geosum get getcurrentdirectory get_edge_weight getenv get_lu_factors get_output_stream_string" + " get_pixel get_plot_option get_tex_environment get_tex_environment_default" + " get_vertex_label gfactor gfactorsum ggf girth global_variances gn gnuplot_close" + " gnuplot_replot gnuplot_reset gnuplot_restart gnuplot_start go Gosper GosperSum" + " gr2d gr3d gradef gramschmidt graph6_decode graph6_encode graph6_export graph6_import" + " graph_center graph_charpoly graph_eigenvalues graph_flow graph_order graph_periphery" + " graph_product graph_size graph_union great_rhombicosidodecahedron_graph great_rhombicuboctahedron_graph" + " grid_graph grind grobner_basis grotzch_graph hamilton_cycle hamilton_path" + " hankel hankel_1 hankel_2 harmonic harmonic_mean hav heawood_graph hermite" + " hessian hgfred hilbertmap hilbert_matrix hipow histogram histogram_description" + " hodge horner hypergeometric i0 i1 %ibes ic1 ic2 ic_convert ichr1 ichr2 icosahedron_graph" + " icosidodecahedron_graph icurvature ident identfor identity idiff idim idummy" + " ieqn %if ifactors iframes ifs igcdex igeodesic_coords ilt image imagpart" + " imetric implicit implicit_derivative implicit_plot indexed_tensor indices" + " induced_subgraph inferencep inference_result infix info_display init_atensor" + " init_ctensor in_neighbors innerproduct inpart inprod inrt integerp integer_partitions" + " integrate intersect intersection intervalp intopois intosum invariant1 invariant2" + " inverse_fft inverse_jacobi_cd inverse_jacobi_cn inverse_jacobi_cs inverse_jacobi_dc" + " inverse_jacobi_dn inverse_jacobi_ds inverse_jacobi_nc inverse_jacobi_nd inverse_jacobi_ns" + " inverse_jacobi_sc inverse_jacobi_sd inverse_jacobi_sn invert invert_by_adjoint" + " invert_by_lu inv_mod irr is is_biconnected is_bipartite is_connected is_digraph" + " is_edge_in_graph is_graph is_graph_or_digraph ishow is_isomorphic isolate" + " isomorphism is_planar isqrt isreal_p is_sconnected is_tree is_vertex_in_graph" + " items_inference %j j0 j1 jacobi jacobian jacobi_cd jacobi_cn jacobi_cs jacobi_dc" + " jacobi_dn jacobi_ds jacobi_nc jacobi_nd jacobi_ns jacobi_p jacobi_sc jacobi_sd" + " jacobi_sn JF jn join jordan julia julia_set julia_sin %k kdels kdelta kill" + " killcontext kostka kron_delta kronecker_product kummer_m kummer_u kurtosis" + " kurtosis_bernoulli kurtosis_beta kurtosis_binomial kurtosis_chi2 kurtosis_continuous_uniform" + " kurtosis_discrete_uniform kurtosis_exp kurtosis_f kurtosis_gamma kurtosis_general_finite_discrete" + " kurtosis_geometric kurtosis_gumbel kurtosis_hypergeometric kurtosis_laplace" + " kurtosis_logistic kurtosis_lognormal kurtosis_negative_binomial kurtosis_noncentral_chi2" + " kurtosis_noncentral_student_t kurtosis_normal kurtosis_pareto kurtosis_poisson" + " kurtosis_rayleigh kurtosis_student_t kurtosis_weibull label labels lagrange" + " laguerre lambda lambert_w laplace laplacian_matrix last lbfgs lc2kdt lcharp" + " lc_l lcm lc_u ldefint ldisp ldisplay legendre_p legendre_q leinstein length" + " let letrules letsimp levi_civita lfreeof lgtreillis lhs li liediff limit" + " Lindstedt linear linearinterpol linear_program linear_regression line_graph" + " linsolve listarray list_correlations listify list_matrix_entries list_nc_monomials" + " listoftens listofvars listp lmax lmin load loadfile local locate_matrix_entry" + " log logcontract log_gamma lopow lorentz_gauge lowercasep lpart lratsubst" + " lreduce lriemann lsquares_estimates lsquares_estimates_approximate lsquares_estimates_exact" + " lsquares_mse lsquares_residual_mse lsquares_residuals lsum ltreillis lu_backsub" + " lucas lu_factor %m macroexpand macroexpand1 make_array makebox makefact makegamma" + " make_graph make_level_picture makelist makeOrders make_poly_continent make_poly_country" + " make_polygon make_random_state make_rgb_picture makeset make_string_input_stream" + " make_string_output_stream make_transform mandelbrot mandelbrot_set map mapatom" + " maplist matchdeclare matchfix mat_cond mat_fullunblocker mat_function mathml_display" + " mat_norm matrix matrixmap matrixp matrix_size mattrace mat_trace mat_unblocker" + " max max_clique max_degree max_flow maximize_lp max_independent_set max_matching" + " maybe md5sum mean mean_bernoulli mean_beta mean_binomial mean_chi2 mean_continuous_uniform" + " mean_deviation mean_discrete_uniform mean_exp mean_f mean_gamma mean_general_finite_discrete" + " mean_geometric mean_gumbel mean_hypergeometric mean_laplace mean_logistic" + " mean_lognormal mean_negative_binomial mean_noncentral_chi2 mean_noncentral_student_t" + " mean_normal mean_pareto mean_poisson mean_rayleigh mean_student_t mean_weibull" + " median median_deviation member mesh metricexpandall mgf1_sha1 min min_degree" + " min_edge_cut minfactorial minimalPoly minimize_lp minimum_spanning_tree minor" + " minpack_lsquares minpack_solve min_vertex_cover min_vertex_cut mkdir mnewton" + " mod mode_declare mode_identity ModeMatrix moebius mon2schur mono monomial_dimensions" + " multibernstein_poly multi_display_for_texinfo multi_elem multinomial multinomial_coeff" + " multi_orbit multiplot_mode multi_pui multsym multthru mycielski_graph nary" + " natural_unit nc_degree ncexpt ncharpoly negative_picture neighbors new newcontext" + " newdet new_graph newline newton new_variable next_prime nicedummies niceindices" + " ninth nofix nonarray noncentral_moment nonmetricity nonnegintegerp nonscalarp" + " nonzeroandfreeof notequal nounify nptetrad npv nroots nterms ntermst" + " nthroot nullity nullspace num numbered_boundaries numberp number_to_octets" + " num_distinct_partitions numerval numfactor num_partitions nusum nzeta nzetai" + " nzetar octets_to_number octets_to_oid odd_girth oddp ode2 ode_check odelin" + " oid_to_octets op opena opena_binary openr openr_binary openw openw_binary" + " operatorp opsubst optimize %or orbit orbits ordergreat ordergreatp orderless" + " orderlessp orthogonal_complement orthopoly_recur orthopoly_weight outermap" + " out_neighbors outofpois pade parabolic_cylinder_d parametric parametric_surface" + " parg parGosper parse_string parse_timedate part part2cont partfrac partition" + " partition_set partpol path_digraph path_graph pathname_directory pathname_name" + " pathname_type pdf_bernoulli pdf_beta pdf_binomial pdf_cauchy pdf_chi2 pdf_continuous_uniform" + " pdf_discrete_uniform pdf_exp pdf_f pdf_gamma pdf_general_finite_discrete" + " pdf_geometric pdf_gumbel pdf_hypergeometric pdf_laplace pdf_logistic pdf_lognormal" + " pdf_negative_binomial pdf_noncentral_chi2 pdf_noncentral_student_t pdf_normal" + " pdf_pareto pdf_poisson pdf_rank_sum pdf_rayleigh pdf_signed_rank pdf_student_t" + " pdf_weibull pearson_skewness permanent permut permutation permutations petersen_graph" + " petrov pickapart picture_equalp picturep piechart piechart_description planar_embedding" + " playback plog plot2d plot3d plotdf ploteq plsquares pochhammer points poisdiff" + " poisexpt poisint poismap poisplus poissimp poissubst poistimes poistrim polar" + " polarform polartorect polar_to_xy poly_add poly_buchberger poly_buchberger_criterion" + " poly_colon_ideal poly_content polydecomp poly_depends_p poly_elimination_ideal" + " poly_exact_divide poly_expand poly_expt poly_gcd polygon poly_grobner poly_grobner_equal" + " poly_grobner_member poly_grobner_subsetp poly_ideal_intersection poly_ideal_polysaturation" + " poly_ideal_polysaturation1 poly_ideal_saturation poly_ideal_saturation1 poly_lcm" + " poly_minimization polymod poly_multiply polynome2ele polynomialp poly_normal_form" + " poly_normalize poly_normalize_list poly_polysaturation_extension poly_primitive_part" + " poly_pseudo_divide poly_reduced_grobner poly_reduction poly_saturation_extension" + " poly_s_polynomial poly_subtract polytocompanion pop postfix potential power_mod" + " powerseries powerset prefix prev_prime primep primes principal_components" + " print printf printfile print_graph printpois printprops prodrac product properties" + " propvars psi psubst ptriangularize pui pui2comp pui2ele pui2polynome pui_direct" + " puireduc push put pv qput qrange qty quad_control quad_qag quad_qagi quad_qagp" + " quad_qags quad_qawc quad_qawf quad_qawo quad_qaws quadrilateral quantile" + " quantile_bernoulli quantile_beta quantile_binomial quantile_cauchy quantile_chi2" + " quantile_continuous_uniform quantile_discrete_uniform quantile_exp quantile_f" + " quantile_gamma quantile_general_finite_discrete quantile_geometric quantile_gumbel" + " quantile_hypergeometric quantile_laplace quantile_logistic quantile_lognormal" + " quantile_negative_binomial quantile_noncentral_chi2 quantile_noncentral_student_t" + " quantile_normal quantile_pareto quantile_poisson quantile_rayleigh quantile_student_t" + " quantile_weibull quartile_skewness quit qunit quotient racah_v racah_w radcan" + " radius random random_bernoulli random_beta random_binomial random_bipartite_graph" + " random_cauchy random_chi2 random_continuous_uniform random_digraph random_discrete_uniform" + " random_exp random_f random_gamma random_general_finite_discrete random_geometric" + " random_graph random_graph1 random_gumbel random_hypergeometric random_laplace" + " random_logistic random_lognormal random_negative_binomial random_network" + " random_noncentral_chi2 random_noncentral_student_t random_normal random_pareto" + " random_permutation random_poisson random_rayleigh random_regular_graph random_student_t" + " random_tournament random_tree random_weibull range rank rat ratcoef ratdenom" + " ratdiff ratdisrep ratexpand ratinterpol rational rationalize ratnumer ratnump" + " ratp ratsimp ratsubst ratvars ratweight read read_array read_binary_array" + " read_binary_list read_binary_matrix readbyte readchar read_hashed_array readline" + " read_list read_matrix read_nested_list readonly read_xpm real_imagpart_to_conjugate" + " realpart realroots rearray rectangle rectform rectform_log_if_constant recttopolar" + " rediff reduce_consts reduce_order region region_boundaries region_boundaries_plus" + " rem remainder remarray rembox remcomps remcon remcoord remfun remfunction" + " remlet remove remove_constvalue remove_dimensions remove_edge remove_fundamental_dimensions" + " remove_fundamental_units remove_plot_option remove_vertex rempart remrule" + " remsym remvalue rename rename_file reset reset_displays residue resolvante" + " resolvante_alternee1 resolvante_bipartite resolvante_diedrale resolvante_klein" + " resolvante_klein3 resolvante_produit_sym resolvante_unitaire resolvante_vierer" + " rest resultant return reveal reverse revert revert2 rgb2level rhs ricci riemann" + " rinvariant risch rk rmdir rncombine romberg room rootscontract round row" + " rowop rowswap rreduce run_testsuite %s save saving scalarp scaled_bessel_i" + " scaled_bessel_i0 scaled_bessel_i1 scalefactors scanmap scatterplot scatterplot_description" + " scene schur2comp sconcat scopy scsimp scurvature sdowncase sec sech second" + " sequal sequalignore set_alt_display setdifference set_draw_defaults set_edge_weight" + " setelmx setequalp setify setp set_partitions set_plot_option set_prompt set_random_state" + " set_tex_environment set_tex_environment_default setunits setup_autoload set_up_dot_simplifications" + " set_vertex_label seventh sexplode sf sha1sum sha256sum shortest_path shortest_weighted_path" + " show showcomps showratvars sierpinskiale sierpinskimap sign signum similaritytransform" + " simp_inequality simplify_sum simplode simpmetderiv simtran sin sinh sinsert" + " sinvertcase sixth skewness skewness_bernoulli skewness_beta skewness_binomial" + " skewness_chi2 skewness_continuous_uniform skewness_discrete_uniform skewness_exp" + " skewness_f skewness_gamma skewness_general_finite_discrete skewness_geometric" + " skewness_gumbel skewness_hypergeometric skewness_laplace skewness_logistic" + " skewness_lognormal skewness_negative_binomial skewness_noncentral_chi2 skewness_noncentral_student_t" + " skewness_normal skewness_pareto skewness_poisson skewness_rayleigh skewness_student_t" + " skewness_weibull slength smake small_rhombicosidodecahedron_graph small_rhombicuboctahedron_graph" + " smax smin smismatch snowmap snub_cube_graph snub_dodecahedron_graph solve" + " solve_rec solve_rec_rat some somrac sort sparse6_decode sparse6_encode sparse6_export" + " sparse6_import specint spherical spherical_bessel_j spherical_bessel_y spherical_hankel1" + " spherical_hankel2 spherical_harmonic spherical_to_xyz splice split sposition" + " sprint sqfr sqrt sqrtdenest sremove sremovefirst sreverse ssearch ssort sstatus" + " ssubst ssubstfirst staircase standardize standardize_inverse_trig starplot" + " starplot_description status std std1 std_bernoulli std_beta std_binomial" + " std_chi2 std_continuous_uniform std_discrete_uniform std_exp std_f std_gamma" + " std_general_finite_discrete std_geometric std_gumbel std_hypergeometric std_laplace" + " std_logistic std_lognormal std_negative_binomial std_noncentral_chi2 std_noncentral_student_t" + " std_normal std_pareto std_poisson std_rayleigh std_student_t std_weibull" + " stemplot stirling stirling1 stirling2 strim striml strimr string stringout" + " stringp strong_components struve_h struve_l sublis sublist sublist_indices" + " submatrix subsample subset subsetp subst substinpart subst_parallel substpart" + " substring subvar subvarp sum sumcontract summand_to_rec supcase supcontext" + " symbolp symmdifference symmetricp system take_channel take_inference tan" + " tanh taylor taylorinfo taylorp taylor_simplifier taytorat tcl_output tcontract" + " tellrat tellsimp tellsimpafter tentex tenth test_mean test_means_difference" + " test_normality test_proportion test_proportions_difference test_rank_sum" + " test_sign test_signed_rank test_variance test_variance_ratio tex tex1 tex_display" + " texput %th third throw time timedate timer timer_info tldefint tlimit todd_coxeter" + " toeplitz tokens to_lisp topological_sort to_poly to_poly_solve totaldisrep" + " totalfourier totient tpartpol trace tracematrix trace_options transform_sample" + " translate translate_file transpose treefale tree_reduce treillis treinat" + " triangle triangularize trigexpand trigrat trigreduce trigsimp trunc truncate" + " truncated_cube_graph truncated_dodecahedron_graph truncated_icosahedron_graph" + " truncated_tetrahedron_graph tr_warnings_get tube tutte_graph ueivects uforget" + " ultraspherical underlying_graph undiff union unique uniteigenvectors unitp" + " units unit_step unitvector unorder unsum untellrat untimer" + " untrace uppercasep uricci uriemann uvect vandermonde_matrix var var1 var_bernoulli" + " var_beta var_binomial var_chi2 var_continuous_uniform var_discrete_uniform" + " var_exp var_f var_gamma var_general_finite_discrete var_geometric var_gumbel" + " var_hypergeometric var_laplace var_logistic var_lognormal var_negative_binomial" + " var_noncentral_chi2 var_noncentral_student_t var_normal var_pareto var_poisson" + " var_rayleigh var_student_t var_weibull vector vectorpotential vectorsimp" + " verbify vers vertex_coloring vertex_connectivity vertex_degree vertex_distance" + " vertex_eccentricity vertex_in_degree vertex_out_degree vertices vertices_to_cycle" + " vertices_to_path %w weyl wheel_graph wiener_index wigner_3j wigner_6j" + " wigner_9j with_stdout write_binary_data writebyte write_data writefile wronskian" + " xreduce xthru %y Zeilberger zeroequiv zerofor zeromatrix zeromatrixp zeta" + " zgeev zheev zlange zn_add_table zn_carmichael_lambda zn_characteristic_factors" + " zn_determinant zn_factor_generators zn_invert_by_lu zn_log zn_mult_table" + " absboxchar activecontexts adapt_depth additive adim aform algebraic" + " algepsilon algexact aliases allbut all_dotsimp_denoms allocation allsym alphabetic" + " animation antisymmetric arrays askexp assume_pos assume_pos_pred assumescalar" + " asymbol atomgrad atrig1 axes axis_3d axis_bottom axis_left axis_right axis_top" + " azimuth background background_color backsubst berlefact bernstein_explicit" + " besselexpand beta_args_sum_to_integer beta_expand bftorat bftrunc bindtest" + " border boundaries_array box boxchar breakup %c capping cauchysum cbrange" + " cbtics center cflength cframe_flag cnonmet_flag color color_bar color_bar_tics" + " colorbox columns commutative complex cone context contexts contour contour_levels" + " cosnpiflag ctaypov ctaypt ctayswitch ctayvar ct_coords ctorsion_flag ctrgsimp" + " cube current_let_rule_package cylinder data_file_name debugmode decreasing" + " default_let_rule_package delay dependencies derivabbrev derivsubst detout" + " diagmetric diff dim dimensions dispflag display2d|10 display_format_internal" + " distribute_over doallmxops domain domxexpt domxmxops domxnctimes dontfactor" + " doscmxops doscmxplus dot0nscsimp dot0simp dot1simp dotassoc dotconstrules" + " dotdistrib dotexptsimp dotident dotscrules draw_graph_program draw_realpart" + " edge_color edge_coloring edge_partition edge_type edge_width %edispflag" + " elevation %emode endphi endtheta engineering_format_floats enhanced3d %enumer" + " epsilon_lp erfflag erf_representation errormsg error_size error_syms error_type" + " %e_to_numlog eval even evenfun evflag evfun ev_point expandwrt_denom expintexpand" + " expintrep expon expop exptdispflag exptisolate exptsubst facexpand facsum_combine" + " factlim factorflag factorial_expand factors_only fb feature features" + " file_name file_output_append file_search_demo file_search_lisp file_search_maxima|10" + " file_search_tests file_search_usage file_type_lisp file_type_maxima|10 fill_color" + " fill_density filled_func fixed_vertices flipflag float2bf font font_size" + " fortindent fortspaces fpprec fpprintprec functions gamma_expand gammalim" + " gdet genindex gensumnum GGFCFMAX GGFINFINITY globalsolve gnuplot_command" + " gnuplot_curve_styles gnuplot_curve_titles gnuplot_default_term_command gnuplot_dumb_term_command" + " gnuplot_file_args gnuplot_file_name gnuplot_out_file gnuplot_pdf_term_command" + " gnuplot_pm3d gnuplot_png_term_command gnuplot_postamble gnuplot_preamble" + " gnuplot_ps_term_command gnuplot_svg_term_command gnuplot_term gnuplot_view_args" + " Gosper_in_Zeilberger gradefs grid grid2d grind halfangles head_angle head_both" + " head_length head_type height hypergeometric_representation %iargs ibase" + " icc1 icc2 icounter idummyx ieqnprint ifb ifc1 ifc2 ifg ifgi ifr iframe_bracket_form" + " ifri igeowedge_flag ikt1 ikt2 imaginary inchar increasing infeval" + " infinity inflag infolists inm inmc1 inmc2 intanalysis integer integervalued" + " integrate_use_rootsof integration_constant integration_constant_counter interpolate_color" + " intfaclim ip_grid ip_grid_in irrational isolate_wrt_times iterations itr" + " julia_parameter %k1 %k2 keepfloat key key_pos kinvariant kt label label_alignment" + " label_orientation labels lassociative lbfgs_ncorrections lbfgs_nfeval_max" + " leftjust legend letrat let_rule_packages lfg lg lhospitallim limsubst linear" + " linear_solver linechar linel|10 linenum line_type linewidth line_width linsolve_params" + " linsolvewarn lispdisp listarith listconstvars listdummyvars lmxchar load_pathname" + " loadprint logabs logarc logcb logconcoeffp logexpand lognegint logsimp logx" + " logx_secondary logy logy_secondary logz lriem m1pbranch macroexpansion macros" + " mainvar manual_demo maperror mapprint matrix_element_add matrix_element_mult" + " matrix_element_transpose maxapplydepth maxapplyheight maxima_tempdir|10 maxima_userdir|10" + " maxnegex MAX_ORD maxposex maxpsifracdenom maxpsifracnum maxpsinegint maxpsiposint" + " maxtayorder mesh_lines_color method mod_big_prime mode_check_errorp" + " mode_checkp mode_check_warnp mod_test mod_threshold modular_linear_solver" + " modulus multiplicative multiplicities myoptions nary negdistrib negsumdispflag" + " newline newtonepsilon newtonmaxiter nextlayerfactor niceindicespref nm nmc" + " noeval nolabels nonegative_lp noninteger nonscalar noun noundisp nouns np" + " npi nticks ntrig numer numer_pbranch obase odd oddfun opacity opproperties" + " opsubst optimprefix optionset orientation origin orthopoly_returns_intervals" + " outative outchar packagefile palette partswitch pdf_file pfeformat phiresolution" + " %piargs piece pivot_count_sx pivot_max_sx plot_format plot_options plot_realpart" + " png_file pochhammer_max_index points pointsize point_size points_joined point_type" + " poislim poisson poly_coefficient_ring poly_elimination_order polyfactor poly_grobner_algorithm" + " poly_grobner_debug poly_monomial_order poly_primary_elimination_order poly_return_term_list" + " poly_secondary_elimination_order poly_top_reduction_only posfun position" + " powerdisp pred prederror primep_number_of_tests product_use_gamma program" + " programmode promote_float_to_bigfloat prompt proportional_axes props psexpand" + " ps_file radexpand radius radsubstflag rassociative ratalgdenom ratchristof" + " ratdenomdivide rateinstein ratepsilon ratfac rational ratmx ratprint ratriemann" + " ratsimpexpons ratvarswitch ratweights ratweyl ratwtlvl real realonly redraw" + " refcheck resolution restart resultant ric riem rmxchar %rnum_list rombergabs" + " rombergit rombergmin rombergtol rootsconmode rootsepsilon run_viewer same_xy" + " same_xyz savedef savefactors scalar scalarmatrixp scale scale_lp setcheck" + " setcheckbreak setval show_edge_color show_edges show_edge_type show_edge_width" + " show_id show_label showtime show_vertex_color show_vertex_size show_vertex_type" + " show_vertices show_weight simp simplified_output simplify_products simpproduct" + " simpsum sinnpiflag solvedecomposes solveexplicit solvefactors solvenullwarn" + " solveradcan solvetrigwarn space sparse sphere spring_embedding_depth sqrtdispflag" + " stardisp startphi starttheta stats_numer stringdisp structures style sublis_apply_lambda" + " subnumsimp sumexpand sumsplitfact surface surface_hide svg_file symmetric" + " tab taylordepth taylor_logexpand taylor_order_coefficients taylor_truncate_polynomials" + " tensorkill terminal testsuite_files thetaresolution timer_devalue title tlimswitch" + " tr track transcompile transform transform_xy translate_fast_arrays transparent" + " transrun tr_array_as_ref tr_bound_function_applyp tr_file_tty_messagesp tr_float_can_branch_complex" + " tr_function_call_default trigexpandplus trigexpandtimes triginverses trigsign" + " trivial_solutions tr_numer tr_optimize_max_loop tr_semicompile tr_state_vars" + " tr_warn_bad_function_calls tr_warn_fexpr tr_warn_meval tr_warn_mode" + " tr_warn_undeclared tr_warn_undefined_variable tstep ttyoff tube_extremes" + " ufg ug %unitexpand unit_vectors uric uriem use_fast_arrays user_preamble" + " usersetunits values vect_cross verbose vertex_color vertex_coloring vertex_partition" + " vertex_size vertex_type view warnings weyl width windowname windowtitle wired_surface" + " wireframe xaxis xaxis_color xaxis_secondary xaxis_type xaxis_width xlabel" + " xlabel_secondary xlength xrange xrange_secondary xtics xtics_axis xtics_rotate" + " xtics_rotate_secondary xtics_secondary xtics_secondary_axis xu_grid x_voxel" + " xy_file xyplane xy_scale yaxis yaxis_color yaxis_secondary yaxis_type yaxis_width" + " ylabel ylabel_secondary ylength yrange yrange_secondary ytics ytics_axis" + " ytics_rotate ytics_rotate_secondary ytics_secondary ytics_secondary_axis" + " yv_grid y_voxel yx_ratio zaxis zaxis_color zaxis_type zaxis_width zeroa zerob" + " zerobern zeta%pi zlabel zlabel_rotate zlength zmin zn_primroot_limit zn_primroot_pretest";
@@ -12912,12 +12927,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var maxima_1 = maxima;
   /*
-  Language: MEL
-  Description: Maya Embedded Language
-  Author: Shuen-Huei Guan <drake.guan@gmail.com>
-  Website: http://www.autodesk.com/products/autodesk-maya/overview
-  Category: graphics
-  */  function mel(hljs) {
+	Language: MEL
+	Description: Maya Embedded Language
+	Author: Shuen-Huei Guan <drake.guan@gmail.com>
+	Website: http://www.autodesk.com/products/autodesk-maya/overview
+	Category: graphics
+	*/  function mel(hljs) {
     return {
       name: "MEL",
       keywords: "int float string vector matrix if else switch case default while do for in break " + "continue global proc return about abs addAttr addAttributeEditorNodeHelp addDynamic " + "addNewShelfTab addPP addPanelCategory addPrefixToName advanceToNextDrivenKey " + "affectedNet affects aimConstraint air alias aliasAttr align alignCtx alignCurve " + "alignSurface allViewFit ambientLight angle angleBetween animCone animCurveEditor " + "animDisplay animView annotate appendStringArray applicationName applyAttrPreset " + "applyTake arcLenDimContext arcLengthDimension arclen arrayMapper art3dPaintCtx " + "artAttrCtx artAttrPaintVertexCtx artAttrSkinPaintCtx artAttrTool artBuildPaintMenu " + "artFluidAttrCtx artPuttyCtx artSelectCtx artSetPaintCtx artUserPaintCtx assignCommand " + "assignInputDevice assignViewportFactories attachCurve attachDeviceAttr attachSurface " + "attrColorSliderGrp attrCompatibility attrControlGrp attrEnumOptionMenu " + "attrEnumOptionMenuGrp attrFieldGrp attrFieldSliderGrp attrNavigationControlGrp " + "attrPresetEditWin attributeExists attributeInfo attributeMenu attributeQuery " + "autoKeyframe autoPlace bakeClip bakeFluidShading bakePartialHistory bakeResults " + "bakeSimulation basename basenameEx batchRender bessel bevel bevelPlus binMembership " + "bindSkin blend2 blendShape blendShapeEditor blendShapePanel blendTwoAttr blindDataType " + "boneLattice boundary boxDollyCtx boxZoomCtx bufferCurve buildBookmarkMenu " + "buildKeyframeMenu button buttonManip CBG cacheFile cacheFileCombine cacheFileMerge " + "cacheFileTrack camera cameraView canCreateManip canvas capitalizeString catch " + "catchQuiet ceil changeSubdivComponentDisplayLevel changeSubdivRegion channelBox " + "character characterMap characterOutlineEditor characterize chdir checkBox checkBoxGrp " + "checkDefaultRenderGlobals choice circle circularFillet clamp clear clearCache clip " + "clipEditor clipEditorCurrentTimeCtx clipSchedule clipSchedulerOutliner clipTrimBefore " + "closeCurve closeSurface cluster cmdFileOutput cmdScrollFieldExecuter " + "cmdScrollFieldReporter cmdShell coarsenSubdivSelectionList collision color " + "colorAtPoint colorEditor colorIndex colorIndexSliderGrp colorSliderButtonGrp " + "colorSliderGrp columnLayout commandEcho commandLine commandPort compactHairSystem " + "componentEditor compositingInterop computePolysetVolume condition cone confirmDialog " + "connectAttr connectControl connectDynamic connectJoint connectionInfo constrain " + "constrainValue constructionHistory container containsMultibyte contextInfo control " + "convertFromOldLayers convertIffToPsd convertLightmap convertSolidTx convertTessellation " + "convertUnit copyArray copyFlexor copyKey copySkinWeights cos cpButton cpCache " + "cpClothSet cpCollision cpConstraint cpConvClothToMesh cpForces cpGetSolverAttr cpPanel " + "cpProperty cpRigidCollisionFilter cpSeam cpSetEdit cpSetSolverAttr cpSolver " + "cpSolverTypes cpTool cpUpdateClothUVs createDisplayLayer createDrawCtx createEditor " + "createLayeredPsdFile createMotionField createNewShelf createNode createRenderLayer " + "createSubdivRegion cross crossProduct ctxAbort ctxCompletion ctxEditMode ctxTraverse " + "currentCtx currentTime currentTimeCtx currentUnit curve curveAddPtCtx " + "curveCVCtx curveEPCtx curveEditorCtx curveIntersect curveMoveEPCtx curveOnSurface " + "curveSketchCtx cutKey cycleCheck cylinder dagPose date defaultLightListCheckBox " + "defaultNavigation defineDataServer defineVirtualDevice deformer deg_to_rad delete " + "deleteAttr deleteShadingGroupsAndMaterials deleteShelfTab deleteUI deleteUnusedBrushes " + "delrandstr detachCurve detachDeviceAttr detachSurface deviceEditor devicePanel dgInfo " + "dgdirty dgeval dgtimer dimWhen directKeyCtx directionalLight dirmap dirname disable " + "disconnectAttr disconnectJoint diskCache displacementToPoly displayAffected " + "displayColor displayCull displayLevelOfDetail displayPref displayRGBColor " + "displaySmoothness displayStats displayString displaySurface distanceDimContext " + "distanceDimension doBlur dolly dollyCtx dopeSheetEditor dot dotProduct " + "doubleProfileBirailSurface drag dragAttrContext draggerContext dropoffLocator " + "duplicate duplicateCurve duplicateSurface dynCache dynControl dynExport dynExpression " + "dynGlobals dynPaintEditor dynParticleCtx dynPref dynRelEdPanel dynRelEditor " + "dynamicLoad editAttrLimits editDisplayLayerGlobals editDisplayLayerMembers " + "editRenderLayerAdjustment editRenderLayerGlobals editRenderLayerMembers editor " + "editorTemplate effector emit emitter enableDevice encodeString endString endsWith env " + "equivalent equivalentTol erf error eval evalDeferred evalEcho event " + "exactWorldBoundingBox exclusiveLightCheckBox exec executeForEachObject exists exp " + "expression expressionEditorListen extendCurve extendSurface extrude fcheck fclose feof " + "fflush fgetline fgetword file fileBrowserDialog fileDialog fileExtension fileInfo " + "filetest filletCurve filter filterCurve filterExpand filterStudioImport " + "findAllIntersections findAnimCurves findKeyframe findMenuItem findRelatedSkinCluster " + "finder firstParentOf fitBspline flexor floatEq floatField floatFieldGrp floatScrollBar " + "floatSlider floatSlider2 floatSliderButtonGrp floatSliderGrp floor flow fluidCacheInfo " + "fluidEmitter fluidVoxelInfo flushUndo fmod fontDialog fopen formLayout format fprint " + "frameLayout fread freeFormFillet frewind fromNativePath fwrite gamma gauss " + "geometryConstraint getApplicationVersionAsFloat getAttr getClassification " + "getDefaultBrush getFileList getFluidAttr getInputDeviceRange getMayaPanelTypes " + "getModifiers getPanel getParticleAttr getPluginResource getenv getpid glRender " + "glRenderEditor globalStitch gmatch goal gotoBindPose grabColor gradientControl " + "gradientControlNoAttr graphDollyCtx graphSelectContext graphTrackCtx gravity grid " + "gridLayout group groupObjectsByName HfAddAttractorToAS HfAssignAS HfBuildEqualMap " + "HfBuildFurFiles HfBuildFurImages HfCancelAFR HfConnectASToHF HfCreateAttractor " + "HfDeleteAS HfEditAS HfPerformCreateAS HfRemoveAttractorFromAS HfSelectAttached " + "HfSelectAttractors HfUnAssignAS hardenPointCurve hardware hardwareRenderPanel " + "headsUpDisplay headsUpMessage help helpLine hermite hide hilite hitTest hotBox hotkey " + "hotkeyCheck hsv_to_rgb hudButton hudSlider hudSliderButton hwReflectionMap hwRender " + "hwRenderLoad hyperGraph hyperPanel hyperShade hypot iconTextButton iconTextCheckBox " + "iconTextRadioButton iconTextRadioCollection iconTextScrollList iconTextStaticLabel " + "ikHandle ikHandleCtx ikHandleDisplayScale ikSolver ikSplineHandleCtx ikSystem " + "ikSystemInfo ikfkDisplayMethod illustratorCurves image imfPlugins inheritTransform " + "insertJoint insertJointCtx insertKeyCtx insertKnotCurve insertKnotSurface instance " + "instanceable instancer intField intFieldGrp intScrollBar intSlider intSliderGrp " + "interToUI internalVar intersect iprEngine isAnimCurve isConnected isDirty isParentOf " + "isSameObject isTrue isValidObjectName isValidString isValidUiName isolateSelect " + "itemFilter itemFilterAttr itemFilterRender itemFilterType joint jointCluster jointCtx " + "jointDisplayScale jointLattice keyTangent keyframe keyframeOutliner " + "keyframeRegionCurrentTimeCtx keyframeRegionDirectKeyCtx keyframeRegionDollyCtx " + "keyframeRegionInsertKeyCtx keyframeRegionMoveKeyCtx keyframeRegionScaleKeyCtx " + "keyframeRegionSelectKeyCtx keyframeRegionSetKeyCtx keyframeRegionTrackCtx " + "keyframeStats lassoContext lattice latticeDeformKeyCtx launch launchImageEditor " + "layerButton layeredShaderPort layeredTexturePort layout layoutDialog lightList " + "lightListEditor lightListPanel lightlink lineIntersection linearPrecision linstep " + "listAnimatable listAttr listCameras listConnections listDeviceAttachments listHistory " + "listInputDeviceAxes listInputDeviceButtons listInputDevices listMenuAnnotation " + "listNodeTypes listPanelCategories listRelatives listSets listTransforms " + "listUnselected listerEditor loadFluid loadNewShelf loadPlugin " + "loadPluginLanguageResources loadPrefObjects localizedPanelLabel lockNode loft log " + "longNameOf lookThru ls lsThroughFilter lsType lsUI Mayatomr mag makeIdentity makeLive " + "makePaintable makeRoll makeSingleSurface makeTubeOn makebot manipMoveContext " + "manipMoveLimitsCtx manipOptions manipRotateContext manipRotateLimitsCtx " + "manipScaleContext manipScaleLimitsCtx marker match max memory menu menuBarLayout " + "menuEditor menuItem menuItemToShelf menuSet menuSetPref messageLine min minimizeApp " + "mirrorJoint modelCurrentTimeCtx modelEditor modelPanel mouse movIn movOut move " + "moveIKtoFK moveKeyCtx moveVertexAlongDirection multiProfileBirailSurface mute " + "nParticle nameCommand nameField namespace namespaceInfo newPanelItems newton nodeCast " + "nodeIconButton nodeOutliner nodePreset nodeType noise nonLinear normalConstraint " + "normalize nurbsBoolean nurbsCopyUVSet nurbsCube nurbsEditUV nurbsPlane nurbsSelect " + "nurbsSquare nurbsToPoly nurbsToPolygonsPref nurbsToSubdiv nurbsToSubdivPref " + "nurbsUVSet nurbsViewDirectionVector objExists objectCenter objectLayer objectType " + "objectTypeUI obsoleteProc oceanNurbsPreviewPlane offsetCurve offsetCurveOnSurface " + "offsetSurface openGLExtension openMayaPref optionMenu optionMenuGrp optionVar orbit " + "orbitCtx orientConstraint outlinerEditor outlinerPanel overrideModifier " + "paintEffectsDisplay pairBlend palettePort paneLayout panel panelConfiguration " + "panelHistory paramDimContext paramDimension paramLocator parent parentConstraint " + "particle particleExists particleInstancer particleRenderInfo partition pasteKey " + "pathAnimation pause pclose percent performanceOptions pfxstrokes pickWalk picture " + "pixelMove planarSrf plane play playbackOptions playblast plugAttr plugNode pluginInfo " + "pluginResourceUtil pointConstraint pointCurveConstraint pointLight pointMatrixMult " + "pointOnCurve pointOnSurface pointPosition poleVectorConstraint polyAppend " + "polyAppendFacetCtx polyAppendVertex polyAutoProjection polyAverageNormal " + "polyAverageVertex polyBevel polyBlendColor polyBlindData polyBoolOp polyBridgeEdge " + "polyCacheMonitor polyCheck polyChipOff polyClipboard polyCloseBorder polyCollapseEdge " + "polyCollapseFacet polyColorBlindData polyColorDel polyColorPerVertex polyColorSet " + "polyCompare polyCone polyCopyUV polyCrease polyCreaseCtx polyCreateFacet " + "polyCreateFacetCtx polyCube polyCut polyCutCtx polyCylinder polyCylindricalProjection " + "polyDelEdge polyDelFacet polyDelVertex polyDuplicateAndConnect polyDuplicateEdge " + "polyEditUV polyEditUVShell polyEvaluate polyExtrudeEdge polyExtrudeFacet " + "polyExtrudeVertex polyFlipEdge polyFlipUV polyForceUV polyGeoSampler polyHelix " + "polyInfo polyInstallAction polyLayoutUV polyListComponentConversion polyMapCut " + "polyMapDel polyMapSew polyMapSewMove polyMergeEdge polyMergeEdgeCtx polyMergeFacet " + "polyMergeFacetCtx polyMergeUV polyMergeVertex polyMirrorFace polyMoveEdge " + "polyMoveFacet polyMoveFacetUV polyMoveUV polyMoveVertex polyNormal polyNormalPerVertex " + "polyNormalizeUV polyOptUvs polyOptions polyOutput polyPipe polyPlanarProjection " + "polyPlane polyPlatonicSolid polyPoke polyPrimitive polyPrism polyProjection " + "polyPyramid polyQuad polyQueryBlindData polyReduce polySelect polySelectConstraint " + "polySelectConstraintMonitor polySelectCtx polySelectEditCtx polySeparate " + "polySetToFaceNormal polySewEdge polyShortestPathCtx polySmooth polySoftEdge " + "polySphere polySphericalProjection polySplit polySplitCtx polySplitEdge polySplitRing " + "polySplitVertex polyStraightenUVBorder polySubdivideEdge polySubdivideFacet " + "polyToSubdiv polyTorus polyTransfer polyTriangulate polyUVSet polyUnite polyWedgeFace " + "popen popupMenu pose pow preloadRefEd print progressBar progressWindow projFileViewer " + "projectCurve projectTangent projectionContext projectionManip promptDialog propModCtx " + "propMove psdChannelOutliner psdEditTextureFile psdExport psdTextureFile putenv pwd " + "python querySubdiv quit rad_to_deg radial radioButton radioButtonGrp radioCollection " + "radioMenuItemCollection rampColorPort rand randomizeFollicles randstate rangeControl " + "readTake rebuildCurve rebuildSurface recordAttr recordDevice redo reference " + "referenceEdit referenceQuery refineSubdivSelectionList refresh refreshAE " + "registerPluginResource rehash reloadImage removeJoint removeMultiInstance " + "removePanelCategory rename renameAttr renameSelectionList renameUI render " + "renderGlobalsNode renderInfo renderLayerButton renderLayerParent " + "renderLayerPostProcess renderLayerUnparent renderManip renderPartition " + "renderQualityNode renderSettings renderThumbnailUpdate renderWindowEditor " + "renderWindowSelectContext renderer reorder reorderDeformers requires reroot " + "resampleFluid resetAE resetPfxToPolyCamera resetTool resolutionNode retarget " + "reverseCurve reverseSurface revolve rgb_to_hsv rigidBody rigidSolver roll rollCtx " + "rootOf rot rotate rotationInterpolation roundConstantRadius rowColumnLayout rowLayout " + "runTimeCommand runup sampleImage saveAllShelves saveAttrPreset saveFluid saveImage " + "saveInitialState saveMenu savePrefObjects savePrefs saveShelf saveToolSettings scale " + "scaleBrushBrightness scaleComponents scaleConstraint scaleKey scaleKeyCtx sceneEditor " + "sceneUIReplacement scmh scriptCtx scriptEditorInfo scriptJob scriptNode scriptTable " + "scriptToShelf scriptedPanel scriptedPanelType scrollField scrollLayout sculpt " + "searchPathArray seed selLoadSettings select selectContext selectCurveCV selectKey " + "selectKeyCtx selectKeyframeRegionCtx selectMode selectPref selectPriority selectType " + "selectedNodes selectionConnection separator setAttr setAttrEnumResource " + "setAttrMapping setAttrNiceNameResource setConstraintRestPosition " + "setDefaultShadingGroup setDrivenKeyframe setDynamic setEditCtx setEditor setFluidAttr " + "setFocus setInfinity setInputDeviceMapping setKeyCtx setKeyPath setKeyframe " + "setKeyframeBlendshapeTargetWts setMenuMode setNodeNiceNameResource setNodeTypeFlag " + "setParent setParticleAttr setPfxToPolyCamera setPluginResource setProject " + "setStampDensity setStartupMessage setState setToolTo setUITemplate setXformManip sets " + "shadingConnection shadingGeometryRelCtx shadingLightRelCtx shadingNetworkCompare " + "shadingNode shapeCompare shelfButton shelfLayout shelfTabLayout shellField " + "shortNameOf showHelp showHidden showManipCtx showSelectionInTitle " + "showShadingGroupAttrEditor showWindow sign simplify sin singleProfileBirailSurface " + "size sizeBytes skinCluster skinPercent smoothCurve smoothTangentSurface smoothstep " + "snap2to2 snapKey snapMode snapTogetherCtx snapshot soft softMod softModCtx sort sound " + "soundControl source spaceLocator sphere sphrand spotLight spotLightPreviewPort " + "spreadSheetEditor spring sqrt squareSurface srtContext stackTrace startString " + "startsWith stitchAndExplodeShell stitchSurface stitchSurfacePoints strcmp " + "stringArrayCatenate stringArrayContains stringArrayCount stringArrayInsertAtIndex " + "stringArrayIntersector stringArrayRemove stringArrayRemoveAtIndex " + "stringArrayRemoveDuplicates stringArrayRemoveExact stringArrayToString " + "stringToStringArray strip stripPrefixFromName stroke subdAutoProjection " + "subdCleanTopology subdCollapse subdDuplicateAndConnect subdEditUV " + "subdListComponentConversion subdMapCut subdMapSewMove subdMatchTopology subdMirror " + "subdToBlind subdToPoly subdTransferUVsToCache subdiv subdivCrease " + "subdivDisplaySmoothness substitute substituteAllString substituteGeometry substring " + "surface surfaceSampler surfaceShaderList swatchDisplayPort switchTable symbolButton " + "symbolCheckBox sysFile system tabLayout tan tangentConstraint texLatticeDeformContext " + "texManipContext texMoveContext texMoveUVShellContext texRotateContext texScaleContext " + "texSelectContext texSelectShortestPathCtx texSmudgeUVContext texWinToolCtx text " + "textCurves textField textFieldButtonGrp textFieldGrp textManip textScrollList " + "textToShelf textureDisplacePlane textureHairColor texturePlacementContext " + "textureWindow threadCount threePointArcCtx timeControl timePort timerX toNativePath " + "toggle toggleAxis toggleWindowVisibility tokenize tokenizeList tolerance tolower " + "toolButton toolCollection toolDropped toolHasOptions toolPropertyWindow torus toupper " + "trace track trackCtx transferAttributes transformCompare transformLimits translator " + "trim trunc truncateFluidCache truncateHairCache tumble tumbleCtx turbulence " + "twoPointArcCtx uiRes uiTemplate unassignInputDevice undo undoInfo ungroup uniform unit " + "unloadPlugin untangleUV untitledFileName untrim upAxis updateAE userCtx uvLink " + "uvSnapshot validateShelfName vectorize view2dToolCtx viewCamera viewClipPlane " + "viewFit viewHeadOn viewLookAt viewManip viewPlace viewSet visor volumeAxis vortex " + "waitCursor warning webBrowser webBrowserPrefs whatIs window windowPref wire " + "wireContext workspace wrinkle wrinkleContext writeTake xbmLangPathList xform",
@@ -12935,11 +12950,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var mel_1 = mel;
   /*
-  Language: Mercury
-  Author: mucaho <mkucko@gmail.com>
-  Description: Mercury is a logic/functional programming language which combines the clarity and expressiveness of declarative programming with advanced static analysis and error detection features.
-  Website: https://www.mercurylang.org
-  */  function mercury(hljs) {
+	Language: Mercury
+	Author: mucaho <mkucko@gmail.com>
+	Description: Mercury is a logic/functional programming language which combines the clarity and expressiveness of declarative programming with advanced static analysis and error detection features.
+	Website: https://www.mercurylang.org
+	*/  function mercury(hljs) {
     var KEYWORDS = {
       keyword: "module use_module import_module include_module end_module initialise " + "mutable initialize finalize finalise interface implementation pred " + "mode func type inst solver any_pred any_func is semidet det nondet " + "multi erroneous failure cc_nondet cc_multi typeclass instance where " + "pragma promise external trace atomic or_else require_complete_switch " + "require_det require_semidet require_multi require_nondet " + "require_cc_multi require_cc_nondet require_erroneous require_failure",
       meta: 
@@ -13007,11 +13022,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var mercury_1 = mercury;
   /*
-  Language: Metasploit Framework Session
-  Author: Tod Beardsley <tod_beardsley@rapid.com>
-  Category: common
-  Description: Metasploit Framework is an open source penetration testing framework, available at https://metasploit.com
-  */  function metasploit(hljs) {
+	Language: Metasploit Framework Session
+	Author: Tod Beardsley <tod_beardsley@rapid.com>
+	Category: common
+	Description: Metasploit Framework is an open source penetration testing framework, available at https://metasploit.com
+	*/  function metasploit(hljs) {
     return {
       aliases: [ "msf" ],
       case_insensitive: false,
@@ -13039,12 +13054,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var metasploit_1 = metasploit;
   /*
-  Language: Mint
-  Author: Szikszai Gusztáv <github.com/gdotdesign>
-  Contributors: Luke Pighetti <github.com/lukepighetti>
-  Description: A refreshing programming language for the front-end web.
-  Website: https://www.mint-lang.com
-  */  function mint(hljs) {
+	Language: Mint
+	Author: Szikszai Gusztáv <github.com/gdotdesign>
+	Contributors: Luke Pighetti <github.com/lukepighetti>
+	Description: A refreshing programming language for the front-end web.
+	Website: https://www.mint-lang.com
+	*/  function mint(hljs) {
     var MINT_CONTAINS = [];
     var MINT_KEYWORDS = [ "const", "global", "component", "store", "module", "fun", "state", "property", "next", "if", "else", "sequence", "parallel|10", "style", "record", "connect", "enum", "routes", "try", "catch", "case", "where", "when", "use", "for", "of", "true", "false", "then", "finally", "get", "exposing|10", "as", "decode", "encode", "using|10" ];
     var XML_IDENT_RE = "[A-Za-z0-9\\._:-]+";
@@ -13134,12 +13149,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var mint_1 = mint;
   /*
-  Language: MIPS Assembly
-  Author: Nebuleon Fumika <nebuleon.fumika@gmail.com>
-  Description: MIPS Assembly (up to MIPS32R2)
-  Website: https://en.wikipedia.org/wiki/MIPS_architecture
-  Category: assembler
-  */  function mipsasm(hljs) {
+	Language: MIPS Assembly
+	Author: Nebuleon Fumika <nebuleon.fumika@gmail.com>
+	Description: MIPS Assembly (up to MIPS32R2)
+	Website: https://en.wikipedia.org/wiki/MIPS_architecture
+	Category: assembler
+	*/  function mipsasm(hljs) {
     //local labels: %?[FB]?[AT]?\d{1,2}\w+
     return {
       name: "MIPS Assembly",
@@ -13212,12 +13227,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var mipsasm_1 = mipsasm;
   /*
-  Language: Mizar
-  Description: The Mizar Language is a formal language derived from the mathematical vernacular.
-  Author: Kelley van Evert <kelleyvanevert@gmail.com>
-  Website: http://mizar.org/language/
-  Category: scientific
-  */  function mizar(hljs) {
+	Language: Mizar
+	Description: The Mizar Language is a formal language derived from the mathematical vernacular.
+	Author: Kelley van Evert <kelleyvanevert@gmail.com>
+	Website: http://mizar.org/language/
+	Category: scientific
+	*/  function mizar(hljs) {
     return {
       name: "Mizar",
       keywords: "environ vocabularies notations constructors definitions " + "registrations theorems schemes requirements begin end definition " + "registration cluster existence pred func defpred deffunc theorem " + "proof let take assume then thus hence ex for st holds consider " + "reconsider such that and in provided of as from be being by means " + "equals implies iff redefine define now not or attr is mode " + "suppose per cases set thesis contradiction scheme reserve struct " + "correctness compatibility coherence symmetry assymetry " + "reflexivity irreflexivity connectedness uniqueness commutativity " + "idempotence involutiveness projectivity",
@@ -13226,11 +13241,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var mizar_1 = mizar;
   /*
-  Language: Perl
-  Author: Peter Leonov <gojpeg@yandex.ru>
-  Website: https://www.perl.org
-  Category: common
-  */  function perl(hljs) {
+	Language: Perl
+	Author: Peter Leonov <gojpeg@yandex.ru>
+	Website: https://www.perl.org
+	Category: common
+	*/  function perl(hljs) {
     var PERL_KEYWORDS = {
       $pattern: /[\w.]+/,
       keyword: "getpwent getservent quotemeta msgrcv scalar kill dbmclose undef lc " + "ma syswrite tr send umask sysopen shmwrite vec qx utime local oct semctl localtime " + "readpipe do return format read sprintf dbmopen pop getpgrp not getpwnam rewinddir qq " + "fileno qw endprotoent wait sethostent bless s|0 opendir continue each sleep endgrent " + "shutdown dump chomp connect getsockname die socketpair close flock exists index shmget " + "sub for endpwent redo lstat msgctl setpgrp abs exit select print ref gethostbyaddr " + "unshift fcntl syscall goto getnetbyaddr join gmtime symlink semget splice x|0 " + "getpeername recv log setsockopt cos last reverse gethostbyname getgrnam study formline " + "endhostent times chop length gethostent getnetent pack getprotoent getservbyname rand " + "mkdir pos chmod y|0 substr endnetent printf next open msgsnd readdir use unlink " + "getsockopt getpriority rindex wantarray hex system getservbyport endservent int chr " + "untie rmdir prototype tell listen fork shmread ucfirst setprotoent else sysseek link " + "getgrgid shmctl waitpid unpack getnetbyname reset chdir grep split require caller " + "lcfirst until warn while values shift telldir getpwuid my getprotobynumber delete and " + "sort uc defined srand accept package seekdir getprotobyname semop our rename seek if q|0 " + "chroot sysread setpwent no crypt getc chown sqrt write setnetent setpriority foreach " + "tie sin msgget map stat getlogin unless elsif truncate exec keys glob tied closedir " + "ioctl socket readlink eval xor readline binmode setservent eof ord bind alarm pipe " + "atan2 getgrent exp time push setgrent gt lt or ne m|0 break given say state when"
@@ -13356,13 +13371,13 @@ var demo = function(path, fs, url, buffer) {
   }
   var perl_1 = perl;
   /*
-  Language: Mojolicious
-  Requires: xml.js, perl.js
-  Author: Dotan Dimet <dotan@corky.net>
-  Description: Mojolicious .ep (Embedded Perl) templates
-  Website: https://mojolicious.org
-  Category: template
-  */  function mojolicious(hljs) {
+	Language: Mojolicious
+	Requires: xml.js, perl.js
+	Author: Dotan Dimet <dotan@corky.net>
+	Description: Mojolicious .ep (Embedded Perl) templates
+	Website: https://mojolicious.org
+	Category: template
+	*/  function mojolicious(hljs) {
     return {
       name: "Mojolicious",
       subLanguage: "xml",
@@ -13388,11 +13403,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var mojolicious_1 = mojolicious;
   /*
-  Language: Monkey
-  Description: Monkey2 is an easy to use, cross platform, games oriented programming language from Blitz Research.
-  Author: Arthur Bikmullin <devolonter@gmail.com>
-  Website: https://blitzresearch.itch.io/monkey2
-  */  function monkey(hljs) {
+	Language: Monkey
+	Description: Monkey2 is an easy to use, cross platform, games oriented programming language from Blitz Research.
+	Author: Arthur Bikmullin <devolonter@gmail.com>
+	Website: https://blitzresearch.itch.io/monkey2
+	*/  function monkey(hljs) {
     var NUMBER = {
       className: "number",
       relevance: 0,
@@ -13446,13 +13461,13 @@ var demo = function(path, fs, url, buffer) {
   }
   var monkey_1 = monkey;
   /*
-  Language: MoonScript
-  Author: Billy Quith <chinbillybilbo@gmail.com>
-  Description: MoonScript is a programming language that transcompiles to Lua.
-  Origin: coffeescript.js
-  Website: http://moonscript.org/
-  Category: scripting
-  */  function moonscript(hljs) {
+	Language: MoonScript
+	Author: Billy Quith <chinbillybilbo@gmail.com>
+	Description: MoonScript is a programming language that transcompiles to Lua.
+	Origin: coffeescript.js
+	Website: http://moonscript.org/
+	Category: scripting
+	*/  function moonscript(hljs) {
     var KEYWORDS = {
       keyword: 
       // Moonscript keywords
@@ -13502,7 +13517,7 @@ var demo = function(path, fs, url, buffer) {
       begin: "\\([^\\(]",
       returnBegin: true,
       /* We need another contained nameless mode to not have every nested
-      pair of parens to be called "params" */
+	    pair of parens to be called "params" */
       contains: [ {
         begin: /\(/,
         end: /\)/,
@@ -13557,11 +13572,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var moonscript_1 = moonscript;
   /*
-  Language: MUMPS
-  Author: Greg Weisbrod <greg.weisbrod@gmail.com>
-  Category: system
-  Description: Non-relational database and programming language. See http://mumps.sourceforge.net/docs.html or https://www.fisglobal.com/Solutions/Services/Database-Engine for more information
-  */  function mumps(hljs) {
+	Language: MUMPS
+	Author: Greg Weisbrod <greg.weisbrod@gmail.com>
+	Category: system
+	Description: Non-relational database and programming language. See http://mumps.sourceforge.net/docs.html or https://www.fisglobal.com/Solutions/Services/Database-Engine for more information
+	*/  function mumps(hljs) {
     var MUMPS_KEYWORDS = "b break c close d do e else f for g goto h halt hang i if " + "j job k kill l lock m merge n new o open q quit r read s set u use v view " + "w write x xecute";
     var MUMPS_BUILT_INS = "$a $ascii $c $char $d $data $device $ec $ecode $es $estack " + "$et $etrap $e $extract $f $find $fn $fnumber $g $get $h $horolog $i $io " + "$j $job $justify $k $key $l $length $n $name $o $order $p $piece $principal " + "$ql $qlength $qs $qsubscript $q $query $quit $r $random $reference $s $select " + "$storage $st $stack $sy $system $t $test $text $tr $translate $v $view $x $y";
     var MUMPS_STRING = {
@@ -13644,12 +13659,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var mumps_1 = mumps;
   /*
-  Language: Mun
-  Author: Bas Zalmstra <zalmstra.bas@gmail.com>
-  Contributors: 
-  Website: https://mun-lang.org
-  Category: common, system
-  */  function mun(hljs) {
+	Language: Mun
+	Author: Bas Zalmstra <zalmstra.bas@gmail.com>
+	Contributors: 
+	Website: https://mun-lang.org
+	Category: common, system
+	*/  function mun(hljs) {
     var NUM_SUFFIX = "([ui](8|16|32|64|128|size)|f(32|64)|uint|int|float)?";
     var KEYWORDS = "pub break else false for fn if in self super return true " + "while loop let mut pub never extern";
     var BUILTINS = 
@@ -13745,12 +13760,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var mun_1 = mun;
   /*
-   Language: N1QL
-   Author: Andres Täht <andres.taht@gmail.com>
-   Contributors: Rene Saarsoo <nene@triin.net>
-   Description: Couchbase query language
-   Website: https://www.couchbase.com/products/n1ql
-   */  function n1ql(hljs) {
+	 Language: N1QL
+	 Author: Andres Täht <andres.taht@gmail.com>
+	 Contributors: Rene Saarsoo <nene@triin.net>
+	 Description: Couchbase query language
+	 Website: https://www.couchbase.com/products/n1ql
+	 */  function n1ql(hljs) {
     return {
       name: "N1QL",
       case_insensitive: true,
@@ -13790,12 +13805,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var n1ql_1 = n1ql;
   /*
-  Language: Nginx config
-  Author: Peter Leonov <gojpeg@yandex.ru>
-  Contributors: Ivan Sagalaev <maniac@softwaremaniacs.org>
-  Category: common, config
-  Website: https://www.nginx.com
-  */  function nginx(hljs) {
+	Language: Nginx config
+	Author: Peter Leonov <gojpeg@yandex.ru>
+	Contributors: Ivan Sagalaev <maniac@softwaremaniacs.org>
+	Category: common, config
+	Website: https://www.nginx.com
+	*/  function nginx(hljs) {
     var VAR = {
       className: "variable",
       variants: [ {
@@ -13896,11 +13911,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var nginx_1 = nginx;
   /*
-  Language: Nim
-  Description: Nim is a statically typed compiled systems programming language.
-  Website: https://nim-lang.org
-  Category: system
-  */  function nim(hljs) {
+	Language: Nim
+	Description: Nim is a statically typed compiled systems programming language.
+	Website: https://nim-lang.org
+	Category: system
+	*/  function nim(hljs) {
     return {
       name: "Nim",
       aliases: [ "nim" ],
@@ -13947,11 +13962,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var nim_1 = nim;
   /*
-  Language: Nix
-  Author: Domen Kožar <domen@dev.si>
-  Description: Nix functional language
-  Website: http://nixos.org/nix
-  */  function nix(hljs) {
+	Language: Nix
+	Author: Domen Kožar <domen@dev.si>
+	Description: Nix functional language
+	Website: http://nixos.org/nix
+	*/  function nix(hljs) {
     var NIX_KEYWORDS = {
       keyword: "rec with let in inherit assert if else then",
       literal: "true false or and null",
@@ -13994,11 +14009,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var nix_1 = nix;
   /*
-  Language: NSIS
-  Description: Nullsoft Scriptable Install System
-  Author: Jan T. Sott <jan.sott@gmail.com>
-  Website: https://nsis.sourceforge.io/Main_Page
-  */  function nsis(hljs) {
+	Language: NSIS
+	Description: Nullsoft Scriptable Install System
+	Author: Jan T. Sott <jan.sott@gmail.com>
+	Website: https://nsis.sourceforge.io/Main_Page
+	*/  function nsis(hljs) {
     var CONSTANTS = {
       className: "variable",
       begin: /\$(ADMINTOOLS|APPDATA|CDBURN_AREA|CMDLINE|COMMONFILES32|COMMONFILES64|COMMONFILES|COOKIES|DESKTOP|DOCUMENTS|EXEDIR|EXEFILE|EXEPATH|FAVORITES|FONTS|HISTORY|HWNDPARENT|INSTDIR|INTERNET_CACHE|LANGUAGE|LOCALAPPDATA|MUSIC|NETHOOD|OUTDIR|PICTURES|PLUGINSDIR|PRINTHOOD|PROFILE|PROGRAMFILES32|PROGRAMFILES64|PROGRAMFILES|QUICKLAUNCH|RECENT|RESOURCES_LOCALIZED|RESOURCES|SENDTO|SMPROGRAMS|SMSTARTUP|STARTMENU|SYSDIR|TEMP|TEMPLATES|VIDEOS|WINDIR)/
@@ -14072,12 +14087,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var nsis_1 = nsis;
   /*
-  Language: Objective-C
-  Author: Valerii Hiora <valerii.hiora@gmail.com>
-  Contributors: Angel G. Olloqui <angelgarcia.mail@gmail.com>, Matt Diephouse <matt@diephouse.com>, Andrew Farmer <ahfarmer@gmail.com>, Minh Nguyễn <mxn@1ec5.org>
-  Website: https://developer.apple.com/documentation/objectivec
-  Category: common
-  */  function objectivec(hljs) {
+	Language: Objective-C
+	Author: Valerii Hiora <valerii.hiora@gmail.com>
+	Contributors: Angel G. Olloqui <angelgarcia.mail@gmail.com>, Matt Diephouse <matt@diephouse.com>, Andrew Farmer <ahfarmer@gmail.com>, Minh Nguyễn <mxn@1ec5.org>
+	Website: https://developer.apple.com/documentation/objectivec
+	Category: common
+	*/  function objectivec(hljs) {
     var API_CLASS = {
       className: "built_in",
       begin: "\\b(AV|CA|CF|CG|CI|CL|CM|CN|CT|MK|MP|MTK|MTL|NS|SCN|SK|UI|WK|XC)\\w+"
@@ -14139,13 +14154,13 @@ var demo = function(path, fs, url, buffer) {
   }
   var objectivec_1 = objectivec;
   /*
-  Language: OCaml
-  Author: Mehdi Dogguy <mehdi@dogguy.org>
-  Contributors: Nicolas Braud-Santoni <nicolas.braud-santoni@ens-cachan.fr>, Mickael Delahaye <mickael.delahaye@gmail.com>
-  Description: OCaml language definition.
-  Website: https://ocaml.org
-  Category: functional
-  */  function ocaml(hljs) {
+	Language: OCaml
+	Author: Mehdi Dogguy <mehdi@dogguy.org>
+	Contributors: Nicolas Braud-Santoni <nicolas.braud-santoni@ens-cachan.fr>, Mickael Delahaye <mickael.delahaye@gmail.com>
+	Description: OCaml language definition.
+	Website: https://ocaml.org
+	Category: functional
+	*/  function ocaml(hljs) {
     /* missing support for heredoc-like string (OCaml 4.0.2+) */
     return {
       name: "OCaml",
@@ -14202,12 +14217,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var ocaml_1 = ocaml;
   /*
-  Language: OData
-  Author: Stanislaw Swierc <stanislaw.swierc@gmail.com>
-  Description: Language definition for Open Data Protocol (OData) query language.
-  Website: http://www.odata.org/
-  Category: common
-  */  function odata(hljs) {
+	Language: OData
+	Author: Stanislaw Swierc <stanislaw.swierc@gmail.com>
+	Description: Language definition for Open Data Protocol (OData) query language.
+	Website: http://www.odata.org/
+	Category: common
+	*/  function odata(hljs) {
     return {
       case_insensitive: false,
       contains: [ hljs.C_BLOCK_COMMENT_MODE, {
@@ -14275,12 +14290,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var odata_1 = odata;
   /*
-  Language: OpenSCAD
-  Author: Dan Panzarella <alsoelp@gmail.com>
-  Description: OpenSCAD is a language for the 3D CAD modeling software of the same name.
-  Website: https://www.openscad.org
-  Category: scientific
-  */  function openscad(hljs) {
+	Language: OpenSCAD
+	Author: Dan Panzarella <alsoelp@gmail.com>
+	Description: OpenSCAD is a language for the 3D CAD modeling software of the same name.
+	Website: https://www.openscad.org
+	Category: scientific
+	*/  function openscad(hljs) {
     var SPECIAL_VARS = {
       className: "keyword",
       begin: "\\$(f[asn]|t|vp[rtd]|children)"
@@ -14328,11 +14343,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var openscad_1 = openscad;
   /*
-  Language: emacs org-mode
-  Requires: lisp.js
-  Author: Jörn Reimerdes <joern.reimerdes@gmail.com>
-  Category: common, markup
-  */  function orgmode(hljs) {
+	Language: emacs org-mode
+	Requires: lisp.js
+	Author: Jörn Reimerdes <joern.reimerdes@gmail.com>
+	Category: common, markup
+	*/  function orgmode(hljs) {
     return {
       aliases: [ "org", "org-mode" ],
       contains: [ 
@@ -14501,11 +14516,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var orgmode_1 = orgmode;
   /*
-  Language: OSL (version 1.9)
-  Description: Open Shading Language
-  Author: Renan Lavarec <renan.lavarec@ti-r.com>
-  Category: graphics
-  */  function osl(hljs) {
+	Language: OSL (version 1.9)
+	Description: Open Shading Language
+	Author: Renan Lavarec <renan.lavarec@ti-r.com>
+	Category: graphics
+	*/  function osl(hljs) {
     var STRINGS = {
       className: "string",
       variants: [ {
@@ -14571,11 +14586,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var osl_1 = osl;
   /*
-  Language: Oxygene
-  Author: Carlo Kok <ck@remobjects.com>
-  Description: Oxygene is built on the foundation of Object Pascal, revamped and extended to be a modern language for the twenty-first century.
-  Website: https://www.elementscompiler.com/elements/default.aspx
-  */  function oxygene(hljs) {
+	Language: Oxygene
+	Author: Carlo Kok <ck@remobjects.com>
+	Description: Oxygene is built on the foundation of Object Pascal, revamped and extended to be a modern language for the twenty-first century.
+	Website: https://www.elementscompiler.com/elements/default.aspx
+	*/  function oxygene(hljs) {
     var OXYGENE_KEYWORDS = {
       $pattern: /\.?\w+/,
       keyword: "abstract add and array as asc aspect assembly async begin break block by case class concat const copy constructor continue " + "create default delegate desc distinct div do downto dynamic each else empty end ensure enum equals event except exit extension external false " + "final finalize finalizer finally flags for forward from function future global group has if implementation implements implies in index inherited " + "inline interface into invariants is iterator join locked locking loop matching method mod module namespace nested new nil not notify nullable of " + "old on operator or order out override parallel params partial pinned private procedure property protected public queryable raise read readonly " + "record reintroduce remove repeat require result reverse sealed select self sequence set shl shr skip static step soft take then to true try tuple " + "type union unit unsafe until uses using var virtual raises volatile where while with write xor yield await mapped deprecated stdcall cdecl pascal " + "register safecall overload library platform reference packed strict published autoreleasepool selector strong weak unretained"
@@ -14627,16 +14642,16 @@ var demo = function(path, fs, url, buffer) {
   }
   var oxygene_1 = oxygene;
   /*
-  Language: Oz
-  Author: Guillaume Maudoux <layus.on@gmail.com>
-  Category: misc
-  Home page: http://mozart.github.io/
-  Description: Oz is a multi-paradigm language that is designed for advanced,
-    concurrent, networked, soft real-time, and reactive applications. It combines
-    ongoing research in programming language design and implementation,
-    constraint logic programming, distributed computing, and human-computer
-    interfaces.
-  */  function oz(hljs) {
+	Language: Oz
+	Author: Guillaume Maudoux <layus.on@gmail.com>
+	Category: misc
+	Home page: http://mozart.github.io/
+	Description: Oz is a multi-paradigm language that is designed for advanced,
+	  concurrent, networked, soft real-time, and reactive applications. It combines
+	  ongoing research in programming language design and implementation,
+	  constraint logic programming, distributed computing, and human-computer
+	  interfaces.
+	*/  function oz(hljs) {
     var COMMENT = {
       variants: [ hljs.COMMENT("%", "$"), hljs.COMMENT("/\\*", "\\*/", {
         relevance: 0
@@ -14708,12 +14723,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var oz_1 = oz;
   /*
-  Language: Parser3
-  Requires: xml.js
-  Author: Oleg Volchkov <oleg@volchkov.net>
-  Website: https://www.parser.ru/en/
-  Category: template
-  */  function parser3(hljs) {
+	Language: Parser3
+	Requires: xml.js
+	Author: Oleg Volchkov <oleg@volchkov.net>
+	Website: https://www.parser.ru/en/
+	Category: template
+	*/  function parser3(hljs) {
     var CURLY_SUBCOMMENT = hljs.COMMENT("{", "}", {
       contains: [ "self" ]
     });
@@ -14745,12 +14760,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var parser3_1 = parser3;
   /*
-  Language: Packet Filter config
-  Description: pf.conf — packet filter configuration file (OpenBSD)
-  Author: Peter Piwowarski <oldlaptop654@aol.com>
-  Website: http://man.openbsd.org/pf.conf
-  Category: config
-  */  function pf(hljs) {
+	Language: Packet Filter config
+	Description: pf.conf — packet filter configuration file (OpenBSD)
+	Author: Peter Piwowarski <oldlaptop654@aol.com>
+	Website: http://man.openbsd.org/pf.conf
+	Category: config
+	*/  function pf(hljs) {
     var MACRO = {
       className: "variable",
       begin: /\$[\w\d#@][\w\d_]*/
@@ -14767,8 +14782,8 @@ var demo = function(path, fs, url, buffer) {
         $pattern: /[a-z0-9_<>-]+/,
         built_in: 
         /* block match pass are "actions" in pf.conf(5), the rest are
-           * lexically similar top-level commands.
-           */
+	         * lexically similar top-level commands.
+	         */
         "block match pass load anchor|5 antispoof|10 set table",
         keyword: "in out log quick on rdomain inet inet6 proto from port os to route " + "allow-opts divert-packet divert-reply divert-to flags group icmp-type " + "icmp6-type label once probability recieved-on rtable prio queue " + "tos tag tagged user keep fragment for os drop " + "af-to|10 binat-to|10 nat-to|10 rdr-to|10 bitmask least-stats random round-robin " + "source-hash static-port " + "dup-to reply-to route-to " + "parent bandwidth default min max qlimit " + "block-policy debug fingerprints hostid limit loginterface optimization " + "reassemble ruleset-optimization basic none profile skip state-defaults " + "state-policy timeout " + "const counters persist " + "no modulate synproxy state|5 floating if-bound no-sync pflow|10 sloppy " + "source-track global rule max-src-nodes max-src-states max-src-conn " + "max-src-conn-rate overload flush " + "scrub|5 max-mss min-ttl no-df|10 random-id",
         literal: "all any no-route self urpf-failed egress|5 unknown"
@@ -14778,22 +14793,22 @@ var demo = function(path, fs, url, buffer) {
   }
   var pf_1 = pf;
   /*
-  Language: PostgreSQL and PL/pgSQL
-  Author: Egor Rogov (e.rogov@postgrespro.ru)
-  Website: https://www.postgresql.org/docs/11/sql.html
-  Description:
-      This language incorporates both PostgreSQL SQL dialect and PL/pgSQL language.
-      It is based on PostgreSQL version 11. Some notes:
-      - Text in double-dollar-strings is _always_ interpreted as some programming code. Text
-        in ordinary quotes is _never_ interpreted that way and highlighted just as a string.
-      - There are quite a bit "special cases". That's because many keywords are not strictly
-        they are keywords in some contexts and ordinary identifiers in others. Only some
-        of such cases are handled; you still can get some of your identifiers highlighted
-        wrong way.
-      - Function names deliberately are not highlighted. There is no way to tell function
-        call from other constructs, hence we can't highlight _all_ function names. And
-        some names highlighted while others not looks ugly.
-  */  function pgsql(hljs) {
+	Language: PostgreSQL and PL/pgSQL
+	Author: Egor Rogov (e.rogov@postgrespro.ru)
+	Website: https://www.postgresql.org/docs/11/sql.html
+	Description:
+	    This language incorporates both PostgreSQL SQL dialect and PL/pgSQL language.
+	    It is based on PostgreSQL version 11. Some notes:
+	    - Text in double-dollar-strings is _always_ interpreted as some programming code. Text
+	      in ordinary quotes is _never_ interpreted that way and highlighted just as a string.
+	    - There are quite a bit "special cases". That's because many keywords are not strictly
+	      they are keywords in some contexts and ordinary identifiers in others. Only some
+	      of such cases are handled; you still can get some of your identifiers highlighted
+	      wrong way.
+	    - Function names deliberately are not highlighted. There is no way to tell function
+	      call from other constructs, hence we can't highlight _all_ function names. And
+	      some names highlighted while others not looks ugly.
+	*/  function pgsql(hljs) {
     var COMMENT_MODE = hljs.COMMENT("--", "$");
     var UNQUOTED_IDENT = "[a-zA-Z_][a-zA-Z_0-9$]*";
     var DOLLAR_STRING = "\\$([a-zA-Z_]?|[a-zA-Z_][a-zA-Z_0-9]*)\\$";
@@ -15151,12 +15166,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var pgsql_1 = pgsql;
   /*
-  Language: PHP
-  Author: Victor Karamzin <Victor.Karamzin@enterra-inc.com>
-  Contributors: Evgeny Stepanischev <imbolk@gmail.com>, Ivan Sagalaev <maniac@softwaremaniacs.org>
-  Website: https://www.php.net
-  Category: common
-  */  function php(hljs) {
+	Language: PHP
+	Author: Victor Karamzin <Victor.Karamzin@enterra-inc.com>
+	Contributors: Evgeny Stepanischev <imbolk@gmail.com>, Ivan Sagalaev <maniac@softwaremaniacs.org>
+	Website: https://www.php.net
+	Category: common
+	*/  function php(hljs) {
     var VARIABLE = {
       begin: "\\$+[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*"
     };
@@ -15290,12 +15305,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var php_1 = php;
   /*
-  Language: PHP Template
-  Requires: xml.js, php.js
-  Author: Josh Goebel <hello@joshgoebel.com>
-  Website: https://www.php.net
-  Category: common
-  */  function phpTemplate(hljs) {
+	Language: PHP Template
+	Requires: xml.js, php.js
+	Author: Josh Goebel <hello@joshgoebel.com>
+	Website: https://www.php.net
+	Category: common
+	*/  function phpTemplate(hljs) {
     return {
       name: "PHP template",
       subLanguage: "xml",
@@ -15334,10 +15349,10 @@ var demo = function(path, fs, url, buffer) {
   }
   var phpTemplate_1 = phpTemplate;
   /*
-  Language: PineType
-  Description: Pine (JS) is a lightweight, interpreted, or just-in-time compiled programming language with first-class functions.
-  Category: common, scripting
-  */  function pineType(hljs) {
+	Language: PineType
+	Description: Pine (JS) is a lightweight, interpreted, or just-in-time compiled programming language with first-class functions.
+	Category: common, scripting
+	*/  function pineType(hljs) {
     var OTHER_KEYWORDS = {
       className: "keyword",
       variants: [ {
@@ -15366,10 +15381,10 @@ var demo = function(path, fs, url, buffer) {
   }
   var pineType_1 = pineType;
   /*
-  Language: Pine
-  Description: Pine (JS) is a lightweight, interpreted, or just-in-time compiled programming language with first-class functions.
-  Category: common, scripting
-  */  function pine(hljs) {
+	Language: Pine
+	Description: Pine (JS) is a lightweight, interpreted, or just-in-time compiled programming language with first-class functions.
+	Category: common, scripting
+	*/  function pine(hljs) {
     var KEYWORDS = {
       keyword: "var if else for to by return break continue and or not =>",
       literal: "true false na open close high low",
@@ -15410,11 +15425,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var pine_1 = pine;
   /*
-  Language: Plain text
-  Author: Egor Rogov (e.rogov@postgrespro.ru)
-  Description: Plain text without any highlighting.
-  Category: common
-  */  function plaintext(hljs) {
+	Language: Plain text
+	Author: Egor Rogov (e.rogov@postgrespro.ru)
+	Description: Plain text without any highlighting.
+	Category: common
+	*/  function plaintext(hljs) {
     return {
       name: "Plain text",
       aliases: [ "text", "txt" ],
@@ -15423,12 +15438,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var plaintext_1 = plaintext;
   /*
-  Language: Pony
-  Author: Joe Eli McIlvain <joe.eli.mac@gmail.com>
-  Description: Pony is an open-source, object-oriented, actor-model,
-               capabilities-secure, high performance programming language.
-  Website: https://www.ponylang.io
-  */  function pony(hljs) {
+	Language: Pony
+	Author: Joe Eli McIlvain <joe.eli.mac@gmail.com>
+	Description: Pony is an open-source, object-oriented, actor-model,
+	             capabilities-secure, high performance programming language.
+	Website: https://www.ponylang.io
+	*/  function pony(hljs) {
     var KEYWORDS = {
       keyword: "actor addressof and as be break class compile_error compile_intrinsic " + "consume continue delegate digestof do else elseif embed end error " + "for fun if ifdef in interface is isnt lambda let match new not object " + "or primitive recover repeat return struct then trait try type until " + "use var where while with xor",
       meta: "iso val tag trn box ref",
@@ -15468,15 +15483,15 @@ var demo = function(path, fs, url, buffer) {
       relevance: 0
     };
     /**
-     * The `FUNCTION` and `CLASS` modes were intentionally removed to simplify
-     * highlighting and fix cases like
-     * ```
-     * interface Iterator[A: A]
-     *   fun has_next(): Bool
-     *   fun next(): A?
-     * ```
-     * where it is valid to have a function head without a body
-     */    return {
+	   * The `FUNCTION` and `CLASS` modes were intentionally removed to simplify
+	   * highlighting and fix cases like
+	   * ```
+	   * interface Iterator[A: A]
+	   *   fun has_next(): Bool
+	   *   fun next(): A?
+	   * ```
+	   * where it is valid to have a function head without a body
+	   */    return {
       name: "Pony",
       keywords: KEYWORDS,
       contains: [ TYPE_NAME, TRIPLE_QUOTE_STRING_MODE, QUOTE_STRING_MODE, SINGLE_QUOTE_CHAR_MODE, PRIMED_NAME, NUMBER_MODE, hljs.C_LINE_COMMENT_MODE, hljs.C_BLOCK_COMMENT_MODE ]
@@ -15484,11 +15499,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var pony_1 = pony;
   /*
-  Language: Portugol
-  Author: Marco Antonio Augusto de Andrade <marco.andrade@ifro.edu.br>
-  Category: pseudocode
-  Description: Portugol is pseudocode in Portuguese for Portugol Studio
-  */  function portugol(hljs) {
+	Language: Portugol
+	Author: Marco Antonio Augusto de Andrade <marco.andrade@ifro.edu.br>
+	Category: pseudocode
+	Description: Portugol is pseudocode in Portuguese for Portugol Studio
+	*/  function portugol(hljs) {
     var OBJC_KEYWORDS = {
       keyword: "programa funcao retorne const nao e ou " + "inclua biblioteca  " + "se senao escolha caso contrario pare faca enquanto para ",
       built_in: "leia escreva limpa",
@@ -15510,12 +15525,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var portugol_1 = portugol;
   /*
-  Language: PowerShell
-  Description: PowerShell is a task-based command-line shell and scripting language built on .NET.
-  Author: David Mohundro <david@mohundro.com>
-  Contributors: Nicholas Blumhardt <nblumhardt@nblumhardt.com>, Victor Zhou <OiCMudkips@users.noreply.github.com>, Nicolas Le Gall <contact@nlegall.fr>
-  Website: https://docs.microsoft.com/en-us/powershell/
-  */  function powershell(hljs) {
+	Language: PowerShell
+	Description: PowerShell is a task-based command-line shell and scripting language built on .NET.
+	Author: David Mohundro <david@mohundro.com>
+	Contributors: Nicholas Blumhardt <nblumhardt@nblumhardt.com>, Victor Zhou <OiCMudkips@users.noreply.github.com>, Nicolas Le Gall <contact@nlegall.fr>
+	Website: https://docs.microsoft.com/en-us/powershell/
+	*/  function powershell(hljs) {
     var TYPES = [ "string", "char", "byte", "int", "long", "bool", "decimal", "single", "double", "DateTime", "xml", "array", "hashtable", "void" ];
     // https://msdn.microsoft.com/en-us/library/ms714428(v=vs.85).aspx
         var VALID_VERBS = "Add|Clear|Close|Copy|Enter|Exit|Find|Format|Get|Hide|Join|Lock|" + "Move|New|Open|Optimize|Pop|Push|Redo|Remove|Rename|Reset|Resize|" + "Search|Select|Set|Show|Skip|Split|Step|Switch|Undo|Unlock|" + "Watch|Backup|Checkpoint|Compare|Compress|Convert|ConvertFrom|" + "ConvertTo|Dismount|Edit|Expand|Export|Group|Import|Initialize|" + "Limit|Merge|New|Out|Publish|Restore|Save|Sync|Unpublish|Update|" + "Approve|Assert|Complete|Confirm|Deny|Disable|Enable|Install|Invoke|Register|" + "Request|Restart|Resume|Start|Stop|Submit|Suspend|Uninstall|" + "Unregister|Wait|Debug|Measure|Ping|Repair|Resolve|Test|Trace|Connect|" + "Disconnect|Read|Receive|Send|Write|Block|Grant|Protect|Revoke|Unblock|" + "Unprotect|Use|ForEach|Sort|Tee|Where";
@@ -15711,12 +15726,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var powershell_1 = powershell;
   /*
-  Language: Processing
-  Description: Processing is a flexible software sketchbook and a language for learning how to code within the context of the visual arts.
-  Author: Erik Paluka <erik.paluka@gmail.com>
-  Website: https://processing.org
-  Category: graphics
-  */  function processing(hljs) {
+	Language: Processing
+	Description: Processing is a flexible software sketchbook and a language for learning how to code within the context of the visual arts.
+	Author: Erik Paluka <erik.paluka@gmail.com>
+	Website: https://processing.org
+	Category: graphics
+	*/  function processing(hljs) {
     return {
       name: "Processing",
       keywords: {
@@ -15732,10 +15747,10 @@ var demo = function(path, fs, url, buffer) {
   }
   var processing_1 = processing;
   /*
-  Language: Python profiler
-  Description: Python profiler results
-  Author: Brian Beck <exogen@gmail.com>
-  */  function profile(hljs) {
+	Language: Python profiler
+	Description: Python profiler results
+	Author: Brian Beck <exogen@gmail.com>
+	*/  function profile(hljs) {
     return {
       name: "Python profiler",
       contains: [ hljs.C_NUMBER_MODE, {
@@ -15764,11 +15779,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var profile_1 = profile;
   /*
-  Language: Prolog
-  Description: Prolog is a general purpose logic programming language associated with artificial intelligence and computational linguistics.
-  Author: Raivo Laanemets <raivo@infdot.com>
-  Website: https://en.wikipedia.org/wiki/Prolog
-  */  function prolog(hljs) {
+	Language: Prolog
+	Description: Prolog is a general purpose logic programming language associated with artificial intelligence and computational linguistics.
+	Author: Raivo Laanemets <raivo@infdot.com>
+	Website: https://en.wikipedia.org/wiki/Prolog
+	*/  function prolog(hljs) {
     var ATOM = {
       begin: /[a-z][A-Za-z0-9_]*/,
       relevance: 0
@@ -15828,11 +15843,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var prolog_1 = prolog;
   /*
-  Language: .properties
-  Contributors: Valentin Aitken <valentin@nalisbg.com>, Egor Rogov <e.rogov@postgrespro.ru>
-  Website: https://en.wikipedia.org/wiki/.properties
-  Category: common, config
-  */  function properties(hljs) {
+	Language: .properties
+	Contributors: Valentin Aitken <valentin@nalisbg.com>, Egor Rogov <e.rogov@postgrespro.ru>
+	Website: https://en.wikipedia.org/wiki/.properties
+	Category: common, config
+	*/  function properties(hljs) {
     // whitespaces: space, tab, formfeed
     var WS0 = "[ \\t\\f]*";
     var WS1 = "[ \\t\\f]+";
@@ -15895,12 +15910,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var properties_1 = properties;
   /*
-  Language: Protocol Buffers
-  Author: Dan Tao <daniel.tao@gmail.com>
-  Description: Protocol buffer message definition format
-  Website: https://developers.google.com/protocol-buffers/docs/proto3
-  Category: protocols
-  */  function protobuf(hljs) {
+	Language: Protocol Buffers
+	Author: Dan Tao <daniel.tao@gmail.com>
+	Description: Protocol buffer message definition format
+	Website: https://developers.google.com/protocol-buffers/docs/proto3
+	Category: protocols
+	*/  function protobuf(hljs) {
     return {
       name: "Protocol Buffers",
       keywords: {
@@ -15934,10 +15949,10 @@ var demo = function(path, fs, url, buffer) {
   }
   var protobuf_1 = protobuf;
   /*
-  Language: Pug
-  Author: Tomas Aparicio <tomas@aparicio.me>
-  Description: Pug is a high performance template engine heavily influenced by Haml and implemented with JavaScript for node.
-  */
+	Language: Pug
+	Author: Tomas Aparicio <tomas@aparicio.me>
+	Description: Pug is a high performance template engine heavily influenced by Haml and implemented with JavaScript for node.
+	*/
   // TODO work in process: detect indentation (comments, multiline), attributes with classes
     function pug(hljs) {
     return {
@@ -16044,12 +16059,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var pug_1 = pug;
   /*
-  Language: PureBASIC
-  Author: Tristano Ajmone <tajmone@gmail.com>
-  Description: Syntax highlighting for PureBASIC (v.5.00-5.60). No inline ASM highlighting. (v.1.2, May 2017)
-  Credits: I've taken inspiration from the PureBasic language file for GeSHi, created by Gustavo Julio Fiorenza (GuShH).
-  Website: https://www.purebasic.com
-  */
+	Language: PureBASIC
+	Author: Tristano Ajmone <tajmone@gmail.com>
+	Description: Syntax highlighting for PureBASIC (v.5.00-5.60). No inline ASM highlighting. (v.1.2, May 2017)
+	Credits: I've taken inspiration from the PureBasic language file for GeSHi, created by Gustavo Julio Fiorenza (GuShH).
+	Website: https://www.purebasic.com
+	*/
   // Base deafult colors in PB IDE: background: #FFFFDF; foreground: #000000;
     function purebasic(hljs) {
     var STRINGS = {
@@ -16096,32 +16111,32 @@ var demo = function(path, fs, url, buffer) {
     };
   }
   /*  ==============================================================================
-                                        CHANGELOG
-      ==============================================================================
-      - v.1.2 (2017-05-12)
-          -- BUG-FIX: Some keywords were accidentally joyned together. Now fixed.
-      - v.1.1 (2017-04-30)
-          -- Updated to PureBASIC 5.60.
-          -- Keywords list now built by extracting them from the PureBASIC SDK's
-             "SyntaxHilighting.dll" (from each PureBASIC version). Tokens from each
-             version are added to the list, and renamed or removed tokens are kept
-             for the sake of covering all versions of the language from PureBASIC
-             v5.00 upward. (NOTE: currently, there are no renamed or deprecated
-             tokens in the keywords list). For more info, see:
-             -- http://www.purebasic.fr/english/viewtopic.php?&p=506269
-             -- https://github.com/tajmone/purebasic-archives/tree/master/syntax-highlighting/guidelines
-      - v.1.0 (April 2016)
-          -- First release
-          -- Keywords list taken and adapted from GuShH's (Gustavo Julio Fiorenza)
-             PureBasic language file for GeSHi:
-             -- https://github.com/easybook/geshi/blob/master/geshi/purebasic.php
-  */  var purebasic_1 = purebasic;
+	                                      CHANGELOG
+	    ==============================================================================
+	    - v.1.2 (2017-05-12)
+	        -- BUG-FIX: Some keywords were accidentally joyned together. Now fixed.
+	    - v.1.1 (2017-04-30)
+	        -- Updated to PureBASIC 5.60.
+	        -- Keywords list now built by extracting them from the PureBASIC SDK's
+	           "SyntaxHilighting.dll" (from each PureBASIC version). Tokens from each
+	           version are added to the list, and renamed or removed tokens are kept
+	           for the sake of covering all versions of the language from PureBASIC
+	           v5.00 upward. (NOTE: currently, there are no renamed or deprecated
+	           tokens in the keywords list). For more info, see:
+	           -- http://www.purebasic.fr/english/viewtopic.php?&p=506269
+	           -- https://github.com/tajmone/purebasic-archives/tree/master/syntax-highlighting/guidelines
+	    - v.1.0 (April 2016)
+	        -- First release
+	        -- Keywords list taken and adapted from GuShH's (Gustavo Julio Fiorenza)
+	           PureBasic language file for GeSHi:
+	           -- https://github.com/easybook/geshi/blob/master/geshi/purebasic.php
+	*/  var purebasic_1 = purebasic;
   /*
-  Language: Python
-  Description: Python is an interpreted, object-oriented, high-level programming language with dynamic semantics.
-  Website: https://www.python.org
-  Category: common
-  */  function python(hljs) {
+	Language: Python
+	Description: Python is an interpreted, object-oriented, high-level programming language with dynamic semantics.
+	Website: https://www.python.org
+	Category: common
+	*/  function python(hljs) {
     var KEYWORDS = {
       keyword: "and elif is global as in if from raise for except finally print import pass return " + "exec else break not with class assert yield try while continue del or def lambda " + "async await nonlocal|10",
       built_in: "Ellipsis NotImplemented",
@@ -16252,11 +16267,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var python_1 = python;
   /*
-  Language: Python REPL
-  Requires: python.js
-  Author: Josh Goebel <hello@joshgoebel.com>
-  Category: common
-  */  function pythonRepl(hljs) {
+	Language: Python REPL
+	Requires: python.js
+	Author: Josh Goebel <hello@joshgoebel.com>
+	Category: common
+	*/  function pythonRepl(hljs) {
     return {
       aliases: [ "pycon" ],
       contains: [ {
@@ -16280,12 +16295,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var pythonRepl_1 = pythonRepl;
   /*
-  Language: Q
-  Description: Q is a vector-based functional paradigm programming language built into the kdb+ database.
-               (K/Q/Kdb+ from Kx Systems)
-  Author: Sergey Vidyuk <svidyuk@gmail.com>
-  Website: https://kx.com/connect-with-us/developers/
-  */  function q(hljs) {
+	Language: Q
+	Description: Q is a vector-based functional paradigm programming language built into the kdb+ database.
+	             (K/Q/Kdb+ from Kx Systems)
+	Author: Sergey Vidyuk <svidyuk@gmail.com>
+	Website: https://kx.com/connect-with-us/developers/
+	*/  function q(hljs) {
     var Q_KEYWORDS = {
       $pattern: /(`?)[A-Za-z0-9_]+\b/,
       keyword: "do while select delete by update from",
@@ -16302,14 +16317,14 @@ var demo = function(path, fs, url, buffer) {
   }
   var q_1 = q;
   /*
-  Language: QML
-  Requires: javascript.js, xml.js
-  Author: John Foster <jfoster@esri.com>
-  Description: Syntax highlighting for the Qt Quick QML scripting language, based mostly off
-               the JavaScript parser.
-  Website: https://doc.qt.io/qt-5/qmlapplications.html
-  Category: scripting
-  */  function qml(hljs) {
+	Language: QML
+	Requires: javascript.js, xml.js
+	Author: John Foster <jfoster@esri.com>
+	Description: Syntax highlighting for the Qt Quick QML scripting language, based mostly off
+	             the JavaScript parser.
+	Website: https://doc.qt.io/qt-5/qmlapplications.html
+	Category: scripting
+	*/  function qml(hljs) {
     var KEYWORDS = {
       keyword: "in of on if for while finally var new function do return void else break catch " + "instanceof with throw case default try this switch continue typeof delete " + "let yield const export super debugger as async await import",
       literal: "true false null undefined NaN Infinity",
@@ -16441,12 +16456,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var qml_1 = qml;
   /*
-  Language: R
-  Description: R is a free software environment for statistical computing and graphics.
-  Author: Joe Cheng <joe@rstudio.org>
-  Website: https://www.r-project.org
-  Category: scientific
-  */  function r(hljs) {
+	Language: R
+	Description: R is a free software environment for statistical computing and graphics.
+	Author: Joe Cheng <joe@rstudio.org>
+	Website: https://www.r-project.org
+	Category: scientific
+	*/  function r(hljs) {
     var IDENT_RE = "([a-zA-Z]|\\.[a-zA-Z.])[a-zA-Z0-9._]*";
     return {
       name: "R",
@@ -16503,10 +16518,10 @@ var demo = function(path, fs, url, buffer) {
   }
   var r_1 = r;
   /*
-   * Language: razor
-   * Requires: xml.js, csharp.js
-   * Author: Nicolas LLOBERA <nicolas@bananeatomic.fr>
-   */  function razor(hljs) {
+	 * Language: razor
+	 * Requires: xml.js, csharp.js
+	 * Author: Nicolas LLOBERA <nicolas@bananeatomic.fr>
+	 */  function razor(hljs) {
     var razor_comment = hljs.COMMENT("@\\*", "\\*@", {
       relevance: 10
     });
@@ -16595,12 +16610,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var razor_1 = razor;
   /*
-  Language: ReasonML
-  Description: Reason lets you write simple, fast and quality type safe code while leveraging both the JavaScript & OCaml ecosystems.
-  Website: https://reasonml.github.io
-  Author: Gidi Meir Morris <oss@gidi.io>
-  Category: functional
-  */  function reasonml(hljs) {
+	Language: ReasonML
+	Description: Reason lets you write simple, fast and quality type safe code while leveraging both the JavaScript & OCaml ecosystems.
+	Website: https://reasonml.github.io
+	Author: Gidi Meir Morris <oss@gidi.io>
+	Category: functional
+	*/  function reasonml(hljs) {
     function orReValues(ops) {
       return ops.map((function(op) {
         return op.split("").map((function(char) {
@@ -16810,12 +16825,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var reasonml_1 = reasonml;
   /*
-  Language: RenderMan RIB
-  Author: Konstantin Evdokimenko <qewerty@gmail.com>
-  Contributors: Shuen-Huei Guan <drake.guan@gmail.com>
-  Website: https://renderman.pixar.com/resources/RenderMan_20/ribBinding.html
-  Category: graphics
-  */  function rib(hljs) {
+	Language: RenderMan RIB
+	Author: Konstantin Evdokimenko <qewerty@gmail.com>
+	Contributors: Shuen-Huei Guan <drake.guan@gmail.com>
+	Website: https://renderman.pixar.com/resources/RenderMan_20/ribBinding.html
+	Category: graphics
+	*/  function rib(hljs) {
     return {
       name: "RenderMan RIB",
       keywords: "ArchiveRecord AreaLightSource Atmosphere Attribute AttributeBegin AttributeEnd Basis " + "Begin Blobby Bound Clipping ClippingPlane Color ColorSamples ConcatTransform Cone " + "CoordinateSystem CoordSysTransform CropWindow Curves Cylinder DepthOfField Detail " + "DetailRange Disk Displacement Display End ErrorHandler Exposure Exterior Format " + "FrameAspectRatio FrameBegin FrameEnd GeneralPolygon GeometricApproximation Geometry " + "Hider Hyperboloid Identity Illuminate Imager Interior LightSource " + "MakeCubeFaceEnvironment MakeLatLongEnvironment MakeShadow MakeTexture Matte " + "MotionBegin MotionEnd NuPatch ObjectBegin ObjectEnd ObjectInstance Opacity Option " + "Orientation Paraboloid Patch PatchMesh Perspective PixelFilter PixelSamples " + "PixelVariance Points PointsGeneralPolygons PointsPolygons Polygon Procedural Projection " + "Quantize ReadArchive RelativeDetail ReverseOrientation Rotate Scale ScreenWindow " + "ShadingInterpolation ShadingRate Shutter Sides Skew SolidBegin SolidEnd Sphere " + "SubdivisionMesh Surface TextureCoordinates Torus Transform TransformBegin TransformEnd " + "TransformPoints Translate TrimCurve WorldBegin WorldEnd",
@@ -16825,11 +16840,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var rib_1 = rib;
   /*
-  Language: RISC-V Assembly
-  Author: Ckristian Duran <ckristian_duran@hotmail.com>
-  Description: RISC-V Assembly including RV32-IMAFDC + picorv32 instructions
-  Category: assembler
-  */
+	Language: RISC-V Assembly
+	Author: Ckristian Duran <ckristian_duran@hotmail.com>
+	Description: RISC-V Assembly including RV32-IMAFDC + picorv32 instructions
+	Category: assembler
+	*/
   // Based on ARM assembly (like everything in this awful project)
     function riscvasm(hljs) {
     //local labels: %?[FB]?[AT]?\d{1,2}\w+
@@ -16932,12 +16947,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var riscvasm_1 = riscvasm;
   /*
-  Language: Roboconf
-  Author: Vincent Zurczak <vzurczak@linagora.com>
-  Description: Syntax highlighting for Roboconf's DSL
-  Website: http://roboconf.net
-  Category: config
-  */  function roboconf(hljs) {
+	Language: Roboconf
+	Author: Vincent Zurczak <vzurczak@linagora.com>
+	Description: Syntax highlighting for Roboconf's DSL
+	Website: http://roboconf.net
+	Category: config
+	*/  function roboconf(hljs) {
     var IDENTIFIER = "[a-zA-Z-_][^\\n{]+\\{";
     var PROPERTY = {
       className: "attribute",
@@ -16989,9 +17004,9 @@ var demo = function(path, fs, url, buffer) {
   }
   var roboconf_1 = roboconf;
   /*
-  Language: Robot Framework
-  Author: Harri Paavola <harri.paavola@gmail.com>
-  */  function robotframework(hljs) {
+	Language: Robot Framework
+	Author: Harri Paavola <harri.paavola@gmail.com>
+	*/  function robotframework(hljs) {
     var VAR = {
       className: "variable",
       begin: /\$\{/,
@@ -17077,11 +17092,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var robotframework_1 = robotframework;
   /*
-  Language: Microtik RouterOS script
-  Author: Ivan Dementev <ivan_div@mail.ru>
-  Description: Scripting host provides a way to automate some router maintenance tasks by means of executing user-defined scripts bounded to some event occurrence
-  Website: https://wiki.mikrotik.com/wiki/Manual:Scripting
-  */
+	Language: Microtik RouterOS script
+	Author: Ivan Dementev <ivan_div@mail.ru>
+	Description: Scripting host provides a way to automate some router maintenance tasks by means of executing user-defined scripts bounded to some event occurrence
+	Website: https://wiki.mikrotik.com/wiki/Manual:Scripting
+	*/
   // Colors from RouterOS terminal:
   //   green        - #0E9A00
   //   teal         - #0C9A9A
@@ -17189,19 +17204,19 @@ var demo = function(path, fs, url, buffer) {
             begin: "\\b(" + LITERALS.split(" ").join("|") + ")\\b"
           }, 
           /*{
-                  // IPv4 addresses and subnets
-                  className: 'number',
-                  variants: [
-                    {begin: IPADDR_wBITMASK+'(,'+IPADDR_wBITMASK+')*'}, //192.168.0.0/24,1.2.3.0/24
-                    {begin: IPADDR+'-'+IPADDR},       // 192.168.0.1-192.168.0.3
-                    {begin: IPADDR+'(,'+IPADDR+')*'}, // 192.168.0.1,192.168.0.34,192.168.24.1,192.168.0.1
-                  ]
-                }, // */
+	                // IPv4 addresses and subnets
+	                className: 'number',
+	                variants: [
+	                  {begin: IPADDR_wBITMASK+'(,'+IPADDR_wBITMASK+')*'}, //192.168.0.0/24,1.2.3.0/24
+	                  {begin: IPADDR+'-'+IPADDR},       // 192.168.0.1-192.168.0.3
+	                  {begin: IPADDR+'(,'+IPADDR+')*'}, // 192.168.0.1,192.168.0.34,192.168.24.1,192.168.0.1
+	                ]
+	              }, // */
           /*{
-                  // MAC addresses and DHCP Client IDs
-                  className: 'number',
-                  begin: /\b(1:)?([0-9A-Fa-f]{1,2}[:-]){5}([0-9A-Fa-f]){1,2}\b/,
-                }, //*/
+	                // MAC addresses and DHCP Client IDs
+	                className: 'number',
+	                begin: /\b(1:)?([0-9A-Fa-f]{1,2}[:-]){5}([0-9A-Fa-f]){1,2}\b/,
+	              }, //*/
           {
             // Не форматировать не классифицированные значения. Необходимо для исключения подсветки значений как built_in.
             // className: 'number',
@@ -17235,12 +17250,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var routeros_1 = routeros;
   /*
-  Language: RenderMan RSL
-  Author: Konstantin Evdokimenko <qewerty@gmail.com>
-  Contributors: Shuen-Huei Guan <drake.guan@gmail.com>
-  Website: https://renderman.pixar.com/resources/RenderMan_20/shadingLanguage.html
-  Category: graphics
-  */  function rsl(hljs) {
+	Language: RenderMan RSL
+	Author: Konstantin Evdokimenko <qewerty@gmail.com>
+	Contributors: Shuen-Huei Guan <drake.guan@gmail.com>
+	Website: https://renderman.pixar.com/resources/RenderMan_20/shadingLanguage.html
+	Category: graphics
+	*/  function rsl(hljs) {
     return {
       name: "RenderMan RSL",
       keywords: {
@@ -17264,12 +17279,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var rsl_1 = rsl;
   /*
-  Language: Oracle Rules Language
-  Author: Jason Jacobson <jason.a.jacobson@gmail.com>
-  Description: The Oracle Utilities Rules Language is used to program the Oracle Utilities Applications acquired from LODESTAR Corporation.  The products include Billing Component, LPSS, Pricing Component etc. through version 1.6.1.
-  Website: https://docs.oracle.com/cd/E17904_01/dev.1111/e10227/rlref.htm
-  Category: enterprise
-  */  function ruleslanguage(hljs) {
+	Language: Oracle Rules Language
+	Author: Jason Jacobson <jason.a.jacobson@gmail.com>
+	Description: The Oracle Utilities Rules Language is used to program the Oracle Utilities Applications acquired from LODESTAR Corporation.  The products include Billing Component, LPSS, Pricing Component etc. through version 1.6.1.
+	Website: https://docs.oracle.com/cd/E17904_01/dev.1111/e10227/rlref.htm
+	Category: enterprise
+	*/  function ruleslanguage(hljs) {
     return {
       name: "Oracle Rules Language",
       keywords: {
@@ -17290,12 +17305,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var ruleslanguage_1 = ruleslanguage;
   /*
-  Language: Rust
-  Author: Andrey Vlasovskikh <andrey.vlasovskikh@gmail.com>
-  Contributors: Roman Shmatov <romanshmatov@gmail.com>, Kasper Andersen <kma_untrusted@protonmail.com>
-  Website: https://www.rust-lang.org
-  Category: common, system
-  */  function rust(hljs) {
+	Language: Rust
+	Author: Andrey Vlasovskikh <andrey.vlasovskikh@gmail.com>
+	Contributors: Roman Shmatov <romanshmatov@gmail.com>, Kasper Andersen <kma_untrusted@protonmail.com>
+	Website: https://www.rust-lang.org
+	Category: common, system
+	*/  function rust(hljs) {
     var NUM_SUFFIX = "([ui](8|16|32|64|128|size)|f(32|64))?";
     var KEYWORDS = "abstract as async await become box break const continue crate do dyn " + "else enum extern false final fn for if impl in let loop macro match mod " + "move mut override priv pub ref return self Self static struct super " + "trait true try type typeof unsafe unsized use virtual where while yield";
     var BUILTINS = 
@@ -17387,10 +17402,10 @@ var demo = function(path, fs, url, buffer) {
   }
   var rust_1 = rust;
   /*
-  Language: SAS
-  Author: Mauricio Caceres <mauricio.caceres.bravo@gmail.com>
-  Description: Syntax Highlighting for SAS
-  */  function sas(hljs) {
+	Language: SAS
+	Author: Mauricio Caceres <mauricio.caceres.bravo@gmail.com>
+	Description: Syntax Highlighting for SAS
+	*/  function sas(hljs) {
     // Data step and PROC SQL statements
     var SAS_KEYWORDS = "" + "do if then else end until while " + "" + "abort array attrib by call cards cards4 catname continue " + "datalines datalines4 delete delim delimiter display dm drop " + "endsas error file filename footnote format goto in infile " + "informat input keep label leave length libname link list " + "lostcard merge missing modify options output out page put " + "redirect remove rename replace retain return select set skip " + "startsas stop title update waitsas where window x systask " + "" + "add and alter as cascade check create delete describe " + "distinct drop foreign from group having index insert into in " + "key like message modify msgtype not null on or order primary " + "references reset restrict select set table unique update " + "validate view where";
     // Built-in SAS functions
@@ -17438,12 +17453,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var sas_1 = sas;
   /*
-  Language: Scala
-  Category: functional
-  Author: Jan Berkel <jan.berkel@gmail.com>
-  Contributors: Erik Osheim <d_m@plastic-idolatry.com>
-  Website: https://www.scala-lang.org
-  */  function scala(hljs) {
+	Language: Scala
+	Category: functional
+	Author: Jan Berkel <jan.berkel@gmail.com>
+	Contributors: Erik Osheim <d_m@plastic-idolatry.com>
+	Website: https://www.scala-lang.org
+	*/  function scala(hljs) {
     var ANNOTATION = {
       className: "meta",
       begin: "@[A-Za-z]+"
@@ -17539,15 +17554,15 @@ var demo = function(path, fs, url, buffer) {
   }
   var scala_1 = scala;
   /*
-  Language: Scheme
-  Description: Scheme is a programming language in the Lisp family.
-               (keywords based on http://community.schemewiki.org/?scheme-keywords)
-  Author: JP Verkamp <me@jverkamp.com>
-  Contributors: Ivan Sagalaev <maniac@softwaremaniacs.org>
-  Origin: clojure.js
-  Website: http://community.schemewiki.org/?what-is-scheme
-  Category: lisp
-  */  function scheme(hljs) {
+	Language: Scheme
+	Description: Scheme is a programming language in the Lisp family.
+	             (keywords based on http://community.schemewiki.org/?scheme-keywords)
+	Author: JP Verkamp <me@jverkamp.com>
+	Contributors: Ivan Sagalaev <maniac@softwaremaniacs.org>
+	Origin: clojure.js
+	Website: http://community.schemewiki.org/?what-is-scheme
+	Category: lisp
+	*/  function scheme(hljs) {
     var SCHEME_IDENT_RE = "[^\\(\\)\\[\\]\\{\\}\",'`;#|\\\\\\s]+";
     var SCHEME_SIMPLE_NUMBER_RE = "(\\-|\\+)?\\d+([./]\\d+)?";
     var SCHEME_COMPLEX_NUMBER_RE = SCHEME_SIMPLE_NUMBER_RE + "[+\\-]" + SCHEME_SIMPLE_NUMBER_RE + "i";
@@ -17638,13 +17653,13 @@ var demo = function(path, fs, url, buffer) {
   }
   var scheme_1 = scheme;
   /*
-  Language: Scilab
-  Author: Sylvestre Ledru <sylvestre.ledru@scilab-enterprises.com>
-  Origin: matlab.js
-  Description: Scilab is a port from Matlab
-  Website: https://www.scilab.org
-  Category: scientific
-  */  function scilab(hljs) {
+	Language: Scilab
+	Author: Sylvestre Ledru <sylvestre.ledru@scilab-enterprises.com>
+	Origin: matlab.js
+	Description: Scilab is a port from Matlab
+	Website: https://www.scilab.org
+	Category: scientific
+	*/  function scilab(hljs) {
     var COMMON_CONTAINS = [ hljs.C_NUMBER_MODE, {
       className: "string",
       begin: "'|\"",
@@ -17687,12 +17702,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var scilab_1 = scilab;
   /*
-  Language: SCSS
-  Description: Scss is an extension of the syntax of CSS.
-  Author: Kurt Emch <kurt@kurtemch.com>
-  Website: https://sass-lang.com
-  Category: common, css
-  */  function scss(hljs) {
+	Language: SCSS
+	Description: Scss is an extension of the syntax of CSS.
+	Author: Kurt Emch <kurt@kurtemch.com>
+	Website: https://sass-lang.com
+	Category: common, css
+	*/  function scss(hljs) {
     var AT_IDENTIFIER = "@[a-z-]+";
  // @font-face
         var AT_MODIFIERS = "and or not only";
@@ -17783,11 +17798,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var scss_1 = scss;
   /*
-  Language: Shell Session
-  Requires: bash.js
-  Author: TSUYUSATO Kitsune <make.just.on@gmail.com>
-  Category: common
-  */  function shell(hljs) {
+	Language: Shell Session
+	Requires: bash.js
+	Author: TSUYUSATO Kitsune <make.just.on@gmail.com>
+	Category: common
+	*/  function shell(hljs) {
     return {
       name: "Shell Session",
       aliases: [ "console" ],
@@ -17803,11 +17818,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var shell_1 = shell;
   /*
-  Language: Smali
-  Author: Dennis Titze <dennis.titze@gmail.com>
-  Description: Basic Smali highlighting
-  Website: https://github.com/JesusFreke/smali
-  */  function smali(hljs) {
+	Language: Smali
+	Author: Dennis Titze <dennis.titze@gmail.com>
+	Description: Basic Smali highlighting
+	Website: https://github.com/JesusFreke/smali
+	*/  function smali(hljs) {
     var smali_instr_low_prio = [ "add", "and", "cmp", "cmpg", "cmpl", "const", "div", "double", "float", "goto", "if", "int", "long", "move", "mul", "neg", "new", "nop", "not", "or", "rem", "return", "shl", "shr", "sput", "sub", "throw", "ushr", "xor" ];
     var smali_instr_high_prio = [ "aget", "aput", "array", "check", "execute", "fill", "filled", "goto/16", "goto/32", "iget", "instance", "invoke", "iput", "monitor", "packed", "sget", "sparse" ];
     var smali_keywords = [ "transient", "constructor", "abstract", "final", "synthetic", "public", "private", "protected", "static", "bridge", "system" ];
@@ -17856,11 +17871,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var smali_1 = smali;
   /*
-  Language: Smalltalk
-  Description: Smalltalk is an object-oriented, dynamically typed reflective programming language.
-  Author: Vladimir Gubarkov <xonixx@gmail.com>
-  Website: https://en.wikipedia.org/wiki/Smalltalk
-  */  function smalltalk(hljs) {
+	Language: Smalltalk
+	Description: Smalltalk is an object-oriented, dynamically typed reflective programming language.
+	Author: Vladimir Gubarkov <xonixx@gmail.com>
+	Website: https://en.wikipedia.org/wiki/Smalltalk
+	*/  function smalltalk(hljs) {
     var VAR_IDENT_RE = "[a-z][a-zA-Z0-9_]*";
     var CHAR = {
       className: "string",
@@ -17902,13 +17917,13 @@ var demo = function(path, fs, url, buffer) {
   }
   var smalltalk_1 = smalltalk;
   /*
-  Language: SML (Standard ML)
-  Author: Edwin Dalorzo <edwin@dalorzo.org>
-  Description: SML language definition.
-  Website: https://www.smlnj.org
-  Origin: ocaml.js
-  Category: functional
-  */  function sml(hljs) {
+	Language: SML (Standard ML)
+	Author: Edwin Dalorzo <edwin@dalorzo.org>
+	Description: SML language definition.
+	Website: https://www.smlnj.org
+	Origin: ocaml.js
+	Category: functional
+	*/  function sml(hljs) {
     return {
       name: "SML (Standard ML)",
       aliases: [ "ml" ],
@@ -17961,9 +17976,9 @@ var demo = function(path, fs, url, buffer) {
   }
   var sml_1 = sml;
   /*
-  Language: Snort
-  Category: Intrusion Detection, Prevention
-  */  function snort(hljs) {
+	Language: Snort
+	Category: Intrusion Detection, Prevention
+	*/  function snort(hljs) {
     var KEYWORDS = "alert log pass activate dynamic drop reject sdrop tcp ip udp icmp " + "msg reference gid sid rev classtype priority metadeta content uricontent " + "nocase threshold type limit track limit by_src by_dst count seconds distance " + "within depth offset rawbytes http_client_body http_cookie http_raw_cookie " + "http_header http_raw_header http_method http_uri http_raw_uri http_stat_code " + "http_stat_msg http_encode fast_pattern urilen isdataat pcre pkt_data file_data " + "base64_decode base64_data byte_test byte_jump byte_extract ftpbounce asn1 " + "cvs dce_iface dce opnum dce_stub_data sip_method sip_stat_code sip_header " + "sip_body gtp_type gtp_info gtp_version ssl_version ssl_state fragoffset ttl tos id " + "ipopts fragbits dsize flags flow flowbits seq ack window itype icode icmp_id icmp_seq " + "rpc ip_proto sameip stream_reassemble stream_size logto session resp react tag activates " + "activated_by replace detection_filter metadata";
     var BUILTINS = "$AIM_SERVERS $DNS_SERVERS $DNS_SERVERS_AD $EXTERNAL_NET $FILE_DATA_PORTS " + "$GTP_PORTS $HOME_NET $HTTP_PORTS $HTTP_SERVERS $ORACLE_PORTS $SHELLCODE_PORTS " + "$SIP_PORTS $SIP_SERVERS $SMTP_SERVERS $SNMP_SERVERS $SNORT_BPF $SQL_SERVERS " + "$SSH_PORTS $SSH_SERVERS $TELNET_SERVERS";
     var LITERALS = "http any";
@@ -17984,12 +17999,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var snort_1 = snort;
   /*
-  Language: Solidity
-  Author: Kaustav Haldar <khaldar@uwaterloo.ca>
-  Contributors: pospi <pospi@spadgos.com>
-  Category: blockchain
-  Description: Syntax Highlighting for the Solidity Language which is a high-level programming language for the Ethereum blockchain. See http://solidity.readthedocs.io/
-  */  function solidity(hljs) {
+	Language: Solidity
+	Author: Kaustav Haldar <khaldar@uwaterloo.ca>
+	Contributors: pospi <pospi@spadgos.com>
+	Category: blockchain
+	Description: Syntax Highlighting for the Solidity Language which is a high-level programming language for the Ethereum blockchain. See http://solidity.readthedocs.io/
+	*/  function solidity(hljs) {
     var IDENT_RE = "[A-Za-z$_][0-9A-Za-z$_]*";
     var NUMBER = {
       className: "number",
@@ -18052,13 +18067,13 @@ var demo = function(path, fs, url, buffer) {
   }
   var solidity_1 = solidity;
   /*
-  Language: Closure Templates
-  Requires: 
-  Author: Chema Balsas <jbalsas@gmail.com>
-  Contributors: Chema Balsas <jbalsas@gmail.com>
-  Description: A client- and server-side templating system that helps you dynamically build reusable HTML and UI elements
-  Category: template
-  */  function soy(hljs) {
+	Language: Closure Templates
+	Requires: 
+	Author: Chema Balsas <jbalsas@gmail.com>
+	Contributors: Chema Balsas <jbalsas@gmail.com>
+	Description: A client- and server-side templating system that helps you dynamically build reusable HTML and UI elements
+	Category: template
+	*/  function soy(hljs) {
     var TEMPLATE_KEYWORDS = "alias as autoescape call case default delcall else elseif fallbackmsg foreach if ifempty let msg namespace param print switch template";
     // Partial html tag support
         var TAG_INTERNALS = {
@@ -18126,10 +18141,10 @@ var demo = function(path, fs, url, buffer) {
   }
   var soy_1 = soy;
   /*
-  Language: Turtle
-  Author: Mark Ellis <mark.ellis@stardog.com>
-  Category: common
-  */  function ttl(hljs) {
+	Language: Turtle
+	Author: Mark Ellis <mark.ellis@stardog.com>
+	Category: common
+	*/  function ttl(hljs) {
     var KEYWORDS = {
       meta: "base|10 prefix|10 @base|10 @prefix|10",
       literal: "true|0 false|0",
@@ -18193,11 +18208,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var ttl_1 = ttl;
   /*
-  Language: SPARQL
-  Requires: ttl.js
-  Author: Mark Ellis <mark.ellis@stardog.com>
-  Category: common
-  */  function sparql(hljs) {
+	Language: SPARQL
+	Requires: ttl.js
+	Author: Mark Ellis <mark.ellis@stardog.com>
+	Category: common
+	*/  function sparql(hljs) {
     var ttl = hljs.getLanguage("ttl").exports;
     var KEYWORDS = {
       meta: "base|10 prefix|10 @base|10 @prefix|10",
@@ -18215,13 +18230,13 @@ var demo = function(path, fs, url, buffer) {
   }
   var sparql_1 = sparql;
   /*
-  Language: SQF
-  Author: Søren Enevoldsen <senevoldsen90@gmail.com>
-  Contributors: Marvin Saignat <contact@zgmrvn.com>, Dedmen Miller <dedmen@dedmen.de>
-  Description: Scripting language for the Arma game series
-  Website: https://community.bistudio.com/wiki/SQF_syntax
-  Category: scripting
-  */  function sqf(hljs) {
+	Language: SQF
+	Author: Søren Enevoldsen <senevoldsen90@gmail.com>
+	Contributors: Marvin Saignat <contact@zgmrvn.com>, Dedmen Miller <dedmen@dedmen.de>
+	Description: Scripting language for the Arma game series
+	Website: https://community.bistudio.com/wiki/SQF_syntax
+	Category: scripting
+	*/  function sqf(hljs) {
     // In SQF, a variable start with _
     var VARIABLE = {
       className: "variable",
@@ -18289,11 +18304,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var sqf_1 = sqf;
   /*
-   Language: SQL
-   Contributors: Nikolay Lisienko <info@neor.ru>, Heiko August <post@auge8472.de>, Travis Odom <travis.a.odom@gmail.com>, Vadimtro <vadimtro@yahoo.com>, Benjamin Auder <benjamin.auder@gmail.com>
-   Website: https://en.wikipedia.org/wiki/SQL
-   Category: common
-   */  function sql(hljs) {
+	 Language: SQL
+	 Contributors: Nikolay Lisienko <info@neor.ru>, Heiko August <post@auge8472.de>, Travis Odom <travis.a.odom@gmail.com>, Vadimtro <vadimtro@yahoo.com>, Benjamin Auder <benjamin.auder@gmail.com>
+	 Website: https://en.wikipedia.org/wiki/SQL
+	 Category: common
+	 */  function sql(hljs) {
     var COMMENT_MODE = hljs.COMMENT("--", "$");
     return {
       name: "SQL",
@@ -18333,12 +18348,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var sql_1 = sql;
   /*
-   * Language: ST
-   * Author: Sergey Romanov <serg4172@mail.ru>
-   * Category: misc
-   * Home page: http://www.plcopen.org/pages/tc1_standards/
-   * Description: Structured Text - one of the 5 languages of IEC-61131 standard for PLC program development.
-   */  function st(hljs) {
+	 * Language: ST
+	 * Author: Sergey Romanov <serg4172@mail.ru>
+	 * Category: misc
+	 * Home page: http://www.plcopen.org/pages/tc1_standards/
+	 * Description: Structured Text - one of the 5 languages of IEC-61131 standard for PLC program development.
+	 */  function st(hljs) {
     return {
       aliases: [ "stl", "scl", "structured-text" ],
       case_insensitive: true,
@@ -18388,12 +18403,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var st_1 = st;
   /*
-  Language: Stan
-  Description: The Stan probabilistic programming language
-  Author: Jeffrey B. Arnold <jeffrey.arnold@gmail.com>
-  Website: http://mc-stan.org/
-  Category: scientific
-  */  function stan(hljs) {
+	Language: Stan
+	Description: The Stan probabilistic programming language
+	Author: Jeffrey B. Arnold <jeffrey.arnold@gmail.com>
+	Website: http://mc-stan.org/
+	Category: scientific
+	*/  function stan(hljs) {
     // variable names cannot conflict with block identifiers
     var BLOCKS = [ "functions", "model", "data", "parameters", "quantities", "transformed", "generated" ];
     var STATEMENTS = [ "for", "in", "if", "else", "while", "break", "continue", "return" ];
@@ -18456,14 +18471,14 @@ var demo = function(path, fs, url, buffer) {
   }
   var stan_1 = stan;
   /*
-  Language: Stanza
-  Description: Stanza is a type oriented programming language.
-  Author: Jonathan Bachrach <j.bachrach@jitx.com>
-  Contributors: Patrick Li <p.li@jitx.com>
-  Origin: scheme.js
-  Website: http://lbstanza.org/
-  Category: lisp
-  */  function stanza(hljs) {
+	Language: Stanza
+	Description: Stanza is a type oriented programming language.
+	Author: Jonathan Bachrach <j.bachrach@jitx.com>
+	Contributors: Patrick Li <p.li@jitx.com>
+	Origin: scheme.js
+	Website: http://lbstanza.org/
+	Category: lisp
+	*/  function stanza(hljs) {
     var STANZA_IDENT_RE = "[^\\(\\)\\:\\&\\|\\<\\>\\[\\]\\{\\}\",'`;#|\\\\\\s]+";
     var NUMBER = {
       className: "number",
@@ -18529,16 +18544,16 @@ var demo = function(path, fs, url, buffer) {
   }
   var stanza_1 = stanza;
   /*
-  Language: Stata
-  Author: Brian Quistorff <bquistorff@gmail.com>
-  Contributors: Drew McDonald <drewmcdo@gmail.com>
-  Description: Stata is a general-purpose statistical software package created in 1985 by StataCorp.
-  Website: https://en.wikipedia.org/wiki/Stata
-  Category: scientific
-  */
+	Language: Stata
+	Author: Brian Quistorff <bquistorff@gmail.com>
+	Contributors: Drew McDonald <drewmcdo@gmail.com>
+	Description: Stata is a general-purpose statistical software package created in 1985 by StataCorp.
+	Website: https://en.wikipedia.org/wiki/Stata
+	Category: scientific
+	*/
   /*
-    This is a fork and modification of Drew McDonald's file (https://github.com/drewmcdonald/stata-highlighting). I have also included a list of builtin commands from https://bugs.kde.org/show_bug.cgi?id=135646.
-  */  function stata(hljs) {
+	  This is a fork and modification of Drew McDonald's file (https://github.com/drewmcdonald/stata-highlighting). I have also included a list of builtin commands from https://bugs.kde.org/show_bug.cgi?id=135646.
+	*/  function stata(hljs) {
     return {
       name: "Stata",
       aliases: [ "do", "ado" ],
@@ -18567,11 +18582,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var stata_1 = stata;
   /*
-  Language: STEP Part 21
-  Contributors: Adam Joseph Cook <adam.joseph.cook@gmail.com>
-  Description: Syntax highlighter for STEP Part 21 files (ISO 10303-21).
-  Website: https://en.wikipedia.org/wiki/ISO_10303-21
-  */  function step21(hljs) {
+	Language: STEP Part 21
+	Contributors: Adam Joseph Cook <adam.joseph.cook@gmail.com>
+	Description: Syntax highlighter for STEP Part 21 files (ISO 10303-21).
+	Website: https://en.wikipedia.org/wiki/ISO_10303-21
+	*/  function step21(hljs) {
     var STEP21_IDENT_RE = "[A-Z_][A-Z0-9_.]*";
     var STEP21_KEYWORDS = {
       $pattern: STEP21_IDENT_RE,
@@ -18613,12 +18628,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var step21_1 = step21;
   /*
-  Language: Structured Text (IEC 61131-3 ST)
-  Version: 1.0.0
-  Author: Björn Sauer <bjo.sauer@live.de>
-  Contributors:
-  Description: Language definition for IEC 61131-3 ST (Structured Text). Textual PLC programming language.
-  */  function structuredtext(hljs) {
+	Language: Structured Text (IEC 61131-3 ST)
+	Version: 1.0.0
+	Author: Björn Sauer <bjo.sauer@live.de>
+	Contributors:
+	Description: Language definition for IEC 61131-3 ST (Structured Text). Textual PLC programming language.
+	*/  function structuredtext(hljs) {
     var KEYWORDS = "and or xor not exit return continue of case end_case|10 " + "to by end_for for end_while while do loop end_repeat repeat until " + "end_if|10 if then else elsif mod";
     var LITERAL = "true false";
     return {
@@ -18675,12 +18690,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var structuredtext_1 = structuredtext;
   /*
-  Language: Stylus
-  Author: Bryant Williams <b.n.williams@gmail.com>
-  Description: Stylus is an expressive, robust, feature-rich CSS language built for nodejs.
-  Website: https://github.com/stylus/stylus
-  Category: css
-  */  function stylus(hljs) {
+	Language: Stylus
+	Author: Bryant Williams <b.n.williams@gmail.com>
+	Description: Stylus is an expressive, robust, feature-rich CSS language built for nodejs.
+	Website: https://github.com/stylus/stylus
+	Category: css
+	*/  function stylus(hljs) {
     var VARIABLE = {
       className: "variable",
       begin: "\\$" + hljs.IDENT_RE
@@ -18781,10 +18796,10 @@ var demo = function(path, fs, url, buffer) {
   }
   var stylus_1 = stylus;
   /*
-  Language: SubUnit
-  Author: Sergey Bronnikov <sergeyb@bronevichok.ru>
-  Website: https://pypi.org/project/python-subunit/
-  */  function subunit(hljs) {
+	Language: SubUnit
+	Author: Sergey Bronnikov <sergeyb@bronevichok.ru>
+	Website: https://pypi.org/project/python-subunit/
+	*/  function subunit(hljs) {
     var DETAILS = {
       className: "string",
       begin: "\\[\n(multipart)?",
@@ -18819,13 +18834,13 @@ var demo = function(path, fs, url, buffer) {
   }
   var subunit_1 = subunit;
   /*
-  Language: Swift
-  Description: Swift is a general-purpose programming language built using a modern approach to safety, performance, and software design patterns.
-  Author: Chris Eidhof <chris@eidhof.nl>
-  Contributors: Nate Cook <natecook@gmail.com>, Alexander Lichter <manniL@gmx.net>
-  Website: https://swift.org
-  Category: common, system
-  */  function swift(hljs) {
+	Language: Swift
+	Description: Swift is a general-purpose programming language built using a modern approach to safety, performance, and software design patterns.
+	Author: Chris Eidhof <chris@eidhof.nl>
+	Contributors: Nate Cook <natecook@gmail.com>, Alexander Lichter <manniL@gmx.net>
+	Website: https://swift.org
+	Category: common, system
+	*/  function swift(hljs) {
     var SWIFT_KEYWORDS = {
       keyword: "#available #colorLiteral #column #else #elseif #endif #file " + "#fileLiteral #function #if #imageLiteral #line #selector #sourceLocation " + "_ __COLUMN__ __FILE__ __FUNCTION__ __LINE__ Any as as! as? associatedtype " + "associativity break case catch class continue convenience default defer deinit didSet do " + "dynamic dynamicType else enum extension fallthrough false fileprivate final for func " + "get guard if import in indirect infix init inout internal is lazy left let " + "mutating nil none nonmutating open operator optional override postfix precedence " + "prefix private protocol Protocol public repeat required rethrows return " + "right self Self set static struct subscript super switch throw throws true " + "try try! try? Type typealias unowned var weak where while willSet",
       literal: "true false nil",
@@ -18915,11 +18930,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var swift_1 = swift;
   /*
-  Language: Tagger Script
-  Author: Philipp Wolfer <ph.wolfer@gmail.com>
-  Description: Syntax Highlighting for the Tagger Script as used by MusicBrainz Picard.
-  Website: https://picard.musicbrainz.org
-   */  function taggerscript(hljs) {
+	Language: Tagger Script
+	Author: Philipp Wolfer <ph.wolfer@gmail.com>
+	Description: Syntax Highlighting for the Tagger Script as used by MusicBrainz Picard.
+	Website: https://picard.musicbrainz.org
+	 */  function taggerscript(hljs) {
     var COMMENT = {
       className: "comment",
       begin: /\$noop\(/,
@@ -18955,14 +18970,14 @@ var demo = function(path, fs, url, buffer) {
   }
   var taggerscript_1 = taggerscript;
   /*
-  Language: YAML
-  Description: Yet Another Markdown Language
-  Author: Stefan Wienert <stwienert@gmail.com>
-  Contributors: Carl Baxter <carl@cbax.tech>
-  Requires: ruby.js
-  Website: https://yaml.org
-  Category: common, config
-  */  function yaml(hljs) {
+	Language: YAML
+	Description: Yet Another Markdown Language
+	Author: Stefan Wienert <stwienert@gmail.com>
+	Contributors: Carl Baxter <carl@cbax.tech>
+	Requires: ruby.js
+	Website: https://yaml.org
+	Category: common, config
+	*/  function yaml(hljs) {
     var LITERALS = "true false yes no null";
     // YAML spec allows non-reserved URI characters in tags.
         var URI_CHARACTERS = "[\\w#;/?:@&=+$,.~*\\'()[\\]]+";
@@ -19135,12 +19150,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var yaml_1 = yaml;
   /*
-  Language: Test Anything Protocol
-  Description: TAP, the Test Anything Protocol, is a simple text-based interface between testing modules in a test harness.
-  Requires: yaml.js
-  Author: Sergey Bronnikov <sergeyb@bronevichok.ru>
-  Website: https://testanything.org
-  */  function tap(hljs) {
+	Language: Test Anything Protocol
+	Description: TAP, the Test Anything Protocol, is a simple text-based interface between testing modules in a test harness.
+	Requires: yaml.js
+	Author: Sergey Bronnikov <sergeyb@bronevichok.ru>
+	Website: https://testanything.org
+	*/  function tap(hljs) {
     return {
       name: "Test Anything Protocol",
       case_insensitive: true,
@@ -19179,11 +19194,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var tap_1 = tap;
   /*
-  Language: Tcl
-  Description: Tcl is a very simple programming language.
-  Author: Radek Liska <radekliska@gmail.com>
-  Website: https://www.tcl.tk/about/language.html
-  */  function tcl(hljs) {
+	Language: Tcl
+	Description: Tcl is a very simple programming language.
+	Author: Radek Liska <radekliska@gmail.com>
+	Website: https://www.tcl.tk/about/language.html
+	*/  function tcl(hljs) {
     return {
       name: "Tcl",
       aliases: [ "tk" ],
@@ -19222,11 +19237,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var tcl_1 = tcl;
   /*
-  Language: ThingsDB
-  Author: Jeroen van der Heijden <jeroen@transceptor.technology>
-  Category: common, scripting
-  Website: https://thingsdb.net
-  */  function thingsdb(hljs) {
+	Language: ThingsDB
+	Author: Jeroen van der Heijden <jeroen@transceptor.technology>
+	Category: common, scripting
+	Website: https://thingsdb.net
+	*/  function thingsdb(hljs) {
     var SUBST = {
       className: "subst",
       begin: /\{/,
@@ -19316,12 +19331,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var thingsdb_1 = thingsdb;
   /*
-  Language: Thrift
-  Author: Oleg Efimov <efimovov@gmail.com>
-  Description: Thrift message definition format
-  Website: https://thrift.apache.org
-  Category: protocols
-  */  function thrift(hljs) {
+	Language: Thrift
+	Author: Oleg Efimov <efimovov@gmail.com>
+	Description: Thrift message definition format
+	Website: https://thrift.apache.org
+	Category: protocols
+	*/  function thrift(hljs) {
     var BUILT_IN_TYPES = "bool byte i16 i32 i64 double string binary";
     return {
       name: "Thrift",
@@ -19351,10 +19366,10 @@ var demo = function(path, fs, url, buffer) {
   }
   var thrift_1 = thrift;
   /*
-  Language: TLA+
-  Author: All-less <all.less.mail@gmail.com>
-  Category: misc
-  */  function tla(hljs) {
+	Language: TLA+
+	Author: All-less <all.less.mail@gmail.com>
+	Category: misc
+	*/  function tla(hljs) {
     return {
       keywords: {
         keyword: "ASSUME ASSUMPTION AXIOM BOOLEAN CASE CONSTANT CONSTANTS ELSE EXCEPT EXTENDS FALSE " + "IF IN INSTANCE LET LOCAL MODULE OTHER STRING THEN THEOREM LEMMA PROPOSITION COROLLARY " + "TRUE VARIABLE VARIABLES WITH CHOOSE ENABLED UNCHANGED SUBSET UNION DOMAIN BY OBVIOUS " + "HAVE QED TAKE DEF HIDE RECURSIVE USE DEFINE PROOF WITNESS PICK DEFS PROVE SUFFICES " + "NEW LAMBDA STATE ACTION TEMPORAL ONLY OMITTED "
@@ -19366,10 +19381,10 @@ var demo = function(path, fs, url, buffer) {
   }
   var tla_1 = tla;
   /*
-  Language: TP
-  Author: Jay Strybis <jay.strybis@gmail.com>
-  Description: FANUC TP programming language (TPP).
-  */  function tp(hljs) {
+	Language: TP
+	Author: Jay Strybis <jay.strybis@gmail.com>
+	Description: FANUC TP programming language (TPP).
+	*/  function tp(hljs) {
     var TPID = {
       className: "number",
       begin: "[1-9][0-9]*",
@@ -19408,7 +19423,7 @@ var demo = function(path, fs, url, buffer) {
         begin: "(CALL|RUN|POINT_LOGIC|LBL)\\b"
       }, {
         /* this is for cases like CNT100 where the default lexemes do not
-           * separate the keyword and the number */
+	         * separate the keyword and the number */
         className: "keyword",
         begin: "\\b(ACC|CNT|Skip|Offset|PSPD|RT_LD|AP_LD|Tool_Offset)"
       }, {
@@ -19428,10 +19443,10 @@ var demo = function(path, fs, url, buffer) {
   }
   var tp_1 = tp;
   /*
-   Language: Transact-SQL (T-SQL)
-   Authors: David Simner <david.simner@red-gate.com>, Grzegorz Smulko <greg.smulko@red-gate.com>
-   Category: common
-   */  function tsql(hljs) {
+	 Language: Transact-SQL (T-SQL)
+	 Authors: David Simner <david.simner@red-gate.com>, Grzegorz Smulko <greg.smulko@red-gate.com>
+	 Category: common
+	 */  function tsql(hljs) {
     return {
       case_insensitive: true,
       contains: [ {
@@ -19498,13 +19513,13 @@ var demo = function(path, fs, url, buffer) {
   }
   var tsql_1 = tsql;
   /*
-  Language: Twig
-  Requires: xml.js
-  Author: Luke Holder <lukemh@gmail.com>
-  Description: Twig is a templating language for PHP
-  Website: https://twig.symfony.com
-  Category: template
-  */  function twig(hljs) {
+	Language: Twig
+	Requires: xml.js
+	Author: Luke Holder <lukemh@gmail.com>
+	Description: Twig is a templating language for PHP
+	Website: https://twig.symfony.com
+	Category: template
+	*/  function twig(hljs) {
     var PARAMS = {
       className: "params",
       begin: "\\(",
@@ -19570,13 +19585,13 @@ var demo = function(path, fs, url, buffer) {
   const BUILT_IN_VARIABLES = [ "arguments", "this", "super", "console", "window", "document", "localStorage", "module", "global" ];
   const BUILT_INS = [].concat(BUILT_IN_GLOBALS, BUILT_IN_VARIABLES, TYPES, ERROR_TYPES);
   /*
-  Language: TypeScript
-  Author: Panu Horsmalahti <panu.horsmalahti@iki.fi>
-  Contributors: Ike Ku <dempfi@yahoo.com>
-  Description: TypeScript is a strict superset of JavaScript
-  Website: https://www.typescriptlang.org
-  Category: common, scripting
-  */  function typescript(hljs) {
+	Language: TypeScript
+	Author: Panu Horsmalahti <panu.horsmalahti@iki.fi>
+	Contributors: Ike Ku <dempfi@yahoo.com>
+	Description: TypeScript is a strict superset of JavaScript
+	Website: https://www.typescriptlang.org
+	Category: common, scripting
+	*/  function typescript(hljs) {
     var IDENT_RE$1 = IDENT_RE;
     var TYPES = [ "any", "void", "number", "boolean", "string", "object", "never", "enum" ];
     var TS_SPECIFIC_KEYWORDS = [ "type", "namespace", "typedef", "interface", "public", "private", "protected", "implements", "declare", "abstract" ];
@@ -19730,11 +19745,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var typescript_1 = typescript;
   /*
-  Language: Vala
-  Author: Antono Vasiljev <antono.vasiljev@gmail.com>
-  Description: Vala is a new programming language that aims to bring modern programming language features to GNOME developers without imposing any additional runtime requirements and without using a different ABI compared to applications and libraries written in C.
-  Website: https://wiki.gnome.org/Projects/Vala
-  */  function vala(hljs) {
+	Language: Vala
+	Author: Antono Vasiljev <antono.vasiljev@gmail.com>
+	Description: Vala is a new programming language that aims to bring modern programming language features to GNOME developers without imposing any additional runtime requirements and without using a different ABI compared to applications and libraries written in C.
+	Website: https://wiki.gnome.org/Projects/Vala
+	*/  function vala(hljs) {
     return {
       name: "Vala",
       keywords: {
@@ -19776,11 +19791,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var vala_1 = vala;
   /*
-  Language: Visual Basic .NET
-  Description: Visual Basic .NET (VB.NET) is a multi-paradigm, object-oriented programming language, implemented on the .NET Framework.
-  Author: Poren Chiang <ren.chiang@gmail.com>
-  Website: https://docs.microsoft.com/en-us/dotnet/visual-basic/getting-started/
-  */  function vbnet(hljs) {
+	Language: Visual Basic .NET
+	Description: Visual Basic .NET (VB.NET) is a multi-paradigm, object-oriented programming language, implemented on the .NET Framework.
+	Author: Poren Chiang <ren.chiang@gmail.com>
+	Website: https://docs.microsoft.com/en-us/dotnet/visual-basic/getting-started/
+	*/  function vbnet(hljs) {
     return {
       name: "Visual Basic .NET",
       aliases: [ "vb" ],
@@ -19834,13 +19849,13 @@ var demo = function(path, fs, url, buffer) {
   }
   var vbnet_1 = vbnet;
   /*
-  Language: VBScript
-  Description: VBScript ("Microsoft Visual Basic Scripting Edition") is an Active Scripting language developed by Microsoft that is modeled on Visual Basic.
-  Author: Nikita Ledyaev <lenikita@yandex.ru>
-  Contributors: Michal Gabrukiewicz <mgabru@gmail.com>
-  Website: https://en.wikipedia.org/wiki/VBScript
-  Category: scripting
-  */  function vbscript(hljs) {
+	Language: VBScript
+	Description: VBScript ("Microsoft Visual Basic Scripting Edition") is an Active Scripting language developed by Microsoft that is modeled on Visual Basic.
+	Author: Nikita Ledyaev <lenikita@yandex.ru>
+	Contributors: Michal Gabrukiewicz <mgabru@gmail.com>
+	Website: https://en.wikipedia.org/wiki/VBScript
+	Category: scripting
+	*/  function vbscript(hljs) {
     return {
       name: "VBScript",
       aliases: [ "vbs" ],
@@ -19862,13 +19877,13 @@ var demo = function(path, fs, url, buffer) {
   }
   var vbscript_1 = vbscript;
   /*
-  Language: VBScript in HTML
-  Requires: xml.js, vbscript.js
-  Author: Ivan Sagalaev <maniac@softwaremaniacs.org>
-  Description: "Bridge" language defining fragments of VBScript in HTML within <% .. %>
-  Website: https://en.wikipedia.org/wiki/VBScript
-  Category: scripting
-  */  function vbscriptHtml(hljs) {
+	Language: VBScript in HTML
+	Requires: xml.js, vbscript.js
+	Author: Ivan Sagalaev <maniac@softwaremaniacs.org>
+	Description: "Bridge" language defining fragments of VBScript in HTML within <% .. %>
+	Website: https://en.wikipedia.org/wiki/VBScript
+	Category: scripting
+	*/  function vbscriptHtml(hljs) {
     return {
       name: "VBScript in HTML",
       subLanguage: "xml",
@@ -19881,12 +19896,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var vbscriptHtml_1 = vbscriptHtml;
   /*
-  Language: Verilog
-  Author: Jon Evans <jon@craftyjon.com>
-  Contributors: Boone Severson <boone.severson@gmail.com>
-  Description: Verilog is a hardware description language used in electronic design automation to describe digital and mixed-signal systems. This highlighter supports Verilog and SystemVerilog through IEEE 1800-2012.
-  Website: http://www.verilog.com
-  */  function verilog(hljs) {
+	Language: Verilog
+	Author: Jon Evans <jon@craftyjon.com>
+	Contributors: Boone Severson <boone.severson@gmail.com>
+	Description: Verilog is a hardware description language used in electronic design automation to describe digital and mixed-signal systems. This highlighter supports Verilog and SystemVerilog through IEEE 1800-2012.
+	Website: http://www.verilog.com
+	*/  function verilog(hljs) {
     var SV_KEYWORDS = {
       $pattern: /[\w\$]+/,
       keyword: "accept_on alias always always_comb always_ff always_latch and assert assign " + "assume automatic before begin bind bins binsof bit break buf|0 bufif0 bufif1 " + "byte case casex casez cell chandle checker class clocking cmos config const " + "constraint context continue cover covergroup coverpoint cross deassign default " + "defparam design disable dist do edge else end endcase endchecker endclass " + "endclocking endconfig endfunction endgenerate endgroup endinterface endmodule " + "endpackage endprimitive endprogram endproperty endspecify endsequence endtable " + "endtask enum event eventually expect export extends extern final first_match for " + "force foreach forever fork forkjoin function generate|5 genvar global highz0 highz1 " + "if iff ifnone ignore_bins illegal_bins implements implies import incdir include " + "initial inout input inside instance int integer interconnect interface intersect " + "join join_any join_none large let liblist library local localparam logic longint " + "macromodule matches medium modport module nand negedge nettype new nexttime nmos " + "nor noshowcancelled not notif0 notif1 or output package packed parameter pmos " + "posedge primitive priority program property protected pull0 pull1 pulldown pullup " + "pulsestyle_ondetect pulsestyle_onevent pure rand randc randcase randsequence rcmos " + "real realtime ref reg reject_on release repeat restrict return rnmos rpmos rtran " + "rtranif0 rtranif1 s_always s_eventually s_nexttime s_until s_until_with scalared " + "sequence shortint shortreal showcancelled signed small soft solve specify specparam " + "static string strong strong0 strong1 struct super supply0 supply1 sync_accept_on " + "sync_reject_on table tagged task this throughout time timeprecision timeunit tran " + "tranif0 tranif1 tri tri0 tri1 triand trior trireg type typedef union unique unique0 " + "unsigned until until_with untyped use uwire var vectored virtual void wait wait_order " + "wand weak weak0 weak1 while wildcard wire with within wor xnor xor",
@@ -19933,12 +19948,12 @@ var demo = function(path, fs, url, buffer) {
     }
   var verilog_1 = verilog;
   /*
-  Language: VHDL
-  Author: Igor Kalnitsky <igor@kalnitsky.org>
-  Contributors: Daniel C.K. Kho <daniel.kho@tauhop.com>, Guillaume Savaton <guillaume.savaton@eseo.fr>
-  Description: VHDL is a hardware description language used in electronic design automation to describe digital and mixed-signal systems.
-  Website: https://en.wikipedia.org/wiki/VHDL
-  */  function vhdl(hljs) {
+	Language: VHDL
+	Author: Igor Kalnitsky <igor@kalnitsky.org>
+	Contributors: Daniel C.K. Kho <daniel.kho@tauhop.com>, Guillaume Savaton <guillaume.savaton@eseo.fr>
+	Description: VHDL is a hardware description language used in electronic design automation to describe digital and mixed-signal systems.
+	Website: https://en.wikipedia.org/wiki/VHDL
+	*/  function vhdl(hljs) {
     // Regular expression for VHDL numeric literals.
     // Decimal literal:
     var INTEGER_RE = "\\d(_|\\d)*";
@@ -19976,12 +19991,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var vhdl_1 = vhdl;
   /*
-  Language: Vim Script
-  Author: Jun Yang <yangjvn@126.com>
-  Description: full keyword and built-in from http://vimdoc.sourceforge.net/htmldoc/
-  Website: https://www.vim.org
-  Category: scripting
-  */  function vim(hljs) {
+	Language: Vim Script
+	Author: Jun Yang <yangjvn@126.com>
+	Description: full keyword and built-in from http://vimdoc.sourceforge.net/htmldoc/
+	Website: https://www.vim.org
+	Category: scripting
+	*/  function vim(hljs) {
     return {
       name: "Vim Script",
       keywords: {
@@ -20002,15 +20017,15 @@ var demo = function(path, fs, url, buffer) {
         illegal: "\\n"
       }, 
       /*
-        A double quote can start either a string or a line comment. Strings are
-        ended before the end of a line by another double quote and can contain
-        escaped double-quotes and post-escaped line breaks.
+	      A double quote can start either a string or a line comment. Strings are
+	      ended before the end of a line by another double quote and can contain
+	      escaped double-quotes and post-escaped line breaks.
 
-        Also, any double quote at the beginning of a line is a comment but we
-        don't handle that properly at the moment: any double quote inside will
-        turn them into a string. Handling it properly will require a smarter
-        parser.
-        */
+	      Also, any double quote at the beginning of a line is a comment but we
+	      don't handle that properly at the moment: any double quote inside will
+	      turn them into a string. Handling it properly will require a smarter
+	      parser.
+	      */
       {
         className: "string",
         begin: /"(\\"|\n\\|[^"\n])*"/
@@ -20035,11 +20050,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var vim_1 = vim;
   /*
-  Language: Web Assembly
-  Author: Rasmus Andersson <rsms.me>
-  Description: Web Assembly version MVP-13 (RC for v1)
-  Category: assembler
-  */  function wasm(hljs) {
+	Language: Web Assembly
+	Author: Rasmus Andersson <rsms.me>
+	Description: Web Assembly version MVP-13 (RC for v1)
+	Category: assembler
+	*/  function wasm(hljs) {
     var KEYWORDS = {
       keyword: 
       // special "unreachable" that is kind of like branching (trap & crash)
@@ -20076,12 +20091,12 @@ var demo = function(path, fs, url, buffer) {
   }
   var wasm_1 = wasm;
   /*
-  Language: Intel x86 Assembly
-  Author: innocenat <innocenat@gmail.com>
-  Description: x86 assembly language using Intel's mnemonic and NASM syntax
-  Website: https://en.wikipedia.org/wiki/X86_assembly_language
-  Category: assembler
-  */  function x86asm(hljs) {
+	Language: Intel x86 Assembly
+	Author: innocenat <innocenat@gmail.com>
+	Description: x86 assembly language using Intel's mnemonic and NASM syntax
+	Website: https://en.wikipedia.org/wiki/X86_assembly_language
+	Category: assembler
+	*/  function x86asm(hljs) {
     return {
       name: "Intel x86 Assembly",
       case_insensitive: true,
@@ -20192,11 +20207,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var x86asm_1 = x86asm;
   /*
-  Language: XL
-  Author: Christophe de Dinechin <christophe@taodyne.com>
-  Description: An extensible programming language, based on parse tree rewriting
-  Website: http://xlr.sf.net
-  */  function xl(hljs) {
+	Language: XL
+	Author: Christophe de Dinechin <christophe@taodyne.com>
+	Description: An extensible programming language, based on parse tree rewriting
+	Website: http://xlr.sf.net
+	*/  function xl(hljs) {
     var BUILTIN_MODULES = "ObjectLoader Animate MovieCredits Slides Filters Shading Materials LensFlare Mapping VLCAudioVideo " + "StereoDecoder PointCloud NetworkAccess RemoteControl RegExp ChromaKey Snowfall NodeJS Speech Charts";
     var XL_KEYWORDS = {
       $pattern: /[a-zA-Z][a-zA-Z0-9_?]*/,
@@ -20252,14 +20267,14 @@ var demo = function(path, fs, url, buffer) {
   }
   var xl_1 = xl;
   /*
-  Language: XQuery
-  Author: Dirk Kirsten <dk@basex.org>
-  Contributor: Duncan Paterson
-  Description: Supports XQuery 3.1 including XQuery Update 3, so also XPath (as it is a superset)
-  Refactored to process xml constructor syntax and function-bodies. Added missing data-types, xpath operands, inbuilt functions, and query prologs
-  Website: https://www.w3.org/XML/Query/
-  Category: functional
-  */  function xquery(hljs) {
+	Language: XQuery
+	Author: Dirk Kirsten <dk@basex.org>
+	Contributor: Duncan Paterson
+	Description: Supports XQuery 3.1 including XQuery Update 3, so also XPath (as it is a superset)
+	Refactored to process xml constructor syntax and function-bodies. Added missing data-types, xpath operands, inbuilt functions, and query prologs
+	Website: https://www.w3.org/XML/Query/
+	Category: functional
+	*/  function xquery(hljs) {
     // see https://www.w3.org/TR/xquery/#id-terminal-delimitation
     var KEYWORDS = "module schema namespace boundary-space preserve no-preserve strip default collation base-uri ordering context decimal-format decimal-separator copy-namespaces empty-sequence except exponent-separator external grouping-separator inherit no-inherit lax minus-sign per-mille percent schema-attribute schema-element strict unordered zero-digit " + "declare import option function validate variable " + "for at in let where order group by return if then else " + "tumbling sliding window start when only end previous next stable " + "ascending descending allowing empty greatest least some every satisfies switch case typeswitch try catch " + "and or to union intersect instance of treat as castable cast map array " + "delete insert into replace value rename copy modify update";
     // Node Types (sorted by inheritance)
@@ -20385,11 +20400,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var xquery_1 = xquery;
   /*
-  Language: Yara
-  Author: Kiran Tambe <kiran.tambe08@gmail.com>
-  Description: The pattern matching swiss knife http://virustotal.github.io/yara//
-  Category: security
-  */  function yara(hljs) {
+	Language: Yara
+	Author: Kiran Tambe <kiran.tambe08@gmail.com>
+	Description: The pattern matching swiss knife http://virustotal.github.io/yara//
+	Category: security
+	*/  function yara(hljs) {
     var YARA_KEYWORDS = {
       keyword: "all and any ascii at condition contains entrypoint false filesize " + "fullword for global in import include int8 int16 int32 int8be int16be " + "int32be matches meta nocase not or of private rule strings them true " + "uint8 uint16 uint32 uint8be uint16be uint32be wide",
       literal: "true false"
@@ -20415,11 +20430,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var yara_1 = yara;
   /*
-  Language: z80 Assembly
-  Author: Eldred Habert <eldredhabert0@gmail.com>
-  Description: Stock Z80 Assembly using TASM syntax
-  Category: assembler
-  */  function z80asm(hljs) {
+	Language: z80 Assembly
+	Author: Eldred Habert <eldredhabert0@gmail.com>
+	Description: Stock Z80 Assembly using TASM syntax
+	Category: assembler
+	*/  function z80asm(hljs) {
     return {
       case_insensitive: true,
       aliases: [ "z80" ],
@@ -20459,11 +20474,11 @@ var demo = function(path, fs, url, buffer) {
   }
   var z80asm_1 = z80asm;
   /*
-   Language: Zephir
-   Description: Zephir, an open source, high-level language designed to ease the creation and maintainability of extensions for PHP with a focus on type and memory safety.
-   Author: Oleg Efimov <efimovov@gmail.com>
-   Website: https://zephir-lang.com/en
-   */  function zephir(hljs) {
+	 Language: Zephir
+	 Description: Zephir, an open source, high-level language designed to ease the creation and maintainability of extensions for PHP with a focus on type and memory safety.
+	 Author: Oleg Efimov <efimovov@gmail.com>
+	 Website: https://zephir-lang.com/en
+	 */  function zephir(hljs) {
     var STRING = {
       className: "string",
       contains: [ hljs.BACKSLASH_ESCAPE ],
@@ -20551,264 +20566,265 @@ var demo = function(path, fs, url, buffer) {
     };
   }
   var zephir_1 = zephir;
-  core.registerLanguage("1c", _1c_1);
-  core.registerLanguage("abap", abap_1);
-  core.registerLanguage("abc", abc_1);
-  core.registerLanguage("abnf", abnf_1);
-  core.registerLanguage("accesslog", accesslog_1);
-  core.registerLanguage("actionscript", actionscript_1);
-  core.registerLanguage("ada", ada_1);
-  core.registerLanguage("angelscript", angelscript_1);
-  core.registerLanguage("antlr", antlr_1);
-  core.registerLanguage("apache", apache_1);
-  core.registerLanguage("applescript", applescript_1);
-  core.registerLanguage("arcade", arcade_1);
-  core.registerLanguage("c-like", cLike_1);
-  core.registerLanguage("cpp", cpp_1);
-  core.registerLanguage("arduino", arduino_1);
-  core.registerLanguage("armasm", armasm_1);
-  core.registerLanguage("xml", xml_1);
-  core.registerLanguage("asciidoc", asciidoc_1);
-  core.registerLanguage("aspectj", aspectj_1);
-  core.registerLanguage("ats", ats_1);
-  core.registerLanguage("autohotkey", autohotkey_1);
-  core.registerLanguage("autoit", autoit_1);
-  core.registerLanguage("avrasm", avrasm_1);
-  core.registerLanguage("awk", awk_1);
-  core.registerLanguage("axapta", axapta_1);
-  core.registerLanguage("azurecli", azurecli_1);
-  core.registerLanguage("ballerina", ballerina_1);
-  core.registerLanguage("bash", bash_1);
-  core.registerLanguage("basic", basic_1);
-  core.registerLanguage("beancount", beancount_1);
-  core.registerLanguage("bnf", bnf_1);
-  core.registerLanguage("botlang", botlang_1);
-  core.registerLanguage("brainfuck", brainfuck_1);
-  core.registerLanguage("c", c_1);
-  core.registerLanguage("cal", cal_1);
-  core.registerLanguage("capnproto", capnproto_1);
-  core.registerLanguage("ceylon", ceylon_1);
-  core.registerLanguage("clean", clean_1);
-  core.registerLanguage("clojure", clojure_1);
-  core.registerLanguage("clojure-repl", clojureRepl_1);
-  core.registerLanguage("cmake", cmake_1);
-  core.registerLanguage("coffeescript", coffeescript_1);
-  core.registerLanguage("coq", coq_1);
-  core.registerLanguage("cos", cos_1);
-  core.registerLanguage("crmsh", crmsh_1);
-  core.registerLanguage("crystal", crystal_1);
-  core.registerLanguage("csharp", csharp_1);
-  core.registerLanguage("cshtml", cshtml_1);
-  core.registerLanguage("csp", csp_1);
-  core.registerLanguage("css", css_1);
-  core.registerLanguage("cypher", cypher_1);
-  core.registerLanguage("d", d_1);
-  core.registerLanguage("markdown", markdown_1);
-  core.registerLanguage("dart", dart_1);
-  core.registerLanguage("dax", dax_1);
-  core.registerLanguage("dbase", dbase_1);
-  core.registerLanguage("delphi", delphi_1);
-  core.registerLanguage("diff", diff_1);
-  core.registerLanguage("django", django_1);
-  core.registerLanguage("dns", dns_1);
-  core.registerLanguage("dockerfile", dockerfile_1);
-  core.registerLanguage("dos", dos_1);
-  core.registerLanguage("dsconfig", dsconfig_1);
-  core.registerLanguage("dts", dts_1);
-  core.registerLanguage("dust", dust_1);
-  core.registerLanguage("ebnf", ebnf_1);
-  core.registerLanguage("elixir", elixir_1);
-  core.registerLanguage("elm", elm_1);
-  core.registerLanguage("puppet", puppet_1);
-  core.registerLanguage("epp", epp_1);
-  core.registerLanguage("ruby", ruby_1);
-  core.registerLanguage("erb", erb_1);
-  core.registerLanguage("erlang-repl", erlangRepl_1);
-  core.registerLanguage("erlang", erlang_1);
-  core.registerLanguage("excel", excel_1);
-  core.registerLanguage("fasm", fasm_1);
-  core.registerLanguage("fix", fix_1);
-  core.registerLanguage("flix", flix_1);
-  core.registerLanguage("fortran", fortran_1);
-  core.registerLanguage("fsharp", fsharp_1);
-  core.registerLanguage("gams", gams_1);
-  core.registerLanguage("gauss", gauss_1);
-  core.registerLanguage("gcode", gcode_1);
-  core.registerLanguage("gdscript", gdscript_1);
-  core.registerLanguage("gherkin", gherkin_1);
-  core.registerLanguage("glsl", glsl_1);
-  core.registerLanguage("gml", gml_1);
-  core.registerLanguage("gmod_wire_e2", gmod_wire_e2_1);
-  core.registerLanguage("go", go_1);
-  core.registerLanguage("golo", golo_1);
-  core.registerLanguage("gradle", gradle_1);
-  core.registerLanguage("graphql", graphql_1);
-  core.registerLanguage("groovy", groovy_1);
-  core.registerLanguage("hakaru", hakaru_1);
-  core.registerLanguage("haml", haml_1);
-  core.registerLanguage("handlebars", handlebars_1);
-  core.registerLanguage("haskell", haskell_1);
-  core.registerLanguage("haxe", haxe_1);
-  core.registerLanguage("hcl", hcl_1);
-  core.registerLanguage("hsp", hsp_1);
-  core.registerLanguage("http", http_1);
-  core.registerLanguage("hy", hy_1);
-  core.registerLanguage("ibmuim", ibmuim_1);
-  core.registerLanguage("igorpro", igorpro_1);
-  core.registerLanguage("inform7", inform7_1);
-  core.registerLanguage("ini", ini_1);
-  core.registerLanguage("ion", ion_1);
-  core.registerLanguage("irc", irc_1);
-  core.registerLanguage("irpf90", irpf90_1);
-  core.registerLanguage("isbl", isbl_1);
-  core.registerLanguage("jade", jade_1);
-  core.registerLanguage("jam", jam_1);
-  core.registerLanguage("java", java_1);
-  core.registerLanguage("javascript", javascript_1);
-  core.registerLanguage("jboss-cli", jbossCli_1);
-  core.registerLanguage("json", json_1);
-  core.registerLanguage("julia", julia_1);
-  core.registerLanguage("julia-repl", juliaRepl_1);
-  core.registerLanguage("kotlin", kotlin_1);
-  core.registerLanguage("kusto", kusto_1);
-  core.registerLanguage("lasso", lasso_1);
-  core.registerLanguage("latex", latex_1);
-  core.registerLanguage("ldif", ldif_1);
-  core.registerLanguage("leaf", leaf_1);
-  core.registerLanguage("lean", lean_1);
-  core.registerLanguage("less", less_1);
-  core.registerLanguage("lisp", lisp_1);
-  core.registerLanguage("livecodeserver", livecodeserver_1);
-  core.registerLanguage("livescript", livescript_1);
-  core.registerLanguage("llvm", llvm_1);
-  core.registerLanguage("logtalk", logtalk_1);
-  core.registerLanguage("lsl", lsl_1);
-  core.registerLanguage("lua", lua_1);
-  core.registerLanguage("makefile", makefile_1);
-  core.registerLanguage("mathematica", mathematica_1);
-  core.registerLanguage("matlab", matlab_1);
-  core.registerLanguage("maxima", maxima_1);
-  core.registerLanguage("mel", mel_1);
-  core.registerLanguage("mercury", mercury_1);
-  core.registerLanguage("metasploit", metasploit_1);
-  core.registerLanguage("mint", mint_1);
-  core.registerLanguage("mipsasm", mipsasm_1);
-  core.registerLanguage("mizar", mizar_1);
-  core.registerLanguage("perl", perl_1);
-  core.registerLanguage("mojolicious", mojolicious_1);
-  core.registerLanguage("monkey", monkey_1);
-  core.registerLanguage("moonscript", moonscript_1);
-  core.registerLanguage("mumps", mumps_1);
-  core.registerLanguage("mun", mun_1);
-  core.registerLanguage("n1ql", n1ql_1);
-  core.registerLanguage("nginx", nginx_1);
-  core.registerLanguage("nim", nim_1);
-  core.registerLanguage("nix", nix_1);
-  core.registerLanguage("nsis", nsis_1);
-  core.registerLanguage("objectivec", objectivec_1);
-  core.registerLanguage("ocaml", ocaml_1);
-  core.registerLanguage("odata", odata_1);
-  core.registerLanguage("openscad", openscad_1);
-  core.registerLanguage("orgmode", orgmode_1);
-  core.registerLanguage("osl", osl_1);
-  core.registerLanguage("oxygene", oxygene_1);
-  core.registerLanguage("oz", oz_1);
-  core.registerLanguage("parser3", parser3_1);
-  core.registerLanguage("pf", pf_1);
-  core.registerLanguage("pgsql", pgsql_1);
-  core.registerLanguage("php", php_1);
-  core.registerLanguage("php-template", phpTemplate_1);
-  core.registerLanguage("pine-type", pineType_1);
-  core.registerLanguage("pine", pine_1);
-  core.registerLanguage("plaintext", plaintext_1);
-  core.registerLanguage("pony", pony_1);
-  core.registerLanguage("portugol", portugol_1);
-  core.registerLanguage("powershell", powershell_1);
-  core.registerLanguage("processing", processing_1);
-  core.registerLanguage("profile", profile_1);
-  core.registerLanguage("prolog", prolog_1);
-  core.registerLanguage("properties", properties_1);
-  core.registerLanguage("protobuf", protobuf_1);
-  core.registerLanguage("pug", pug_1);
-  core.registerLanguage("purebasic", purebasic_1);
-  core.registerLanguage("python", python_1);
-  core.registerLanguage("python-repl", pythonRepl_1);
-  core.registerLanguage("q", q_1);
-  core.registerLanguage("qml", qml_1);
-  core.registerLanguage("r", r_1);
-  core.registerLanguage("razor", razor_1);
-  core.registerLanguage("reasonml", reasonml_1);
-  core.registerLanguage("rib", rib_1);
-  core.registerLanguage("riscvasm", riscvasm_1);
-  core.registerLanguage("roboconf", roboconf_1);
-  core.registerLanguage("robotframework", robotframework_1);
-  core.registerLanguage("routeros", routeros_1);
-  core.registerLanguage("rsl", rsl_1);
-  core.registerLanguage("ruleslanguage", ruleslanguage_1);
-  core.registerLanguage("rust", rust_1);
-  core.registerLanguage("sas", sas_1);
-  core.registerLanguage("scala", scala_1);
-  core.registerLanguage("scheme", scheme_1);
-  core.registerLanguage("scilab", scilab_1);
-  core.registerLanguage("scss", scss_1);
-  core.registerLanguage("shell", shell_1);
-  core.registerLanguage("smali", smali_1);
-  core.registerLanguage("smalltalk", smalltalk_1);
-  core.registerLanguage("sml", sml_1);
-  core.registerLanguage("snort", snort_1);
-  core.registerLanguage("solidity", solidity_1);
-  core.registerLanguage("soy", soy_1);
-  core.registerLanguage("ttl", ttl_1);
-  core.registerLanguage("sparql", sparql_1);
-  core.registerLanguage("sqf", sqf_1);
-  core.registerLanguage("sql", sql_1);
-  core.registerLanguage("st", st_1);
-  core.registerLanguage("stan", stan_1);
-  core.registerLanguage("stanza", stanza_1);
-  core.registerLanguage("stata", stata_1);
-  core.registerLanguage("step21", step21_1);
-  core.registerLanguage("structuredtext", structuredtext_1);
-  core.registerLanguage("stylus", stylus_1);
-  core.registerLanguage("subunit", subunit_1);
-  core.registerLanguage("swift", swift_1);
-  core.registerLanguage("taggerscript", taggerscript_1);
-  core.registerLanguage("yaml", yaml_1);
-  core.registerLanguage("tap", tap_1);
-  core.registerLanguage("tcl", tcl_1);
-  core.registerLanguage("thingsdb", thingsdb_1);
-  core.registerLanguage("thrift", thrift_1);
-  core.registerLanguage("tla", tla_1);
-  core.registerLanguage("tp", tp_1);
-  core.registerLanguage("tsql", tsql_1);
-  core.registerLanguage("twig", twig_1);
-  core.registerLanguage("typescript", typescript_1);
-  core.registerLanguage("vala", vala_1);
-  core.registerLanguage("vbnet", vbnet_1);
-  core.registerLanguage("vbscript", vbscript_1);
-  core.registerLanguage("vbscript-html", vbscriptHtml_1);
-  core.registerLanguage("verilog", verilog_1);
-  core.registerLanguage("vhdl", vhdl_1);
-  core.registerLanguage("vim", vim_1);
-  core.registerLanguage("wasm", wasm_1);
-  core.registerLanguage("x86asm", x86asm_1);
-  core.registerLanguage("xl", xl_1);
-  core.registerLanguage("xquery", xquery_1);
-  core.registerLanguage("yara", yara_1);
-  core.registerLanguage("z80asm", z80asm_1);
-  core.registerLanguage("zephir", zephir_1);
-  var lib = core;
+  var hljs$2 = core;
+  hljs$2.registerLanguage("1c", _1c_1);
+  hljs$2.registerLanguage("abap", abap_1);
+  hljs$2.registerLanguage("abc", abc_1);
+  hljs$2.registerLanguage("abnf", abnf_1);
+  hljs$2.registerLanguage("accesslog", accesslog_1);
+  hljs$2.registerLanguage("actionscript", actionscript_1);
+  hljs$2.registerLanguage("ada", ada_1);
+  hljs$2.registerLanguage("angelscript", angelscript_1);
+  hljs$2.registerLanguage("antlr", antlr_1);
+  hljs$2.registerLanguage("apache", apache_1);
+  hljs$2.registerLanguage("applescript", applescript_1);
+  hljs$2.registerLanguage("arcade", arcade_1);
+  hljs$2.registerLanguage("c-like", cLike_1);
+  hljs$2.registerLanguage("cpp", cpp_1);
+  hljs$2.registerLanguage("arduino", arduino_1);
+  hljs$2.registerLanguage("armasm", armasm_1);
+  hljs$2.registerLanguage("xml", xml_1);
+  hljs$2.registerLanguage("asciidoc", asciidoc_1);
+  hljs$2.registerLanguage("aspectj", aspectj_1);
+  hljs$2.registerLanguage("ats", ats_1);
+  hljs$2.registerLanguage("autohotkey", autohotkey_1);
+  hljs$2.registerLanguage("autoit", autoit_1);
+  hljs$2.registerLanguage("avrasm", avrasm_1);
+  hljs$2.registerLanguage("awk", awk_1);
+  hljs$2.registerLanguage("axapta", axapta_1);
+  hljs$2.registerLanguage("azurecli", azurecli_1);
+  hljs$2.registerLanguage("ballerina", ballerina_1);
+  hljs$2.registerLanguage("bash", bash_1);
+  hljs$2.registerLanguage("basic", basic_1);
+  hljs$2.registerLanguage("beancount", beancount_1);
+  hljs$2.registerLanguage("bnf", bnf_1);
+  hljs$2.registerLanguage("botlang", botlang_1);
+  hljs$2.registerLanguage("brainfuck", brainfuck_1);
+  hljs$2.registerLanguage("c", c_1);
+  hljs$2.registerLanguage("cal", cal_1);
+  hljs$2.registerLanguage("capnproto", capnproto_1);
+  hljs$2.registerLanguage("ceylon", ceylon_1);
+  hljs$2.registerLanguage("clean", clean_1);
+  hljs$2.registerLanguage("clojure", clojure_1);
+  hljs$2.registerLanguage("clojure-repl", clojureRepl_1);
+  hljs$2.registerLanguage("cmake", cmake_1);
+  hljs$2.registerLanguage("coffeescript", coffeescript_1);
+  hljs$2.registerLanguage("coq", coq_1);
+  hljs$2.registerLanguage("cos", cos_1);
+  hljs$2.registerLanguage("crmsh", crmsh_1);
+  hljs$2.registerLanguage("crystal", crystal_1);
+  hljs$2.registerLanguage("csharp", csharp_1);
+  hljs$2.registerLanguage("cshtml", cshtml_1);
+  hljs$2.registerLanguage("csp", csp_1);
+  hljs$2.registerLanguage("css", css_1);
+  hljs$2.registerLanguage("cypher", cypher_1);
+  hljs$2.registerLanguage("d", d_1);
+  hljs$2.registerLanguage("markdown", markdown_1);
+  hljs$2.registerLanguage("dart", dart_1);
+  hljs$2.registerLanguage("dax", dax_1);
+  hljs$2.registerLanguage("dbase", dbase_1);
+  hljs$2.registerLanguage("delphi", delphi_1);
+  hljs$2.registerLanguage("diff", diff_1);
+  hljs$2.registerLanguage("django", django_1);
+  hljs$2.registerLanguage("dns", dns_1);
+  hljs$2.registerLanguage("dockerfile", dockerfile_1);
+  hljs$2.registerLanguage("dos", dos_1);
+  hljs$2.registerLanguage("dsconfig", dsconfig_1);
+  hljs$2.registerLanguage("dts", dts_1);
+  hljs$2.registerLanguage("dust", dust_1);
+  hljs$2.registerLanguage("ebnf", ebnf_1);
+  hljs$2.registerLanguage("elixir", elixir_1);
+  hljs$2.registerLanguage("elm", elm_1);
+  hljs$2.registerLanguage("puppet", puppet_1);
+  hljs$2.registerLanguage("epp", epp_1);
+  hljs$2.registerLanguage("ruby", ruby_1);
+  hljs$2.registerLanguage("erb", erb_1);
+  hljs$2.registerLanguage("erlang-repl", erlangRepl_1);
+  hljs$2.registerLanguage("erlang", erlang_1);
+  hljs$2.registerLanguage("excel", excel_1);
+  hljs$2.registerLanguage("fasm", fasm_1);
+  hljs$2.registerLanguage("fix", fix_1);
+  hljs$2.registerLanguage("flix", flix_1);
+  hljs$2.registerLanguage("fortran", fortran_1);
+  hljs$2.registerLanguage("fsharp", fsharp_1);
+  hljs$2.registerLanguage("gams", gams_1);
+  hljs$2.registerLanguage("gauss", gauss_1);
+  hljs$2.registerLanguage("gcode", gcode_1);
+  hljs$2.registerLanguage("gdscript", gdscript_1);
+  hljs$2.registerLanguage("gherkin", gherkin_1);
+  hljs$2.registerLanguage("glsl", glsl_1);
+  hljs$2.registerLanguage("gml", gml_1);
+  hljs$2.registerLanguage("gmod_wire_e2", gmod_wire_e2_1);
+  hljs$2.registerLanguage("go", go_1);
+  hljs$2.registerLanguage("golo", golo_1);
+  hljs$2.registerLanguage("gradle", gradle_1);
+  hljs$2.registerLanguage("graphql", graphql_1);
+  hljs$2.registerLanguage("groovy", groovy_1);
+  hljs$2.registerLanguage("hakaru", hakaru_1);
+  hljs$2.registerLanguage("haml", haml_1);
+  hljs$2.registerLanguage("handlebars", handlebars_1);
+  hljs$2.registerLanguage("haskell", haskell_1);
+  hljs$2.registerLanguage("haxe", haxe_1);
+  hljs$2.registerLanguage("hcl", hcl_1);
+  hljs$2.registerLanguage("hsp", hsp_1);
+  hljs$2.registerLanguage("http", http_1);
+  hljs$2.registerLanguage("hy", hy_1);
+  hljs$2.registerLanguage("ibmuim", ibmuim_1);
+  hljs$2.registerLanguage("igorpro", igorpro_1);
+  hljs$2.registerLanguage("inform7", inform7_1);
+  hljs$2.registerLanguage("ini", ini_1);
+  hljs$2.registerLanguage("ion", ion_1);
+  hljs$2.registerLanguage("irc", irc_1);
+  hljs$2.registerLanguage("irpf90", irpf90_1);
+  hljs$2.registerLanguage("isbl", isbl_1);
+  hljs$2.registerLanguage("jade", jade_1);
+  hljs$2.registerLanguage("jam", jam_1);
+  hljs$2.registerLanguage("java", java_1);
+  hljs$2.registerLanguage("javascript", javascript_1);
+  hljs$2.registerLanguage("jboss-cli", jbossCli_1);
+  hljs$2.registerLanguage("json", json_1);
+  hljs$2.registerLanguage("julia", julia_1);
+  hljs$2.registerLanguage("julia-repl", juliaRepl_1);
+  hljs$2.registerLanguage("kotlin", kotlin_1);
+  hljs$2.registerLanguage("kusto", kusto_1);
+  hljs$2.registerLanguage("lasso", lasso_1);
+  hljs$2.registerLanguage("latex", latex_1);
+  hljs$2.registerLanguage("ldif", ldif_1);
+  hljs$2.registerLanguage("leaf", leaf_1);
+  hljs$2.registerLanguage("lean", lean_1);
+  hljs$2.registerLanguage("less", less_1);
+  hljs$2.registerLanguage("lisp", lisp_1);
+  hljs$2.registerLanguage("livecodeserver", livecodeserver_1);
+  hljs$2.registerLanguage("livescript", livescript_1);
+  hljs$2.registerLanguage("llvm", llvm_1);
+  hljs$2.registerLanguage("logtalk", logtalk_1);
+  hljs$2.registerLanguage("lsl", lsl_1);
+  hljs$2.registerLanguage("lua", lua_1);
+  hljs$2.registerLanguage("makefile", makefile_1);
+  hljs$2.registerLanguage("mathematica", mathematica_1);
+  hljs$2.registerLanguage("matlab", matlab_1);
+  hljs$2.registerLanguage("maxima", maxima_1);
+  hljs$2.registerLanguage("mel", mel_1);
+  hljs$2.registerLanguage("mercury", mercury_1);
+  hljs$2.registerLanguage("metasploit", metasploit_1);
+  hljs$2.registerLanguage("mint", mint_1);
+  hljs$2.registerLanguage("mipsasm", mipsasm_1);
+  hljs$2.registerLanguage("mizar", mizar_1);
+  hljs$2.registerLanguage("perl", perl_1);
+  hljs$2.registerLanguage("mojolicious", mojolicious_1);
+  hljs$2.registerLanguage("monkey", monkey_1);
+  hljs$2.registerLanguage("moonscript", moonscript_1);
+  hljs$2.registerLanguage("mumps", mumps_1);
+  hljs$2.registerLanguage("mun", mun_1);
+  hljs$2.registerLanguage("n1ql", n1ql_1);
+  hljs$2.registerLanguage("nginx", nginx_1);
+  hljs$2.registerLanguage("nim", nim_1);
+  hljs$2.registerLanguage("nix", nix_1);
+  hljs$2.registerLanguage("nsis", nsis_1);
+  hljs$2.registerLanguage("objectivec", objectivec_1);
+  hljs$2.registerLanguage("ocaml", ocaml_1);
+  hljs$2.registerLanguage("odata", odata_1);
+  hljs$2.registerLanguage("openscad", openscad_1);
+  hljs$2.registerLanguage("orgmode", orgmode_1);
+  hljs$2.registerLanguage("osl", osl_1);
+  hljs$2.registerLanguage("oxygene", oxygene_1);
+  hljs$2.registerLanguage("oz", oz_1);
+  hljs$2.registerLanguage("parser3", parser3_1);
+  hljs$2.registerLanguage("pf", pf_1);
+  hljs$2.registerLanguage("pgsql", pgsql_1);
+  hljs$2.registerLanguage("php", php_1);
+  hljs$2.registerLanguage("php-template", phpTemplate_1);
+  hljs$2.registerLanguage("pine-type", pineType_1);
+  hljs$2.registerLanguage("pine", pine_1);
+  hljs$2.registerLanguage("plaintext", plaintext_1);
+  hljs$2.registerLanguage("pony", pony_1);
+  hljs$2.registerLanguage("portugol", portugol_1);
+  hljs$2.registerLanguage("powershell", powershell_1);
+  hljs$2.registerLanguage("processing", processing_1);
+  hljs$2.registerLanguage("profile", profile_1);
+  hljs$2.registerLanguage("prolog", prolog_1);
+  hljs$2.registerLanguage("properties", properties_1);
+  hljs$2.registerLanguage("protobuf", protobuf_1);
+  hljs$2.registerLanguage("pug", pug_1);
+  hljs$2.registerLanguage("purebasic", purebasic_1);
+  hljs$2.registerLanguage("python", python_1);
+  hljs$2.registerLanguage("python-repl", pythonRepl_1);
+  hljs$2.registerLanguage("q", q_1);
+  hljs$2.registerLanguage("qml", qml_1);
+  hljs$2.registerLanguage("r", r_1);
+  hljs$2.registerLanguage("razor", razor_1);
+  hljs$2.registerLanguage("reasonml", reasonml_1);
+  hljs$2.registerLanguage("rib", rib_1);
+  hljs$2.registerLanguage("riscvasm", riscvasm_1);
+  hljs$2.registerLanguage("roboconf", roboconf_1);
+  hljs$2.registerLanguage("robotframework", robotframework_1);
+  hljs$2.registerLanguage("routeros", routeros_1);
+  hljs$2.registerLanguage("rsl", rsl_1);
+  hljs$2.registerLanguage("ruleslanguage", ruleslanguage_1);
+  hljs$2.registerLanguage("rust", rust_1);
+  hljs$2.registerLanguage("sas", sas_1);
+  hljs$2.registerLanguage("scala", scala_1);
+  hljs$2.registerLanguage("scheme", scheme_1);
+  hljs$2.registerLanguage("scilab", scilab_1);
+  hljs$2.registerLanguage("scss", scss_1);
+  hljs$2.registerLanguage("shell", shell_1);
+  hljs$2.registerLanguage("smali", smali_1);
+  hljs$2.registerLanguage("smalltalk", smalltalk_1);
+  hljs$2.registerLanguage("sml", sml_1);
+  hljs$2.registerLanguage("snort", snort_1);
+  hljs$2.registerLanguage("solidity", solidity_1);
+  hljs$2.registerLanguage("soy", soy_1);
+  hljs$2.registerLanguage("ttl", ttl_1);
+  hljs$2.registerLanguage("sparql", sparql_1);
+  hljs$2.registerLanguage("sqf", sqf_1);
+  hljs$2.registerLanguage("sql", sql_1);
+  hljs$2.registerLanguage("st", st_1);
+  hljs$2.registerLanguage("stan", stan_1);
+  hljs$2.registerLanguage("stanza", stanza_1);
+  hljs$2.registerLanguage("stata", stata_1);
+  hljs$2.registerLanguage("step21", step21_1);
+  hljs$2.registerLanguage("structuredtext", structuredtext_1);
+  hljs$2.registerLanguage("stylus", stylus_1);
+  hljs$2.registerLanguage("subunit", subunit_1);
+  hljs$2.registerLanguage("swift", swift_1);
+  hljs$2.registerLanguage("taggerscript", taggerscript_1);
+  hljs$2.registerLanguage("yaml", yaml_1);
+  hljs$2.registerLanguage("tap", tap_1);
+  hljs$2.registerLanguage("tcl", tcl_1);
+  hljs$2.registerLanguage("thingsdb", thingsdb_1);
+  hljs$2.registerLanguage("thrift", thrift_1);
+  hljs$2.registerLanguage("tla", tla_1);
+  hljs$2.registerLanguage("tp", tp_1);
+  hljs$2.registerLanguage("tsql", tsql_1);
+  hljs$2.registerLanguage("twig", twig_1);
+  hljs$2.registerLanguage("typescript", typescript_1);
+  hljs$2.registerLanguage("vala", vala_1);
+  hljs$2.registerLanguage("vbnet", vbnet_1);
+  hljs$2.registerLanguage("vbscript", vbscript_1);
+  hljs$2.registerLanguage("vbscript-html", vbscriptHtml_1);
+  hljs$2.registerLanguage("verilog", verilog_1);
+  hljs$2.registerLanguage("vhdl", vhdl_1);
+  hljs$2.registerLanguage("vim", vim_1);
+  hljs$2.registerLanguage("wasm", wasm_1);
+  hljs$2.registerLanguage("x86asm", x86asm_1);
+  hljs$2.registerLanguage("xl", xl_1);
+  hljs$2.registerLanguage("xquery", xquery_1);
+  hljs$2.registerLanguage("yara", yara_1);
+  hljs$2.registerLanguage("z80asm", z80asm_1);
+  hljs$2.registerLanguage("zephir", zephir_1);
+  var lib = hljs$2;
   /*! markdown-it-abbr 1.0.4-27 https://github.com//GerHobbelt/markdown-it-abbr @license MIT */
   // Enclose abbreviations in <abbr> tags
   
   /**
-  * @param {*} md The markdown-it plugin instance.
-  * @param {Object=} abbrDefList A list of abbreviations and their definitions
-  *   {"HTML": "Hyper Text Markup Language", "W3C": "World Wide Web Consortium"}.
-  *   It will be merged with the reference style abbreviation definitions like `*[HTML]: Hyper Text Markup Language`
-  *   inside the markdown files (file definitions overwrite existing list definitions by default).
-  * @param {boolean=} [listPriorsFile=false] If false (default) definitions inside the markdown file overwrite
-  *   existing list definitions. If true list definitions overwrite existing definitions in the markdown file.
-  */  function sub_plugin(md, abbrDefList, listPriorsFile) {
+	* @param {*} md The markdown-it plugin instance.
+	* @param {Object=} abbrDefList A list of abbreviations and their definitions
+	*   {"HTML": "Hyper Text Markup Language", "W3C": "World Wide Web Consortium"}.
+	*   It will be merged with the reference style abbreviation definitions like `*[HTML]: Hyper Text Markup Language`
+	*   inside the markdown files (file definitions overwrite existing list definitions by default).
+	* @param {boolean=} [listPriorsFile=false] If false (default) definitions inside the markdown file overwrite
+	*   existing list definitions. If true list definitions overwrite existing definitions in the markdown file.
+	*/  function sub_plugin(md, abbrDefList, listPriorsFile) {
     const escapeRE = md.utils.escapeRE;
     const arrayReplaceAt = md.utils.arrayReplaceAt;
  // ASCII characters in Cc, Sc, Sm, Sk categories we should terminate on;
@@ -20968,13 +20984,14 @@ var demo = function(path, fs, url, buffer) {
     __proto__: null,
     default: sub_plugin
   });
+  var require$$58 =  getAugmentedNamespace(markdownitAbbr);
   /*! markdown-it-attrs 3.0.3-20 https://github.com//GerHobbelt/markdown-it-attrs @license MIT */
   /**
-   * parse {.class #id key=val} strings
-   * @param {string} str: string to parse
-   * @param {int} start: where to start parsing (including {)
-   * @returns {2d array}: [['key', 'val'], ['class', 'red']]
-   */  function getAttrs(str, start, options) {
+	 * parse {.class #id key=val} strings
+	 * @param {string} str: string to parse
+	 * @param {int} start: where to start parsing (including {)
+	 * @returns {2d array}: [['key', 'val'], ['class', 'red']]
+	 */  function getAttrs(str, start, options) {
     // not tab, line feed, form feed, space, solidus, greater than sign, quotation mark, apostrophe and equals sign
     const allowedKeyChars = /[^\t\n\f />"'=]/;
     const pairSeparator = " ";
@@ -21064,11 +21081,11 @@ var demo = function(path, fs, url, buffer) {
     return attrs;
   }
   /**
-   * add attributes from [['key', 'val']] list
-   * @param {array} attrs: [['key', 'val']]
-   * @param {token} token: which token to add attributes
-   * @returns token
-   */  function addAttrs(attrs, token) {
+	 * add attributes from [['key', 'val']] list
+	 * @param {array} attrs: [['key', 'val']]
+	 * @param {token} token: which token to add attributes
+	 * @returns token
+	 */  function addAttrs(attrs, token) {
     for (let j = 0, l = attrs.length; j < l; ++j) {
       let key = attrs[j][0];
       if (key === "class") {
@@ -21082,23 +21099,23 @@ var demo = function(path, fs, url, buffer) {
     return token;
   }
   /**
-   * Does string have properly formatted curly?
-   *
-   * start: '{.a} asdf'
-   * middle: 'a{.b}c'
-   * end: 'asdf {.a}'
-   * only: '{.a}'
-   *
-   * @param {string} where to expect {} curly. start, middle, end or only.
-   * @return {function(string)} Function which testes if string has curly.
-   */  function hasDelimiters(where, options) {
+	 * Does string have properly formatted curly?
+	 *
+	 * start: '{.a} asdf'
+	 * middle: 'a{.b}c'
+	 * end: 'asdf {.a}'
+	 * only: '{.a}'
+	 *
+	 * @param {string} where to expect {} curly. start, middle, end or only.
+	 * @return {function(string)} Function which testes if string has curly.
+	 */  function hasDelimiters(where, options) {
     if (!where) {
       throw new Error('Parameter `where` not passed. Should be "start", "middle", "end" or "only".');
     }
     /**
-     * @param {string} str
-     * @return {boolean}
-     */    return function(str) {
+	   * @param {string} str
+	   * @return {boolean}
+	   */    return function(str) {
       // we need minimum three chars, for example {b}
       let minCurlyLength = options.leftDelimiter.length + 1 + options.rightDelimiter.length;
       if (!str || typeof str !== "string" || str.length < minCurlyLength) {
@@ -21143,8 +21160,8 @@ var demo = function(path, fs, url, buffer) {
     };
   }
   /**
-   * Removes last curly from string.
-   */  function removeDelimiter(str, options) {
+	 * Removes last curly from string.
+	 */  function removeDelimiter(str, options) {
     const start = escapeRegExp(options.leftDelimiter);
     const end = escapeRegExp(options.rightDelimiter);
     let curly = new RegExp("[ \\n]?" + start + "[^" + start + end + "]+" + end + "$");
@@ -21152,17 +21169,17 @@ var demo = function(path, fs, url, buffer) {
     return pos !== -1 ? str.slice(0, pos) : str;
   }
   /**
-   * Escapes special characters in string s such that the string
-   * can be used in `new RegExp`. For example "[" becomes "\\[".
-   *
-   * @param {string} s Regex string.
-   * @return {string} Escaped string.
-   */  function escapeRegExp(s) {
+	 * Escapes special characters in string s such that the string
+	 * can be used in `new RegExp`. For example "[" becomes "\\[".
+	 *
+	 * @param {string} s Regex string.
+	 * @return {string} Escaped string.
+	 */  function escapeRegExp(s) {
     return s.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&");
   }
   /**
-   * find corresponding opening block
-   */  function getMatchingOpeningToken(tokens, i) {
+	 * find corresponding opening block
+	 */  function getMatchingOpeningToken(tokens, i) {
     if (tokens[i].type === "softbreak") {
       return false;
     }
@@ -21180,17 +21197,17 @@ var demo = function(path, fs, url, buffer) {
     return false;
   }
   /**
-   * If a pattern matches the token stream,
-   * then run transform.
-   */  function patternsConfig(options) {
+	 * If a pattern matches the token stream,
+	 * then run transform.
+	 */  function patternsConfig(options) {
     const __hr = new RegExp("^ {0,3}[-*_]{3,} ?" + escapeRegExp(options.leftDelimiter) + "[^" + escapeRegExp(options.rightDelimiter) + "]");
     return [ {
       /**
-       * ```python {.cls}
-       * for i in range(10):
-       *     print(i)
-       * ```
-       */
+	     * ```python {.cls}
+	     * for i in range(10):
+	     *     print(i)
+	     * ```
+	     */
       name: "fenced code blocks",
       tests: [ {
         shift: 0,
@@ -21206,11 +21223,11 @@ var demo = function(path, fs, url, buffer) {
       }
     }, {
       /**
-       * bla `click()`{.c} ![](img.png){.d}
-       *
-       * differs from 'inline attributes' as it does
-       * not have a closing tag (nesting: -1)
-       */
+	     * bla `click()`{.c} ![](img.png){.d}
+	     *
+	     * differs from 'inline attributes' as it does
+	     * not have a closing tag (nesting: -1)
+	     */
       name: "inline nesting 0",
       tests: [ {
         shift: 0,
@@ -21238,11 +21255,11 @@ var demo = function(path, fs, url, buffer) {
       }
     }, {
       /**
-       * | h1 |
-       * | -- |
-       * | c1 |
-       * {.c}
-       */
+	     * | h1 |
+	     * | -- |
+	     * | c1 |
+	     * {.c}
+	     */
       name: "tables",
       tests: [ {
         // let this token be i, such that for-loop continues at
@@ -21268,8 +21285,8 @@ var demo = function(path, fs, url, buffer) {
       }
     }, {
       /**
-       * *emphasis*{.with attrs=1}
-       */
+	     * *emphasis*{.with attrs=1}
+	     */
       name: "inline attributes",
       tests: [ {
         shift: 0,
@@ -21293,9 +21310,9 @@ var demo = function(path, fs, url, buffer) {
       }
     }, {
       /**
-       * - item
-       * {.a}
-       */
+	     * - item
+	     * {.a}
+	     */
       name: "list softbreak",
       tests: [ {
         shift: -2,
@@ -21325,12 +21342,12 @@ var demo = function(path, fs, url, buffer) {
       }
     }, {
       /**
-       * - nested list
-       *   - with double \n
-       *   {.a} <-- apply to nested ul
-       *
-       * {.b} <-- apply to root <ul>
-       */
+	     * - nested list
+	     *   - with double \n
+	     *   {.a} <-- apply to nested ul
+	     *
+	     * {.b} <-- apply to root <ul>
+	     */
       name: "list double softbreak",
       tests: [ {
         // let this token be i = 0 so that we can erase
@@ -21359,8 +21376,8 @@ var demo = function(path, fs, url, buffer) {
       }
     }, {
       /**
-       * - end of {.list-item}
-       */
+	     * - end of {.list-item}
+	     */
       name: "list item end",
       tests: [ {
         shift: -2,
@@ -21384,9 +21401,9 @@ var demo = function(path, fs, url, buffer) {
       }
     }, {
       /**
-       * something with softbreak
-       * {.cls}
-       */
+	     * something with softbreak
+	     * {.cls}
+	     */
       name: "\n{.a} softbreak then curly in start",
       tests: [ {
         shift: 0,
@@ -21414,8 +21431,8 @@ var demo = function(path, fs, url, buffer) {
       }
     }, {
       /**
-       * horizontal rule --- {#id}
-       */
+	     * horizontal rule --- {#id}
+	     */
       name: "horizontal rule",
       tests: [ {
         shift: 0,
@@ -21442,8 +21459,8 @@ var demo = function(path, fs, url, buffer) {
       }
     }, {
       /**
-       * end of {.block}
-       */
+	     * end of {.block}
+	     */
       name: "end of block",
       tests: [ {
         shift: 0,
@@ -21510,13 +21527,13 @@ var demo = function(path, fs, url, buffer) {
     md.core.ruler.after("inline", "curly_attributes", curlyAttrs);
   }
   /**
-   * Test if t matches token stream.
-   *
-   * @param {array} tokens
-   * @param {number} i
-   * @param {object} t Test to match.
-   * @return {object} { match: true|false, j: null|number }
-   */  function test(tokens, i, t, options) {
+	 * Test if t matches token stream.
+	 *
+	 * @param {array} tokens
+	 * @param {number} i
+	 * @param {object} t Test to match.
+	 * @return {object} { match: true|false, j: null|number }
+	 */  function test(tokens, i, t, options) {
     let res = {
       match: false,
       j: null
@@ -21605,11 +21622,11 @@ var demo = function(path, fs, url, buffer) {
     return Array.isArray(arr) && arr.length && arr.every((i => typeof i === "function"));
   }
   /**
-   * Get n item of array. Supports negative n, where -1 is last
-   * element in array.
-   * @param {array} arr
-   * @param {number} n
-   */  function get(arr, n) {
+	 * Get n item of array. Supports negative n, where -1 is last
+	 * element in array.
+	 * @param {array} arr
+	 * @param {number} n
+	 */  function get(arr, n) {
     return n >= 0 ? arr[n] : arr[arr.length + n];
   }
  // get last element of array, safe - returns {} if not found
@@ -21621,6 +21638,7 @@ var demo = function(path, fs, url, buffer) {
     __proto__: null,
     default: attributes
   });
+  var require$$59 =  getAugmentedNamespace(markdownItAttrs);
   /*! markdown-it-container 3.0.0-7 https://github.com//GerHobbelt/markdown-it-container @license MIT */
   // Process block-level custom containers
   
@@ -21759,33 +21777,11 @@ var demo = function(path, fs, url, buffer) {
     __proto__: null,
     default: container_plugin
   });
-  var commonjsGlobal = typeof globalThis !== "undefined" ? globalThis : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : {};
-  function getAugmentedNamespace(n) {
-    if (n.__esModule) return n;
-    var a = Object.defineProperty({}, "__esModule", {
-      value: true
-    });
-    Object.keys(n).forEach((function(k) {
-      var d = Object.getOwnPropertyDescriptor(n, k);
-      Object.defineProperty(a, k, d.get ? d : {
-        enumerable: true,
-        get: function() {
-          return n[k];
-        }
-      });
-    }));
-    return a;
-  }
-  function createCommonjsModule(fn) {
-    var module = {
-      exports: {}
-    };
-    return fn(module, module.exports), module.exports;
-  }
-  function commonjsRequire(target) {
-    throw new Error('Could not dynamically require "' + target + '". Please configure the dynamicRequireTargets option of @rollup/plugin-commonjs appropriately for this require call to behave properly.');
-  }
-  var underscore = createCommonjsModule((function(module, exports) {
+  var require$$60 =  getAugmentedNamespace(markdownitContainer);
+  var underscore = {
+    exports: {}
+  };
+  (function(module, exports) {
     //     Underscore.js 1.8.3
     //     http://underscorejs.org
     //     (c) 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -23125,9 +23121,9 @@ var demo = function(path, fs, url, buffer) {
         return "" + this._wrapped;
       };
     }).call(commonjsGlobal);
-  }));
+  })(underscore, underscore.exports);
   var _$1, checkboxReplace;
-  _$1 = underscore;
+  _$1 = underscore.exports;
   checkboxReplace = function(md, options, Token) {
     var arrayReplaceAt, createTokens, defaults, lastId, pattern, splitTextToken;
     arrayReplaceAt = md.utils.arrayReplaceAt;
@@ -23143,15 +23139,15 @@ var demo = function(path, fs, url, buffer) {
       var id, nodes, token;
       nodes = [];
       /**
-       * <div class="checkbox">
-       */      if (options.divWrap) {
+	     * <div class="checkbox">
+	     */      if (options.divWrap) {
         token = new Token("checkbox_open", "div", 1);
         token.attrs = [ [ "class", options.divClass ] ];
         nodes.push(token);
       }
       /**
-       * <input type="checkbox" id="checkbox{n}" checked="true">
-       */      id = options.idPrefix + lastId;
+	     * <input type="checkbox" id="checkbox{n}" checked="true">
+	     */      id = options.idPrefix + lastId;
       lastId += 1;
       token = new Token("checkbox_input", "input", 0);
       token.attrs = [ [ "type", "checkbox" ], [ "id", id ] ];
@@ -23160,18 +23156,18 @@ var demo = function(path, fs, url, buffer) {
       }
       nodes.push(token);
       /**
-       * <label for="checkbox{n}">
-       */      token = new Token("label_open", "label", 1);
+	     * <label for="checkbox{n}">
+	     */      token = new Token("label_open", "label", 1);
       token.attrs = [ [ "for", id ] ];
       nodes.push(token);
       /**
-       * content of label tag
-       */      token = new Token("text", "", 0);
+	     * content of label tag
+	     */      token = new Token("text", "", 0);
       token.content = label;
       nodes.push(token);
       /**
-       * closing tags
-       */      nodes.push(new Token("label_close", "label", -1));
+	     * closing tags
+	     */      nodes.push(new Token("label_close", "label", -1));
       if (options.divWrap) {
         nodes.push(new Token("checkbox_close", "div", -1));
       }
@@ -23415,6 +23411,7 @@ var demo = function(path, fs, url, buffer) {
   var markdownItDefList =  Object.freeze({
     __proto__: null
   });
+  var require$$62 =  getAugmentedNamespace(markdownItDefList);
   /*! markdown-it-emoji 2.0.0-10 https://github.com//GerHobbelt/markdown-it-emoji @license MIT */
   // Emoticons -> Emoji mapping.
   
@@ -23604,11 +23601,11 @@ var demo = function(path, fs, url, buffer) {
     let opts = md.utils.assign({}, defaults, options || {});
     emoji_plugin(md, opts);
   }
-  //# sourceMappingURL=markdownItEmoji.modern.js.map
-    var markdownItEmoji =  Object.freeze({
+  var markdownItEmoji =  Object.freeze({
     __proto__: null,
     default: emoji_plugin$1
   });
+  var require$$63 =  getAugmentedNamespace(markdownItEmoji);
   /*! markdown-it-fontawesome 0.3.0-3 https://github.com//GerHobbelt/markdown-it-fontawesome @license MIT */  let Plugin = require("@gerhobbelt/markdown-it-regexp");
   module.exports = function fontawesome_plugin(md) {
     // FA4 style.
@@ -23623,7 +23620,8 @@ var demo = function(path, fs, url, buffer) {
   var markdownItFontAwesome =  Object.freeze({
     __proto__: null
   });
-  /*! markdown-it-footnote 3.0.2-5 https://github.com//GerHobbelt/markdown-it-footnote @license MIT */
+  var require$$64 =  getAugmentedNamespace(markdownItFontAwesome);
+  /*! markdown-it-footnote 3.0.2-7 https://github.com//GerHobbelt/markdown-it-footnote @license MIT */
   // Process footnotes
   
   ////////////////////////////////////////////////////////////////////////////////
@@ -23643,6 +23641,8 @@ var demo = function(path, fs, url, buffer) {
   }
   function footnote_plugin(md, plugin_options) {
     let parseLinkLabel = md.helpers.parseLinkLabel, isSpace = md.utils.isSpace;
+    plugin_options = plugin_options || {};
+    plugin_options.atDocumentEnd = typeof plugin_options.atDocumentEnd === "undefined" ? true : plugin_options.atDocumentEnd;
     let anchorFn = plugin_options && plugin_options.anchor ? plugin_options.anchor : anchorFnDefault;
     let captionFn = plugin_options && plugin_options.caption ? plugin_options.caption : captionFnDefault;
     let headerFn = plugin_options && plugin_options.header ? plugin_options.header : headerFnDefault;
@@ -23681,10 +23681,10 @@ var demo = function(path, fs, url, buffer) {
     function render_footnote_open(tokens, idx, options, env, slf) {
       let id = slf.rules.footnote_anchor_name(tokens, idx, options, env, slf);
       /*
-        if (tokens[idx].meta.subId > 0) {
-          id += ':' + tokens[idx].meta.subId;
-        }
-      */      return '<li tabindex="-1" id="fn' + id + '" class="footnote-item">';
+	      if (tokens[idx].meta.subId > 0) {
+	        id += ':' + tokens[idx].meta.subId;
+	      }
+	    */      return '<li tabindex="-1" id="fn' + id + '" class="footnote-item">';
     }
     function render_footnote_close() {
       return "</li>\n";
@@ -23987,11 +23987,12 @@ var demo = function(path, fs, url, buffer) {
     }
  // Glue footnote tokens to end of token stream
         function footnote_tail(state) {
-      let i, l, j, t, lastParagraph, list, token, tokens, current, currentLabel, insideRef = false, refTokens = {};
+      let i, l, j, t, lastParagraph, list, token, tokens, current, currentLabel, lastRefIndex = 0, insideRef = false, refTokens = {};
       if (!state.env.footnotes) {
         return;
       }
-      state.tokens = state.tokens.filter((function(tok) {
+      let oldLen = state.tokens.length;
+      state.tokens = state.tokens.filter((function(tok, idx) {
         if (tok.type === "footnote_reference_open") {
           insideRef = true;
           current = [];
@@ -24002,6 +24003,7 @@ var demo = function(path, fs, url, buffer) {
           insideRef = false;
  // prepend ':' to avoid conflict with Object.prototype members
                     refTokens[":" + currentLabel] = current;
+          lastRefIndex = idx;
           return false;
         }
         if (insideRef) {
@@ -24009,20 +24011,22 @@ var demo = function(path, fs, url, buffer) {
         }
         return !insideRef;
       }));
+      lastRefIndex = plugin_options.atDocumentEnd ? state.tokens.length : lastRefIndex - (oldLen - state.tokens.length - 1);
+      let firstHalfTokens = state.tokens.slice(0, lastRefIndex);
       if (!state.env.footnotes.list) {
         return;
       }
       list = state.env.footnotes.list;
       token = new state.Token("footnote_block_open", "", 1);
       token.markup = headerFn(state);
-      state.tokens.push(token);
+      firstHalfTokens.push(token);
       for (i = 0, l = list.length; i < l; i++) {
         token = new state.Token("footnote_open", "", 1);
         token.meta = {
           id: i,
           label: list[i].label
         };
-        state.tokens.push(token);
+        firstHalfTokens.push(token);
         if (list[i].tokens) {
           tokens = [];
           token = new state.Token("paragraph_open", "p", 1);
@@ -24036,11 +24040,13 @@ var demo = function(path, fs, url, buffer) {
           token.block = true;
           tokens.push(token);
         } else if (list[i].label) {
-          tokens = refTokens[":" + list[i].label];
+          tokens = refTokens[":" + list[i].label] || [];
+        } else {
+          tokens = [];
         }
-        state.tokens = state.tokens.concat(tokens);
-        if (state.tokens[state.tokens.length - 1].type === "paragraph_close") {
-          lastParagraph = state.tokens.pop();
+        firstHalfTokens = firstHalfTokens.concat(tokens);
+        if (firstHalfTokens[firstHalfTokens.length - 1].type === "paragraph_close") {
+          lastParagraph = firstHalfTokens.pop();
         } else {
           lastParagraph = null;
         }
@@ -24052,16 +24058,17 @@ var demo = function(path, fs, url, buffer) {
             subId: j,
             label: list[i].label
           };
-          state.tokens.push(token);
+          firstHalfTokens.push(token);
         }
         if (lastParagraph) {
-          state.tokens.push(lastParagraph);
+          firstHalfTokens.push(lastParagraph);
         }
         token = new state.Token("footnote_close", "", -1);
-        state.tokens.push(token);
+        firstHalfTokens.push(token);
       }
       token = new state.Token("footnote_block_close", "", -1);
-      state.tokens.push(token);
+      firstHalfTokens.push(token);
+      state.tokens = firstHalfTokens.concat(state.tokens.slice(lastRefIndex));
     }
     md.block.ruler.before("reference", "footnote_def", footnote_def, {
       alt: [ "paragraph", "reference" ]
@@ -24075,6 +24082,7 @@ var demo = function(path, fs, url, buffer) {
     __proto__: null,
     default: footnote_plugin
   });
+  var require$$65 =  getAugmentedNamespace(markdownItFootnote);
   /*! markdown-it-front-matter 0.2.3-3 https://github.com//GerHobbelt/markdown-it-front-matter @license MIT */
   // Process front matter and pass to cb
     function front_matter_plugin(md, opts) {
@@ -24177,6 +24185,7 @@ var demo = function(path, fs, url, buffer) {
     __proto__: null,
     default: front_matter_plugin
   });
+  var require$$66 =  getAugmentedNamespace(markdownitFrontMatter);
   const renderHashtagOpen = (tokens, idx) => '<a href="/tags/' + tokens[idx].content.toLowerCase() + '" class="tag">', renderHashtagClose = () => "</a>", renderHashtagText = (tokens, idx) => "#" + tokens[idx].content, isLinkOpenRegExp = /^<a[>\s]/i, isLinkCloseRegExp = /^<\/a\s*>/i, isLinkOpen = str => isLinkOpenRegExp.test(str), isLinkClose = str => isLinkCloseRegExp.test(str);
   var markdownItHashtag = function hashtagPlugin(md, options) {
     const arrayReplaceAt = md.utils.arrayReplaceAt, escapeHtml = md.utils.escapeHtml, assign = md.utils.assign, defaultOpts = {
@@ -24338,9 +24347,9 @@ var demo = function(path, fs, url, buffer) {
     return arr.slice(-1)[0];
   }
   /*
-   * Copyright Adam Pritchard 2015
-   * MIT License : http://adampritchard.mit-license.org/
-   */
+	 * Copyright Adam Pritchard 2015
+	 * MIT License : http://adampritchard.mit-license.org/
+	 */
   /* jshint node:true */  function slugify$1(s, md) {
     // Unicode-friendly
     var spaceRegex = new RegExp(md.utils.lib.ucmicro.Z.source, "g");
@@ -24465,6 +24474,7 @@ var demo = function(path, fs, url, buffer) {
     __proto__: null,
     default: implicitFiguresPlugin
   });
+  var require$$70 =  getAugmentedNamespace(markdownItAbbr);
   var markdownItIns = function ins_plugin(md) {
     // Insert each marker as a separate text token, and add it to delimiter list
     function tokenize(state, silent) {
@@ -24629,8 +24639,8 @@ var demo = function(path, fs, url, buffer) {
             return end;
     }
     /*
-     * Add delimiters for double occurrences of MARKER_SYMBOL.
-     */    function tokenize(state, silent) {
+	   * Add delimiters for double occurrences of MARKER_SYMBOL.
+	   */    function tokenize(state, silent) {
       if (silent) {
         return false;
       }
@@ -24680,6 +24690,7 @@ var demo = function(path, fs, url, buffer) {
     __proto__: null,
     default: kbdplugin
   });
+  var require$$72 =  getAugmentedNamespace(markdownitKbd);
   var markdownItMark = function ins_plugin(md) {
     // Insert each marker as a separate text token, and add it to delimiter list
     function tokenize(state, silent) {
@@ -24769,7 +24780,10 @@ var demo = function(path, fs, url, buffer) {
     md.inline.ruler.before("emphasis", "mark", tokenize);
     md.inline.ruler2.before("emphasis", "mark", postProcess);
   };
-  var markdownItMathjax = createCommonjsModule((function(module, exports) {
+  var markdownItMathjax = {
+    exports: {}
+  };
+  (function(module, exports) {
     (function(root, factory) {
       {
         module.exports = factory();
@@ -24893,7 +24907,7 @@ var demo = function(path, fs, url, buffer) {
         };
       };
     }));
-  }));
+  })(markdownItMathjax);
   /*! markdown-it-modify-token 1.0.2-1 https://github.com//GerHobbelt/markdown-it-modify-token @license MIT */  function modifyToken(token, modifyFn, env) {
     // create attrObj for convenient get/set of attributes
     let attrObj = token.attrs ? token.attrs.reduce((function(acc, pair) {
@@ -24926,16 +24940,20 @@ var demo = function(path, fs, url, buffer) {
     __proto__: null,
     default: index
   });
-  var prism = createCommonjsModule((function(module) {
+  var require$$75 =  getAugmentedNamespace(markdownitModifyToken);
+  var prism = {
+    exports: {}
+  };
+  (function(module) {
     /* **********************************************
-       Begin prism-core.js
-  ********************************************** */
+	     Begin prism-core.js
+	********************************************** */
     var _self = typeof window !== "undefined" ? window : typeof WorkerGlobalScope !== "undefined" && self instanceof WorkerGlobalScope ? self : {};
     /**
-   * Prism: Lightweight, robust, elegant syntax highlighting
-   * MIT license http://www.opensource.org/licenses/mit-license.php/
-   * @author Lea Verou http://lea.verou.me
-   */    var Prism = function(_self) {
+	 * Prism: Lightweight, robust, elegant syntax highlighting
+	 * MIT license http://www.opensource.org/licenses/mit-license.php/
+	 * @author Lea Verou http://lea.verou.me
+	 */    var Prism = function(_self) {
       // Private helper vars
       var lang = /\blang(?:uage)?-([\w-]+)\b/i;
       var uniqueId = 0;
@@ -24999,13 +25017,13 @@ var demo = function(path, fs, url, buffer) {
             }
           },
           /**
-  		 * Returns the Prism language of the given element set by a `language-xxxx` or `lang-xxxx` class.
-  		 *
-  		 * If no language is set for the element or the element is `null` or `undefined`, `none` will be returned.
-  		 *
-  		 * @param {Element} element
-  		 * @returns {string}
-  		 */
+			 * Returns the Prism language of the given element set by a `language-xxxx` or `lang-xxxx` class.
+			 *
+			 * If no language is set for the element or the element is `null` or `undefined`, `none` will be returned.
+			 *
+			 * @param {Element} element
+			 * @returns {string}
+			 */
           getLanguage: function(element) {
             while (element && !lang.test(element.className)) {
               element = element.parentElement;
@@ -25016,12 +25034,12 @@ var demo = function(path, fs, url, buffer) {
             return "none";
           },
           /**
-  		 * Returns the script element that is currently executing.
-  		 *
-  		 * This does __not__ work for line script element.
-  		 *
-  		 * @returns {HTMLScriptElement | null}
-  		 */
+			 * Returns the script element that is currently executing.
+			 *
+			 * This does __not__ work for line script element.
+			 *
+			 * @returns {HTMLScriptElement | null}
+			 */
           currentScript: function() {
             if (typeof document === "undefined") {
               return null;
@@ -25062,14 +25080,14 @@ var demo = function(path, fs, url, buffer) {
             return lang;
           },
           /**
-  		 * Insert a token before another token in a language literal
-  		 * As this needs to recreate the object (we cannot actually insert before keys in object literals),
-  		 * we cannot just provide an object, we need an object and a key.
-  		 * @param inside The key (or language id) of the parent
-  		 * @param before The key to insert before.
-  		 * @param insert Object with the key/value pairs to insert
-  		 * @param root The object that contains `inside`. If equal to Prism.languages, it can be omitted.
-  		 */
+			 * Insert a token before another token in a language literal
+			 * As this needs to recreate the object (we cannot actually insert before keys in object literals),
+			 * we cannot just provide an object, we need an object and a key.
+			 * @param inside The key (or language id) of the parent
+			 * @param before The key to insert before.
+			 * @param insert Object with the key/value pairs to insert
+			 * @param root The object that contains `inside`. If equal to Prism.languages, it can be omitted.
+			 */
           insertBefore: function(inside, before, insert, root) {
             root = root || _.languages;
             var grammar = root[inside];
@@ -25273,14 +25291,14 @@ var demo = function(path, fs, url, buffer) {
         return "<" + env.tag + ' class="' + env.classes.join(" ") + '"' + attributes + ">" + env.content + "</" + env.tag + ">";
       };
       /**
-   * @param {string} text
-   * @param {LinkedList<string | Token>} tokenList
-   * @param {any} grammar
-   * @param {LinkedListNode<string | Token>} startNode
-   * @param {number} startPos
-   * @param {boolean} [oneshot=false]
-   * @param {string} [target]
-   */      function matchGrammar(text, tokenList, grammar, startNode, startPos, oneshot, target) {
+	 * @param {string} text
+	 * @param {LinkedList<string | Token>} tokenList
+	 * @param {any} grammar
+	 * @param {LinkedListNode<string | Token>} startNode
+	 * @param {number} startPos
+	 * @param {boolean} [oneshot=false]
+	 * @param {string} [target]
+	 */      function matchGrammar(text, tokenList, grammar, startNode, startPos, oneshot, target) {
         for (var token in grammar) {
           if (!grammar.hasOwnProperty(token) || !grammar[token]) {
             continue;
@@ -25374,15 +25392,15 @@ var demo = function(path, fs, url, buffer) {
         }
       }
       /**
-   * @typedef LinkedListNode
-   * @property {T} value
-   * @property {LinkedListNode<T> | null} prev The previous node.
-   * @property {LinkedListNode<T> | null} next The next node.
-   * @template T
-   */
+	 * @typedef LinkedListNode
+	 * @property {T} value
+	 * @property {LinkedListNode<T> | null} prev The previous node.
+	 * @property {LinkedListNode<T> | null} next The next node.
+	 * @template T
+	 */
       /**
-   * @template T
-   */      function LinkedList() {
+	 * @template T
+	 */      function LinkedList() {
         /** @type {LinkedListNode<T>} */
         var head = {
           value: null,
@@ -25400,13 +25418,13 @@ var demo = function(path, fs, url, buffer) {
         this.length = 0;
       }
       /**
-   * Adds a new node with the given value to the list.
-   * @param {LinkedList<T>} list
-   * @param {LinkedListNode<T>} node
-   * @param {T} value
-   * @returns {LinkedListNode<T>} The added node.
-   * @template T
-   */      function addAfter(list, node, value) {
+	 * Adds a new node with the given value to the list.
+	 * @param {LinkedList<T>} list
+	 * @param {LinkedListNode<T>} node
+	 * @param {T} value
+	 * @returns {LinkedListNode<T>} The added node.
+	 * @template T
+	 */      function addAfter(list, node, value) {
         // assumes that node != list.tail && values.length >= 0
         var next = node.next;
         var newNode = {
@@ -25420,12 +25438,12 @@ var demo = function(path, fs, url, buffer) {
         return newNode;
       }
       /**
-   * Removes `count` nodes after the given node. The given node will not be removed.
-   * @param {LinkedList<T>} list
-   * @param {LinkedListNode<T>} node
-   * @param {number} count
-   * @template T
-   */      function removeRange(list, node, count) {
+	 * Removes `count` nodes after the given node. The given node will not be removed.
+	 * @param {LinkedList<T>} list
+	 * @param {LinkedListNode<T>} node
+	 * @param {number} count
+	 * @template T
+	 */      function removeRange(list, node, count) {
         var next = node.next;
         for (var i = 0; i < count && next !== list.tail; i++) {
           next = next.next;
@@ -25435,10 +25453,10 @@ var demo = function(path, fs, url, buffer) {
         list.length -= i;
       }
       /**
-   * @param {LinkedList<T>} list
-   * @returns {T[]}
-   * @template T
-   */      function toArray(list) {
+	 * @param {LinkedList<T>} list
+	 * @returns {T[]}
+	 * @template T
+	 */      function toArray(list) {
         var array = [];
         var node = list.head.next;
         while (node !== list.tail) {
@@ -25505,8 +25523,8 @@ var demo = function(path, fs, url, buffer) {
       commonjsGlobal.Prism = Prism;
     }
     /* **********************************************
-       Begin prism-markup.js
-  ********************************************** */    Prism.languages.markup = {
+	     Begin prism-markup.js
+	********************************************** */    Prism.languages.markup = {
       comment: /<!--[\s\S]*?-->/,
       prolog: /<\?[\s\S]+?\?>/,
       doctype: {
@@ -25554,16 +25572,16 @@ var demo = function(path, fs, url, buffer) {
     }));
     Object.defineProperty(Prism.languages.markup.tag, "addInlined", {
       /**
-  	 * Adds an inlined language to markup.
-  	 *
-  	 * An example of an inlined language is CSS with `<style>` tags.
-  	 *
-  	 * @param {string} tagName The name of the tag that contains the inlined language. This name will be treated as
-  	 * case insensitive.
-  	 * @param {string} lang The language key.
-  	 * @example
-  	 * addInlined('style', 'css');
-  	 */
+		 * Adds an inlined language to markup.
+		 *
+		 * An example of an inlined language is CSS with `<style>` tags.
+		 *
+		 * @param {string} tagName The name of the tag that contains the inlined language. This name will be treated as
+		 * case insensitive.
+		 * @param {string} lang The language key.
+		 * @example
+		 * addInlined('style', 'css');
+		 */
       value: function addInlined(tagName, lang) {
         var includedCdataInside = {};
         includedCdataInside["language-" + lang] = {
@@ -25599,8 +25617,8 @@ var demo = function(path, fs, url, buffer) {
     Prism.languages.mathml = Prism.languages.markup;
     Prism.languages.svg = Prism.languages.markup;
     /* **********************************************
-       Begin prism-css.js
-  ********************************************** */    (function(Prism) {
+	     Begin prism-css.js
+	********************************************** */    (function(Prism) {
       var string = /("|')(?:\\(?:\r\n|[\s\S])|(?!\1)[^\\\r\n])*\1/;
       Prism.languages.css = {
         comment: /\/\*[\s\S]*?\*\//,
@@ -25657,8 +25675,8 @@ var demo = function(path, fs, url, buffer) {
       }
     })(Prism);
     /* **********************************************
-       Begin prism-clike.js
-  ********************************************** */    Prism.languages.clike = {
+	     Begin prism-clike.js
+	********************************************** */    Prism.languages.clike = {
       comment: [ {
         pattern: /(^|[^\\])\/\*[\s\S]*?(?:\*\/|$)/,
         lookbehind: true
@@ -25686,8 +25704,8 @@ var demo = function(path, fs, url, buffer) {
       punctuation: /[{}[\];(),.:]/
     };
     /* **********************************************
-       Begin prism-javascript.js
-  ********************************************** */    Prism.languages.javascript = Prism.languages.extend("clike", {
+	     Begin prism-javascript.js
+	********************************************** */    Prism.languages.javascript = Prism.languages.extend("clike", {
       "class-name": [ Prism.languages.clike["class-name"], {
         pattern: /(^|[^$\w\xA0-\uFFFF])[_$A-Z\xA0-\uFFFF][$\w\xA0-\uFFFF]*(?=\.(?:prototype|constructor))/,
         lookbehind: true
@@ -25763,14 +25781,14 @@ var demo = function(path, fs, url, buffer) {
     }
     Prism.languages.js = Prism.languages.javascript;
     /* **********************************************
-       Begin prism-file-highlight.js
-  ********************************************** */    (function() {
+	     Begin prism-file-highlight.js
+	********************************************** */    (function() {
       if (typeof self === "undefined" || !self.Prism || !self.document || !document.querySelector) {
         return;
       }
       /**
-  	 * @param {Element} [container=document]
-  	 */      self.Prism.fileHighlight = function(container) {
+		 * @param {Element} [container=document]
+		 */      self.Prism.fileHighlight = function(container) {
         container = container || document;
         var Extensions = {
           js: "javascript",
@@ -25831,8 +25849,12 @@ var demo = function(path, fs, url, buffer) {
         self.Prism.fileHighlight();
       }));
     })();
-  }));
-  var components_1$1 = createCommonjsModule((function(module) {
+  })(prism);
+  var Prism$1 = prism.exports;
+  var components$1 = {
+    exports: {}
+  };
+  (function(module) {
     var components = {
       core: {
         meta: {
@@ -27056,43 +27078,46 @@ var demo = function(path, fs, url, buffer) {
     if (module.exports) {
       module.exports = components;
     }
-  }));
-  var dependencies = createCommonjsModule((function(module) {
+  })(components$1);
+  var dependencies = {
+    exports: {}
+  };
+  (function(module) {
     /**
-   * @typedef {Object<string, ComponentCategory>} Components
-   * @typedef {Object<string, ComponentEntry | string>} ComponentCategory
-   *
-   * @typedef ComponentEntry
-   * @property {string} [title] The title of the component.
-   * @property {string} [owner] The GitHub user name of the owner.
-   * @property {boolean} [noCSS=false] Whether the component doesn't have style sheets which should also be loaded.
-   * @property {string | string[]} [alias] An optional list of aliases for the id of the component.
-   * @property {Object<string, string>} [aliasTitles] An optional map from an alias to its title.
-   *
-   * Aliases which are not in this map will the get title of the component.
-   * @property {string | string[]} [optional]
-   * @property {string | string[]} [require]
-   * @property {string | string[]} [modify]
-   */
+	 * @typedef {Object<string, ComponentCategory>} Components
+	 * @typedef {Object<string, ComponentEntry | string>} ComponentCategory
+	 *
+	 * @typedef ComponentEntry
+	 * @property {string} [title] The title of the component.
+	 * @property {string} [owner] The GitHub user name of the owner.
+	 * @property {boolean} [noCSS=false] Whether the component doesn't have style sheets which should also be loaded.
+	 * @property {string | string[]} [alias] An optional list of aliases for the id of the component.
+	 * @property {Object<string, string>} [aliasTitles] An optional map from an alias to its title.
+	 *
+	 * Aliases which are not in this map will the get title of the component.
+	 * @property {string | string[]} [optional]
+	 * @property {string | string[]} [require]
+	 * @property {string | string[]} [modify]
+	 */
     var getLoader = function() {
       /**
-  	 * A function which does absolutely nothing.
-  	 *
-  	 * @type {any}
-  	 */
+		 * A function which does absolutely nothing.
+		 *
+		 * @type {any}
+		 */
       var noop = function() {};
       /**
-  	 * Invokes the given callback for all elements of the given value.
-  	 *
-  	 * If the given value is an array, the callback will be invokes for all elements. If the given value is `null` or
-  	 * `undefined`, the callback will not be invoked. In all other cases, the callback will be invoked with the given
-  	 * value as parameter.
-  	 *
-  	 * @param {null | undefined | T | T[]} value
-  	 * @param {(value: T, index: number) => void} callbackFn
-  	 * @returns {void}
-  	 * @template T
-  	 */      function forEach(value, callbackFn) {
+		 * Invokes the given callback for all elements of the given value.
+		 *
+		 * If the given value is an array, the callback will be invokes for all elements. If the given value is `null` or
+		 * `undefined`, the callback will not be invoked. In all other cases, the callback will be invoked with the given
+		 * value as parameter.
+		 *
+		 * @param {null | undefined | T | T[]} value
+		 * @param {(value: T, index: number) => void} callbackFn
+		 * @returns {void}
+		 * @template T
+		 */      function forEach(value, callbackFn) {
         if (Array.isArray(value)) {
           value.forEach(callbackFn);
         } else if (value != null) {
@@ -27100,13 +27125,13 @@ var demo = function(path, fs, url, buffer) {
         }
       }
       /**
-  	 * Returns a new set for the given string array.
-  	 *
-  	 * @param {string[]} array
-  	 * @returns {StringSet}
-  	 *
-  	 * @typedef {Object<string, true>} StringSet
-  	 */      function toSet(array) {
+		 * Returns a new set for the given string array.
+		 *
+		 * @param {string[]} array
+		 * @returns {StringSet}
+		 *
+		 * @typedef {Object<string, true>} StringSet
+		 */      function toSet(array) {
         /** @type {StringSet} */
         var set = {};
         for (var i = 0, l = array.length; i < l; i++) {
@@ -27115,13 +27140,13 @@ var demo = function(path, fs, url, buffer) {
         return set;
       }
       /**
-  	 * Creates a map of every components id to its entry.
-  	 *
-  	 * @param {Components} components
-  	 * @returns {EntryMap}
-  	 *
-  	 * @typedef {{ readonly [id: string]: Readonly<ComponentEntry> | undefined }} EntryMap
-  	 */      function createEntryMap(components) {
+		 * Creates a map of every components id to its entry.
+		 *
+		 * @param {Components} components
+		 * @returns {EntryMap}
+		 *
+		 * @typedef {{ readonly [id: string]: Readonly<ComponentEntry> | undefined }} EntryMap
+		 */      function createEntryMap(components) {
         /** @type {Object<string, Readonly<ComponentEntry>>} */
         var map = {};
         for (var categoryName in components) {
@@ -27139,22 +27164,22 @@ var demo = function(path, fs, url, buffer) {
         return map;
       }
       /**
-  	 * Creates a full dependencies map which includes all types of dependencies and their transitive dependencies.
-  	 *
-  	 * @param {EntryMap} entryMap
-  	 * @returns {DependencyResolver}
-  	 *
-  	 * @typedef {(id: string) => StringSet} DependencyResolver
-  	 */      function createDependencyResolver(entryMap) {
+		 * Creates a full dependencies map which includes all types of dependencies and their transitive dependencies.
+		 *
+		 * @param {EntryMap} entryMap
+		 * @returns {DependencyResolver}
+		 *
+		 * @typedef {(id: string) => StringSet} DependencyResolver
+		 */      function createDependencyResolver(entryMap) {
         /** @type {Object<string, StringSet>} */
         var map = {};
         var _stackArray = [];
         /**
-  		 * Adds the dependencies of the given component to the dependency map.
-  		 *
-  		 * @param {string} id
-  		 * @param {string[]} stack
-  		 */        function addToMap(id, stack) {
+			 * Adds the dependencies of the given component to the dependency map.
+			 *
+			 * @param {string} id
+			 * @param {string[]} stack
+			 */        function addToMap(id, stack) {
           if (id in map) {
             return;
           }
@@ -27168,12 +27193,12 @@ var demo = function(path, fs, url, buffer) {
           var entry = entryMap[id];
           if (entry) {
             /**
-  				 * This will add the direct dependency and all of its transitive dependencies to the set of
-  				 * dependencies of `entry`.
-  				 *
-  				 * @param {string} depId
-  				 * @returns {void}
-  				 */
+					 * This will add the direct dependency and all of its transitive dependencies to the set of
+					 * dependencies of `entry`.
+					 *
+					 * @param {string} depId
+					 * @returns {void}
+					 */
             function handleDirectDependency(depId) {
               if (!(depId in entryMap)) {
                 throw new Error(id + " depends on an unknown component " + depId);
@@ -27205,11 +27230,11 @@ var demo = function(path, fs, url, buffer) {
         };
       }
       /**
-  	 * Returns a function which resolves the aliases of its given id of alias.
-  	 *
-  	 * @param {EntryMap} entryMap
-  	 * @returns {(idOrAlias: string) => string}
-  	 */      function createAliasResolver(entryMap) {
+		 * Returns a function which resolves the aliases of its given id of alias.
+		 *
+		 * @param {EntryMap} entryMap
+		 * @returns {(idOrAlias: string) => string}
+		 */      function createAliasResolver(entryMap) {
         /** @type {Object<string, string> | undefined} */
         var map;
         return function(idOrAlias) {
@@ -27237,35 +27262,35 @@ var demo = function(path, fs, url, buffer) {
         };
       }
       /**
-  	 * @typedef LoadChainer
-  	 * @property {(before: T, after: () => T) => T} series
-  	 * @property {(values: T[]) => T} parallel
-  	 * @template T
-  	 */
+		 * @typedef LoadChainer
+		 * @property {(before: T, after: () => T) => T} series
+		 * @property {(values: T[]) => T} parallel
+		 * @template T
+		 */
       /**
-  	 * Creates an implicit DAG from the given components and dependencies and call the given `loadComponent` for each
-  	 * component in topological order.
-  	 *
-  	 * @param {DependencyResolver} dependencyResolver
-  	 * @param {StringSet} ids
-  	 * @param {(id: string) => T} loadComponent
-  	 * @param {LoadChainer<T>} [chainer]
-  	 * @returns {T}
-  	 * @template T
-  	 */      function loadComponentsInOrder(dependencyResolver, ids, loadComponent, chainer) {
+		 * Creates an implicit DAG from the given components and dependencies and call the given `loadComponent` for each
+		 * component in topological order.
+		 *
+		 * @param {DependencyResolver} dependencyResolver
+		 * @param {StringSet} ids
+		 * @param {(id: string) => T} loadComponent
+		 * @param {LoadChainer<T>} [chainer]
+		 * @returns {T}
+		 * @template T
+		 */      function loadComponentsInOrder(dependencyResolver, ids, loadComponent, chainer) {
         const series = chainer ? chainer.series : undefined;
         const parallel = chainer ? chainer.parallel : noop;
         /** @type {Object<string, T>} */        var cache = {};
         /**
-  		 * A set of ids of nodes which are not depended upon by any other node in the graph.
-  		 * @type {StringSet}
-  		 */        var ends = {};
+			 * A set of ids of nodes which are not depended upon by any other node in the graph.
+			 * @type {StringSet}
+			 */        var ends = {};
         /**
-  		 * Loads the given component and its dependencies or returns the cached value.
-  		 *
-  		 * @param {string} id
-  		 * @returns {T}
-  		 */        function handleId(id) {
+			 * Loads the given component and its dependencies or returns the cached value.
+			 *
+			 * @param {string} id
+			 * @returns {T}
+			 */        function handleId(id) {
           if (id in cache) {
             return cache[id];
           }
@@ -27280,9 +27305,9 @@ var demo = function(path, fs, url, buffer) {
             }
           }
           /**
-  			 * The value to be returned.
-  			 * @type {T}
-  			 */          var value;
+				 * The value to be returned.
+				 * @type {T}
+				 */          var value;
           if (dependsOn.length === 0) {
             value = loadComponent(id);
           } else {
@@ -27315,61 +27340,61 @@ var demo = function(path, fs, url, buffer) {
         return parallel(endValues);
       }
       /**
-  	 * Returns whether the given object has any keys.
-  	 *
-  	 * @param {object} obj
-  	 */      function hasKeys(obj) {
+		 * Returns whether the given object has any keys.
+		 *
+		 * @param {object} obj
+		 */      function hasKeys(obj) {
         for (var key in obj) {
           return true;
         }
         return false;
       }
       /**
-  	 * Returns an object which provides methods to get the ids of the components which have to be loaded (`getIds`) and
-  	 * a way to efficiently load them in synchronously and asynchronous contexts (`load`).
-  	 *
-  	 * The set of ids to be loaded is a superset of `load`. If some of these ids are in `loaded`, the corresponding
-  	 * components will have to reloaded.
-  	 *
-  	 * The ids in `load` and `loaded` may be in any order and can contain duplicates.
-  	 *
-  	 * @param {Components} components
-  	 * @param {string[]} load
-  	 * @param {string[]} [loaded=[]] A list of already loaded components.
-  	 *
-  	 * If a component is in this list, then all of its requirements will also be assumed to be in the list.
-  	 * @returns {Loader}
-  	 *
-  	 * @typedef Loader
-  	 * @property {() => string[]} getIds A function to get all ids of the components to load.
-  	 *
-  	 * The returned ids will be duplicate-free, alias-free and in load order.
-  	 * @property {LoadFunction} load A functional interface to load components.
-  	 *
-  	 * @typedef {<T> (loadComponent: (id: string) => T, chainer?: LoadChainer<T>) => T} LoadFunction
-  	 * A functional interface to load components.
-  	 *
-  	 * The `loadComponent` function will be called for every component in the order in which they have to be loaded.
-  	 *
-  	 * The `chainer` is useful for asynchronous loading and its `series` and `parallel` functions can be thought of as
-  	 * `Promise#then` and `Promise.all`.
-  	 *
-  	 * @example
-  	 * load(id => { loadComponent(id); }); // returns undefined
-  	 *
-  	 * await load(
-  	 *     id => loadComponentAsync(id), // returns a Promise for each id
-  	 *     {
-  	 *         series: async (before, after) => {
-  	 *             await before;
-  	 *             await after();
-  	 *         },
-  	 *         parallel: async (values) => {
-  	 *             await Promise.all(values);
-  	 *         }
-  	 *     }
-  	 * );
-  	 */      function getLoader(components, load, loaded) {
+		 * Returns an object which provides methods to get the ids of the components which have to be loaded (`getIds`) and
+		 * a way to efficiently load them in synchronously and asynchronous contexts (`load`).
+		 *
+		 * The set of ids to be loaded is a superset of `load`. If some of these ids are in `loaded`, the corresponding
+		 * components will have to reloaded.
+		 *
+		 * The ids in `load` and `loaded` may be in any order and can contain duplicates.
+		 *
+		 * @param {Components} components
+		 * @param {string[]} load
+		 * @param {string[]} [loaded=[]] A list of already loaded components.
+		 *
+		 * If a component is in this list, then all of its requirements will also be assumed to be in the list.
+		 * @returns {Loader}
+		 *
+		 * @typedef Loader
+		 * @property {() => string[]} getIds A function to get all ids of the components to load.
+		 *
+		 * The returned ids will be duplicate-free, alias-free and in load order.
+		 * @property {LoadFunction} load A functional interface to load components.
+		 *
+		 * @typedef {<T> (loadComponent: (id: string) => T, chainer?: LoadChainer<T>) => T} LoadFunction
+		 * A functional interface to load components.
+		 *
+		 * The `loadComponent` function will be called for every component in the order in which they have to be loaded.
+		 *
+		 * The `chainer` is useful for asynchronous loading and its `series` and `parallel` functions can be thought of as
+		 * `Promise#then` and `Promise.all`.
+		 *
+		 * @example
+		 * load(id => { loadComponent(id); }); // returns undefined
+		 *
+		 * await load(
+		 *     id => loadComponentAsync(id), // returns a Promise for each id
+		 *     {
+		 *         series: async (before, after) => {
+		 *             await before;
+		 *             await after();
+		 *         },
+		 *         parallel: async (values) => {
+		 *             await Promise.all(values);
+		 *         }
+		 *     }
+		 * );
+		 */      function getLoader(components, load, loaded) {
         var entryMap = createEntryMap(components);
         var resolveAlias = createAliasResolver(entryMap);
         load = load.map(resolveAlias);
@@ -27441,30 +27466,32 @@ var demo = function(path, fs, url, buffer) {
     {
       module.exports = getLoader;
     }
-  }));
+  })(dependencies);
+  const components = components$1.exports;
+  const getLoader = dependencies.exports;
   /**
-   * The set of all languages which have been loaded using the below function.
-   *
-   * @type {Set<string>}
-   */  const loadedLanguages = new Set;
+	 * The set of all languages which have been loaded using the below function.
+	 *
+	 * @type {Set<string>}
+	 */  const loadedLanguages = new Set;
   /**
-   * Loads the given languages and adds them to the current Prism instance.
-   *
-   * If no languages are provided, __all__ Prism languages will be loaded.
-   *
-   * @param {string|string[]} [languages]
-   * @returns {void}
-   */  function loadLanguages(languages) {
+	 * Loads the given languages and adds them to the current Prism instance.
+	 *
+	 * If no languages are provided, __all__ Prism languages will be loaded.
+	 *
+	 * @param {string|string[]} [languages]
+	 * @returns {void}
+	 */  function loadLanguages(languages) {
     if (languages === undefined) {
-      languages = Object.keys(components_1$1.languages).filter((l => l != "meta"));
+      languages = Object.keys(components.languages).filter((l => l != "meta"));
     } else if (!Array.isArray(languages)) {
       languages = [ languages ];
     }
     // the user might have loaded languages via some other way or used `prism.js` which already includes some
     // we don't need to validate the ids because `getLoader` will ignore invalid ones
         const loaded = [ ...loadedLanguages, ...Object.keys(Prism.languages) ];
-    dependencies(components_1$1, languages, loaded).load((lang => {
-      if (!(lang in components_1$1.languages)) {
+    getLoader(components, languages, loaded).load((lang => {
+      if (!(lang in components.languages)) {
         if (!loadLanguages.silent) {
           console.warn("Language does not exist: " + lang);
         }
@@ -27479,36 +27506,36 @@ var demo = function(path, fs, url, buffer) {
     }));
   }
   /**
-   * Set this to `true` to prevent all warning messages `loadLanguages` logs.
-   */  loadLanguages.silent = false;
+	 * Set this to `true` to prevent all warning messages `loadLanguages` logs.
+	 */  loadLanguages.silent = false;
   loadLanguages.getSupportedLanguages = function() {
     return loadedLanguages;
   };
   var components_1 = loadLanguages;
   /**
-   * A callback that can be used to perform custom initialisation of the Prism instance.
-   *
-   * @callback PrismInitialisationCallback
-   * @param {Prism} prism
-   *        The Prism instance
-   */
+	 * A callback that can be used to perform custom initialisation of the Prism instance.
+	 *
+	 * @callback PrismInitialisationCallback
+	 * @param {Prism} prism
+	 *        The Prism instance
+	 */
   /**
-   * The options for the markdown-it-prism plugin
-   *
-   * @typedef {Object} MarkdownItPrismOptions
-   * @property {String[]} plugins
-   *        Names of Prism plugins to load
-   * @property {PrismInitialisationCallback} init
-   *        Callback for Prism initialisation
-   * @property {String} defaultLanguageForUnknown
-   *        The language to use for code blocks that specify a language that Prism does not know
-   * @property {String} defaultLanguageForUnspecified
-   *        The language to use for code block that do not specify a language
-   * @property {String} defaultLanguage
-   *        Shorthand to set both {@code defaultLanguageForUnknown} and {@code defaultLanguageForUnspecified} to the same value
-   * @property {Function} noKnownLanguageCallback
-   *        Function which will be invoked when the specified/default language is not known to Prism. The function is passed the error message, the specified language and the set of available languages.
-   */  const DEFAULTS = {
+	 * The options for the markdown-it-prism plugin
+	 *
+	 * @typedef {Object} MarkdownItPrismOptions
+	 * @property {String[]} plugins
+	 *        Names of Prism plugins to load
+	 * @property {PrismInitialisationCallback} init
+	 *        Callback for Prism initialisation
+	 * @property {String} defaultLanguageForUnknown
+	 *        The language to use for code blocks that specify a language that Prism does not know
+	 * @property {String} defaultLanguageForUnspecified
+	 *        The language to use for code block that do not specify a language
+	 * @property {String} defaultLanguage
+	 *        Shorthand to set both {@code defaultLanguageForUnknown} and {@code defaultLanguageForUnspecified} to the same value
+	 * @property {Function} noKnownLanguageCallback
+	 *        Function which will be invoked when the specified/default language is not known to Prism. The function is passed the error message, the specified language and the set of available languages.
+	 */  const DEFAULTS = {
     plugins: [],
     init: () => {},
     defaultLanguageForUnknown: undefined,
@@ -27517,26 +27544,26 @@ var demo = function(path, fs, url, buffer) {
     noKnownLanguageCallback: undefined
   };
   /**
-   * Loads the provided {@code lang} into prism.
-   *
-   * @param {String} lang
-   *        Code of the language to load.
-   * @return {Object} The Prism language object for the provided {@code lang} code. {@code undefined} if the language is not known to Prism.
-   */  function loadPrismLang(lang) {
+	 * Loads the provided {@code lang} into prism.
+	 *
+	 * @param {String} lang
+	 *        Code of the language to load.
+	 * @return {Object} The Prism language object for the provided {@code lang} code. {@code undefined} if the language is not known to Prism.
+	 */  function loadPrismLang(lang) {
     if (!lang) return undefined;
-    let langObject = prism.languages[lang];
+    let langObject = Prism$1.languages[lang];
     if (langObject === undefined) {
       components_1([ lang ]);
-      langObject = prism.languages[lang];
+      langObject = Prism$1.languages[lang];
     }
     return langObject;
   }
   /**
-   * Loads the provided Prism plugin.a
-   * @param name
-   *        Name of the plugin to load
-   * @throws {Error} If there is no plugin with the provided {@code name}
-   */  function loadPrismPlugin(name) {
+	 * Loads the provided Prism plugin.a
+	 * @param name
+	 *        Name of the plugin to load
+	 * @throws {Error} If there is no plugin with the provided {@code name}
+	 */  function loadPrismPlugin(name) {
     try {
       require(`@gerhobbelt/prismjs/plugins/${name}/prism-${name}`);
     } catch (e) {
@@ -27544,14 +27571,14 @@ var demo = function(path, fs, url, buffer) {
     }
   }
   /**
-   * Select the language to use for highlighting, based on the provided options and the specified language.
-   *
-   * @param {Object} options
-   *        The options that were used to initialise the plugin.
-   * @param {String} lang
-   *        Code of the language to highlight the text in.
-   * @return {Array} An array where the first element is the name of the language to use, and the second element is the PRISM language object for that language.
-   */  function selectLanguage(options, lang) {
+	 * Select the language to use for highlighting, based on the provided options and the specified language.
+	 *
+	 * @param {Object} options
+	 *        The options that were used to initialise the plugin.
+	 * @param {String} lang
+	 *        Code of the language to highlight the text in.
+	 * @return {Array} An array where the first element is the name of the language to use, and the second element is the PRISM language object for that language.
+	 */  function selectLanguage(options, lang) {
     let langToUse = lang;
     if (langToUse === "" && options.defaultLanguageForUnspecified !== undefined) {
       langToUse = options.defaultLanguageForUnspecified;
@@ -27564,23 +27591,23 @@ var demo = function(path, fs, url, buffer) {
     return [ langToUse, prismLang ];
   }
   /**
-   * Highlights the provided text using Prism.
-   *
-   * @param {MarkdownIt} markdownit
-   *        Instance of MarkdownIt Class. This argument is bound in markdownItPrism().
-   * @param {MarkdownItPrismOptions} options
-   *        The options that have been used to initialise the plugin. This argument is bound in markdownItPrism().
-   * @param {String} text
-   *        The text to highlight.
-   * @param {String} lang
-   *        Code of the language to highlight the text in.
-   * @return {String} {@code text} wrapped in {@code &lt;pre&gt;} and {@code &lt;code&gt;}, both equipped with the appropriate class (markdown-it’s langPrefix + lang). If Prism knows {@code lang}, {@code text} will be highlighted by it.
-   */  function highlight$1(markdownit, options, text, lang) {
+	 * Highlights the provided text using Prism.
+	 *
+	 * @param {MarkdownIt} markdownit
+	 *        Instance of MarkdownIt Class. This argument is bound in markdownItPrism().
+	 * @param {MarkdownItPrismOptions} options
+	 *        The options that have been used to initialise the plugin. This argument is bound in markdownItPrism().
+	 * @param {String} text
+	 *        The text to highlight.
+	 * @param {String} lang
+	 *        Code of the language to highlight the text in.
+	 * @return {String} {@code text} wrapped in {@code &lt;pre&gt;} and {@code &lt;code&gt;}, both equipped with the appropriate class (markdown-it’s langPrefix + lang). If Prism knows {@code lang}, {@code text} will be highlighted by it.
+	 */  function highlight$1(markdownit, options, text, lang) {
     let langToUse, prismLang;
     [langToUse, prismLang] = selectLanguage(options, lang);
     let code;
     if (prismLang) {
-      code = prism.highlight(text, prismLang);
+      code = Prism$1.highlight(text, prismLang);
     } else {
       if (options.noKnownLanguageCallback && lang) {
         options.noKnownLanguageCallback(`There is no Prism language '${lang}' for highlight chunk:\n${text}`, lang, components_1.getSupportedLanguages());
@@ -27591,28 +27618,28 @@ var demo = function(path, fs, url, buffer) {
     return `<pre${classAttribute}><code${classAttribute}>${code}</code></pre>`;
   }
   /**
-   * Checks whether an option represents a valid Prism language
-   *
-   * @param {MarkdownItPrismOptions} options
-   *        The options that have been used to initialise the plugin.
-   * @param optionName
-   *        The key of the option insides {@code options} that shall be checked.
-   * @throws {Error} If the option is not set to a valid Prism language.
-   */  function checkLanguageOption(options, optionName) {
+	 * Checks whether an option represents a valid Prism language
+	 *
+	 * @param {MarkdownItPrismOptions} options
+	 *        The options that have been used to initialise the plugin.
+	 * @param optionName
+	 *        The key of the option insides {@code options} that shall be checked.
+	 * @throws {Error} If the option is not set to a valid Prism language.
+	 */  function checkLanguageOption(options, optionName) {
     const language = options[optionName];
     if (language !== undefined && loadPrismLang(language) === undefined) {
       throw new Error(`Bad option ${optionName}: There is no Prism language '${language}'.`);
     }
   }
   /**
-   * Initialisation function of the plugin. This function is not called directly by clients, but is rather provided
-   * to MarkdownIt’s {@link MarkdownIt.use} function.
-   *
-   * @param {MarkdownIt} markdownit
-   *        The markdown it instance the plugin is being registered to.
-   * @param {MarkdownItPrismOptions} useroptions
-   *        The options this plugin is being initialised with.
-   */  function markdownItPrism(markdownit, useroptions) {
+	 * Initialisation function of the plugin. This function is not called directly by clients, but is rather provided
+	 * to MarkdownIt’s {@link MarkdownIt.use} function.
+	 *
+	 * @param {MarkdownIt} markdownit
+	 *        The markdown it instance the plugin is being registered to.
+	 * @param {MarkdownItPrismOptions} useroptions
+	 *        The options this plugin is being initialised with.
+	 */  function markdownItPrism(markdownit, useroptions) {
     const options = Object.assign({}, DEFAULTS, useroptions);
     checkLanguageOption(options, "defaultLanguage");
     checkLanguageOption(options, "defaultLanguageForUnknown");
@@ -27620,7 +27647,7 @@ var demo = function(path, fs, url, buffer) {
     options.defaultLanguageForUnknown = options.defaultLanguageForUnknown || options.defaultLanguage;
     options.defaultLanguageForUnspecified = options.defaultLanguageForUnspecified || options.defaultLanguage;
     options.plugins.forEach(loadPrismPlugin);
-    options.init(prism);
+    options.init(Prism$1);
     // register ourselves as highlighter
         markdownit.options.highlight = (...args) => highlight$1(markdownit, options, ...args);
   }
@@ -27628,6 +27655,7 @@ var demo = function(path, fs, url, buffer) {
     __proto__: null,
     default: markdownItPrism
   });
+  var require$$76 =  getAugmentedNamespace(markdownItPrism$1);
   // export.default = ...  <-- causes slightly different behaviour: MarkDownIt.use(require(plugin).default);
     var index_es6 = md => {
     const originalRender = md.render;
@@ -27644,6 +27672,7 @@ var demo = function(path, fs, url, buffer) {
       return html;
     };
   };
+  const hljs$1 = lib;
   const maybe = f => {
     try {
       return f();
@@ -27653,14 +27682,14 @@ var demo = function(path, fs, url, buffer) {
   };
   // Allow registration of other languages.
     const registerLangs = register => register && Object.entries(register).map((([lang, pack]) => {
-    lib.registerLanguage(lang, pack);
+    hljs$1.registerLanguage(lang, pack);
   }))
   // Highlight with given language.
   ;
-  const highlight = (code, lang) => maybe((() => lib.highlight(lang || "plaintext", code, true).value)) || ""
+  const highlight = (code, lang) => maybe((() => hljs$1.highlight(lang || "plaintext", code, true).value)) || ""
   // Highlight with given language or automatically.
   ;
-  const highlightAuto = (code, lang) => lang ? highlight(code, lang) : maybe((() => lib.highlightAuto(code).value)) || ""
+  const highlightAuto = (code, lang) => lang ? highlight(code, lang) : maybe((() => hljs$1.highlightAuto(code).value)) || ""
   // Wrap a render function to add `hljs` class to code blocks.
   ;
   const wrap = render => function(...args) {
@@ -27762,8 +27791,7 @@ var demo = function(path, fs, url, buffer) {
       return "<pre><samp" + self.renderAttrs(token) + ">" + md.utils.escapeHtml(token.content) + "</samp></pre>\n";
     };
   };
-  // Process --strikethrough--
-    var markdownItStrikethroughAlt = function strikethrough_alt_plugin(md) {
+  var markdownItStrikethroughAlt = function strikethrough_alt_plugin(md) {
     function scanDelims(src, posMax, start) {
       var pos = start, count, can_open, can_close, max = posMax, marker = src.charCodeAt(start);
       while (pos < max && src.charCodeAt(pos) === marker) {
@@ -27835,7 +27863,6 @@ var demo = function(path, fs, url, buffer) {
     md.inline.ruler.before("emphasis", "strikethrough_alt_plugin", tokenize);
     md.inline.ruler2.before("emphasis", "strikethrough_alt_plugin", postProcess);
   };
-  // Process ~subscript~
   // same as UNESCAPE_MD_RE plus a space
     var UNESCAPE_RE$1 = /\\([ \\!"#$%&'()*+,./:;<=>?@[\]^_`{|}~-])/g;
   function subscript(state, silent) {
@@ -27885,7 +27912,6 @@ var demo = function(path, fs, url, buffer) {
   var markdownItSub = function sub_plugin(md) {
     md.inline.ruler.after("emphasis", "sub", subscript);
   };
-  // Process ^superscript^
   // same as UNESCAPE_MD_RE plus a space
     var UNESCAPE_RE = /\\([ \\!"#$%&'()*+,./:;<=>?@[\]^_`{|}~-])/g;
   function superscript(state, silent) {
@@ -28003,19 +28029,19 @@ var demo = function(path, fs, url, buffer) {
       if (options.forceFullToc) {
         /*
 
-        Renders full TOC even if the hierarchy of headers contains
-        a header greater than the first appearing header
+	      Renders full TOC even if the hierarchy of headers contains
+	      a header greater than the first appearing header
 
-        ## heading 2
-        ### heading 3
-        # heading 1
+	      ## heading 2
+	      ### heading 3
+	      # heading 1
 
-        Result TOC:
-        - heading 2
-           - heading 3
-        - heading 1
+	      Result TOC:
+	      - heading 2
+	         - heading 3
+	      - heading 1
 
-        */
+	      */
         let tocBody = "";
         let pos = 0;
         let tokenLength = gstate && gstate.tokens && gstate.tokens.length;
@@ -28087,6 +28113,7 @@ var demo = function(path, fs, url, buffer) {
     __proto__: null,
     default: markdownItTableOfContents
   });
+  var require$$83 =  getAugmentedNamespace(markdownIt$1);
   // Process @[toc](|Title)
     var markdownItToc = function(md) {
     const TOC_REGEXP = /^@\[toc\](?:\((?:\s+)?([^\)]+)(?:\s+)?\))?(?:\s*?)$/im;
@@ -28237,17 +28264,18 @@ var demo = function(path, fs, url, buffer) {
     __proto__: null,
     default: markdownItToc
   });
+  var require$$84 =  getAugmentedNamespace(markdownIt);
   /*! markdown-it-regexp 0.6.0-12 https://github.com//GerHobbelt/markdown-it-regexp @license MIT */
   /*!
-   * markdown-it-regexp
-   * Copyright (c) 2014 Alex Kocharin
-   * MIT Licensed
-   */
+	 * markdown-it-regexp
+	 * Copyright (c) 2014 Alex Kocharin
+	 * MIT Licensed
+	 */
   /**
-   * Escape special characters in the given string of html.
-   *
-   * Borrowed from escape-html component, MIT-licensed
-   */  function escape(html) {
+	 * Escape special characters in the given string of html.
+	 *
+	 * Borrowed from escape-html component, MIT-licensed
+	 */  function escape(html) {
     return String(html).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/'/g, "&#39;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   }
  // code assumes you're wrapping HTML attributes in doublequotes:
@@ -28256,13 +28284,13 @@ var demo = function(path, fs, url, buffer) {
     return value.replace(/"/g, "&#34;");
   }
   /*!
-   * markdown-it-regexp
-   * Copyright (c) 2014 Alex Kocharin
-   * MIT Licensed
-   */
+	 * markdown-it-regexp
+	 * Copyright (c) 2014 Alex Kocharin
+	 * MIT Licensed
+	 */
   /**
-   * Counter for multi usage.
-   */  let counter = 0;
+	 * Counter for multi usage.
+	 */  let counter = 0;
   let registered_ids = [];
   function transformRegExpToOnlyMatchFromStart(regexp) {
     // clone regexp with all the flags
@@ -28273,8 +28301,8 @@ var demo = function(path, fs, url, buffer) {
     return regexp;
   }
   /**
-   * Constructor function
-   */  let createPlugin = function createPluginF(regexp, config) {
+	 * Constructor function
+	 */  let createPlugin = function createPluginF(regexp, config) {
     regexp = transformRegExpToOnlyMatchFromStart(regexp);
     config = Object.assign({}, {
       setup: (setup, config) => config,
@@ -28365,15 +28393,14 @@ var demo = function(path, fs, url, buffer) {
     counter = 0;
     registered_ids = [];
   };
-  //# sourceMappingURL=markdownItRegexp.modern.js.map
-    function isHighSurrogate(codePoint) {
+  function isHighSurrogate(codePoint) {
     return codePoint >= 55296 && codePoint <= 56319;
   }
   function isLowSurrogate(codePoint) {
     return codePoint >= 56320 && codePoint <= 57343;
   }
   // Truncate string by size in bytes
-    var truncate = function truncate(getLength, string, byteLength) {
+    var truncate$2 = function truncate(getLength, string, byteLength) {
     if (typeof string !== "string") {
       throw new Error("Input must be string");
     }
@@ -28397,35 +28424,37 @@ var demo = function(path, fs, url, buffer) {
     }
     return string;
   };
-  var getLength = buffer.Buffer.byteLength.bind(buffer.Buffer);
-  var truncateUtf8Bytes = truncate.bind(null, getLength);
+  var truncate$1 = truncate$2;
+  var getLength = Buffer.byteLength.bind(Buffer);
+  var truncateUtf8Bytes = truncate$1.bind(null, getLength);
   /*jshint node:true*/
   /**
-   * Replaces characters in strings that are illegal/unsafe for filenames.
-   * Unsafe characters are either removed or replaced by a substitute set
-   * in the optional `options` object.
-   *
-   * Illegal Characters on Various Operating Systems
-   * / ? < > \ : * | "
-   * https://kb.acronis.com/content/39790
-   *
-   * Unicode Control codes
-   * C0 0x00-0x1f & C1 (0x80-0x9f)
-   * http://en.wikipedia.org/wiki/C0_and_C1_control_codes
-   *
-   * Reserved filenames on Unix-based systems (".", "..")
-   * Reserved filenames in Windows ("CON", "PRN", "AUX", "NUL", "COM1",
-   * "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9",
-   * "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", and
-   * "LPT9") case-insesitively and with or without filename extensions.
-   *
-   * Capped at 255 characters in length.
-   * http://unix.stackexchange.com/questions/32795/what-is-the-maximum-allowed-filename-and-folder-size-with-ecryptfs
-   *
-   * @param  {String} input   Original filename
-   * @param  {Object} options {replacement: String | Function }
-   * @return {String}         Sanitized filename
-   */  var illegalRe = /[\/\?<>\\:\*\|"]/g;
+	 * Replaces characters in strings that are illegal/unsafe for filenames.
+	 * Unsafe characters are either removed or replaced by a substitute set
+	 * in the optional `options` object.
+	 *
+	 * Illegal Characters on Various Operating Systems
+	 * / ? < > \ : * | "
+	 * https://kb.acronis.com/content/39790
+	 *
+	 * Unicode Control codes
+	 * C0 0x00-0x1f & C1 (0x80-0x9f)
+	 * http://en.wikipedia.org/wiki/C0_and_C1_control_codes
+	 *
+	 * Reserved filenames on Unix-based systems (".", "..")
+	 * Reserved filenames in Windows ("CON", "PRN", "AUX", "NUL", "COM1",
+	 * "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9",
+	 * "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", and
+	 * "LPT9") case-insesitively and with or without filename extensions.
+	 *
+	 * Capped at 255 characters in length.
+	 * http://unix.stackexchange.com/questions/32795/what-is-the-maximum-allowed-filename-and-folder-size-with-ecryptfs
+	 *
+	 * @param  {String} input   Original filename
+	 * @param  {Object} options {replacement: String | Function }
+	 * @return {String}         Sanitized filename
+	 */  var truncate = truncateUtf8Bytes;
+  var illegalRe = /[\/\?<>\\:\*\|"]/g;
   var controlRe = /[\x00-\x1f\x80-\x9f]/g;
   var reservedRe = /^\.+$/;
   var windowsReservedRe = /^(con|prn|aux|nul|com[0-9]|lpt[0-9])(\..*)?$/i;
@@ -28435,7 +28464,7 @@ var demo = function(path, fs, url, buffer) {
       throw new Error("Input must be string");
     }
     var sanitized = input.replace(illegalRe, replacement).replace(controlRe, replacement).replace(reservedRe, replacement).replace(windowsReservedRe, replacement).replace(windowsTrailingRe, replacement);
-    return truncateUtf8Bytes(sanitized, 255);
+    return truncate(sanitized, 255);
   }
   var sanitizeFilename = function(input, options) {
     var replacement = options && options.replacement || "";
@@ -28556,84 +28585,71 @@ var demo = function(path, fs, url, buffer) {
     /./, Object.assign({}, defaultSetup, setupObj));
     return p;
   };
-  //# sourceMappingURL=markdownItWikiLinks.modern.js.map
-    var markdownitWikilinks =  Object.freeze({
+  var markdownitWikilinks =  Object.freeze({
     __proto__: null,
     default: plugin
   });
-  var require$$56 =  getAugmentedNamespace(markdownitAbbr);
-  var require$$57 =  getAugmentedNamespace(markdownItAttrs);
-  var require$$58 =  getAugmentedNamespace(markdownitContainer);
-  var require$$60 =  getAugmentedNamespace(markdownItDefList);
-  var require$$61 =  getAugmentedNamespace(markdownItEmoji);
-  var require$$62 =  getAugmentedNamespace(markdownItFontAwesome);
-  var require$$63 =  getAugmentedNamespace(markdownItFootnote);
-  var require$$64 =  getAugmentedNamespace(markdownitFrontMatter);
-  var require$$68 =  getAugmentedNamespace(markdownItAbbr);
-  var require$$70 =  getAugmentedNamespace(markdownitKbd);
-  var require$$73 =  getAugmentedNamespace(markdownitModifyToken);
-  var require$$74 =  getAugmentedNamespace(markdownItPrism$1);
-  var require$$81 =  getAugmentedNamespace(markdownIt$1);
-  var require$$82 =  getAugmentedNamespace(markdownIt);
-  var require$$83 =  getAugmentedNamespace(markdownitWikilinks);
+  var require$$85 =  getAugmentedNamespace(markdownitWikilinks);
   /*eslint-env browser*/
-  /*global $, _*/  lib.registerLanguage("actionscript", actionscript_1);
-  lib.registerLanguage("apache", apache_1);
-  lib.registerLanguage("armasm", armasm_1);
-  lib.registerLanguage("xml", xml_1);
-  lib.registerLanguage("asciidoc", asciidoc_1);
-  lib.registerLanguage("avrasm", avrasm_1);
-  lib.registerLanguage("bash", bash_1);
-  lib.registerLanguage("clojure", clojure_1);
-  lib.registerLanguage("cmake", cmake_1);
-  lib.registerLanguage("coffeescript", coffeescript_1);
-  lib.registerLanguage("cpp", cpp_1);
-  lib.registerLanguage("c", c_1);
-  lib.registerLanguage("c-like", cLike_1);
-  lib.registerLanguage("csharp", csharp_1);
-  lib.registerLanguage("arduino", arduino_1);
-  lib.registerLanguage("css", css_1);
-  lib.registerLanguage("diff", diff_1);
-  lib.registerLanguage("django", django_1);
-  lib.registerLanguage("dockerfile", dockerfile_1);
-  lib.registerLanguage("ruby", ruby_1);
-  lib.registerLanguage("fortran", fortran_1);
-  lib.registerLanguage("glsl", glsl_1);
-  lib.registerLanguage("go", go_1);
-  lib.registerLanguage("groovy", groovy_1);
-  lib.registerLanguage("handlebars", handlebars_1);
-  lib.registerLanguage("haskell", haskell_1);
-  lib.registerLanguage("ini", ini_1);
-  lib.registerLanguage("java", java_1);
-  lib.registerLanguage("javascript", javascript_1);
-  lib.registerLanguage("json", json_1);
-  lib.registerLanguage("latex", latex_1);
-  lib.registerLanguage("less", less_1);
-  lib.registerLanguage("lisp", lisp_1);
-  lib.registerLanguage("livescript", livescript_1);
-  lib.registerLanguage("lua", lua_1);
-  lib.registerLanguage("makefile", makefile_1);
-  lib.registerLanguage("matlab", matlab_1);
-  lib.registerLanguage("mipsasm", mipsasm_1);
-  lib.registerLanguage("perl", perl_1);
-  lib.registerLanguage("nginx", nginx_1);
-  lib.registerLanguage("objectivec", objectivec_1);
-  lib.registerLanguage("php", php_1);
+  /*global $, _*/  let mdurl = mdurl$1;
+  let hljs = lib;
+  hljs.registerLanguage("actionscript", actionscript_1);
+  hljs.registerLanguage("apache", apache_1);
+  hljs.registerLanguage("armasm", armasm_1);
+  hljs.registerLanguage("xml", xml_1);
+  hljs.registerLanguage("asciidoc", asciidoc_1);
+  hljs.registerLanguage("avrasm", avrasm_1);
+  hljs.registerLanguage("bash", bash_1);
+  hljs.registerLanguage("clojure", clojure_1);
+  hljs.registerLanguage("cmake", cmake_1);
+  hljs.registerLanguage("coffeescript", coffeescript_1);
+  hljs.registerLanguage("cpp", cpp_1);
+  hljs.registerLanguage("c", c_1);
+  hljs.registerLanguage("c-like", cLike_1);
+  hljs.registerLanguage("csharp", csharp_1);
+  hljs.registerLanguage("arduino", arduino_1);
+  hljs.registerLanguage("css", css_1);
+  hljs.registerLanguage("diff", diff_1);
+  hljs.registerLanguage("django", django_1);
+  hljs.registerLanguage("dockerfile", dockerfile_1);
+  hljs.registerLanguage("ruby", ruby_1);
+  hljs.registerLanguage("fortran", fortran_1);
+  hljs.registerLanguage("glsl", glsl_1);
+  hljs.registerLanguage("go", go_1);
+  hljs.registerLanguage("groovy", groovy_1);
+  hljs.registerLanguage("handlebars", handlebars_1);
+  hljs.registerLanguage("haskell", haskell_1);
+  hljs.registerLanguage("ini", ini_1);
+  hljs.registerLanguage("java", java_1);
+  hljs.registerLanguage("javascript", javascript_1);
+  hljs.registerLanguage("json", json_1);
+  hljs.registerLanguage("latex", latex_1);
+  hljs.registerLanguage("less", less_1);
+  hljs.registerLanguage("lisp", lisp_1);
+  hljs.registerLanguage("livescript", livescript_1);
+  hljs.registerLanguage("lua", lua_1);
+  hljs.registerLanguage("makefile", makefile_1);
+  hljs.registerLanguage("matlab", matlab_1);
+  hljs.registerLanguage("mipsasm", mipsasm_1);
+  hljs.registerLanguage("perl", perl_1);
+  hljs.registerLanguage("nginx", nginx_1);
+  hljs.registerLanguage("objectivec", objectivec_1);
+  hljs.registerLanguage("php", php_1);
   //hljs.registerLanguage('phptemplate',  require('@gerhobbelt/highlight.js/lib/languages/phptemplate'));
-    lib.registerLanguage("python", python_1);
-  lib.registerLanguage("python-repl", pythonRepl_1);
-  lib.registerLanguage("rust", rust_1);
-  lib.registerLanguage("scala", scala_1);
-  lib.registerLanguage("scheme", scheme_1);
-  lib.registerLanguage("scss", scss_1);
-  lib.registerLanguage("smalltalk", smalltalk_1);
-  lib.registerLanguage("stylus", stylus_1);
-  lib.registerLanguage("swift", swift_1);
-  lib.registerLanguage("tcl", tcl_1);
-  lib.registerLanguage("typescript", typescript_1);
-  lib.registerLanguage("verilog", verilog_1);
-  lib.registerLanguage("vhdl", vhdl_1);
-  lib.registerLanguage("yaml", yaml_1);
+    hljs.registerLanguage("python", python_1);
+  hljs.registerLanguage("python-repl", pythonRepl_1);
+  hljs.registerLanguage("rust", rust_1);
+  hljs.registerLanguage("scala", scala_1);
+  hljs.registerLanguage("scheme", scheme_1);
+  hljs.registerLanguage("scss", scss_1);
+  hljs.registerLanguage("smalltalk", smalltalk_1);
+  hljs.registerLanguage("stylus", stylus_1);
+  hljs.registerLanguage("swift", swift_1);
+  hljs.registerLanguage("tcl", tcl_1);
+  hljs.registerLanguage("typescript", typescript_1);
+  hljs.registerLanguage("verilog", verilog_1);
+  hljs.registerLanguage("vhdl", vhdl_1);
+  hljs.registerLanguage("yaml", yaml_1);
   let mdHtml, mdSrc, permalink, scrollMap;
   let defaults = {
     html: false,
@@ -28684,10 +28700,10 @@ var demo = function(path, fs, url, buffer) {
       if (!defaults._highlight) {
         throw "highlighting disabled";
       }
-      if (lang && lang !== "auto" && lib.getLanguage(lang)) {
-        return '<pre class="hljs language-' + esc(lang.toLowerCase()) + '"><code>' + lib.highlight(lang, str, true).value + "</code></pre>";
+      if (lang && lang !== "auto" && hljs.getLanguage(lang)) {
+        return '<pre class="hljs language-' + esc(lang.toLowerCase()) + '"><code>' + hljs.highlight(lang, str, true).value + "</code></pre>";
       } else if (lang === "auto") {
-        let result = lib.highlightAuto(str);
+        let result = hljs.highlightAuto(str);
         /*eslint-disable no-console*/        console.log("highlight language: " + result.language + ", relevance: " + result.relevance);
         return '<pre class="hljs language-' + esc(result.language) + '"><code>' + result.value + "</code></pre>";
       }
@@ -28731,30 +28747,30 @@ var demo = function(path, fs, url, buffer) {
     return rv || pckg1;
   }
   function usePlugins(md) {
-    return md.use(require$$56).use(require$$57).use(require$$58, "warning").use(markdownItCheckbox).use(require$$60).use(require$$61).use(require$$62).use(require$$63).use(require$$64, (function processFrontMatter(fm) {
+    return md.use(require$$58).use(require$$59).use(require$$60, "warning").use(markdownItCheckbox).use(require$$62).use(require$$63).use(require$$64).use(require$$65).use(require$$66, (function processFrontMatter(fm) {
       console.log("FrontMatter:", fm);
-    })).use(markdownItHashtag).use(markdownItHeaderSections).use(markdownItHeadinganchor, {}).use(require$$68).use(markdownItIns).use(require$$70).use(markdownItMark).use(markdownItMathjax).use(require$$73).use(pick(require$$74, index_es6, markdownItHighlightjs))
+    })).use(markdownItHashtag).use(markdownItHeaderSections).use(markdownItHeadinganchor, {}).use(require$$70).use(markdownItIns).use(require$$72).use(markdownItMark).use(markdownItMathjax.exports).use(require$$75).use(pick(require$$76, index_es6, markdownItHighlightjs))
     /*  .use(require('@gerhobbelt/markdown-it-responsive'), {
-      responsive: {
-        srcset: {
-          'header-*': [ {
-            width: 320,
-            rename: {
-              suffix: '-small'
-            }
-          }, {
-            width: 640,
-            rename: {
-              suffix: '-medium'
-            }
-          } ]
-        },
-        sizes: {
-          'header-*': '(min-width: 36em) 33.3vw, 100vw'
-        }
-      }
-    })
-  */ .use(markdownItSamp).use(markdownItStrikethroughAlt).use(markdownItSub).use(markdownItSup).use(pick(require$$81, require$$82)).use(require$$83);
+	    responsive: {
+	      srcset: {
+	        'header-*': [ {
+	          width: 320,
+	          rename: {
+	            suffix: '-small'
+	          }
+	        }, {
+	          width: 640,
+	          rename: {
+	            suffix: '-medium'
+	          }
+	        } ]
+	      },
+	      sizes: {
+	        'header-*': '(min-width: 36em) 33.3vw, 100vw'
+	      }
+	    }
+	  })
+	*/ .use(markdownItSamp).use(markdownItStrikethroughAlt).use(markdownItSub).use(markdownItSup).use(pick(require$$83, require$$84)).use(require$$85);
   }
   function mdInit() {
     console.log("SETTINGS:", defaults);
@@ -29050,6 +29066,5 @@ var demo = function(path, fs, url, buffer) {
     }));
     updateResult();
   }));
-  var demo_template = {};
   return demo_template;
-}(path, fs, url, buffer);
+}(path, fs, url);
