@@ -5830,8 +5830,9 @@
   // subsumed by other inline rules (backticks, link, etc.)
     linkify.tokenize = function linkify(state, silent) {
     let link, url, fullUrl, urlText, token;
+    const oldPos = state.pos;
     if (state.links) {
-      link = state.links[state.pos];
+      link = state.links[oldPos];
     }
     if (!link) {
       return false;
@@ -5854,16 +5855,25 @@
       urlText = state.md.normalizeLinkText(urlText);
     }
     if (!silent) {
+      const linkInfo = {
+        url: link,
+        fullUrl: fullUrl,
+        urlText: urlText
+      };
       token = state.push("link_open", "a", 1);
       token.attrs = [ [ "href", fullUrl ] ];
       token.markup = "linkify";
       token.info = "auto";
+      token.__linkInfo = linkInfo;
+      token.position = oldPos;
+      token.size = 0;
       // TODO: position + size
             token = state.push("text", "", 0);
       token.content = urlText;
       token = state.push("link_close", "a", -1);
       token.markup = "linkify";
       token.info = "auto";
+      token.__linkInfo = linkInfo;
       token.position = link.lastIndex;
       token.size = 0;
     }

@@ -53317,7 +53317,7 @@ var demo = function(require$$6, path, fs, url) {
     default: markdownItToc
   });
   var require$$83 =  getAugmentedNamespace(markdownIt);
-  /*! markdown-it-regexp 0.6.0-12 https://github.com//GerHobbelt/markdown-it-regexp @license MIT */
+  /*! markdown-it-regexp 0.6.0-13 https://github.com//GerHobbelt/markdown-it-regexp @license MIT */
   /*!
 	 * markdown-it-regexp
 	 * Copyright (c) 2014 Alex Kocharin
@@ -53526,7 +53526,7 @@ var demo = function(require$$6, path, fs, url) {
     }
     return sanitize(output, "");
   };
-  /*! markdown-it-wikilinks 1.1.1-10 https://github.com//GerHobbelt/markdown-it-wikilinks @license MIT */  function removeInitialSlashes(str) {
+  /*! markdown-it-wikilinks 1.1.1-11 https://github.com//GerHobbelt/markdown-it-wikilinks @license MIT */  function removeInitialSlashes(str) {
     return str.replace(/^\/+/g, "");
   }
  // separate the setup/config object from the `md.use(...)` call for code clarity:
