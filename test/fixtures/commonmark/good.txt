@@ -2823,19 +2823,6 @@ src line: 3485
 .
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-src line: 3506
-
-.
-[foo]
-
-> [foo]: /url
-.
-<p><a href="/url">foo</a></p>
-<blockquote>
-</blockquote>
-.
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 src line: 3528
 
 .
@@ -3110,28 +3097,6 @@ src line: 3870
 <blockquote>
 <p>foo
 - bar</p>
-</blockquote>
-.
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-src line: 3894
-
-.
->
-.
-<blockquote>
-</blockquote>
-.
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-src line: 3902
-
-.
->
->  
-> 
-.
-<blockquote>
 </blockquote>
 .
 
