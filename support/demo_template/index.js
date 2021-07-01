@@ -3,10 +3,10 @@
 /*eslint-env browser*/
 /*global $, _*/
 
-let mdurl = require('mdurl');
+const mdurl = require('mdurl');
 
 
-let hljs = require('@gerhobbelt/highlight.js');
+const hljs = require('@gerhobbelt/highlight.js');
 
 hljs.registerLanguage('actionscript', require('@gerhobbelt/highlight.js/lib/languages/actionscript'));
 hljs.registerLanguage('apache',       require('@gerhobbelt/highlight.js/lib/languages/apache'));
@@ -68,7 +68,7 @@ hljs.registerLanguage('yaml',         require('@gerhobbelt/highlight.js/lib/lang
 
 let mdHtml, mdSrc, permalink, scrollMap;
 
-let defaults = {
+const defaults = {
   html:         false,        // Enable HTML tags in source
   xhtmlOut:     false,        // Use '/' to close single tags (<br />)
   breaks:       false,        // Convert '\n' in paragraphs into <br>
@@ -110,7 +110,7 @@ let defaults = {
 };
 
 defaults.highlight = function (str, lang) {
-  let esc = mdHtml.utils.escapeHtml;
+  const esc = mdHtml.utils.escapeHtml;
 
   try {
     if (!defaults._highlight) {
@@ -125,7 +125,7 @@ defaults.highlight = function (str, lang) {
 
     } else if (lang === 'auto') {
 
-      let result = hljs.highlightAuto(str);
+      const result = hljs.highlightAuto(str);
 
       /*eslint-disable no-console*/
       console.log('highlight language: ' + result.language + ', relevance: ' + result.relevance);
@@ -297,7 +297,7 @@ function setHighlightedlContent(selector, content, lang) {
 }
 
 function updateResult() {
-  let source = $('.source').val();
+  const source = $('.source').val();
 
   // Update only active view to avoid slowdowns
   // (debug & src view with highlighting are a bit slow)
@@ -409,7 +409,7 @@ function buildScrollMap() {
 }
 
 // Synchronize scroll position from source to result
-let syncResultScroll = _.debounce(function () {
+const syncResultScroll = _.debounce(function () {
   let textarea   = $('.source'),
       lineHeight = parseFloat(textarea.css('line-height')),
       lineNo, posTo;
@@ -423,7 +423,7 @@ let syncResultScroll = _.debounce(function () {
 }, 50, { maxWait: 50 });
 
 // Synchronize scroll position from result to source
-let syncSrcScroll = _.debounce(function () {
+const syncSrcScroll = _.debounce(function () {
   let resultHtml = $('.result-html'),
       scrollTop  = resultHtml.scrollTop(),
       textarea   = $('.source'),
@@ -531,16 +531,16 @@ $(function () {
   _.forOwn(defaults, function (val, key) {
     if (key === 'highlight') { return; }
 
-    let el = document.getElementById(key);
+    const el = document.getElementById(key);
 
     if (!el) { return; }
 
-    let $el = $(el);
+    const $el = $(el);
 
     if (_.isBoolean(val)) {
       $el.prop('checked', val);
       $el.on('change', function () {
-        let value = Boolean($el.prop('checked'));
+        const value = Boolean($el.prop('checked'));
         setOptionClass(key, value);
         defaults[key] = value;
         mdInit();
@@ -583,7 +583,7 @@ $(function () {
   });
 
   $(document).on('click', '[data-result-as]', function (event) {
-    let view = $(this).data('resultAs');
+    const view = $(this).data('resultAs');
     if (view) {
       setResultView(view);
       // only to update permalink

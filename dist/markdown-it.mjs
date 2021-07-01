@@ -2630,14 +2630,14 @@ uc_micro.Z = regex;
   function isString(obj) {
     return _class(obj) === "[object String]";
   }
-  let _hasOwnProperty = Object.prototype.hasOwnProperty;
+  const _hasOwnProperty = Object.prototype.hasOwnProperty;
   function has(object, key) {
     return _hasOwnProperty.call(object, key);
   }
   // Merge objects
   
     function assign(obj /*from1, from2, from3, ...*/) {
-    let sources = Array.prototype.slice.call(arguments, 1);
+    const sources = Array.prototype.slice.call(arguments, 1);
     sources.forEach((function(source) {
       if (!source) {
         return;
@@ -2693,16 +2693,16 @@ uc_micro.Z = regex;
     /*eslint no-bitwise:0*/
     if (c > 65535) {
       c -= 65536;
-      let surrogate1 = 55296 + (c >> 10), surrogate2 = 56320 + (c & 1023);
+      const surrogate1 = 55296 + (c >> 10), surrogate2 = 56320 + (c & 1023);
       return String.fromCharCode(surrogate1, surrogate2);
     }
     return String.fromCharCode(c);
   }
-  let UNESCAPE_MD_RE = /\\([!"#$%&'()*+,\-.\/:;<=>?@[\\\]^_`{|}~])/g;
-  let ENTITY_RE = /&([a-z#][a-z0-9]{1,31});/gi;
-  let UNESCAPE_ALL_RE = new RegExp(UNESCAPE_MD_RE.source + "|" + ENTITY_RE.source, "gi");
-  let DIGITAL_ENTITY_TEST_RE = /^#((?:x[a-f0-9]{1,8}|[0-9]{1,8}))/i;
-  let entities = entities$1;
+  const UNESCAPE_MD_RE = /\\([!"#$%&'()*+,\-.\/:;<=>?@[\\\]^_`{|}~])/g;
+  const ENTITY_RE = /&([a-z#][a-z0-9]{1,31});/gi;
+  const UNESCAPE_ALL_RE = new RegExp(UNESCAPE_MD_RE.source + "|" + ENTITY_RE.source, "gi");
+  const DIGITAL_ENTITY_TEST_RE = /^#((?:x[a-f0-9]{1,8}|[0-9]{1,8}))/i;
+  const entities = entities$1;
   function replaceEntityPattern(match, name) {
     let code = 0;
     if (has(entities, name)) {
@@ -2738,9 +2738,9 @@ uc_micro.Z = regex;
     }));
   }
   ////////////////////////////////////////////////////////////////////////////////
-    let HTML_ESCAPE_TEST_RE = /[&<>"]/;
-  let HTML_ESCAPE_REPLACE_RE = /[&<>"]/g;
-  let HTML_REPLACEMENTS = {
+    const HTML_ESCAPE_TEST_RE = /[&<>"]/;
+  const HTML_ESCAPE_REPLACE_RE = /[&<>"]/g;
+  const HTML_REPLACEMENTS = {
     "&": "&amp;",
     "<": "&lt;",
     ">": "&gt;",
@@ -2758,7 +2758,7 @@ uc_micro.Z = regex;
     return str;
   }
   ////////////////////////////////////////////////////////////////////////////////
-    let REGEXP_ESCAPE_RE = /[.?*+^$[\]\\(){}|-]/g;
+    const REGEXP_ESCAPE_RE = /[.?*+^$[\]\\(){}|-]/g;
   function escapeRE(str) {
     return str.replace(REGEXP_ESCAPE_RE, "\\$&");
   }
@@ -2798,7 +2798,7 @@ uc_micro.Z = regex;
     return false;
   }
   ////////////////////////////////////////////////////////////////////////////////
-  /*eslint-disable max-len*/  let UNICODE_PUNCT_RE = regex$4;
+  /*eslint-disable max-len*/  const UNICODE_PUNCT_RE = regex$4;
   // Currently without astral characters support.
     function isPunctChar(ch) {
     return UNICODE_PUNCT_RE.test(ch);
@@ -2899,16 +2899,16 @@ uc_micro.Z = regex;
     
         return str.toLowerCase().toUpperCase();
   }
-  /* eslint-env browser */  let _g = typeof commonjsGlobal !== "undefined" ? commonjsGlobal : window;
-  let tokensRef = new _g.WeakMap;
+  /* eslint-env browser */  const _g = typeof commonjsGlobal !== "undefined" ? commonjsGlobal : window;
+  const tokensRef = new _g.WeakMap;
   // TODO: performance tweaks for emphasis **_* pattern which has only 1/10 performance after adding line offset
     function getLineOffset(state, tokenIdx) {
-    let blockState = state.env.state_block;
-    let parentToken = state.env.parentToken;
-    let tokensBefore = typeof tokenIdx !== "undefined" ? state.tokens.slice(0, tokenIdx) : state.tokens;
+    const blockState = state.env.state_block;
+    const parentToken = state.env.parentToken;
+    const tokensBefore = typeof tokenIdx !== "undefined" ? state.tokens.slice(0, tokenIdx) : state.tokens;
     let resultsMap = tokensRef.get(state.tokens);
     if (resultsMap) {
-      let cachedResult = resultsMap.get(tokenIdx);
+      const cachedResult = resultsMap.get(tokenIdx);
       if (typeof cachedResult !== "undefined") {
         return cachedResult;
       }
@@ -2916,12 +2916,12 @@ uc_micro.Z = regex;
       resultsMap = new _g.Map;
       tokensRef.set(state.tokens, resultsMap);
     }
-    let linesBefore = tokensBefore.filter((function(t) {
+    const linesBefore = tokensBefore.filter((function(t) {
       return t.type === "softbreak" || t.type === "hardbreak";
     })).length;
     let lineOffset = 0;
     for (let i = 0; i < linesBefore; i++) {
-      let startLine = i + parentToken.map[0] + 1;
+      const startLine = i + parentToken.map[0] + 1;
       lineOffset += blockState.tShift[startLine];
     }
     resultsMap.set(tokenIdx, lineOffset);
@@ -3001,7 +3001,7 @@ var parse_link_label = function parseLinkLabel(state, start, disableNested) {
 
 // Parse link destination
 
-let unescapeAll$2 = utils$1.unescapeAll;
+const unescapeAll$2 = utils$1.unescapeAll;
 
 var parse_link_destination = function parseLinkDestination(str, pos, max) {
   let code, level, lines = 0, start = pos, result = {
@@ -3082,7 +3082,7 @@ var parse_link_destination = function parseLinkDestination(str, pos, max) {
 
 // Parse link title
 
-let unescapeAll$1 = utils$1.unescapeAll;
+const unescapeAll$1 = utils$1.unescapeAll;
 
 var parse_link_title = function parseLinkTitle(str, pos, max) {
   let code, marker, lines = 0, start = pos, result = {
@@ -3139,24 +3139,24 @@ helpers$1.parseLinkTitle = parse_link_title;
  * Generates HTML from parsed token stream. Each instance has independent
  * copy of rules. Those can be rewritten with ease. Also, you can add new
  * rules if you create plugin and adds new token types.
- **/ let assign$1 = utils$1.assign;
+ **/ const assign$1 = utils$1.assign;
 
-let unescapeAll = utils$1.unescapeAll;
+const unescapeAll = utils$1.unescapeAll;
 
-let escapeHtml = utils$1.escapeHtml;
+const escapeHtml = utils$1.escapeHtml;
 
-let isNil = utils$1.isNil;
+const isNil = utils$1.isNil;
 
 ////////////////////////////////////////////////////////////////////////////////
-let default_rules = {};
+const default_rules = {};
 
 default_rules.code_inline = function(tokens, idx, options, env, slf) {
-  let token = tokens[idx];
+  const token = tokens[idx];
   return "<code" + slf.renderAttrs(token) + ">" + escapeHtml(tokens[idx].content) + "</code>";
 };
 
 default_rules.code_block = function(tokens, idx, options, env, slf) {
-  let token = tokens[idx];
+  const token = tokens[idx];
   return "<pre" + slf.renderAttrs(token) + "><code>" + escapeHtml(tokens[idx].content) + "</code></pre>\n";
 };
 
@@ -3197,7 +3197,7 @@ default_rules.fence = function(tokens, idx, options, env, slf) {
 };
 
 default_rules.image = function(tokens, idx, options, env, slf) {
-  let token = tokens[idx];
+  const token = tokens[idx];
   // "alt" attr MUST be set, even if empty. Because it's mandatory and
   // should be placed on proper position for tests.
   
@@ -3276,7 +3276,7 @@ default_rules.html_inline = function(tokens, idx /*, options, env */) {
   }
   result = "";
   for (i = 0, l = token.attrs.length; i < l; i++) {
-    let value = token.attrs[i][1];
+    const value = token.attrs[i][1];
     result += " " + escapeHtml(token.attrs[i][0]) + (isNil(value) ? "" : '="' + escapeHtml(value) + '"');
   }
   return result;
@@ -3456,8 +3456,8 @@ Ruler$3.prototype.__find__ = function(name) {
 // Build rules lookup cache
 
 Ruler$3.prototype.__compile__ = function() {
-  let self = this;
-  let chains = [ "" ];
+  const self = this;
+  const chains = [ "" ];
   // collect unique names
     self.__rules__.forEach((function(rule) {
     if (!rule.enabled) {
@@ -3509,8 +3509,8 @@ Ruler$3.prototype.__compile__ = function() {
  * });
  * ```
  **/ Ruler$3.prototype.at = function(name, fn, options) {
-  let index = this.__find__(name);
-  let opt = options || {};
+  const index = this.__find__(name);
+  const opt = options || {};
   if (index === -1) {
     throw new Error("Parser rule not found: " + name);
   }
@@ -3543,8 +3543,8 @@ Ruler$3.prototype.__compile__ = function() {
  * });
  * ```
  **/ Ruler$3.prototype.before = function(beforeName, ruleName, fn, options) {
-  let index = this.__find__(beforeName);
-  let opt = options || {};
+  const index = this.__find__(beforeName);
+  const opt = options || {};
   if (index === -1) {
     throw new Error("Parser rule not found: " + beforeName);
   }
@@ -3581,8 +3581,8 @@ Ruler$3.prototype.__compile__ = function() {
  * });
  * ```
  **/ Ruler$3.prototype.after = function(afterName, ruleName, fn, options) {
-  let index = this.__find__(afterName);
-  let opt = options || {};
+  const index = this.__find__(afterName);
+  const opt = options || {};
   if (index === -1) {
     throw new Error("Parser rule not found: " + afterName);
   }
@@ -3618,7 +3618,7 @@ Ruler$3.prototype.__compile__ = function() {
  * });
  * ```
  **/ Ruler$3.prototype.push = function(ruleName, fn, options) {
-  let opt = options || {};
+  const opt = options || {};
   this.__rules__.push({
     name: ruleName,
     enabled: true,
@@ -3643,10 +3643,10 @@ Ruler$3.prototype.__compile__ = function() {
   if (!Array.isArray(list)) {
     list = [ list ];
   }
-  let result = [];
+  const result = [];
   // Search by name and enable
     list.forEach((function(name) {
-    let idx = this.__find__(name);
+    const idx = this.__find__(name);
     if (idx < 0) {
       if (ignoreInvalid) {
         return;
@@ -3694,10 +3694,10 @@ Ruler$3.prototype.__compile__ = function() {
   if (!Array.isArray(list)) {
     list = [ list ];
   }
-  let result = [];
+  const result = [];
   // Search by name and disable
     list.forEach((function(name) {
-    let idx = this.__find__(name);
+    const idx = this.__find__(name);
     if (idx < 0) {
       if (ignoreInvalid) {
         return;
@@ -3731,9 +3731,9 @@ var ruler = Ruler$3;
 
 // Normalize input string
 // https://spec.commonmark.org/0.29/#line-ending
-let NEWLINES_RE = /\r\n?|\n/g;
+const NEWLINES_RE = /\r\n?|\n/g;
 
-let NULL_RE = /\0/g;
+const NULL_RE = /\0/g;
 
 var normalize = function normalize(state) {
   let str;
@@ -3793,9 +3793,9 @@ var inline = function inline(state, positionOffset) {
 // TODO:
 // - fractionals 1/2, 1/4, 3/4 -> ½, ¼, ¾
 // - miltiplication 2 x 4 -> 2 × 4
-let RARE_RE = /\+-|\.\.|\?\?\?\?|!!!!|,,|--|==/;
+const RARE_RE = /\+-|\.\.|\?\?\?\?|!!!!|,,|--|==/;
 
-let ARROW_REPLACEMENTS = {
+const ARROW_REPLACEMENTS = {
   "<--\x3e": "\u2194",
   "--\x3e": "\u2192",
   "<--": "\u2190",
@@ -3806,11 +3806,11 @@ let ARROW_REPLACEMENTS = {
 
 // Workaround for phantomjs - need regex without /g flag,
 // or root check will fail every second time
-let SCOPED_ABBR_TEST_RE = /\((c|tm|r|p)\)/i;
+const SCOPED_ABBR_TEST_RE = /\((c|tm|r|p)\)/i;
 
-let SCOPED_ABBR_RE = /\((c|tm|r|p)\)/gi;
+const SCOPED_ABBR_RE = /\((c|tm|r|p)\)/gi;
 
-let SCOPED_ABBR = {
+const SCOPED_ABBR = {
   c: "\xa9",
   r: "\xae",
   p: "\xa7",
@@ -3878,17 +3878,17 @@ var replacements = function replace(state) {
 
 // Convert straight quotation marks to typographic ones
 
-let isWhiteSpace$1 = utils$1.isWhiteSpace;
+const isWhiteSpace$1 = utils$1.isWhiteSpace;
 
-let isPunctChar$1 = utils$1.isPunctChar;
+const isPunctChar$1 = utils$1.isPunctChar;
 
-let isMdAsciiPunct$1 = utils$1.isMdAsciiPunct;
+const isMdAsciiPunct$1 = utils$1.isMdAsciiPunct;
 
-let QUOTE_TEST_RE = /['"]/;
+const QUOTE_TEST_RE = /['"]/;
 
-let QUOTE_RE = /['"]/g;
+const QUOTE_RE = /['"]/g;
 
-let APOSTROPHE = "\u2019";
+const APOSTROPHE = "\u2019";
 
  /* ’ */ function replaceAt(str, index, ch) {
   return str.substr(0, index) + ch + str.substr(index + 1);
@@ -4182,7 +4182,7 @@ var smartquotes = function smartquotes(state) {
  *
  * Set `name` attribute to `value`. Override old value if exists.
  **/ Token$3.prototype.attrSet = function attrSet(name, value) {
-  let idx = this.attrIndex(name), attrData = [ name, value ];
+  const idx = this.attrIndex(name), attrData = [ name, value ];
   if (idx < 0) {
     this.attrPush(attrData);
   } else {
@@ -4208,7 +4208,7 @@ var smartquotes = function smartquotes(state) {
  * Join value to existing attribute via space. Or create new attribute if not
  * exists. Useful to operate with token classes.
  **/ Token$3.prototype.attrJoin = function attrJoin(name, value) {
-  let idx = this.attrIndex(name);
+  const idx = this.attrIndex(name);
   if (idx < 0) {
     this.attrPush([ name, value ]);
   } else {
@@ -4222,7 +4222,7 @@ var smartquotes = function smartquotes(state) {
  * Obtain a shallow clone of the token.  You can use this while rendering to
  * prevent modifying the token list while rendering.
  **/ Token$3.prototype.clone = function clone() {
-  let token = new Token$3(this.type, this.tag, this.nesting);
+  const token = new Token$3(this.type, this.tag, this.nesting);
   token.attrs = this.attrs;
   token.level = this.level;
   token.children = this.children;
@@ -4240,7 +4240,7 @@ var token = Token$3;
 
 // Core state object
 
-let Token$2 = token;
+const Token$2 = token;
 
 function StateCore(src, md, env) {
   this.src = src;
@@ -4261,9 +4261,9 @@ var state_core = StateCore;
  *
  * Top-level rules executor. Glues block/inline parsers and does intermediate
  * transformations.
- **/ let Ruler$2 = ruler;
+ **/ const Ruler$2 = ruler;
 
-let _rules$2 = [ [ "normalize", normalize ], [ "block", block ], [ "inline", inline ], [ "replacements", replacements ], [ "smartquotes", smartquotes ] ];
+const _rules$2 = [ [ "normalize", normalize ], [ "block", block ], [ "inline", inline ], [ "replacements", replacements ], [ "smartquotes", smartquotes ] ];
 
 /**
  * new Core()
@@ -4296,12 +4296,12 @@ Core.prototype.State = state_core;
 var parser_core = Core;
 
 // GFM table, https://github.github.com/gfm/#tables-extension-
-let isSpace$a = utils$1.isSpace;
+const isSpace$a = utils$1.isSpace;
 
-let trimLeftOffset$3 = utils$1.trimLeftOffset;
+const trimLeftOffset$3 = utils$1.trimLeftOffset;
 
 function getLine(state, line) {
-  let pos = state.bMarks[line] + state.tShift[line], max = state.eMarks[line];
+  const pos = state.bMarks[line] + state.tShift[line], max = state.eMarks[line];
   return state.src.substr(pos, max - pos);
 }
 
@@ -4443,7 +4443,7 @@ var table = function table(state, startLine, endLine, silent) {
   token.map = [ startLine, startLine + 1 ];
   token.size = 0;
   token.position = state.bMarks[startLine];
-  let headings = [];
+  const headings = [];
   columnVIndex = state.bMarks[startLine] + state.tShift[startLine];
   for (i = 0; i < columns.length; i++) {
     token = state.push("th_open", "th", 1);
@@ -4534,7 +4534,7 @@ var table = function table(state, startLine, endLine, silent) {
       if (aligns[i]) {
         token.attrs.push([ "style", "text-align:" + aligns[i] ]);
       }
-      let originalContent = columns[i] || "";
+      const originalContent = columns[i] || "";
       token = state.push("inline", "", 0);
       token.content = originalContent.trim();
       token.children = [];
@@ -4683,7 +4683,7 @@ var fence = function fence(state, startLine, endLine, silent) {
 };
 
 // Block quotes
-let isSpace$9 = utils$1.isSpace;
+const isSpace$9 = utils$1.isSpace;
 
 var blockquote = function blockquote(state, startLine, endLine, silent) {
   let adjustTab, ch, i, initial, blockStart, l, lastLineEmpty, lines, nextLine, offset, oldBMarks, oldBSCount, oldIndent, oldParentType, oldSCount, oldTShift, spaceAfterMarker, terminate, terminatorRules, token, isOutdented, oldLineMax = state.lineMax, pos = state.bMarks[startLine] + state.tShift[startLine], max = state.eMarks[startLine];
@@ -4910,7 +4910,7 @@ var blockquote = function blockquote(state, startLine, endLine, silent) {
 };
 
 // Horizontal rule
-let isSpace$8 = utils$1.isSpace;
+const isSpace$8 = utils$1.isSpace;
 
 var hr = function hr(state, startLine, endLine, silent) {
   let marker, cnt, ch, token, originalPos, pos = state.bMarks[startLine] + state.tShift[startLine], max = state.eMarks[startLine];
@@ -4951,7 +4951,7 @@ var hr = function hr(state, startLine, endLine, silent) {
 };
 
 // Lists
-let isSpace$7 = utils$1.isSpace;
+const isSpace$7 = utils$1.isSpace;
 
 // Search `[-+*][\n ]`, returns next pos after marker on success
 // or -1 on fail.
@@ -5238,9 +5238,9 @@ var list = function list(state, startLine, endLine, silent) {
   return true;
 };
 
-let normalizeReference$2 = utils$1.normalizeReference;
+const normalizeReference$2 = utils$1.normalizeReference;
 
-let isSpace$6 = utils$1.isSpace;
+const isSpace$6 = utils$1.isSpace;
 
 var reference = function reference(state, startLine, _endLine, silent) {
   let ch, destEndPos, destEndLineNo, endLine, href, i, l, label, labelEnd, oldParentType, res, start, str, terminate, terminatorRules, title, lines = 0, pos = state.bMarks[startLine] + state.tShift[startLine], max = state.eMarks[startLine], nextLine = startLine + 1;
@@ -5421,47 +5421,47 @@ var html_blocks = [ "address", "article", "aside", "base", "basefont", "blockquo
 var html_re = {};
 
 // Regexps to match html elements
-let attr_name = "[a-zA-Z_:@][a-zA-Z0-9:._-]*";
+const attr_name = "[a-zA-Z_:@][a-zA-Z0-9:._-]*";
 
-let unquoted = "[^\"'=<>`\\x00-\\x20]+";
+const unquoted = "[^\"'=<>`\\x00-\\x20]+";
 
-let single_quoted = "'[^']*'";
+const single_quoted = "'[^']*'";
 
-let double_quoted = '"[^"]*"';
+const double_quoted = '"[^"]*"';
 
-let attr_value = "(?:" + unquoted + "|" + single_quoted + "|" + double_quoted + ")";
+const attr_value = "(?:" + unquoted + "|" + single_quoted + "|" + double_quoted + ")";
 
-let attribute = "(?:\\s+" + attr_name + "(?:\\s*=\\s*" + attr_value + ")?)";
+const attribute = "(?:\\s+" + attr_name + "(?:\\s*=\\s*" + attr_value + ")?)";
 
-let open_tag = "<[A-Za-z][A-Za-z0-9\\-]*" + attribute + "*\\s*\\/?>";
+const open_tag = "<[A-Za-z][A-Za-z0-9\\-]*" + attribute + "*\\s*\\/?>";
 
-let close_tag = "<\\/[A-Za-z][A-Za-z0-9\\-]*\\s*>";
+const close_tag = "<\\/[A-Za-z][A-Za-z0-9\\-]*\\s*>";
 
-let comment = "\x3c!----\x3e|\x3c!--(?:-?[^>-])(?:-?[^-])*--\x3e";
+const comment = "\x3c!----\x3e|\x3c!--(?:-?[^>-])(?:-?[^-])*--\x3e";
 
-let processing = "<[?][\\s\\S]*?[?]>";
+const processing = "<[?][\\s\\S]*?[?]>";
 
-let declaration = "<![A-Z]+\\s+[^>]*>";
+const declaration = "<![A-Z]+\\s+[^>]*>";
 
-let cdata = "<!\\[CDATA\\[[\\s\\S]*?\\]\\]>";
+const cdata = "<!\\[CDATA\\[[\\s\\S]*?\\]\\]>";
 
-let HTML_TAG_RE$1 = new RegExp("^(?:" + open_tag + "|" + close_tag + "|" + comment + "|" + processing + "|" + declaration + "|" + cdata + ")");
+const HTML_TAG_RE$1 = new RegExp("^(?:" + open_tag + "|" + close_tag + "|" + comment + "|" + processing + "|" + declaration + "|" + cdata + ")");
 
-let HTML_OPEN_CLOSE_TAG_RE$1 = new RegExp("^(?:" + open_tag + "|" + close_tag + ")");
+const HTML_OPEN_CLOSE_TAG_RE$1 = new RegExp("^(?:" + open_tag + "|" + close_tag + ")");
 
 html_re.HTML_TAG_RE = HTML_TAG_RE$1;
 
 html_re.HTML_OPEN_CLOSE_TAG_RE = HTML_OPEN_CLOSE_TAG_RE$1;
 
 // HTML block
-let block_names = html_blocks;
+const block_names = html_blocks;
 
-let HTML_OPEN_CLOSE_TAG_RE = html_re.HTML_OPEN_CLOSE_TAG_RE;
+const HTML_OPEN_CLOSE_TAG_RE = html_re.HTML_OPEN_CLOSE_TAG_RE;
 
 // An array of opening and corresponding closing sequences for html tags,
 // last argument defines whether it can terminate a paragraph or not
 
-let HTML_SEQUENCES = [ [ /^<(script|pre|style|textarea)(?=(\s|>|$))/i, /<\/(script|pre|style|textarea)>/i, true ], [ /^<!--/, /-->/, true ], [ /^<\?/, /\?>/, true ], [ /^<![A-Z]/, />/, true ], [ /^<!\[CDATA\[/, /\]\]>/, true ], [ new RegExp("^</?(?:" + block_names.join("|") + ")(?=(\\s|/?>|$))", "i"), /^$/, true ], [ new RegExp(HTML_OPEN_CLOSE_TAG_RE.source + "\\s*$"), /^$/, false ] ];
+const HTML_SEQUENCES = [ [ /^<(script|pre|style|textarea)(?=(\s|>|$))/i, /<\/(script|pre|style|textarea)>/i, true ], [ /^<!--/, /-->/, true ], [ /^<\?/, /\?>/, true ], [ /^<![A-Z]/, />/, true ], [ /^<!\[CDATA\[/, /\]\]>/, true ], [ new RegExp("^</?(?:" + block_names.join("|") + ")(?=(\\s|/?>|$))", "i"), /^$/, true ], [ new RegExp(HTML_OPEN_CLOSE_TAG_RE.source + "\\s*$"), /^$/, false ] ];
 
 var html_block = function html_block(state, startLine, endLine, silent) {
   let i, nextLine, token, lineText, blockStart, pos = blockStart = state.bMarks[startLine] + state.tShift[startLine], max = state.eMarks[startLine];
@@ -5517,9 +5517,9 @@ var html_block = function html_block(state, startLine, endLine, silent) {
 };
 
 // heading (#, ##, ...)
-let isSpace$5 = utils$1.isSpace;
+const isSpace$5 = utils$1.isSpace;
 
-let trimLeftOffset$2 = utils$1.trimLeftOffset;
+const trimLeftOffset$2 = utils$1.trimLeftOffset;
 
 var heading = function heading(state, startLine, endLine, silent) {
   let ch, level, tmp, token, originalPos, originalMax, pos = state.bMarks[startLine] + state.tShift[startLine], max = state.eMarks[startLine];
@@ -5559,7 +5559,7 @@ var heading = function heading(state, startLine, endLine, silent) {
   token.map = [ startLine, state.line ];
   token.position = originalPos;
   token.size = pos - originalPos;
-  let originalContent = state.src.slice(pos, max);
+  const originalContent = state.src.slice(pos, max);
   token = state.push("inline", "", 0);
   token.content = originalContent.trim();
   token.map = [ startLine, state.line ];
@@ -5575,7 +5575,7 @@ var heading = function heading(state, startLine, endLine, silent) {
 };
 
 // lheading (---, ===)
-let trimLeftOffset$1 = utils$1.trimLeftOffset;
+const trimLeftOffset$1 = utils$1.trimLeftOffset;
 
 var lheading = function lheading(state, startLine, endLine /*, silent*/) {
   let content, terminate, i, l, token, pos, max, level, marker, nextLine = startLine + 1, oldParentType, terminatorRules = state.md.block.ruler.getRules("paragraph");
@@ -5654,7 +5654,7 @@ var lheading = function lheading(state, startLine, endLine /*, silent*/) {
 };
 
 // Paragraph
-let trimLeftOffset = utils$1.trimLeftOffset;
+const trimLeftOffset = utils$1.trimLeftOffset;
 
 var paragraph = function paragraph(state, startLine /*, endLine*/) {
   let content, terminate, i, l, token, oldParentType, nextLine = startLine + 1, terminatorRules = state.md.block.ruler.getRules("paragraph"), endLine = state.lineMax, pos = state.bMarks[startLine];
@@ -5703,9 +5703,9 @@ var paragraph = function paragraph(state, startLine /*, endLine*/) {
 };
 
 // Parser state class
-let Token$1 = token;
+const Token$1 = token;
 
-let isSpace$4 = utils$1.isSpace;
+const isSpace$4 = utils$1.isSpace;
 
 function StateBlock(src, md, env, tokens) {
   let ch, s, start, pos, len, indent, offset, indent_found;
@@ -5810,7 +5810,7 @@ function StateBlock(src, md, env, tokens) {
 // Push new token to "stream".
 
 StateBlock.prototype.push = function(type, tag, nesting) {
-  let token = new Token$1(type, tag, nesting);
+  const token = new Token$1(type, tag, nesting);
   token.block = true;
   if (nesting < 0) this.level--;
  // closing tag
@@ -5934,9 +5934,9 @@ var state_block = StateBlock;
  * class ParserBlock
  *
  * Block-level tokenizer.
- **/ let Ruler$1 = ruler;
+ **/ const Ruler$1 = ruler;
 
-let _rules$1 = [ 
+const _rules$1 = [ 
 // First 2 params - rule name & source. Secondary array - list of rules,
 // which can be terminated by this one.
 [ "table", table, [ "paragraph", "reference" ] ], [ "code", code ], [ "fence", fence, [ "paragraph", "reference", "blockquote", "list" ] ], [ "blockquote", blockquote, [ "paragraph", "reference", "blockquote", "list" ] ], [ "hr", hr, [ "paragraph", "reference", "blockquote", "list" ] ], [ "list", list, [ "paragraph", "reference", "blockquote", "table" ] ], [ "reference", reference ], [ "html_block", html_block, [ "paragraph", "reference", "blockquote" ] ], [ "heading", heading, [ "paragraph", "reference", "blockquote" ] ], [ "lheading", lheading ], [ "paragraph", paragraph ] ];
@@ -6183,7 +6183,7 @@ function isTerminatorChar(ch) {
 
 var text = function text(state, silent) {
   let pos = state.pos;
-  let terminatorRe = state.md.options.inlineTokenTerminatorsRe;
+  const terminatorRe = state.md.options.inlineTokenTerminatorsRe;
   if (!terminatorRe) {
     while (pos < state.posMax && !isTerminatorChar(state.src.charCodeAt(pos)) && (!state.links || !state.links[pos])) {
       pos++;
@@ -6204,7 +6204,7 @@ var text = function text(state, silent) {
 };
 
 // Process '\n'
-let isSpace$3 = utils$1.isSpace;
+const isSpace$3 = utils$1.isSpace;
 
 var newline = function newline(state, silent) {
   let pmax, max, pos = state.pos;
@@ -6243,9 +6243,9 @@ var newline = function newline(state, silent) {
 };
 
 // Process escaped chars and hardbreaks
-let isSpace$2 = utils$1.isSpace;
+const isSpace$2 = utils$1.isSpace;
 
-let ESCAPED = [];
+const ESCAPED = [];
 
 for (let i = 0; i < 256; i++) {
   ESCAPED.push(0);
@@ -6272,7 +6272,7 @@ var _escape = function escape(state, silent) {
     }
     if (ch === 10) {
       if (!silent) {
-        let token = state.push("hardbreak", "br", 0);
+        const token = state.push("hardbreak", "br", 0);
         token.position = pos;
         token.size = 1;
       }
@@ -6330,7 +6330,7 @@ var backticks = function backtick(state, silent) {
       if (!silent) {
         token = state.push("code_inline", "code", 0);
         token.markup = marker;
-        let originalContent = state.src.slice(pos, matchStart);
+        const originalContent = state.src.slice(pos, matchStart);
         token.content = originalContent.replace(/\n/g, " ").replace(/^ (.+) $/, "$1");
         token.position = pos + (originalContent.length - token.content.length) / 2;
         token.size = token.content.length;
@@ -6352,7 +6352,7 @@ var strikethrough = {};
 
 // ~~strike through~~
 
-let getLineOffset$2 = utils$1.getLineOffset;
+const getLineOffset$2 = utils$1.getLineOffset;
 
 // Insert each marker as a separate text token, and add it to delimiter list
 
@@ -6466,7 +6466,7 @@ var emphasis = {};
 
 // Process *this* and _that_
 
-let getLineOffset$1 = utils$1.getLineOffset;
+const getLineOffset$1 = utils$1.getLineOffset;
 
 // Insert each marker as a separate text token, and add it to delimiter list
 
@@ -6564,9 +6564,9 @@ emphasis.postProcess = function emphasis(state) {
 };
 
 // Process [link](<to> "stuff")
-let normalizeReference$1 = utils$1.normalizeReference;
+const normalizeReference$1 = utils$1.normalizeReference;
 
-let isSpace$1 = utils$1.isSpace;
+const isSpace$1 = utils$1.isSpace;
 
 var link = function link(state, silent) {
   let attrs, code, label, labelEnd, labelStart, pos, res, ref, token, href = "", title = "", oldPos = state.pos, max = state.posMax, start = state.pos, parseReference = true;
@@ -6692,9 +6692,9 @@ var link = function link(state, silent) {
 };
 
 // Process ![image](<src> "title")
-let normalizeReference = utils$1.normalizeReference;
+const normalizeReference = utils$1.normalizeReference;
 
-let isSpace = utils$1.isSpace;
+const isSpace = utils$1.isSpace;
 
 var image = function image(state, silent) {
   let attrs, code, content, label, labelEnd, labelStart, pos, ref, res, title, token, tokens, start, href = "", oldPos = state.pos, max = state.posMax, endPos = state.pos;
@@ -6827,9 +6827,9 @@ var image = function image(state, silent) {
 };
 
 // Process autolinks '<protocol:...>'
-/*eslint max-len:0*/ let EMAIL_RE = /^([a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*)$/;
+/*eslint max-len:0*/ const EMAIL_RE = /^([a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*)$/;
 
-let AUTOLINK_RE = /^([a-zA-Z][a-zA-Z0-9+.\-]{1,31}):([^<>\x00-\x20]*)$/;
+const AUTOLINK_RE = /^([a-zA-Z][a-zA-Z0-9+.\-]{1,31}):([^<>\x00-\x20]*)$/;
 
 var autolink = function autolink(state, silent) {
   let url, fullUrl, token, start, max, pos = state.pos;
@@ -6840,7 +6840,7 @@ var autolink = function autolink(state, silent) {
   max = state.posMax;
   for (;;) {
     if (++pos >= max) return false;
-    let ch = state.src.charCodeAt(pos);
+    const ch = state.src.charCodeAt(pos);
     if (ch === 60 /* < */) return false;
     if (ch === 62 /* > */) break;
   }
@@ -6899,11 +6899,11 @@ var autolink = function autolink(state, silent) {
 };
 
 // Process html tags
-let HTML_TAG_RE = html_re.HTML_TAG_RE;
+const HTML_TAG_RE = html_re.HTML_TAG_RE;
 
 function isLetter(ch) {
   /*eslint no-bitwise:0*/
-  let lc = ch | 32;
+  const lc = ch | 32;
  // to lower case
     return lc >= 97 /* a */ && lc <= 122 /* z */;
 }
@@ -6938,17 +6938,17 @@ var html_inline = function html_inline(state, silent) {
 };
 
 // Process html entity - &#123;, &#xAF;, &quot;, ...
-let entities = entities$1;
+const entities = entities$1;
 
-let has = utils$1.has;
+const has = utils$1.has;
 
-let isValidEntityCode = utils$1.isValidEntityCode;
+const isValidEntityCode = utils$1.isValidEntityCode;
 
-let fromCodePoint = utils$1.fromCodePoint;
+const fromCodePoint = utils$1.fromCodePoint;
 
-let DIGITAL_RE = /^&#((?:x[a-f0-9]{1,6}|[0-9]{1,7}));/i;
+const DIGITAL_RE = /^&#((?:x[a-f0-9]{1,6}|[0-9]{1,7}));/i;
 
-let NAMED_RE = /^&([a-z][a-z0-9]{1,31});/i;
+const NAMED_RE = /^&([a-z][a-z0-9]{1,31});/i;
 
 var entity = function entity(state, silent) {
   let ch, code, match, pos = state.pos, max = state.posMax;
@@ -7106,15 +7106,15 @@ var text_collapse = function text_collapse(state) {
 };
 
 // Inline parser state
-let Token = token;
+const Token = token;
 
-let isWhiteSpace = utils$1.isWhiteSpace;
+const isWhiteSpace = utils$1.isWhiteSpace;
 
-let isPunctChar = utils$1.isPunctChar;
+const isPunctChar = utils$1.isPunctChar;
 
-let isMdAsciiPunct = utils$1.isMdAsciiPunct;
+const isMdAsciiPunct = utils$1.isMdAsciiPunct;
 
-let getLineOffset = utils$1.getLineOffset;
+const getLineOffset = utils$1.getLineOffset;
 
 function StateInline(src, md, env, outTokens) {
   this.src = src;
@@ -7143,7 +7143,7 @@ function StateInline(src, md, env, outTokens) {
 // Flush pending text
 
 StateInline.prototype.pushPending = function() {
-  let token = new Token("text", "", 0);
+  const token = new Token("text", "", 0);
   token.content = this.pending;
   token.level = this.pendingLevel;
   token.size = token.content.length;
@@ -7160,7 +7160,7 @@ StateInline.prototype.push = function(type, tag, nesting) {
   if (this.pending) {
     this.pushPending();
   }
-  let token = new Token(type, tag, nesting);
+  const token = new Token(type, tag, nesting);
   let token_meta = null;
   if (nesting < 0) {
     // closing tag
@@ -7240,15 +7240,15 @@ var state_inline = StateInline;
  * class ParserInline
  *
  * Tokenizes paragraph content.
- **/ let Ruler = ruler;
+ **/ const Ruler = ruler;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Parser rules
-let _rules0 = [ [ "linkify", linkify.preProcess ] ];
+const _rules0 = [ [ "linkify", linkify.preProcess ] ];
 
-let _rules = [ [ "linkify", linkify.tokenize ], [ "text", text ], [ "newline", newline ], [ "escape", _escape ], [ "backticks", backticks ], [ "strikethrough", strikethrough.tokenize ], [ "emphasis", emphasis.tokenize ], [ "link", link ], [ "image", image ], [ "autolink", autolink ], [ "html_inline", html_inline ], [ "entity", entity ] ];
+const _rules = [ [ "linkify", linkify.tokenize ], [ "text", text ], [ "newline", newline ], [ "escape", _escape ], [ "backticks", backticks ], [ "strikethrough", strikethrough.tokenize ], [ "emphasis", emphasis.tokenize ], [ "link", link ], [ "image", image ], [ "autolink", autolink ], [ "html_inline", html_inline ], [ "entity", entity ] ];
 
-let _rules2 = [ [ "balance_pairs", balance_pairs ], [ "strikethrough", strikethrough.postProcess ], [ "emphasis", emphasis.postProcess ], [ "linkify", linkify.postProcess ], [ "text_collapse", text_collapse ] ];
+const _rules2 = [ [ "balance_pairs", balance_pairs ], [ "strikethrough", strikethrough.postProcess ], [ "emphasis", emphasis.postProcess ], [ "linkify", linkify.postProcess ], [ "text_collapse", text_collapse ] ];
 
 /**
  * new ParserInline()
@@ -7356,7 +7356,7 @@ ParserInline$1.prototype.tokenize = function(state) {
  * Process input string and push inline tokens into `outTokens`
  **/ ParserInline$1.prototype.parse = function(str, md, env, outTokens) {
   let i, rules, len;
-  let state = new this.State(str, md, env, outTokens);
+  const state = new this.State(str, md, env, outTokens);
   rules = this.ruler0.getRules("");
   len = rules.length;
   for (i = 0; i < len; i++) {
@@ -8168,25 +8168,25 @@ var commonmark = {
 };
 
 // Main parser class
-let utils = utils$1;
+const utils = utils$1;
 
-let helpers = helpers$1;
+const helpers = helpers$1;
 
-let Renderer = renderer;
+const Renderer = renderer;
 
-let ParserCore = parser_core;
+const ParserCore = parser_core;
 
-let ParserBlock = parser_block;
+const ParserBlock = parser_block;
 
-let ParserInline = parser_inline;
+const ParserInline = parser_inline;
 
-let LinkifyIt = linkifyIt;
+const LinkifyIt = linkifyIt;
 
-let mdurl = mdurl$1;
+const mdurl = mdurl$1;
 
-let punycode = require$$8;
+const punycode = require$$8;
 
-let config = {
+const config = {
   default: _default,
   zero: zero,
   commonmark: commonmark
@@ -8200,21 +8200,21 @@ let config = {
 // If you need different setup - override validator method as you wish. Or
 // replace it with dummy function and use external sanitizer.
 
-let BAD_PROTO_RE = /^(vbscript|javascript|file|data):/;
+const BAD_PROTO_RE = /^(vbscript|javascript|file|data):/;
 
-let GOOD_DATA_RE = /^data:image\/(gif|png|jpeg|webp|svg\+xml);/;
+const GOOD_DATA_RE = /^data:image\/(gif|png|jpeg|webp|svg\+xml);/;
 
 function validateLink(url) {
   // url should be normalized at this point, and existing entities are decoded
-  let str = url.trim().toLowerCase();
+  const str = url.trim().toLowerCase();
   return BAD_PROTO_RE.test(str) ? GOOD_DATA_RE.test(str) ? true : false : true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-let RECODE_HOSTNAME_FOR = [ "http:", "https:", "mailto:" ];
+const RECODE_HOSTNAME_FOR = [ "http:", "https:", "mailto:" ];
 
 function normalizeLink(url) {
-  let parsed = mdurl.parse(url, true);
+  const parsed = mdurl.parse(url, true);
   if (parsed.hostname) {
     // Encode hostnames in urls like:
     // `http://host/`, `https://host/`, `mailto:user@host`, `//host/`
@@ -8230,7 +8230,7 @@ function normalizeLink(url) {
 }
 
 function normalizeLinkText(url) {
-  let parsed = mdurl.parse(url, true);
+  const parsed = mdurl.parse(url, true);
   if (parsed.hostname) {
     // Encode hostnames in urls like:
     // `http://host/`, `https://host/`, `mailto:user@host`, `//host/`
@@ -8580,7 +8580,7 @@ function normalizeLinkText(url) {
   }), this);
   result = result.concat(this.inline.ruler2.enable(list, true));
   result = result.concat(this.inline.ruler0.enable(list, true));
-  let missed = list.filter((function(name) {
+  const missed = list.filter((function(name) {
     return result.indexOf(name) < 0;
   }));
   if (missed.length && !ignoreInvalid) {
@@ -8605,7 +8605,7 @@ function normalizeLinkText(url) {
   }), this);
   result = result.concat(this.inline.ruler2.disable(list, true));
   result = result.concat(this.inline.ruler0.disable(list, true));
-  let missed = list.filter((function(name) {
+  const missed = list.filter((function(name) {
     return result.indexOf(name) < 0;
   }));
   if (missed.length && !ignoreInvalid) {
@@ -8630,7 +8630,7 @@ function normalizeLinkText(url) {
  *             });
  * ```
  **/ MarkdownIt.prototype.use = function(plugin /*, params, ... */) {
-  let args = [ this ].concat(Array.prototype.slice.call(arguments, 1));
+  const args = [ this ].concat(Array.prototype.slice.call(arguments, 1));
   plugin.apply(plugin, args);
   return this;
 };
@@ -8653,7 +8653,7 @@ function normalizeLinkText(url) {
   if (typeof src !== "string") {
     throw new Error("Input data should be a String");
   }
-  let state = new this.core.State(src, this, env || {});
+  const state = new this.core.State(src, this, env || {});
   this.core.process(state);
   return state.tokens;
 };
@@ -8682,7 +8682,7 @@ function normalizeLinkText(url) {
  * block tokens list with the single `inline` element, containing parsed inline
  * tokens in `children` property. Also updates `env` object.
  **/ MarkdownIt.prototype.parseInline = function(src, env) {
-  let state = new this.core.State(src, this, env);
+  const state = new this.core.State(src, this, env);
   state.inlineMode = true;
   this.core.process(state);
   return state.tokens;

@@ -1,20 +1,20 @@
 
 
 
-let assert = require('chai').assert;
+const assert = require('chai').assert;
 
 
 describe('Utils', function () {
 
   it('fromCodePoint', function () {
-    let fromCodePoint = require('../lib/common/utils').fromCodePoint;
+    const fromCodePoint = require('../lib/common/utils').fromCodePoint;
 
     assert.strictEqual(fromCodePoint(0x20), ' ');
     assert.strictEqual(fromCodePoint(0x1F601), '😁');
   });
 
   it('isValidEntityCode', function () {
-    let isValidEntityCode = require('../lib/common/utils').isValidEntityCode;
+    const isValidEntityCode = require('../lib/common/utils').isValidEntityCode;
 
     assert.strictEqual(isValidEntityCode(0x20), true);
     assert.strictEqual(isValidEntityCode(0xD800), false);
@@ -40,7 +40,7 @@ describe('Utils', function () {
   });*/
 
   it('assign', function () {
-    let assign = require('../lib/common/utils').assign;
+    const assign = require('../lib/common/utils').assign;
 
     assert.deepEqual(assign({ a: 1 }, null, { b: 2 }), { a: 1, b: 2 });
     assert.throws(function () {
@@ -49,13 +49,13 @@ describe('Utils', function () {
   });
 
   it('escapeRE', function () {
-    let escapeRE = require('../lib/common/utils').escapeRE;
+    const escapeRE = require('../lib/common/utils').escapeRE;
 
     assert.strictEqual(escapeRE(' .?*+^$[]\\(){}|-'), ' \\.\\?\\*\\+\\^\\$\\[\\]\\\\\\(\\)\\{\\}\\|\\-');
   });
 
   it('isWhiteSpace', function () {
-    let isWhiteSpace = require('../lib/common/utils').isWhiteSpace;
+    const isWhiteSpace = require('../lib/common/utils').isWhiteSpace;
 
     assert.strictEqual(isWhiteSpace(0x2000), true);
     assert.strictEqual(isWhiteSpace(0x09), true);
@@ -64,7 +64,7 @@ describe('Utils', function () {
   });
 
   it('isMdAsciiPunct', function () {
-    let isMdAsciiPunct = require('../lib/common/utils').isMdAsciiPunct;
+    const isMdAsciiPunct = require('../lib/common/utils').isMdAsciiPunct;
 
     assert.strictEqual(isMdAsciiPunct(0x30), false);
 
@@ -74,7 +74,7 @@ describe('Utils', function () {
   });
 
   it('unescapeMd', function () {
-    let unescapeMd = require('../lib/common/utils').unescapeMd;
+    const unescapeMd = require('../lib/common/utils').unescapeMd;
 
     assert.strictEqual(unescapeMd('\\foo'), '\\foo');
     assert.strictEqual(unescapeMd('foo'), 'foo');

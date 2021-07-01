@@ -1,19 +1,19 @@
 
 
 
-let assert = require('chai').assert;
-let Ruler  = require('../lib/ruler');
+const assert = require('chai').assert;
+const Ruler  = require('../lib/ruler');
 
 describe('Ruler', function () {
 
   it('should replace rule (.at)', function () {
-    let ruler = new Ruler();
+    const ruler = new Ruler();
     let res = 0;
 
     ruler.push('test', function foo() { res = 1; });
     ruler.at('test', function bar() { res = 2; });
 
-    let rules = ruler.getRules('');
+    const rules = ruler.getRules('');
 
     assert.strictEqual(rules.length, 1);
     rules[0]();
@@ -22,14 +22,14 @@ describe('Ruler', function () {
 
 
   it('should inject before/after rule', function () {
-    let ruler = new Ruler();
+    const ruler = new Ruler();
     let res = 0;
 
     ruler.push('test', function foo() { res = 1; });
     ruler.before('test', 'before_test', function fooBefore() { res = -10; });
     ruler.after('test', 'after_test', function fooAfter() { res = 10; });
 
-    let rules = ruler.getRules('');
+    const rules = ruler.getRules('');
 
     assert.strictEqual(rules.length, 3);
     rules[0]();
@@ -110,7 +110,7 @@ describe('Ruler', function () {
 
 
   it('should fail on invalid rule name', function () {
-    let ruler = new Ruler();
+    const ruler = new Ruler();
 
     ruler.push('test', function foo() {});
 
@@ -133,7 +133,7 @@ describe('Ruler', function () {
 
 
   it('should not fail on invalid rule name in silent mode', function () {
-    let ruler = new Ruler();
+    const ruler = new Ruler();
 
     ruler.push('test', function foo() {});
 

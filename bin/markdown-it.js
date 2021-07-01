@@ -2,13 +2,13 @@
 /*eslint no-console:0*/
 
 
-let fs = require('fs');
-let argparse = require('argparse');
+const fs = require('fs');
+const argparse = require('argparse');
 
 
 ////////////////////////////////////////////////////////////////////////////////
 
-let cli = new argparse.ArgumentParser({
+const cli = new argparse.ArgumentParser({
   prog: 'markdown-it',
   add_help: true
 });
@@ -47,21 +47,21 @@ cli.add_argument('--trace', {
 cli.add_argument('file', {
   help: 'File to read',
   nargs: '?',
-  default: '-'
+  'default': '-'
 });
 
 cli.add_argument('-o', '--output', {
   help: 'File to write',
-  default: '-'
+  'default': '-'
 });
 
-let options = cli.parse_args();
+const options = cli.parse_args();
 
 
 function readFile(filename, encoding, callback) {
   if (options.file === '-') {
     // read from stdin
-    let chunks = [];
+    const chunks = [];
 
     process.stdin.on('data', function (chunk) { chunks.push(chunk); });
 
@@ -78,10 +78,10 @@ function loadPlugins(md, plugins) {
   plugins = [].concat.apply([], plugins);
 
   for (let index = 0; index < plugins.length; ++index) {
-    let name = plugins[index];
+    const name = plugins[index];
 
     try {
-      let plugin = require(name);
+      const plugin = require(name);
       md.use(plugin.default || plugin);
     } catch (e) {
       console.error('cannot load plugin ' + name);

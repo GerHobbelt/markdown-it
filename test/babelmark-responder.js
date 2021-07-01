@@ -4,8 +4,8 @@
 describe('babelmark responder app', function () {
   let app;
 
-  let PORT    = 5005;
-  let request = require('supertest')('http://127.0.0.1:' + PORT);
+  const PORT    = 5005;
+  const request = require('supertest')('http://127.0.0.1:' + PORT);
 
   function timeout(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));

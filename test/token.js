@@ -1,13 +1,13 @@
 
 
-let assert = require('chai').assert;
-let Token  = require('../lib/token');
+const assert = require('chai').assert;
+const Token  = require('../lib/token');
 
 
 describe('Token', function () {
 
   it('attr', function () {
-    let t = new Token('test_token', 'tok', 1);
+    const t = new Token('test_token', 'tok', 1);
 
     assert.strictEqual(t.attrs, null);
     assert.equal(t.attrIndex('foo'), -1);

@@ -43,7 +43,6 @@
     "dist/"
   ],
   "dependencies": {
-    "argparse": "2.0.1",
     "entities": "2.2.0",
     "github-markdown-css": "4.0.0",
     "linkify-it": "3.0.2",
@@ -98,6 +97,7 @@
     "@rollup/plugin-node-resolve": "13.0.0",
     "@rollup/plugin-replace": "2.4.2",
     "ansi": "0.3.1",
+    "argparse": "2.0.1",
     "autoprefixer-stylus": "1.0.0",
     "benchmark": "2.1.4",
     "chai": "4.3.4",

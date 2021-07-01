@@ -1,14 +1,14 @@
 
 
 
-let path = require('path');
+const path = require('path');
 
 
-let generate = require('@gerhobbelt/markdown-it-testgen');
+const generate = require('@gerhobbelt/markdown-it-testgen');
 
 
 describe('markdown-it', function () {
-  let md = require('../')({
+  const md = require('../')({
     html: true,
     langPrefix: '',
     typographer: true,

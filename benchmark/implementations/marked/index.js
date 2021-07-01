@@ -1,6 +1,6 @@
 
 
-let marked = require('marked');
+const marked = require('marked');
 
 exports.run = function (data) {
   return marked(data);

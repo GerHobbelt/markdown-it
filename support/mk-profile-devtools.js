@@ -9,8 +9,8 @@ let arg = fs.readdirSync(path.join(__dirname, '..')).filter(fn => fn.endsWith('.
 if (arg.length > 0) {
 	// sort latest to oldest:
   arg.sort(function (a, b) {
-    let aa = a.split('.');
-    let ba = b.split('.');
+    const aa = a.split('.');
+    const ba = b.split('.');
     for (let i = 1; i <= 5; i++) {
       if (!isNaN(aa[i])) {
         aa[i] = +aa[i];
@@ -22,8 +22,8 @@ if (arg.length > 0) {
     let diff = 0;
 		// length+1 as counter limit so we can correctly compare against *longer* b sequences:
     for (let i = 0; diff === 0 && i < aa.length + 1; i++) {
-      let ax = (aa[i] == null ? '' : aa[i]);
-      let bx = (ba[i] == null ? '' : ba[i]);
+      const ax = (aa[i] == null ? '' : aa[i]);
+      const bx = (ba[i] == null ? '' : ba[i]);
       if (Number.isFinite(ax)) {
         diff = bx - ax;
         if (!Number.isFinite(diff)) {
@@ -48,8 +48,8 @@ if (!fs.existsSync(arg)) {
 arg = path.resolve(arg);
 
 const fn = path.join(__dirname, 'profile-devtools.html');
-let src = fs.readFileSync(fn, 'utf8');
-let dst = src.replace(/<pre>[\s\S]*<\/pre>/g, `<pre>${arg}</pre>`);
+const src = fs.readFileSync(fn, 'utf8');
+const dst = src.replace(/<pre>[\s\S]*<\/pre>/g, `<pre>${arg}</pre>`);
 if (dst !== src) {
   fs.writeFileSync(fn, dst, 'utf8');
   console.log(`Updated HTML file ( reference: ${arg} )`);

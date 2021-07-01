@@ -21,7 +21,7 @@ async function test_pattern(func) {
   let errcnt = 0;
   let terminate_reason = 'total time spent reached limit';
   let err;
-  let spinner = {
+  const spinner = {
     __frames: [
       '⢹',
       '⢺',
@@ -81,7 +81,7 @@ async function test_pattern(func) {
       await worker.end();
     }
 
-    let entry = marky.stop('pathological_test');
+    const entry = marky.stop('pathological_test');
     dt = entry.duration;
     total_time_spent += dt;
 
@@ -109,14 +109,14 @@ async function test_pattern(func) {
         }
 
         // guestimate next N to try:
-        let rc = n / Math.max(1, dt - 20);
+        const rc = n / Math.max(1, dt - 20);
         n = Math.min(Math.max(n * 2, TIME_LIMIT * rc), 1E9);
       }
     }
     if (mode === 2) {
       if (err) {
         // current N is too much. Assume exponential behavior so estimate next N far below the half-way mark:
-        let dn = n - last_good_n;
+        const dn = n - last_good_n;
         // when the distance between 'last-known-good' and 'bad' gets below
         // a certain threshold (bad is within 15% of last-known-good),
         // we stop the search to save time:

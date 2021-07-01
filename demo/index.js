@@ -54550,8 +54550,8 @@ var demo = function(require$$6, path, fs, url) {
   });
   var require$$84 =  getAugmentedNamespace(markdownitWikilinks);
   /*eslint-env browser*/
-  /*global $, _*/  let mdurl = mdurl$1;
-  let hljs = lib$1;
+  /*global $, _*/  const mdurl = mdurl$1;
+  const hljs = lib$1;
   hljs.registerLanguage("actionscript", actionscript_1$1);
   hljs.registerLanguage("apache", apache_1$1);
   hljs.registerLanguage("armasm", armasm_1$1);
@@ -54609,7 +54609,7 @@ var demo = function(require$$6, path, fs, url) {
   hljs.registerLanguage("vhdl", vhdl_1$1);
   hljs.registerLanguage("yaml", yaml_1$1);
   let mdHtml, mdSrc, permalink, scrollMap;
-  let defaults = {
+  const defaults = {
     html: false,
     // Enable HTML tags in source
     xhtmlOut: false,
@@ -54653,7 +54653,7 @@ var demo = function(require$$6, path, fs, url) {
         }
   };
   defaults.highlight = function(str, lang) {
-    let esc = mdHtml.utils.escapeHtml;
+    const esc = mdHtml.utils.escapeHtml;
     try {
       if (!defaults._highlight) {
         throw "highlighting disabled";
@@ -54664,7 +54664,7 @@ var demo = function(require$$6, path, fs, url) {
           ignoreIllegals: true
         }).value + "</code></pre>";
       } else if (lang === "auto") {
-        let result = hljs.highlightAuto(str);
+        const result = hljs.highlightAuto(str);
         /*eslint-disable no-console*/        console.log("highlight language: " + result.language + ", relevance: " + result.relevance);
         return '<pre class="hljs language-' + esc(result.language) + '"><code>' + result.value + "</code></pre>";
       }
@@ -54776,7 +54776,7 @@ var demo = function(require$$6, path, fs, url) {
     }
   }
   function updateResult() {
-    let source = $(".source").val();
+    const source = $(".source").val();
     // Update only active view to avoid slowdowns
     // (debug & src view with highlighting are a bit slow)
         if (defaults._view === "src") {
@@ -54871,7 +54871,7 @@ var demo = function(require$$6, path, fs, url) {
     return _scrollMap;
   }
   // Synchronize scroll position from source to result
-    let syncResultScroll = _.debounce((function() {
+    const syncResultScroll = _.debounce((function() {
     let textarea = $(".source"), lineHeight = parseFloat(textarea.css("line-height")), lineNo, posTo;
     lineNo = Math.floor(textarea.scrollTop() / lineHeight);
     if (!scrollMap) {
@@ -54885,7 +54885,7 @@ var demo = function(require$$6, path, fs, url) {
     maxWait: 50
   });
   // Synchronize scroll position from result to source
-    let syncSrcScroll = _.debounce((function() {
+    const syncSrcScroll = _.debounce((function() {
     let resultHtml = $(".result-html"), scrollTop = resultHtml.scrollTop(), textarea = $(".source"), lineHeight = parseFloat(textarea.css("line-height")), lines, i, line;
     if (!scrollMap) {
       scrollMap = buildScrollMap();
@@ -54970,15 +54970,15 @@ var demo = function(require$$6, path, fs, url) {
       if (key === "highlight") {
         return;
       }
-      let el = document.getElementById(key);
+      const el = document.getElementById(key);
       if (!el) {
         return;
       }
-      let $el = $(el);
+      const $el = $(el);
       if (_.isBoolean(val)) {
         $el.prop("checked", val);
         $el.on("change", (function() {
-          let value = Boolean($el.prop("checked"));
+          const value = Boolean($el.prop("checked"));
           setOptionClass(key, value);
           defaults[key] = value;
           mdInit();
@@ -55015,7 +55015,7 @@ var demo = function(require$$6, path, fs, url) {
       event.preventDefault();
     }));
     $(document).on("click", "[data-result-as]", (function(event) {
-      let view = $(this).data("resultAs");
+      const view = $(this).data("resultAs");
       if (view) {
         setResultView(view);
         // only to update permalink

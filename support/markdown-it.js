@@ -4,30 +4,30 @@
 
 
 
-let fs = require('fs');
-let argparse = require('argparse');
+const fs = require('fs');
+const argparse = require('argparse');
 
 
 ////////////////////////////////////////////////////////////////////////////////
 
-let cli = new argparse.ArgumentParser({
+const cli = new argparse.ArgumentParser({
   add_help: true
 });
 
 cli.add_argument('file', {
   help: 'File to read',
   nargs: '?',
-  default: '-'
+  'default': '-'
 });
 
-let options = cli.parse_args();
+const options = cli.parse_args();
 
 
 function readFile(filename, encoding, callback) {
   if (options.file === '-') {
     // read from stdin
 
-    let chunks = [];
+    const chunks = [];
 
     process.stdin.on('data', function (chunk) {
       chunks.push(chunk);

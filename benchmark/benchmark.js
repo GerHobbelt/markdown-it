@@ -3,21 +3,21 @@
 
 
 
-let path      = require('path');
-let fs        = require('fs');
-let util      = require('util');
-let Benchmark = require('benchmark');
-let ansi      = require('ansi');
-let cursor    = ansi(process.stdout);
+const path      = require('path');
+const fs        = require('fs');
+const util      = require('util');
+const Benchmark = require('benchmark');
+const ansi      = require('ansi');
+const cursor    = ansi(process.stdout);
 
-let IMPLS_DIRECTORY = path.join(__dirname, 'implementations');
-let IMPLS_PATHS = {};
-let IMPLS = [];
+const IMPLS_DIRECTORY = path.join(__dirname, 'implementations');
+const IMPLS_PATHS = {};
+const IMPLS = [];
 
 
 fs.readdirSync(IMPLS_DIRECTORY).sort().forEach(function (name) {
-  let file = path.join(IMPLS_DIRECTORY, name);
-  let code = require(file);
+  const file = path.join(IMPLS_DIRECTORY, name);
+  const code = require(file);
 
   IMPLS_PATHS[name] = file;
   IMPLS.push({
@@ -27,26 +27,26 @@ fs.readdirSync(IMPLS_DIRECTORY).sort().forEach(function (name) {
 });
 
 
-let SAMPLES_DIRECTORY = path.join(__dirname, 'samples');
-let SAMPLES = [];
+const SAMPLES_DIRECTORY = path.join(__dirname, 'samples');
+const SAMPLES = [];
 
 fs.readdirSync(SAMPLES_DIRECTORY).sort().forEach(function (sample) {
-  let filepath = path.join(SAMPLES_DIRECTORY, sample),
-      extname  = path.extname(filepath),
-      basename = path.basename(filepath, extname);
+  const filepath = path.join(SAMPLES_DIRECTORY, sample),
+        extname  = path.extname(filepath),
+        basename = path.basename(filepath, extname);
 
-  let content = {};
+  const content = {};
 
   content.string = fs.readFileSync(filepath, 'utf8');
 
-  let title    = util.format('(%d bytes)', content.string.length);
+  const title    = util.format('(%d bytes)', content.string.length);
 
   function onComplete() {
     cursor.write('\n');
   }
 
 
-  let suite = new Benchmark.Suite(title, {
+  const suite = new Benchmark.Suite(title, {
 
     onStart: function onStart() {
       console.log('\nSample: %s %s', sample, title);
@@ -86,7 +86,7 @@ fs.readdirSync(SAMPLES_DIRECTORY).sort().forEach(function (sample) {
 
 
 function select(patterns) {
-  let result = [];
+  const result = [];
 
   if (!(patterns instanceof Array)) {
     patterns = [ patterns ];
@@ -109,7 +109,7 @@ function select(patterns) {
 
 
 function run(files) {
-  let selected = select(files);
+  const selected = select(files);
 
   if (selected.length > 0) {
     console.log('Selected samples: (%d of %d)', selected.length, SAMPLES.length);

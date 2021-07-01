@@ -1,8 +1,8 @@
 
 
-let commonmark = require('commonmark');
-let parser = new commonmark.Parser();
-let renderer = new commonmark.HtmlRenderer();
+const commonmark = require('commonmark');
+const parser = new commonmark.Parser();
+const renderer = new commonmark.HtmlRenderer();
 
 exports.run = function (data) {
   return renderer.render(parser.parse(data));

@@ -1,6 +1,6 @@
 
 
-let md = require('markdown-it')('commonmark');
+const md = require('markdown-it')('commonmark');
 
 exports.run = function (data) {
   return md.render(data);

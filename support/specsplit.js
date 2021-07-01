@@ -7,12 +7,14 @@
 
 
 
-let fs        = require('fs');
-let util      = require('util');
-let argparse  = require('argparse');
+const fs        = require('fs');
+const path      = require('path');
+const util      = require('util');
+const argparse  = require('argparse');
+const md        = require('..');
 
 
-let cli = new argparse.ArgumentParser({
+const cli = new argparse.ArgumentParser({
   add_help: true
 });
 
@@ -24,15 +26,15 @@ cli.add_argument('type', {
 
 cli.add_argument('-s', '--spec', {
   help: 'spec file to read',
-  default: require('path').join(__dirname, '../test/fixtures/commonmark/spec.txt')
+  'default': path.join(__dirname, '../test/fixtures/commonmark/spec.txt')
 });
 
 cli.add_argument('-o', '--output', {
   help: 'output file, stdout if not set',
-  default: '-'
+  'default': '-'
 });
 
-let options = cli.parse_args();
+const options = cli.parse_args();
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -46,7 +48,7 @@ function readFile(filename, encoding, callback) {
   if (options.file === '-') {
     // read from stdin
 
-    let chunks = [];
+    const chunks = [];
 
     process.stdin.on('data', function (chunk) {
       chunks.push(chunk);
@@ -64,8 +66,8 @@ function readFile(filename, encoding, callback) {
 ////////////////////////////////////////////////////////////////////////////////
 
 readFile(options.spec, 'utf8', function (error, input) {
-  let good = [], bad = [],
-      markdown = require('..')('commonmark');
+  const good = [], bad = [],
+        markdown = md('commonmark');
 
   if (error) {
     if (error.code === 'ENOENT') {
@@ -85,11 +87,11 @@ readFile(options.spec, 'utf8', function (error, input) {
              token.info.trim() === 'example';
     })
     .forEach(function (token) {
-      let arr  = token.content.split(/^\.\s*?$/m, 2);
-      let md   = arr[0];
-      let html = arr[1].replace(/^\n/, '');
+      const arr  = token.content.split(/^\.\s*?$/m, 2);
+      const md   = arr[0];
+      const html = arr[1].replace(/^\n/, '');
 
-      let result = {
+      const result = {
         md:   md,
         html: html,
         line: token.map[0],
@@ -109,12 +111,12 @@ readFile(options.spec, 'utf8', function (error, input) {
       }
     });
 
-  let out = [];
+  const out = [];
 
   if (!options.type) {
     out.push(util.format('CM spec stat: passed samples - %s, failed samples - %s', good.length, bad.length));
   } else {
-    let data = options.type === 'good' ? good : bad;
+    const data = options.type === 'good' ? good : bad;
 
     data.forEach(function (sample) {
       out.push(util.format(

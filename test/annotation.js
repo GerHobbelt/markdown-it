@@ -1,14 +1,14 @@
 
 // Implemented originally in https://github.com/markdown-it/markdown-it/pull/204
 
-let assert = require('chai').assert;
+const assert = require('chai').assert;
 
 function assertTokenContent(src, token, content) {
   assert.strictEqual(src.slice(token.position, token.position + token.size), content);
 }
 
 describe('Annotation', function () {
-  let md = require('../')({
+  const md = require('../')({
     html: true,
     langPrefix: '',
     typographer: false,
@@ -16,7 +16,7 @@ describe('Annotation', function () {
   });
 
   it('should annotate paragraph', function () {
-    let tokens = md.parse('Hello World\n\nThis is great !');
+    const tokens = md.parse('Hello World\n\nThis is great !');
     assert.strictEqual(tokens.length, 6);
 
     // First paragraph
@@ -37,7 +37,7 @@ describe('Annotation', function () {
   });
 
   it('should annotate headings', function () {
-    let tokens = md.parse('# Hello\n\n## World ##\n');
+    const tokens = md.parse('# Hello\n\n## World ##\n');
     assert.strictEqual(tokens.length, 6);
 
     // First heading
@@ -58,8 +58,8 @@ describe('Annotation', function () {
   });
 
   it('should annotate lheadings', function () {
-    let src = 'Hello\n=====\n\nWorld\n=======';
-    let tokens = md.parse(src);
+    const src = 'Hello\n=====\n\nWorld\n=======';
+    const tokens = md.parse(src);
     assert.strictEqual(tokens.length, 6);
 
     // First heading
@@ -76,7 +76,7 @@ describe('Annotation', function () {
   });
 
   it('should annotate code blocks', function () {
-    let tokens = md.parse('\tHello\n\tWorld\n\nt\n\n\tBlock 2\n');
+    const tokens = md.parse('\tHello\n\tWorld\n\nt\n\n\tBlock 2\n');
     assert.strictEqual(tokens.length, 5);
 
     assert.strictEqual(tokens[0].position, 0);
@@ -87,12 +87,12 @@ describe('Annotation', function () {
   });
 
   it('should annotate tables', function () {
-    let src = 'Test:\n\n' +
+    const src = 'Test:\n\n' +
               ' | Type | Message |\n' +
               ' | ---- | ------- |\n' +
               '| Hello | World\n' +
               ' | Bonjour | Monde |\n';
-    let tokens = md.parse(src);
+    const tokens = md.parse(src);
     assert.strictEqual(tokens.length, 33);
 
     // Begin
