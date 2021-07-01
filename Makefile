@@ -146,12 +146,16 @@ superclean: clean
 prep: superclean
 	-ncu -a --packageFile=package.json
 	-npm install
+	-npm prune
 	-npm audit fix
 
 prep-ci: clean
 	-rm -rf ./node_modules/
 	-npm ci
+	-npm prune
 	-npm audit fix
+	-mocha --version
+	-node --version
 
 report-config:
 	-echo "NPM_PACKAGE=${NPM_PACKAGE} NPM_VERSION=${NPM_VERSION} GLOBAL_NAME=${GLOBAL_NAME} BUNDLE_NAME=${BUNDLE_NAME} TMP_PATH=${TMP_PATH} REMOTE_NAME=${REMOTE_NAME} REMOTE_REPO=${REMOTE_REPO} CURR_HEAD=${CURR_HEAD}"
