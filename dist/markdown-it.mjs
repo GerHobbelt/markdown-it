@@ -1,6 +1,8 @@
 /*! @gerhobbelt/markdown-it 12.0.6-56 https://github.com/GerHobbelt/markdown-it @license MIT */
 import require$$8 from "punycode";
 
+var commonjsGlobal = typeof globalThis !== "undefined" ? globalThis : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : {};
+
 var utils$1 = {};
 
 var require$$0 = {
@@ -2897,18 +2899,32 @@ uc_micro.Z = regex;
     
         return str.toLowerCase().toUpperCase();
   }
-  function getLineOffset(state, tokenIdx) {
+  /* eslint-env browser */  let _g = typeof commonjsGlobal !== "undefined" ? commonjsGlobal : window;
+  let tokensRef = new _g.WeakMap;
+  // TODO: performance tweaks for emphasis **_* pattern which has only 1/10 performance after adding line offset
+    function getLineOffset(state, tokenIdx) {
     let blockState = state.env.state_block;
     let parentToken = state.env.parentToken;
     let tokensBefore = typeof tokenIdx !== "undefined" ? state.tokens.slice(0, tokenIdx) : state.tokens;
-    let lineOffset = 0;
+    let resultsMap = tokensRef.get(state.tokens);
+    if (resultsMap) {
+      let cachedResult = resultsMap.get(tokenIdx);
+      if (typeof cachedResult !== "undefined") {
+        return cachedResult;
+      }
+    } else {
+      resultsMap = new _g.Map;
+      tokensRef.set(state.tokens, resultsMap);
+    }
     let linesBefore = tokensBefore.filter((function(t) {
-      return t.type.includes("break");
+      return t.type === "softbreak" || t.type === "hardbreak";
     })).length;
+    let lineOffset = 0;
     for (let i = 0; i < linesBefore; i++) {
       let startLine = i + parentToken.map[0] + 1;
       lineOffset += blockState.tShift[startLine];
     }
+    resultsMap.set(tokenIdx, lineOffset);
     return lineOffset;
   }
   function trimLeftOffset(str) {

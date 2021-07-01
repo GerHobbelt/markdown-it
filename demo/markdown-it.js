@@ -9,6 +9,7 @@
     };
   }
   var require$$8__default =  _interopDefaultLegacy(require$$8);
+  var commonjsGlobal = typeof globalThis !== "undefined" ? globalThis : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : {};
   var utils$1 = {};
   var require$$0 = {
     Aacute: "\xc1",
@@ -2686,10 +2687,10 @@
       return match;
     }
     /*function replaceEntities(str) {
-    if (str.indexOf('&') < 0) { return str; }
+	  if (str.indexOf('&') < 0) { return str; }
 
-    return str.replace(ENTITY_RE, replaceEntityPattern);
-  }*/    function unescapeMd(str) {
+	  return str.replace(ENTITY_RE, replaceEntityPattern);
+	}*/    function unescapeMd(str) {
       if (str.indexOf("\\") < 0) {
         return str;
       }
@@ -2868,18 +2869,32 @@
       
             return str.toLowerCase().toUpperCase();
     }
-    function getLineOffset(state, tokenIdx) {
+    /* eslint-env browser */    let _g = typeof commonjsGlobal !== "undefined" ? commonjsGlobal : window;
+    let tokensRef = new _g.WeakMap;
+    // TODO: performance tweaks for emphasis **_* pattern which has only 1/10 performance after adding line offset
+        function getLineOffset(state, tokenIdx) {
       let blockState = state.env.state_block;
       let parentToken = state.env.parentToken;
       let tokensBefore = typeof tokenIdx !== "undefined" ? state.tokens.slice(0, tokenIdx) : state.tokens;
-      let lineOffset = 0;
+      let resultsMap = tokensRef.get(state.tokens);
+      if (resultsMap) {
+        let cachedResult = resultsMap.get(tokenIdx);
+        if (typeof cachedResult !== "undefined") {
+          return cachedResult;
+        }
+      } else {
+        resultsMap = new _g.Map;
+        tokensRef.set(state.tokens, resultsMap);
+      }
       let linesBefore = tokensBefore.filter((function(t) {
-        return t.type.includes("break");
+        return t.type === "softbreak" || t.type === "hardbreak";
       })).length;
+      let lineOffset = 0;
       for (let i = 0; i < linesBefore; i++) {
         let startLine = i + parentToken.map[0] + 1;
         lineOffset += blockState.tShift[startLine];
       }
+      resultsMap.set(tokenIdx, lineOffset);
       return lineOffset;
     }
     function trimLeftOffset(str) {
@@ -3079,12 +3094,12 @@
   helpers$1.parseLinkDestination = parse_link_destination;
   helpers$1.parseLinkTitle = parse_link_title;
   /**
-   * class Renderer
-   *
-   * Generates HTML from parsed token stream. Each instance has independent
-   * copy of rules. Those can be rewritten with ease. Also, you can add new
-   * rules if you create plugin and adds new token types.
-   **/  let assign$1 = utils$1.assign;
+	 * class Renderer
+	 *
+	 * Generates HTML from parsed token stream. Each instance has independent
+	 * copy of rules. Those can be rewritten with ease. Also, you can add new
+	 * rules if you create plugin and adds new token types.
+	 **/  let assign$1 = utils$1.assign;
   let unescapeAll = utils$1.unescapeAll;
   let escapeHtml = utils$1.escapeHtml;
   let isNil = utils$1.isNil;
@@ -3158,45 +3173,45 @@
     return tokens[idx].content;
   };
   /**
-   * new Renderer()
-   *
-   * Creates new [[Renderer]] instance and fill [[Renderer#rules]] with defaults.
-   **/  function Renderer$1() {
+	 * new Renderer()
+	 *
+	 * Creates new [[Renderer]] instance and fill [[Renderer#rules]] with defaults.
+	 **/  function Renderer$1() {
     /**
-     * Renderer#rules -> Object
-     *
-     * Contains render rules for tokens. Can be updated and extended.
-     *
-     * ##### Example
-     *
-     * ```javascript
-     * var md = require('markdown-it')();
-     *
-     * md.renderer.rules.strong_open  = function () { return '<b>'; };
-     * md.renderer.rules.strong_close = function () { return '</b>'; };
-     *
-     * var result = md.renderInline(...);
-     * ```
-     *
-     * Each rule is called as independent static function with fixed signature:
-     *
-     * ```javascript
-     * function my_token_render(tokens, idx, options, env, renderer) {
-     *   // ...
-     *   return renderedHTML;
-     * }
-     * ```
-     *
-     * See [source code](https://github.com/markdown-it/markdown-it/blob/master/lib/renderer.js)
-     * for more details and examples.
-     **/
+	   * Renderer#rules -> Object
+	   *
+	   * Contains render rules for tokens. Can be updated and extended.
+	   *
+	   * ##### Example
+	   *
+	   * ```javascript
+	   * var md = require('markdown-it')();
+	   *
+	   * md.renderer.rules.strong_open  = function () { return '<b>'; };
+	   * md.renderer.rules.strong_close = function () { return '</b>'; };
+	   *
+	   * var result = md.renderInline(...);
+	   * ```
+	   *
+	   * Each rule is called as independent static function with fixed signature:
+	   *
+	   * ```javascript
+	   * function my_token_render(tokens, idx, options, env, renderer) {
+	   *   // ...
+	   *   return renderedHTML;
+	   * }
+	   * ```
+	   *
+	   * See [source code](https://github.com/markdown-it/markdown-it/blob/master/lib/renderer.js)
+	   * for more details and examples.
+	   **/
     this.rules = assign$1({}, default_rules);
   }
   /**
-   * Renderer.renderAttrs(token) -> String
-   *
-   * Render token attributes to string.
-   **/  Renderer$1.prototype.renderAttrs = function renderAttrs(token, options) {
+	 * Renderer.renderAttrs(token) -> String
+	 *
+	 * Render token attributes to string.
+	 **/  Renderer$1.prototype.renderAttrs = function renderAttrs(token, options) {
     let i, l, result;
     if (options && options.default_attributes && options.default_attributes[token.tag]) {
       token.attrs = (token.attrs || []).concat(options.default_attributes[token.tag]);
@@ -3212,14 +3227,14 @@
     return result;
   };
   /**
-   * Renderer.renderToken(tokens, idx, options) -> String
-   * - tokens (Array): list of tokens
-   * - idx (Numbed): token index to render
-   * - options (Object): params of parser instance
-   *
-   * Default token renderer. Can be overriden by custom function
-   * in [[Renderer#rules]].
-   **/  Renderer$1.prototype.renderToken = function renderToken(tokens, idx, options) {
+	 * Renderer.renderToken(tokens, idx, options) -> String
+	 * - tokens (Array): list of tokens
+	 * - idx (Numbed): token index to render
+	 * - options (Object): params of parser instance
+	 *
+	 * Default token renderer. Can be overriden by custom function
+	 * in [[Renderer#rules]].
+	 **/  Renderer$1.prototype.renderToken = function renderToken(tokens, idx, options) {
     let nextToken, result = "", needLf = false, token = tokens[idx];
     // Tight list paragraphs
         if (token.hidden) {
@@ -3263,13 +3278,13 @@
     return result;
   };
   /**
-   * Renderer.renderInline(tokens, options, env) -> String
-   * - tokens (Array): list on block tokens to renter
-   * - options (Object): params of parser instance
-   * - env (Object): additional data from parsed input (references, for example)
-   *
-   * The same as [[Renderer.render]], but for single token of `inline` type.
-   **/  Renderer$1.prototype.renderInline = function(tokens, options, env) {
+	 * Renderer.renderInline(tokens, options, env) -> String
+	 * - tokens (Array): list on block tokens to renter
+	 * - options (Object): params of parser instance
+	 * - env (Object): additional data from parsed input (references, for example)
+	 *
+	 * The same as [[Renderer.render]], but for single token of `inline` type.
+	 **/  Renderer$1.prototype.renderInline = function(tokens, options, env) {
     let type, result = "", rules = this.rules;
     if (tokens) {
       for (let i = 0, len = tokens.length; i < len; i++) {
@@ -3284,15 +3299,15 @@
     return result;
   };
   /** internal
-   * Renderer.renderInlineAsText(tokens, options, env) -> String
-   * - tokens (Array): list on block tokens to renter
-   * - options (Object): params of parser instance
-   * - env (Object): additional data from parsed input (references, for example)
-   *
-   * Special kludge for image `alt` attributes to conform CommonMark spec.
-   * Don't try to use it! Spec requires to show `alt` content with stripped markup,
-   * instead of simple escaping.
-   **/  Renderer$1.prototype.renderInlineAsText = function(tokens, options, env) {
+	 * Renderer.renderInlineAsText(tokens, options, env) -> String
+	 * - tokens (Array): list on block tokens to renter
+	 * - options (Object): params of parser instance
+	 * - env (Object): additional data from parsed input (references, for example)
+	 *
+	 * Special kludge for image `alt` attributes to conform CommonMark spec.
+	 * Don't try to use it! Spec requires to show `alt` content with stripped markup,
+	 * instead of simple escaping.
+	 **/  Renderer$1.prototype.renderInlineAsText = function(tokens, options, env) {
     let result = "";
     if (tokens) {
       for (let i = 0, len = tokens.length; i < len; i++) {
@@ -3308,14 +3323,14 @@
     return result;
   };
   /**
-   * Renderer.render(tokens, options, env) -> String
-   * - tokens (Array): list on block tokens to renter
-   * - options (Object): params of parser instance
-   * - env (Object): additional data from parsed input (references, for example)
-   *
-   * Takes token stream and generates HTML. Probably, you will never need to call
-   * this method directly.
-   **/  Renderer$1.prototype.render = function(tokens, options, env) {
+	 * Renderer.render(tokens, options, env) -> String
+	 * - tokens (Array): list on block tokens to renter
+	 * - options (Object): params of parser instance
+	 * - env (Object): additional data from parsed input (references, for example)
+	 *
+	 * Takes token stream and generates HTML. Probably, you will never need to call
+	 * this method directly.
+	 **/  Renderer$1.prototype.render = function(tokens, options, env) {
     if (options.ast) return tokens;
     let i, len, type, result = "", rules = this.rules;
     for (i = 0, len = tokens.length; i < len; i++) {
@@ -3332,25 +3347,25 @@
   };
   var renderer = Renderer$1;
   /**
-   * class Ruler
-   *
-   * Helper class, used by [[MarkdownIt#core]], [[MarkdownIt#block]] and
-   * [[MarkdownIt#inline]] to manage sequences of functions (rules):
-   *
-   * - keep rules in defined order
-   * - assign the name to each rule
-   * - enable/disable rules
-   * - add/replace rules
-   * - allow assign rules to additional named chains (in the same)
-   * - cacheing lists of active rules
-   *
-   * You will not need use this class directly until write plugins. For simple
-   * rules control use [[MarkdownIt.disable]], [[MarkdownIt.enable]] and
-   * [[MarkdownIt.use]].
-   **/
+	 * class Ruler
+	 *
+	 * Helper class, used by [[MarkdownIt#core]], [[MarkdownIt#block]] and
+	 * [[MarkdownIt#inline]] to manage sequences of functions (rules):
+	 *
+	 * - keep rules in defined order
+	 * - assign the name to each rule
+	 * - enable/disable rules
+	 * - add/replace rules
+	 * - allow assign rules to additional named chains (in the same)
+	 * - cacheing lists of active rules
+	 *
+	 * You will not need use this class directly until write plugins. For simple
+	 * rules control use [[MarkdownIt.disable]], [[MarkdownIt.enable]] and
+	 * [[MarkdownIt.use]].
+	 **/
   /**
-   * new Ruler()
-   **/  function Ruler$3() {
+	 * new Ruler()
+	 **/  function Ruler$3() {
     // List of added rules. Each element is:
     // {
     //   name: XXX,
@@ -3406,30 +3421,30 @@
     }));
   };
   /**
-   * Ruler.at(name, fn [, options])
-   * - name (String): rule name to replace.
-   * - fn (Function): new rule function.
-   * - options (Object): new rule options (not mandatory).
-   *
-   * Replace rule by name with new function & options. Throws error if name not
-   * found.
-   *
-   * ##### Options:
-   *
-   * - __alt__ - array with names of "alternate" chains.
-   *
-   * ##### Example
-   *
-   * Replace existing typographer replacement rule with new one:
-   *
-   * ```javascript
-   * var md = require('markdown-it')();
-   *
-   * md.core.ruler.at('replacements', function replace(state) {
-   *   //...
-   * });
-   * ```
-   **/  Ruler$3.prototype.at = function(name, fn, options) {
+	 * Ruler.at(name, fn [, options])
+	 * - name (String): rule name to replace.
+	 * - fn (Function): new rule function.
+	 * - options (Object): new rule options (not mandatory).
+	 *
+	 * Replace rule by name with new function & options. Throws error if name not
+	 * found.
+	 *
+	 * ##### Options:
+	 *
+	 * - __alt__ - array with names of "alternate" chains.
+	 *
+	 * ##### Example
+	 *
+	 * Replace existing typographer replacement rule with new one:
+	 *
+	 * ```javascript
+	 * var md = require('markdown-it')();
+	 *
+	 * md.core.ruler.at('replacements', function replace(state) {
+	 *   //...
+	 * });
+	 * ```
+	 **/  Ruler$3.prototype.at = function(name, fn, options) {
     let index = this.__find__(name);
     let opt = options || {};
     if (index === -1) {
@@ -3440,29 +3455,29 @@
     this.__cache__ = null;
   };
   /**
-   * Ruler.before(beforeName, ruleName, fn [, options])
-   * - beforeName (String): new rule will be added before this one.
-   * - ruleName (String): name of added rule.
-   * - fn (Function): rule function.
-   * - options (Object): rule options (not mandatory).
-   *
-   * Add new rule to chain before one with given name. See also
-   * [[Ruler.after]], [[Ruler.push]].
-   *
-   * ##### Options:
-   *
-   * - __alt__ - array with names of "alternate" chains.
-   *
-   * ##### Example
-   *
-   * ```javascript
-   * var md = require('markdown-it')();
-   *
-   * md.block.ruler.before('paragraph', 'my_rule', function replace(state) {
-   *   //...
-   * });
-   * ```
-   **/  Ruler$3.prototype.before = function(beforeName, ruleName, fn, options) {
+	 * Ruler.before(beforeName, ruleName, fn [, options])
+	 * - beforeName (String): new rule will be added before this one.
+	 * - ruleName (String): name of added rule.
+	 * - fn (Function): rule function.
+	 * - options (Object): rule options (not mandatory).
+	 *
+	 * Add new rule to chain before one with given name. See also
+	 * [[Ruler.after]], [[Ruler.push]].
+	 *
+	 * ##### Options:
+	 *
+	 * - __alt__ - array with names of "alternate" chains.
+	 *
+	 * ##### Example
+	 *
+	 * ```javascript
+	 * var md = require('markdown-it')();
+	 *
+	 * md.block.ruler.before('paragraph', 'my_rule', function replace(state) {
+	 *   //...
+	 * });
+	 * ```
+	 **/  Ruler$3.prototype.before = function(beforeName, ruleName, fn, options) {
     let index = this.__find__(beforeName);
     let opt = options || {};
     if (index === -1) {
@@ -3477,29 +3492,29 @@
     this.__cache__ = null;
   };
   /**
-   * Ruler.after(afterName, ruleName, fn [, options])
-   * - afterName (String): new rule will be added after this one.
-   * - ruleName (String): name of added rule.
-   * - fn (Function): rule function.
-   * - options (Object): rule options (not mandatory).
-   *
-   * Add new rule to chain after one with given name. See also
-   * [[Ruler.before]], [[Ruler.push]].
-   *
-   * ##### Options:
-   *
-   * - __alt__ - array with names of "alternate" chains.
-   *
-   * ##### Example
-   *
-   * ```javascript
-   * var md = require('markdown-it')();
-   *
-   * md.inline.ruler.after('text', 'my_rule', function replace(state) {
-   *   //...
-   * });
-   * ```
-   **/  Ruler$3.prototype.after = function(afterName, ruleName, fn, options) {
+	 * Ruler.after(afterName, ruleName, fn [, options])
+	 * - afterName (String): new rule will be added after this one.
+	 * - ruleName (String): name of added rule.
+	 * - fn (Function): rule function.
+	 * - options (Object): rule options (not mandatory).
+	 *
+	 * Add new rule to chain after one with given name. See also
+	 * [[Ruler.before]], [[Ruler.push]].
+	 *
+	 * ##### Options:
+	 *
+	 * - __alt__ - array with names of "alternate" chains.
+	 *
+	 * ##### Example
+	 *
+	 * ```javascript
+	 * var md = require('markdown-it')();
+	 *
+	 * md.inline.ruler.after('text', 'my_rule', function replace(state) {
+	 *   //...
+	 * });
+	 * ```
+	 **/  Ruler$3.prototype.after = function(afterName, ruleName, fn, options) {
     let index = this.__find__(afterName);
     let opt = options || {};
     if (index === -1) {
@@ -3514,28 +3529,28 @@
     this.__cache__ = null;
   };
   /**
-   * Ruler.push(ruleName, fn [, options])
-   * - ruleName (String): name of added rule.
-   * - fn (Function): rule function.
-   * - options (Object): rule options (not mandatory).
-   *
-   * Push new rule to the end of chain. See also
-   * [[Ruler.before]], [[Ruler.after]].
-   *
-   * ##### Options:
-   *
-   * - __alt__ - array with names of "alternate" chains.
-   *
-   * ##### Example
-   *
-   * ```javascript
-   * var md = require('markdown-it')();
-   *
-   * md.core.ruler.push('my_rule', function replace(state) {
-   *   //...
-   * });
-   * ```
-   **/  Ruler$3.prototype.push = function(ruleName, fn, options) {
+	 * Ruler.push(ruleName, fn [, options])
+	 * - ruleName (String): name of added rule.
+	 * - fn (Function): rule function.
+	 * - options (Object): rule options (not mandatory).
+	 *
+	 * Push new rule to the end of chain. See also
+	 * [[Ruler.before]], [[Ruler.after]].
+	 *
+	 * ##### Options:
+	 *
+	 * - __alt__ - array with names of "alternate" chains.
+	 *
+	 * ##### Example
+	 *
+	 * ```javascript
+	 * var md = require('markdown-it')();
+	 *
+	 * md.core.ruler.push('my_rule', function replace(state) {
+	 *   //...
+	 * });
+	 * ```
+	 **/  Ruler$3.prototype.push = function(ruleName, fn, options) {
     let opt = options || {};
     this.__rules__.push({
       name: ruleName,
@@ -3546,17 +3561,17 @@
     this.__cache__ = null;
   };
   /**
-   * Ruler.enable(list [, ignoreInvalid]) -> Array
-   * - list (String|Array): list of rule names to enable.
-   * - ignoreInvalid (Boolean): set `true` to ignore errors when rule not found.
-   *
-   * Enable rules with given names. If any rule name not found - throw Error.
-   * Errors can be disabled by second param.
-   *
-   * Returns list of found rule names (if no exception happened).
-   *
-   * See also [[Ruler.disable]], [[Ruler.enableOnly]].
-   **/  Ruler$3.prototype.enable = function(list, ignoreInvalid) {
+	 * Ruler.enable(list [, ignoreInvalid]) -> Array
+	 * - list (String|Array): list of rule names to enable.
+	 * - ignoreInvalid (Boolean): set `true` to ignore errors when rule not found.
+	 *
+	 * Enable rules with given names. If any rule name not found - throw Error.
+	 * Errors can be disabled by second param.
+	 *
+	 * Returns list of found rule names (if no exception happened).
+	 *
+	 * See also [[Ruler.disable]], [[Ruler.enableOnly]].
+	 **/  Ruler$3.prototype.enable = function(list, ignoreInvalid) {
     if (!Array.isArray(list)) {
       list = [ list ];
     }
@@ -3577,15 +3592,15 @@
     return result;
   };
   /**
-   * Ruler.enableOnly(list [, ignoreInvalid])
-   * - list (String|Array): list of rule names to enable (whitelist).
-   * - ignoreInvalid (Boolean): set `true` to ignore errors when rule not found.
-   *
-   * Enable rules with given names, and disable everything else. If any rule name
-   * not found - throw Error. Errors can be disabled by second param.
-   *
-   * See also [[Ruler.disable]], [[Ruler.enable]].
-   **/  Ruler$3.prototype.enableOnly = function(list, ignoreInvalid) {
+	 * Ruler.enableOnly(list [, ignoreInvalid])
+	 * - list (String|Array): list of rule names to enable (whitelist).
+	 * - ignoreInvalid (Boolean): set `true` to ignore errors when rule not found.
+	 *
+	 * Enable rules with given names, and disable everything else. If any rule name
+	 * not found - throw Error. Errors can be disabled by second param.
+	 *
+	 * See also [[Ruler.disable]], [[Ruler.enable]].
+	 **/  Ruler$3.prototype.enableOnly = function(list, ignoreInvalid) {
     if (!Array.isArray(list)) {
       list = [ list ];
     }
@@ -3595,17 +3610,17 @@
     this.enable(list, ignoreInvalid);
   };
   /**
-   * Ruler.disable(list [, ignoreInvalid]) -> Array
-   * - list (String|Array): list of rule names to disable.
-   * - ignoreInvalid (Boolean): set `true` to ignore errors when rule not found.
-   *
-   * Disable rules with given names. If any rule name not found - throw Error.
-   * Errors can be disabled by second param.
-   *
-   * Returns list of found rule names (if no exception happened).
-   *
-   * See also [[Ruler.enable]], [[Ruler.enableOnly]].
-   **/  Ruler$3.prototype.disable = function(list, ignoreInvalid) {
+	 * Ruler.disable(list [, ignoreInvalid]) -> Array
+	 * - list (String|Array): list of rule names to disable.
+	 * - ignoreInvalid (Boolean): set `true` to ignore errors when rule not found.
+	 *
+	 * Disable rules with given names. If any rule name not found - throw Error.
+	 * Errors can be disabled by second param.
+	 *
+	 * Returns list of found rule names (if no exception happened).
+	 *
+	 * See also [[Ruler.enable]], [[Ruler.enableOnly]].
+	 **/  Ruler$3.prototype.disable = function(list, ignoreInvalid) {
     if (!Array.isArray(list)) {
       list = [ list ];
     }
@@ -3626,14 +3641,14 @@
     return result;
   };
   /**
-   * Ruler.getRules(chainName) -> Array
-   *
-   * Return array of active functions (rules) for given chain name. It analyzes
-   * rules configuration, compiles caches if not exists and returns result.
-   *
-   * Default chain name is `''` (empty string). It can't be skipped. That's
-   * done intentionally, to keep signature monomorphic for high speed.
-   **/  Ruler$3.prototype.getRules = function(chainName) {
+	 * Ruler.getRules(chainName) -> Array
+	 *
+	 * Return array of active functions (rules) for given chain name. It analyzes
+	 * rules configuration, compiles caches if not exists and returns result.
+	 *
+	 * Default chain name is `''` (empty string). It can't be skipped. That's
+	 * done intentionally, to keep signature monomorphic for high speed.
+	 **/  Ruler$3.prototype.getRules = function(chainName) {
     if (this.__cache__ === null) {
       this.__compile__();
     }
@@ -3944,105 +3959,105 @@
   };
   // Token class
   /**
-   * class Token
-   **/
+	 * class Token
+	 **/
   /**
-   * new Token(type, tag, nesting)
-   *
-   * Create new token and fill passed properties.
-   **/  function Token$3(type, tag, nesting) {
+	 * new Token(type, tag, nesting)
+	 *
+	 * Create new token and fill passed properties.
+	 **/  function Token$3(type, tag, nesting) {
     /**
-     * Token#type -> String
-     *
-     * Type of the token (string, e.g. "paragraph_open")
-     **/
+	   * Token#type -> String
+	   *
+	   * Type of the token (string, e.g. "paragraph_open")
+	   **/
     this.type = type;
     /**
-     * Token#tag -> String
-     *
-     * html tag name, e.g. "p"
-     **/    this.tag = tag;
+	   * Token#tag -> String
+	   *
+	   * html tag name, e.g. "p"
+	   **/    this.tag = tag;
     /**
-     * Token#attrs -> Array
-     *
-     * Html attributes. Format: `[ [ name1, value1 ], [ name2, value2 ] ]`
-     **/    this.attrs = null;
+	   * Token#attrs -> Array
+	   *
+	   * Html attributes. Format: `[ [ name1, value1 ], [ name2, value2 ] ]`
+	   **/    this.attrs = null;
     /**
-     * Token#map -> Array
-     *
-     * Source map info. Format: `[ line_begin, line_end ]`
-     **/    this.map = null;
+	   * Token#map -> Array
+	   *
+	   * Source map info. Format: `[ line_begin, line_end ]`
+	   **/    this.map = null;
     /**
-     * Token#nesting -> Number
-     *
-     * Level change (number in {-1, 0, 1} set), where:
-     *
-     * -  `1` means the tag is opening
-     * -  `0` means the tag is self-closing
-     * - `-1` means the tag is closing
-     **/    this.nesting = nesting;
+	   * Token#nesting -> Number
+	   *
+	   * Level change (number in {-1, 0, 1} set), where:
+	   *
+	   * -  `1` means the tag is opening
+	   * -  `0` means the tag is self-closing
+	   * - `-1` means the tag is closing
+	   **/    this.nesting = nesting;
     /**
-     * Token#level -> Number
-     *
-     * nesting level, the same as `state.level`
-     **/    this.level = 0;
+	   * Token#level -> Number
+	   *
+	   * nesting level, the same as `state.level`
+	   **/    this.level = 0;
     /**
-     * Token#children -> Array
-     *
-     * An array of child nodes (inline and img tokens)
-     **/    this.children = null;
+	   * Token#children -> Array
+	   *
+	   * An array of child nodes (inline and img tokens)
+	   **/    this.children = null;
     /**
-     * Token#content -> String
-     *
-     * In a case of self-closing tag (code, html, fence, etc.),
-     * it has contents of this tag.
-     **/    this.content = "";
+	   * Token#content -> String
+	   *
+	   * In a case of self-closing tag (code, html, fence, etc.),
+	   * it has contents of this tag.
+	   **/    this.content = "";
     /**
-     * Token#markup -> String
-     *
-     * '*' or '_' for emphasis, fence string for fence, etc.
-     **/    this.markup = "";
+	   * Token#markup -> String
+	   *
+	   * '*' or '_' for emphasis, fence string for fence, etc.
+	   **/    this.markup = "";
     /**
-     * Token#info -> String
-     *
-     * Additional information:
-     *
-     * - Info string for "fence" tokens
-     * - The value "auto" for autolink "link_open" and "link_close" tokens
-     **/    this.info = "";
+	   * Token#info -> String
+	   *
+	   * Additional information:
+	   *
+	   * - Info string for "fence" tokens
+	   * - The value "auto" for autolink "link_open" and "link_close" tokens
+	   **/    this.info = "";
     /**
-     * Token#meta -> Object
-     *
-     * A place for plugins to store an arbitrary data
-     **/    this.meta = null;
+	   * Token#meta -> Object
+	   *
+	   * A place for plugins to store an arbitrary data
+	   **/    this.meta = null;
     /**
-     * Token#block -> Boolean
-     *
-     * True for block-level tokens, false for inline tokens.
-     * Used in renderer to calculate line breaks
-     **/    this.block = false;
+	   * Token#block -> Boolean
+	   *
+	   * True for block-level tokens, false for inline tokens.
+	   * Used in renderer to calculate line breaks
+	   **/    this.block = false;
     /**
-     * Token#hidden -> Boolean
-     *
-     * If it's true, ignore this element when rendering. Used for tight lists
-     * to hide paragraphs.
-     **/    this.hidden = false;
+	   * Token#hidden -> Boolean
+	   *
+	   * If it's true, ignore this element when rendering. Used for tight lists
+	   * to hide paragraphs.
+	   **/    this.hidden = false;
     /**
-     * Token#position -> Number
-     *
-     * Position in the original string
-     **/    this.position = 0;
+	   * Token#position -> Number
+	   *
+	   * Position in the original string
+	   **/    this.position = 0;
     /**
-     * Token#size -> Number
-     *
-     * Size of the token
-     **/    this.size = 0;
+	   * Token#size -> Number
+	   *
+	   * Size of the token
+	   **/    this.size = 0;
   }
   /**
-   * Token.attrIndex(name) -> Number
-   *
-   * Search attribute index by name.
-   **/  Token$3.prototype.attrIndex = function attrIndex(name) {
+	 * Token.attrIndex(name) -> Number
+	 *
+	 * Search attribute index by name.
+	 **/  Token$3.prototype.attrIndex = function attrIndex(name) {
     let attrs;
     if (!this.attrs) {
       return -1;
@@ -4053,10 +4068,10 @@
     }));
   };
   /**
-   * Token.attrPush(attrData)
-   *
-   * Add `[ name, value ]` attribute to list. Init attrs if necessary
-   **/  Token$3.prototype.attrPush = function attrPush(attrData) {
+	 * Token.attrPush(attrData)
+	 *
+	 * Add `[ name, value ]` attribute to list. Init attrs if necessary
+	 **/  Token$3.prototype.attrPush = function attrPush(attrData) {
     if (this.attrs) {
       this.attrs.push(attrData);
     } else {
@@ -4064,10 +4079,10 @@
     }
   };
   /**
-   * Token.attrSet(name, value)
-   *
-   * Set `name` attribute to `value`. Override old value if exists.
-   **/  Token$3.prototype.attrSet = function attrSet(name, value) {
+	 * Token.attrSet(name, value)
+	 *
+	 * Set `name` attribute to `value`. Override old value if exists.
+	 **/  Token$3.prototype.attrSet = function attrSet(name, value) {
     let idx = this.attrIndex(name), attrData = [ name, value ];
     if (idx < 0) {
       this.attrPush(attrData);
@@ -4076,10 +4091,10 @@
     }
   };
   /**
-   * Token.attrGet(name)
-   *
-   * Get the value of attribute `name`, or null if it does not exist.
-   **/  Token$3.prototype.attrGet = function attrGet(name) {
+	 * Token.attrGet(name)
+	 *
+	 * Get the value of attribute `name`, or null if it does not exist.
+	 **/  Token$3.prototype.attrGet = function attrGet(name) {
     let idx = this.attrIndex(name), value = null;
     if (idx >= 0) {
       value = this.attrs[idx][1];
@@ -4087,11 +4102,11 @@
     return value;
   };
   /**
-   * Token.attrJoin(name, value)
-   *
-   * Join value to existing attribute via space. Or create new attribute if not
-   * exists. Useful to operate with token classes.
-   **/  Token$3.prototype.attrJoin = function attrJoin(name, value) {
+	 * Token.attrJoin(name, value)
+	 *
+	 * Join value to existing attribute via space. Or create new attribute if not
+	 * exists. Useful to operate with token classes.
+	 **/  Token$3.prototype.attrJoin = function attrJoin(name, value) {
     let idx = this.attrIndex(name);
     if (idx < 0) {
       this.attrPush([ name, value ]);
@@ -4100,11 +4115,11 @@
     }
   };
   /**
-   * Token.clone()
-   *
-   * Obtain a shallow clone of the token.  You can use this while rendering to
-   * prevent modifying the token list while rendering.
-   **/  Token$3.prototype.clone = function clone() {
+	 * Token.clone()
+	 *
+	 * Obtain a shallow clone of the token.  You can use this while rendering to
+	 * prevent modifying the token list while rendering.
+	 **/  Token$3.prototype.clone = function clone() {
     let token = new Token$3(this.type, this.tag, this.nesting);
     token.attrs = this.attrs;
     token.level = this.level;
@@ -4134,30 +4149,30 @@
     StateCore.prototype.Token = Token$2;
   var state_core = StateCore;
   /** internal
-   * class Core
-   *
-   * Top-level rules executor. Glues block/inline parsers and does intermediate
-   * transformations.
-   **/  let Ruler$2 = ruler;
+	 * class Core
+	 *
+	 * Top-level rules executor. Glues block/inline parsers and does intermediate
+	 * transformations.
+	 **/  let Ruler$2 = ruler;
   let _rules$2 = [ [ "normalize", normalize ], [ "block", block ], [ "inline", inline ], [ "replacements", replacements ], [ "smartquotes", smartquotes ] ];
   /**
-   * new Core()
-   **/  function Core() {
+	 * new Core()
+	 **/  function Core() {
     /**
-     * Core#ruler -> Ruler
-     *
-     * [[Ruler]] instance. Keep configuration of core rules.
-     **/
+	   * Core#ruler -> Ruler
+	   *
+	   * [[Ruler]] instance. Keep configuration of core rules.
+	   **/
     this.ruler = new Ruler$2;
     for (let i = 0; i < _rules$2.length; i++) {
       this.ruler.push(_rules$2[i][0], _rules$2[i][1]);
     }
   }
   /**
-   * Core.process(state)
-   *
-   * Executes core chain rules.
-   **/  Core.prototype.process = function(state) {
+	 * Core.process(state)
+	 *
+	 * Executes core chain rules.
+	 **/  Core.prototype.process = function(state) {
     let i, l, rules;
     rules = this.ruler.getRules("");
     for (i = 0, l = rules.length; i < l; i++) {
@@ -5741,22 +5756,22 @@
     StateBlock.prototype.Token = Token$1;
   var state_block = StateBlock;
   /** internal
-   * class ParserBlock
-   *
-   * Block-level tokenizer.
-   **/  let Ruler$1 = ruler;
+	 * class ParserBlock
+	 *
+	 * Block-level tokenizer.
+	 **/  let Ruler$1 = ruler;
   let _rules$1 = [ 
   // First 2 params - rule name & source. Secondary array - list of rules,
   // which can be terminated by this one.
   [ "table", table, [ "paragraph", "reference" ] ], [ "code", code ], [ "fence", fence, [ "paragraph", "reference", "blockquote", "list" ] ], [ "blockquote", blockquote, [ "paragraph", "reference", "blockquote", "list" ] ], [ "hr", hr, [ "paragraph", "reference", "blockquote", "list" ] ], [ "list", list, [ "paragraph", "reference", "blockquote", "table" ] ], [ "reference", reference ], [ "html_block", html_block, [ "paragraph", "reference", "blockquote" ] ], [ "heading", heading, [ "paragraph", "reference", "blockquote" ] ], [ "lheading", lheading ], [ "paragraph", paragraph ] ];
   /**
-   * new ParserBlock()
-   **/  function ParserBlock$1() {
+	 * new ParserBlock()
+	 **/  function ParserBlock$1() {
     /**
-     * ParserBlock#ruler -> Ruler
-     *
-     * [[Ruler]] instance. Keep configuration of block rules.
-     **/
+	   * ParserBlock#ruler -> Ruler
+	   *
+	   * [[Ruler]] instance. Keep configuration of block rules.
+	   **/
     this.ruler = new Ruler$1;
     for (let i = 0; i < _rules$1.length; i++) {
       this.ruler.push(_rules$1[i][0], _rules$1[i][1], {
@@ -5812,10 +5827,10 @@
     }
   };
   /**
-   * ParserBlock.parse(str, md, env, outTokens)
-   *
-   * Process input string and push block tokens into `outTokens`
-   **/  ParserBlock$1.prototype.parse = function(src, md, env, outTokens) {
+	 * ParserBlock.parse(str, md, env, outTokens)
+	 *
+	 * Process input string and push block tokens into `outTokens`
+	 **/  ParserBlock$1.prototype.parse = function(src, md, env, outTokens) {
     let state;
     if (!src) {
       return;
@@ -6981,42 +6996,42 @@
     StateInline.prototype.Token = Token;
   var state_inline = StateInline;
   /** internal
-   * class ParserInline
-   *
-   * Tokenizes paragraph content.
-   **/  let Ruler = ruler;
+	 * class ParserInline
+	 *
+	 * Tokenizes paragraph content.
+	 **/  let Ruler = ruler;
   ////////////////////////////////////////////////////////////////////////////////
   // Parser rules
     let _rules0 = [ [ "linkify", linkify.preProcess ] ];
   let _rules = [ [ "linkify", linkify.tokenize ], [ "text", text ], [ "newline", newline ], [ "escape", _escape ], [ "backticks", backticks ], [ "strikethrough", strikethrough.tokenize ], [ "emphasis", emphasis.tokenize ], [ "link", link ], [ "image", image ], [ "autolink", autolink ], [ "html_inline", html_inline ], [ "entity", entity ] ];
   let _rules2 = [ [ "balance_pairs", balance_pairs ], [ "strikethrough", strikethrough.postProcess ], [ "emphasis", emphasis.postProcess ], [ "linkify", linkify.postProcess ], [ "text_collapse", text_collapse ] ];
   /**
-   * new ParserInline()
-   **/  function ParserInline$1() {
+	 * new ParserInline()
+	 **/  function ParserInline$1() {
     let i;
     /**
-     * ParserInline#ruler -> Ruler
-     *
-     * [[Ruler]] instance. Keep configuration of inline rules.
-     **/    this.ruler = new Ruler;
+	   * ParserInline#ruler -> Ruler
+	   *
+	   * [[Ruler]] instance. Keep configuration of inline rules.
+	   **/    this.ruler = new Ruler;
     for (i = 0; i < _rules.length; i++) {
       this.ruler.push(_rules[i][0], _rules[i][1]);
     }
     /**
-     * ParserInline#ruler2 -> Ruler
-     *
-     * [[Ruler]] instance. Second ruler used for post-processing
-     * (e.g. in emphasis-like rules).
-     **/    this.ruler2 = new Ruler;
+	   * ParserInline#ruler2 -> Ruler
+	   *
+	   * [[Ruler]] instance. Second ruler used for post-processing
+	   * (e.g. in emphasis-like rules).
+	   **/    this.ruler2 = new Ruler;
     for (i = 0; i < _rules2.length; i++) {
       this.ruler2.push(_rules2[i][0], _rules2[i][1]);
     }
     /**
-     * ParserInline#ruler0 -> Ruler
-     *
-     * [[Ruler]] instance. Third ruler used for pre-processing
-     * (e.g. in linkify rule).
-     **/    this.ruler0 = new Ruler;
+	   * ParserInline#ruler0 -> Ruler
+	   *
+	   * [[Ruler]] instance. Third ruler used for pre-processing
+	   * (e.g. in linkify rule).
+	   **/    this.ruler0 = new Ruler;
     for (i = 0; i < _rules0.length; i++) {
       this.ruler0.push(_rules0[i][0], _rules0[i][1]);
     }
@@ -7088,10 +7103,10 @@
     }
   };
   /**
-   * ParserInline.parse(str, links, md, env, outTokens)
-   *
-   * Process input string and push inline tokens into `outTokens`
-   **/  ParserInline$1.prototype.parse = function(str, md, env, outTokens) {
+	 * ParserInline.parse(str, links, md, env, outTokens)
+	 *
+	 * Process input string and push inline tokens into `outTokens`
+	 **/  ParserInline$1.prototype.parse = function(str, md, env, outTokens) {
     let i, rules, len;
     let state = new this.State(str, md, env, outTokens);
     rules = this.ruler0.getRules("");
@@ -7404,41 +7419,41 @@
         resetScanCache(self);
   }
   /**
-   * class Match
-   *
-   * Match result. Single element of array, returned by [[LinkifyIt#match]]
-   **/  function Match(self, shift) {
+	 * class Match
+	 *
+	 * Match result. Single element of array, returned by [[LinkifyIt#match]]
+	 **/  function Match(self, shift) {
     var start = self.__index__, end = self.__last_index__, text = self.__text_cache__.slice(start, end);
     /**
-     * Match#schema -> String
-     *
-     * Prefix (protocol) for matched string.
-     **/    this.schema = self.__schema__.toLowerCase();
+	   * Match#schema -> String
+	   *
+	   * Prefix (protocol) for matched string.
+	   **/    this.schema = self.__schema__.toLowerCase();
     /**
-     * Match#index -> Number
-     *
-     * First position of matched string.
-     **/    this.index = start + shift;
+	   * Match#index -> Number
+	   *
+	   * First position of matched string.
+	   **/    this.index = start + shift;
     /**
-     * Match#lastIndex -> Number
-     *
-     * Next position after matched string.
-     **/    this.lastIndex = end + shift;
+	   * Match#lastIndex -> Number
+	   *
+	   * Next position after matched string.
+	   **/    this.lastIndex = end + shift;
     /**
-     * Match#raw -> String
-     *
-     * Matched string.
-     **/    this.raw = text;
+	   * Match#raw -> String
+	   *
+	   * Matched string.
+	   **/    this.raw = text;
     /**
-     * Match#text -> String
-     *
-     * Notmalized text of matched string.
-     **/    this.text = text;
+	   * Match#text -> String
+	   *
+	   * Notmalized text of matched string.
+	   **/    this.text = text;
     /**
-     * Match#url -> String
-     *
-     * Normalized url of matched string.
-     **/    this.url = text;
+	   * Match#url -> String
+	   *
+	   * Normalized url of matched string.
+	   **/    this.url = text;
   }
   function createMatch(self, shift) {
     var match = new Match(self, shift);
@@ -7446,42 +7461,42 @@
     return match;
   }
   /**
-   * class LinkifyIt
-   **/
+	 * class LinkifyIt
+	 **/
   /**
-   * new LinkifyIt(schemas, options)
-   * - schemas (Object): Optional. Additional schemas to validate (prefix/validator)
-   * - options (Object): { fuzzyLink|fuzzyEmail|fuzzyIP: true|false }
-   *
-   * Creates new linkifier instance with optional additional schemas.
-   * Can be called without `new` keyword for convenience.
-   *
-   * By default understands:
-   *
-   * - `http(s)://...` , `ftp://...`, `mailto:...` & `//...` links
-   * - "fuzzy" links and emails (example.com, foo@bar.com).
-   *
-   * `schemas` is an object, where each key/value describes protocol/rule:
-   *
-   * - __key__ - link prefix (usually, protocol name with `:` at the end, `skype:`
-   *   for example). `linkify-it` makes shure that prefix is not preceeded with
-   *   alphanumeric char and symbols. Only whitespaces and punctuation allowed.
-   * - __value__ - rule to check tail after link prefix
-   *   - _String_ - just alias to existing rule
-   *   - _Object_
-   *     - _validate_ - validator function (should return matched length on success),
-   *       or `RegExp`.
-   *     - _normalize_ - optional function to normalize text & url of matched result
-   *       (for example, for @twitter mentions).
-   *
-   * `options`:
-   *
-   * - __fuzzyLink__ - recognige URL-s without `http(s):` prefix. Default `true`.
-   * - __fuzzyIP__ - allow IPs in fuzzy links above. Can conflict with some texts
-   *   like version numbers. Default `false`.
-   * - __fuzzyEmail__ - recognize emails without `mailto:` prefix.
-   *
-   **/  function LinkifyIt$1(schemas, options) {
+	 * new LinkifyIt(schemas, options)
+	 * - schemas (Object): Optional. Additional schemas to validate (prefix/validator)
+	 * - options (Object): { fuzzyLink|fuzzyEmail|fuzzyIP: true|false }
+	 *
+	 * Creates new linkifier instance with optional additional schemas.
+	 * Can be called without `new` keyword for convenience.
+	 *
+	 * By default understands:
+	 *
+	 * - `http(s)://...` , `ftp://...`, `mailto:...` & `//...` links
+	 * - "fuzzy" links and emails (example.com, foo@bar.com).
+	 *
+	 * `schemas` is an object, where each key/value describes protocol/rule:
+	 *
+	 * - __key__ - link prefix (usually, protocol name with `:` at the end, `skype:`
+	 *   for example). `linkify-it` makes shure that prefix is not preceeded with
+	 *   alphanumeric char and symbols. Only whitespaces and punctuation allowed.
+	 * - __value__ - rule to check tail after link prefix
+	 *   - _String_ - just alias to existing rule
+	 *   - _Object_
+	 *     - _validate_ - validator function (should return matched length on success),
+	 *       or `RegExp`.
+	 *     - _normalize_ - optional function to normalize text & url of matched result
+	 *       (for example, for @twitter mentions).
+	 *
+	 * `options`:
+	 *
+	 * - __fuzzyLink__ - recognige URL-s without `http(s):` prefix. Default `true`.
+	 * - __fuzzyIP__ - allow IPs in fuzzy links above. Can conflict with some texts
+	 *   like version numbers. Default `false`.
+	 * - __fuzzyEmail__ - recognize emails without `mailto:` prefix.
+	 *
+	 **/  function LinkifyIt$1(schemas, options) {
     if (!(this instanceof LinkifyIt$1)) {
       return new LinkifyIt$1(schemas, options);
     }
@@ -7506,30 +7521,30 @@
     compile(this);
   }
   /** chainable
-   * LinkifyIt#add(schema, definition)
-   * - schema (String): rule name (fixed pattern prefix)
-   * - definition (String|RegExp|Object): schema definition
-   *
-   * Add new rule definition. See constructor description for details.
-   **/  LinkifyIt$1.prototype.add = function add(schema, definition) {
+	 * LinkifyIt#add(schema, definition)
+	 * - schema (String): rule name (fixed pattern prefix)
+	 * - definition (String|RegExp|Object): schema definition
+	 *
+	 * Add new rule definition. See constructor description for details.
+	 **/  LinkifyIt$1.prototype.add = function add(schema, definition) {
     this.__schemas__[schema] = definition;
     compile(this);
     return this;
   };
   /** chainable
-   * LinkifyIt#set(options)
-   * - options (Object): { fuzzyLink|fuzzyEmail|fuzzyIP: true|false }
-   *
-   * Set recognition options for links without schema.
-   **/  LinkifyIt$1.prototype.set = function set(options) {
+	 * LinkifyIt#set(options)
+	 * - options (Object): { fuzzyLink|fuzzyEmail|fuzzyIP: true|false }
+	 *
+	 * Set recognition options for links without schema.
+	 **/  LinkifyIt$1.prototype.set = function set(options) {
     this.__opts__ = assign(this.__opts__, options);
     return this;
   };
   /**
-   * LinkifyIt#test(text) -> Boolean
-   *
-   * Searches linkifiable pattern and returns `true` on success or `false` on fail.
-   **/  LinkifyIt$1.prototype.test = function test(text) {
+	 * LinkifyIt#test(text) -> Boolean
+	 *
+	 * Searches linkifiable pattern and returns `true` on success or `false` on fail.
+	 **/  LinkifyIt$1.prototype.test = function test(text) {
     // Reset scan cache
     this.__text_cache__ = text;
     this.__index__ = -1;
@@ -7588,23 +7603,23 @@
     return this.__index__ >= 0;
   };
   /**
-   * LinkifyIt#pretest(text) -> Boolean
-   *
-   * Very quick check, that can give false positives. Returns true if link MAY BE
-   * can exists. Can be used for speed optimization, when you need to check that
-   * link NOT exists.
-   **/  LinkifyIt$1.prototype.pretest = function pretest(text) {
+	 * LinkifyIt#pretest(text) -> Boolean
+	 *
+	 * Very quick check, that can give false positives. Returns true if link MAY BE
+	 * can exists. Can be used for speed optimization, when you need to check that
+	 * link NOT exists.
+	 **/  LinkifyIt$1.prototype.pretest = function pretest(text) {
     return this.re.pretest.test(text);
   };
   /**
-   * LinkifyIt#testSchemaAt(text, name, position) -> Number
-   * - text (String): text to scan
-   * - name (String): rule (schema) name
-   * - position (Number): text offset to check from
-   *
-   * Similar to [[LinkifyIt#test]] but checks only specific protocol tail exactly
-   * at given position. Returns length of found pattern (0 on fail).
-   **/  LinkifyIt$1.prototype.testSchemaAt = function testSchemaAt(text, schema, pos) {
+	 * LinkifyIt#testSchemaAt(text, name, position) -> Number
+	 * - text (String): text to scan
+	 * - name (String): rule (schema) name
+	 * - position (Number): text offset to check from
+	 *
+	 * Similar to [[LinkifyIt#test]] but checks only specific protocol tail exactly
+	 * at given position. Returns length of found pattern (0 on fail).
+	 **/  LinkifyIt$1.prototype.testSchemaAt = function testSchemaAt(text, schema, pos) {
     // If not supported schema check requested - terminate
     if (!this.__compiled__[schema.toLowerCase()]) {
       return 0;
@@ -7612,21 +7627,21 @@
     return this.__compiled__[schema.toLowerCase()].validate(text, pos, this);
   };
   /**
-   * LinkifyIt#match(text) -> Array|null
-   *
-   * Returns array of found link descriptions or `null` on fail. We strongly
-   * recommend to use [[LinkifyIt#test]] first, for best speed.
-   *
-   * ##### Result match description
-   *
-   * - __schema__ - link schema, can be empty for fuzzy links, or `//` for
-   *   protocol-neutral  links.
-   * - __index__ - offset of matched text
-   * - __lastIndex__ - index of next char after mathch end
-   * - __raw__ - matched text
-   * - __text__ - normalized text
-   * - __url__ - link, generated from matched text
-   **/  LinkifyIt$1.prototype.match = function match(text) {
+	 * LinkifyIt#match(text) -> Array|null
+	 *
+	 * Returns array of found link descriptions or `null` on fail. We strongly
+	 * recommend to use [[LinkifyIt#test]] first, for best speed.
+	 *
+	 * ##### Result match description
+	 *
+	 * - __schema__ - link schema, can be empty for fuzzy links, or `//` for
+	 *   protocol-neutral  links.
+	 * - __index__ - offset of matched text
+	 * - __lastIndex__ - index of next char after mathch end
+	 * - __raw__ - matched text
+	 * - __text__ - normalized text
+	 * - __url__ - link, generated from matched text
+	 **/  LinkifyIt$1.prototype.match = function match(text) {
     var shift = 0, result = [];
     // Try to take previous element from cache, if .test() called before
         if (this.__index__ >= 0 && this.__text_cache__ === text) {
@@ -7647,20 +7662,20 @@
     return null;
   };
   /** chainable
-   * LinkifyIt#tlds(list [, keepOld]) -> this
-   * - list (Array): list of tlds
-   * - keepOld (Boolean): merge with current list if `true` (`false` by default)
-   *
-   * Load (or merge) new tlds list. Those are user for fuzzy links (without prefix)
-   * to avoid false positives. By default this algorythm used:
-   *
-   * - hostname with any 2-letter root zones are ok.
-   * - biz|com|edu|gov|net|org|pro|web|xxx|aero|asia|coop|info|museum|name|shop|рф
-   *   are ok.
-   * - encoded (`xn--...`) root zones are ok.
-   *
-   * If list is replaced, then exact match for 2-chars root zones will be checked.
-   **/  LinkifyIt$1.prototype.tlds = function tlds(list, keepOld) {
+	 * LinkifyIt#tlds(list [, keepOld]) -> this
+	 * - list (Array): list of tlds
+	 * - keepOld (Boolean): merge with current list if `true` (`false` by default)
+	 *
+	 * Load (or merge) new tlds list. Those are user for fuzzy links (without prefix)
+	 * to avoid false positives. By default this algorythm used:
+	 *
+	 * - hostname with any 2-letter root zones are ok.
+	 * - biz|com|edu|gov|net|org|pro|web|xxx|aero|asia|coop|info|museum|name|shop|рф
+	 *   are ok.
+	 * - encoded (`xn--...`) root zones are ok.
+	 *
+	 * If list is replaced, then exact match for 2-chars root zones will be checked.
+	 **/  LinkifyIt$1.prototype.tlds = function tlds(list, keepOld) {
     list = Array.isArray(list) ? list : [ list ];
     if (!keepOld) {
       this.__tlds__ = list.slice();
@@ -7675,10 +7690,10 @@
     return this;
   };
   /**
-   * LinkifyIt#normalize(match)
-   *
-   * Default normalizer (if schema does not define it's own).
-   **/  LinkifyIt$1.prototype.normalize = function normalize(match) {
+	 * LinkifyIt#normalize(match)
+	 *
+	 * Default normalizer (if schema does not define it's own).
+	 **/  LinkifyIt$1.prototype.normalize = function normalize(match) {
     // Do minimal possible changes by default. Need to collect feedback prior
     // to move forward https://github.com/markdown-it/linkify-it/issues/1
     if (!match.schema) {
@@ -7689,10 +7704,10 @@
     }
   };
   /**
-   * LinkifyIt#onCompile()
-   *
-   * Override to modify basic RegExp-s.
-   **/  LinkifyIt$1.prototype.onCompile = function onCompile() {};
+	 * LinkifyIt#onCompile()
+	 *
+	 * Override to modify basic RegExp-s.
+	 **/  LinkifyIt$1.prototype.onCompile = function onCompile() {};
   var linkifyIt = LinkifyIt$1;
   // markdown-it default options
     var _default = {
@@ -7941,137 +7956,137 @@
         return mdurl.decode(mdurl.format(parsed), mdurl.decode.defaultChars + "%");
   }
   /**
-   * class MarkdownIt
-   *
-   * Main parser/renderer class.
-   *
-   * ##### Usage
-   *
-   * ```javascript
-   * // node.js, "classic" way:
-   * var MarkdownIt = require('markdown-it'),
-   *     md = new MarkdownIt();
-   * var result = md.render('# markdown-it rulezz!');
-   *
-   * // node.js, the same, but with sugar:
-   * var md = require('markdown-it')();
-   * var result = md.render('# markdown-it rulezz!');
-   *
-   * // browser without AMD, added to "window" on script load
-   * // Note, there are no dash.
-   * var md = window.markdownit();
-   * var result = md.render('# markdown-it rulezz!');
-   * ```
-   *
-   * Single line rendering, without paragraph wrap:
-   *
-   * ```javascript
-   * var md = require('markdown-it')();
-   * var result = md.renderInline('__markdown-it__ rulezz!');
-   * ```
-   **/
+	 * class MarkdownIt
+	 *
+	 * Main parser/renderer class.
+	 *
+	 * ##### Usage
+	 *
+	 * ```javascript
+	 * // node.js, "classic" way:
+	 * var MarkdownIt = require('markdown-it'),
+	 *     md = new MarkdownIt();
+	 * var result = md.render('# markdown-it rulezz!');
+	 *
+	 * // node.js, the same, but with sugar:
+	 * var md = require('markdown-it')();
+	 * var result = md.render('# markdown-it rulezz!');
+	 *
+	 * // browser without AMD, added to "window" on script load
+	 * // Note, there are no dash.
+	 * var md = window.markdownit();
+	 * var result = md.render('# markdown-it rulezz!');
+	 * ```
+	 *
+	 * Single line rendering, without paragraph wrap:
+	 *
+	 * ```javascript
+	 * var md = require('markdown-it')();
+	 * var result = md.renderInline('__markdown-it__ rulezz!');
+	 * ```
+	 **/
   /**
-   * new MarkdownIt([presetName, options])
-   * - presetName (String): optional, `commonmark` / `zero`
-   * - options (Object)
-   *
-   * Creates parser instanse with given config. Can be called without `new`.
-   *
-   * ##### presetName
-   *
-   * MarkdownIt provides named presets as a convenience to quickly
-   * enable/disable active syntax rules and options for common use cases.
-   *
-   * - ["commonmark"](https://github.com/markdown-it/markdown-it/blob/master/lib/presets/commonmark.js) -
-   *   configures parser to strict [CommonMark](http://commonmark.org/) mode.
-   * - [default](https://github.com/markdown-it/markdown-it/blob/master/lib/presets/default.js) -
-   *   similar to GFM, used when no preset name given. Enables all available rules,
-   *   but still without html, typographer & autolinker.
-   * - ["zero"](https://github.com/markdown-it/markdown-it/blob/master/lib/presets/zero.js) -
-   *   all rules disabled. Useful to quickly setup your config via `.enable()`.
-   *   For example, when you need only `bold` and `italic` markup and nothing else.
-   *
-   * ##### options:
-   *
-   * - __html__ - `false`. Set `true` to enable HTML tags in source. Be careful!
-   *   That's not safe! You may need external sanitizer to protect output from XSS.
-   *   It's better to extend features via plugins, instead of enabling HTML.
-   * - __xhtmlOut__ - `false`. Set `true` to add '/' when closing single tags
-   *   (`<br />`). This is needed only for full CommonMark compatibility. In real
-   *   world you will need HTML output.
-   * - __breaks__ - `false`. Set `true` to convert `\n` in paragraphs into `<br>`.
-   * - __langPrefix__ - `language-`. CSS language class prefix for fenced blocks.
-   *   Can be useful for external highlighters.
-   * - __linkify__ - `false`. Set `true` to autoconvert URL-like text to links.
-   * - __typographer__  - `false`. Set `true` to enable [some language-neutral
-   *   replacement](https://github.com/markdown-it/markdown-it/blob/master/lib/rules_core/replacements.js) +
-   *   quotes beautification (smartquotes).
-   * - __quotes__ - `“”‘’`, String or Array. Double + single quotes replacement
-   *   pairs (a.k.a. "smartquotes"), when typographer enabled. For example, you can
-   *   use `'«»„“'` for Russian, `'„“‚‘'` for German, and
-   *   `['«\xA0', '\xA0»', '‹\xA0', '\xA0›']` for French (including nbsp).
-   * - __highlight__ - `null`. Highlighter function for fenced code blocks.
-   *   Highlighter `function (str, lang, attrs)` should return escaped HTML. It can also
-   *   return empty string if the source was not changed and should be escaped
-   *   externaly. If result starts with <pre... internal wrapper is skipped.
-   *
-   * ##### Example
-   *
-   * ```javascript
-   * // commonmark mode
-   * var md = require('markdown-it')('commonmark');
-   *
-   * // default mode
-   * var md = require('markdown-it')();
-   *
-   * // enable everything
-   * var md = require('markdown-it')({
-   *   html: true,
-   *   linkify: true,
-   *   typographer: true
-   * });
-   * ```
-   *
-   * ##### Syntax highlighting
-   *
-   * ```js
-   * var hljs = require('highlight.js') // https://highlightjs.org/
-   *
-   * var md = require('markdown-it')({
-   *   highlight: function (str, lang, attrs) {
-   *     if (lang && hljs.getLanguage(lang)) {
-   *       try {
-   *         return hljs.highlight(str, { language: lang, ignoreIllegals: true }).value;
-   *       } catch (__) {}
-   *     }
-   *
-   *     return ''; // use external default escaping
-   *   }
-   * });
-   * ```
-   *
-   * Or with full wrapper override (if you need assign class to `<pre>`):
-   *
-   * ```javascript
-   * var hljs = require('highlight.js') // https://highlightjs.org/
-   *
-   * // Actual default values
-   * var md = require('markdown-it')({
-   *   highlight: function (str, lang, attrs) {
-   *     if (lang && hljs.getLanguage(lang)) {
-   *       try {
-   *         return '<pre class="hljs"><code>' +
-   *                hljs.highlight(str, { language: lang, ignoreIllegals: true }).value +
-   *                '</code></pre>';
-   *       } catch (__) {}
-   *     }
-   *
-   *     return '<pre class="hljs"><code>' + md.utils.escapeHtml(str) + '</code></pre>';
-   *   }
-   * });
-   * ```
-   *
-   **/  function MarkdownIt(presetName, options) {
+	 * new MarkdownIt([presetName, options])
+	 * - presetName (String): optional, `commonmark` / `zero`
+	 * - options (Object)
+	 *
+	 * Creates parser instanse with given config. Can be called without `new`.
+	 *
+	 * ##### presetName
+	 *
+	 * MarkdownIt provides named presets as a convenience to quickly
+	 * enable/disable active syntax rules and options for common use cases.
+	 *
+	 * - ["commonmark"](https://github.com/markdown-it/markdown-it/blob/master/lib/presets/commonmark.js) -
+	 *   configures parser to strict [CommonMark](http://commonmark.org/) mode.
+	 * - [default](https://github.com/markdown-it/markdown-it/blob/master/lib/presets/default.js) -
+	 *   similar to GFM, used when no preset name given. Enables all available rules,
+	 *   but still without html, typographer & autolinker.
+	 * - ["zero"](https://github.com/markdown-it/markdown-it/blob/master/lib/presets/zero.js) -
+	 *   all rules disabled. Useful to quickly setup your config via `.enable()`.
+	 *   For example, when you need only `bold` and `italic` markup and nothing else.
+	 *
+	 * ##### options:
+	 *
+	 * - __html__ - `false`. Set `true` to enable HTML tags in source. Be careful!
+	 *   That's not safe! You may need external sanitizer to protect output from XSS.
+	 *   It's better to extend features via plugins, instead of enabling HTML.
+	 * - __xhtmlOut__ - `false`. Set `true` to add '/' when closing single tags
+	 *   (`<br />`). This is needed only for full CommonMark compatibility. In real
+	 *   world you will need HTML output.
+	 * - __breaks__ - `false`. Set `true` to convert `\n` in paragraphs into `<br>`.
+	 * - __langPrefix__ - `language-`. CSS language class prefix for fenced blocks.
+	 *   Can be useful for external highlighters.
+	 * - __linkify__ - `false`. Set `true` to autoconvert URL-like text to links.
+	 * - __typographer__  - `false`. Set `true` to enable [some language-neutral
+	 *   replacement](https://github.com/markdown-it/markdown-it/blob/master/lib/rules_core/replacements.js) +
+	 *   quotes beautification (smartquotes).
+	 * - __quotes__ - `“”‘’`, String or Array. Double + single quotes replacement
+	 *   pairs (a.k.a. "smartquotes"), when typographer enabled. For example, you can
+	 *   use `'«»„“'` for Russian, `'„“‚‘'` for German, and
+	 *   `['«\xA0', '\xA0»', '‹\xA0', '\xA0›']` for French (including nbsp).
+	 * - __highlight__ - `null`. Highlighter function for fenced code blocks.
+	 *   Highlighter `function (str, lang, attrs)` should return escaped HTML. It can also
+	 *   return empty string if the source was not changed and should be escaped
+	 *   externaly. If result starts with <pre... internal wrapper is skipped.
+	 *
+	 * ##### Example
+	 *
+	 * ```javascript
+	 * // commonmark mode
+	 * var md = require('markdown-it')('commonmark');
+	 *
+	 * // default mode
+	 * var md = require('markdown-it')();
+	 *
+	 * // enable everything
+	 * var md = require('markdown-it')({
+	 *   html: true,
+	 *   linkify: true,
+	 *   typographer: true
+	 * });
+	 * ```
+	 *
+	 * ##### Syntax highlighting
+	 *
+	 * ```js
+	 * var hljs = require('highlight.js') // https://highlightjs.org/
+	 *
+	 * var md = require('markdown-it')({
+	 *   highlight: function (str, lang, attrs) {
+	 *     if (lang && hljs.getLanguage(lang)) {
+	 *       try {
+	 *         return hljs.highlight(str, { language: lang, ignoreIllegals: true }).value;
+	 *       } catch (__) {}
+	 *     }
+	 *
+	 *     return ''; // use external default escaping
+	 *   }
+	 * });
+	 * ```
+	 *
+	 * Or with full wrapper override (if you need assign class to `<pre>`):
+	 *
+	 * ```javascript
+	 * var hljs = require('highlight.js') // https://highlightjs.org/
+	 *
+	 * // Actual default values
+	 * var md = require('markdown-it')({
+	 *   highlight: function (str, lang, attrs) {
+	 *     if (lang && hljs.getLanguage(lang)) {
+	 *       try {
+	 *         return '<pre class="hljs"><code>' +
+	 *                hljs.highlight(str, { language: lang, ignoreIllegals: true }).value +
+	 *                '</code></pre>';
+	 *       } catch (__) {}
+	 *     }
+	 *
+	 *     return '<pre class="hljs"><code>' + md.utils.escapeHtml(str) + '</code></pre>';
+	 *   }
+	 * });
+	 * ```
+	 *
+	 **/  function MarkdownIt(presetName, options) {
     if (!(this instanceof MarkdownIt)) {
       return new MarkdownIt(presetName, options);
     }
@@ -8082,93 +8097,93 @@
       }
     }
     /**
-     * MarkdownIt#inline -> ParserInline
-     *
-     * Instance of [[ParserInline]]. You may need it to add new rules when
-     * writing plugins. For simple rules control use [[MarkdownIt.disable]] and
-     * [[MarkdownIt.enable]].
-     **/    this.inline = new ParserInline;
+	   * MarkdownIt#inline -> ParserInline
+	   *
+	   * Instance of [[ParserInline]]. You may need it to add new rules when
+	   * writing plugins. For simple rules control use [[MarkdownIt.disable]] and
+	   * [[MarkdownIt.enable]].
+	   **/    this.inline = new ParserInline;
     /**
-     * MarkdownIt#block -> ParserBlock
-     *
-     * Instance of [[ParserBlock]]. You may need it to add new rules when
-     * writing plugins. For simple rules control use [[MarkdownIt.disable]] and
-     * [[MarkdownIt.enable]].
-     **/    this.block = new ParserBlock;
+	   * MarkdownIt#block -> ParserBlock
+	   *
+	   * Instance of [[ParserBlock]]. You may need it to add new rules when
+	   * writing plugins. For simple rules control use [[MarkdownIt.disable]] and
+	   * [[MarkdownIt.enable]].
+	   **/    this.block = new ParserBlock;
     /**
-     * MarkdownIt#core -> Core
-     *
-     * Instance of [[Core]] chain executor. You may need it to add new rules when
-     * writing plugins. For simple rules control use [[MarkdownIt.disable]] and
-     * [[MarkdownIt.enable]].
-     **/    this.core = new ParserCore;
+	   * MarkdownIt#core -> Core
+	   *
+	   * Instance of [[Core]] chain executor. You may need it to add new rules when
+	   * writing plugins. For simple rules control use [[MarkdownIt.disable]] and
+	   * [[MarkdownIt.enable]].
+	   **/    this.core = new ParserCore;
     /**
-     * MarkdownIt#renderer -> Renderer
-     *
-     * Instance of [[Renderer]]. Use it to modify output look. Or to add rendering
-     * rules for new token types, generated by plugins.
-     *
-     * ##### Example
-     *
-     * ```javascript
-     * var md = require('markdown-it')();
-     *
-     * function myToken(tokens, idx, options, env, self) {
-     *   //...
-     *   return result;
-     * };
-     *
-     * md.renderer.rules['my_token'] = myToken
-     * ```
-     *
-     * See [[Renderer]] docs and [source code](https://github.com/markdown-it/markdown-it/blob/master/lib/renderer.js).
-     **/    this.renderer = new Renderer;
+	   * MarkdownIt#renderer -> Renderer
+	   *
+	   * Instance of [[Renderer]]. Use it to modify output look. Or to add rendering
+	   * rules for new token types, generated by plugins.
+	   *
+	   * ##### Example
+	   *
+	   * ```javascript
+	   * var md = require('markdown-it')();
+	   *
+	   * function myToken(tokens, idx, options, env, self) {
+	   *   //...
+	   *   return result;
+	   * };
+	   *
+	   * md.renderer.rules['my_token'] = myToken
+	   * ```
+	   *
+	   * See [[Renderer]] docs and [source code](https://github.com/markdown-it/markdown-it/blob/master/lib/renderer.js).
+	   **/    this.renderer = new Renderer;
     /**
-     * MarkdownIt#linkify -> LinkifyIt
-     *
-     * [linkify-it](https://github.com/markdown-it/linkify-it) instance.
-     * Used by [linkify](https://github.com/markdown-it/markdown-it/blob/master/lib/rules_core/linkify.js)
-     * rule.
-     **/    this.linkify = new LinkifyIt;
+	   * MarkdownIt#linkify -> LinkifyIt
+	   *
+	   * [linkify-it](https://github.com/markdown-it/linkify-it) instance.
+	   * Used by [linkify](https://github.com/markdown-it/markdown-it/blob/master/lib/rules_core/linkify.js)
+	   * rule.
+	   **/    this.linkify = new LinkifyIt;
     /**
-     * MarkdownIt#validateLink(url) -> Boolean
-     *
-     * Link validation function. CommonMark allows too much in links. By default
-     * we disable `javascript:`, `vbscript:`, `file:` schemas, and almost all `data:...` schemas
-     * except some embedded image types.
-     *
-     * You can change this behaviour:
-     *
-     * ```javascript
-     * var md = require('markdown-it')();
-     * // enable everything
-     * md.validateLink = function () { return true; }
-     * ```
-     **/    this.validateLink = validateLink;
+	   * MarkdownIt#validateLink(url) -> Boolean
+	   *
+	   * Link validation function. CommonMark allows too much in links. By default
+	   * we disable `javascript:`, `vbscript:`, `file:` schemas, and almost all `data:...` schemas
+	   * except some embedded image types.
+	   *
+	   * You can change this behaviour:
+	   *
+	   * ```javascript
+	   * var md = require('markdown-it')();
+	   * // enable everything
+	   * md.validateLink = function () { return true; }
+	   * ```
+	   **/    this.validateLink = validateLink;
     /**
-     * MarkdownIt#normalizeLink(url) -> String
-     *
-     * Function used to encode link url to a machine-readable format,
-     * which includes url-encoding, punycode, etc.
-     **/    this.normalizeLink = normalizeLink;
+	   * MarkdownIt#normalizeLink(url) -> String
+	   *
+	   * Function used to encode link url to a machine-readable format,
+	   * which includes url-encoding, punycode, etc.
+	   **/    this.normalizeLink = normalizeLink;
     /**
-     * MarkdownIt#normalizeLinkText(url) -> String
-     *
-     * Function used to decode link url to a human-readable format`
-     **/    this.normalizeLinkText = normalizeLinkText;
+	   * MarkdownIt#normalizeLinkText(url) -> String
+	   *
+	   * Function used to decode link url to a human-readable format`
+	   **/    this.normalizeLinkText = normalizeLinkText;
     // Expose utils & helpers for easy acces from plugins
     /**
-     * MarkdownIt#utils -> utils
-     *
-     * Assorted utility functions, useful to write plugins. See details
-     * [here](https://github.com/markdown-it/markdown-it/blob/master/lib/common/utils.js).
-     **/    this.utils = utils;
+	   * MarkdownIt#utils -> utils
+	   *
+	   * Assorted utility functions, useful to write plugins. See details
+	   * [here](https://github.com/markdown-it/markdown-it/blob/master/lib/common/utils.js).
+	   **/    this.utils = utils;
     /**
-     * MarkdownIt#helpers -> helpers
-     *
-     * Link components parser functions, useful to write plugins. See details
-     * [here](https://github.com/markdown-it/markdown-it/blob/master/lib/helpers).
-     **/    this.helpers = utils.assign({}, helpers);
+	   * MarkdownIt#helpers -> helpers
+	   *
+	   * Link components parser functions, useful to write plugins. See details
+	   * [here](https://github.com/markdown-it/markdown-it/blob/master/lib/helpers).
+	   **/    this.helpers = utils.assign({}, helpers);
     this.options = {};
     this.configure(presetName);
     if (options) {
@@ -8176,37 +8191,37 @@
     }
   }
   /** chainable
-   * MarkdownIt.set(options)
-   *
-   * Set parser options (in the same format as in constructor). Probably, you
-   * will never need it, but you can change options after constructor call.
-   *
-   * ##### Example
-   *
-   * ```javascript
-   * var md = require('markdown-it')()
-   *             .set({ html: true, breaks: true })
-   *             .set({ typographer, true });
-   * ```
-   *
-   * __Note:__ To achieve the best possible performance, don't modify a
-   * `markdown-it` instance options on the fly. If you need multiple configurations
-   * it's best to create multiple instances and initialize each with separate
-   * config.
-   **/  MarkdownIt.prototype.set = function(options) {
+	 * MarkdownIt.set(options)
+	 *
+	 * Set parser options (in the same format as in constructor). Probably, you
+	 * will never need it, but you can change options after constructor call.
+	 *
+	 * ##### Example
+	 *
+	 * ```javascript
+	 * var md = require('markdown-it')()
+	 *             .set({ html: true, breaks: true })
+	 *             .set({ typographer, true });
+	 * ```
+	 *
+	 * __Note:__ To achieve the best possible performance, don't modify a
+	 * `markdown-it` instance options on the fly. If you need multiple configurations
+	 * it's best to create multiple instances and initialize each with separate
+	 * config.
+	 **/  MarkdownIt.prototype.set = function(options) {
     utils.assign(this.options, options);
     return this;
   };
   /** chainable, internal
-   * MarkdownIt.configure(presets)
-   *
-   * Batch load of all options and compenent settings. This is internal method,
-   * and you probably will not need it. But if you will - see available presets
-   * and data structure [here](https://github.com/markdown-it/markdown-it/tree/master/lib/presets)
-   *
-   * We strongly recommend to use presets instead of direct config loads. That
-   * will give better compatibility with next versions.
-   **/  MarkdownIt.prototype.configure = function(presets) {
+	 * MarkdownIt.configure(presets)
+	 *
+	 * Batch load of all options and compenent settings. This is internal method,
+	 * and you probably will not need it. But if you will - see available presets
+	 * and data structure [here](https://github.com/markdown-it/markdown-it/tree/master/lib/presets)
+	 *
+	 * We strongly recommend to use presets instead of direct config loads. That
+	 * will give better compatibility with next versions.
+	 **/  MarkdownIt.prototype.configure = function(presets) {
     let self = this, presetName;
     if (utils.isString(presets)) {
       presetName = presets;
@@ -8237,22 +8252,22 @@
     return this;
   };
   /** chainable
-   * MarkdownIt.enable(list, ignoreInvalid)
-   * - list (String|Array): rule name or list of rule names to enable
-   * - ignoreInvalid (Boolean): set `true` to ignore errors when rule not found.
-   *
-   * Enable list or rules. It will automatically find appropriate components,
-   * containing rules with given names. If rule not found, and `ignoreInvalid`
-   * not set - throws exception.
-   *
-   * ##### Example
-   *
-   * ```javascript
-   * var md = require('markdown-it')()
-   *             .enable(['sub', 'sup'])
-   *             .disable('smartquotes');
-   * ```
-   **/  MarkdownIt.prototype.enable = function(list, ignoreInvalid) {
+	 * MarkdownIt.enable(list, ignoreInvalid)
+	 * - list (String|Array): rule name or list of rule names to enable
+	 * - ignoreInvalid (Boolean): set `true` to ignore errors when rule not found.
+	 *
+	 * Enable list or rules. It will automatically find appropriate components,
+	 * containing rules with given names. If rule not found, and `ignoreInvalid`
+	 * not set - throws exception.
+	 *
+	 * ##### Example
+	 *
+	 * ```javascript
+	 * var md = require('markdown-it')()
+	 *             .enable(['sub', 'sup'])
+	 *             .disable('smartquotes');
+	 * ```
+	 **/  MarkdownIt.prototype.enable = function(list, ignoreInvalid) {
     let result = [];
     if (!Array.isArray(list)) {
       list = [ list ];
@@ -8271,12 +8286,12 @@
     return this;
   };
   /** chainable
-   * MarkdownIt.disable(list, ignoreInvalid)
-   * - list (String|Array): rule name or list of rule names to disable.
-   * - ignoreInvalid (Boolean): set `true` to ignore errors when rule not found.
-   *
-   * The same as [[MarkdownIt.enable]], but turn specified rules off.
-   **/  MarkdownIt.prototype.disable = function(list, ignoreInvalid) {
+	 * MarkdownIt.disable(list, ignoreInvalid)
+	 * - list (String|Array): rule name or list of rule names to disable.
+	 * - ignoreInvalid (Boolean): set `true` to ignore errors when rule not found.
+	 *
+	 * The same as [[MarkdownIt.enable]], but turn specified rules off.
+	 **/  MarkdownIt.prototype.disable = function(list, ignoreInvalid) {
     let result = [];
     if (!Array.isArray(list)) {
       list = [ list ];
@@ -8295,40 +8310,40 @@
     return this;
   };
   /** chainable
-   * MarkdownIt.use(plugin, params)
-   *
-   * Load specified plugin with given params into current parser instance.
-   * It's just a sugar to call `plugin(md, params)` with curring.
-   *
-   * ##### Example
-   *
-   * ```javascript
-   * var iterator = require('markdown-it-for-inline');
-   * var md = require('markdown-it')()
-   *             .use(iterator, 'foo_replace', 'text', function (tokens, idx) {
-   *               tokens[idx].content = tokens[idx].content.replace(/foo/g, 'bar');
-   *             });
-   * ```
-   **/  MarkdownIt.prototype.use = function(plugin /*, params, ... */) {
+	 * MarkdownIt.use(plugin, params)
+	 *
+	 * Load specified plugin with given params into current parser instance.
+	 * It's just a sugar to call `plugin(md, params)` with curring.
+	 *
+	 * ##### Example
+	 *
+	 * ```javascript
+	 * var iterator = require('markdown-it-for-inline');
+	 * var md = require('markdown-it')()
+	 *             .use(iterator, 'foo_replace', 'text', function (tokens, idx) {
+	 *               tokens[idx].content = tokens[idx].content.replace(/foo/g, 'bar');
+	 *             });
+	 * ```
+	 **/  MarkdownIt.prototype.use = function(plugin /*, params, ... */) {
     let args = [ this ].concat(Array.prototype.slice.call(arguments, 1));
     plugin.apply(plugin, args);
     return this;
   };
   /** internal
-   * MarkdownIt.parse(src, env) -> Array
-   * - src (String): source string
-   * - env (Object): environment sandbox
-   *
-   * Parse input string and return list of block tokens (special token type
-   * "inline" will contain list of inline tokens). You should not call this
-   * method directly, until you write custom renderer (for example, to produce
-   * AST).
-   *
-   * `env` is used to pass data between "distributed" rules and return additional
-   * metadata like reference info, needed for the renderer. It also can be used to
-   * inject data in specific cases. Usually, you will be ok to pass `{}` or NULL,
-   * and then pass updated object to renderer.
-   **/  MarkdownIt.prototype.parse = function(src, env) {
+	 * MarkdownIt.parse(src, env) -> Array
+	 * - src (String): source string
+	 * - env (Object): environment sandbox
+	 *
+	 * Parse input string and return list of block tokens (special token type
+	 * "inline" will contain list of inline tokens). You should not call this
+	 * method directly, until you write custom renderer (for example, to produce
+	 * AST).
+	 *
+	 * `env` is used to pass data between "distributed" rules and return additional
+	 * metadata like reference info, needed for the renderer. It also can be used to
+	 * inject data in specific cases. Usually, you will be ok to pass `{}` or NULL,
+	 * and then pass updated object to renderer.
+	 **/  MarkdownIt.prototype.parse = function(src, env) {
     if (typeof src !== "string") {
       throw new Error("Input data should be a String");
     }
@@ -8337,41 +8352,41 @@
     return state.tokens;
   };
   /**
-   * MarkdownIt.render(src [, env]) -> String
-   * - src (String): source string
-   * - env (Object): environment sandbox
-   *
-   * Render markdown string into html. It does all magic for you :).
-   *
-   * `env` can be used to inject additional metadata (`{}` by default).
-   * But you will not need it with high probability. See also comment
-   * in [[MarkdownIt.parse]].
-   **/  MarkdownIt.prototype.render = function(src, env) {
+	 * MarkdownIt.render(src [, env]) -> String
+	 * - src (String): source string
+	 * - env (Object): environment sandbox
+	 *
+	 * Render markdown string into html. It does all magic for you :).
+	 *
+	 * `env` can be used to inject additional metadata (`{}` by default).
+	 * But you will not need it with high probability. See also comment
+	 * in [[MarkdownIt.parse]].
+	 **/  MarkdownIt.prototype.render = function(src, env) {
     env = env || {};
     return this.renderer.render(this.parse(src, env), this.options, env);
   };
   /** internal
-   * MarkdownIt.parseInline(src, env) -> Array
-   * - src (String): source string
-   * - env (Object): environment sandbox
-   *
-   * The same as [[MarkdownIt.parse]] but skip all block rules. It returns the
-   * block tokens list with the single `inline` element, containing parsed inline
-   * tokens in `children` property. Also updates `env` object.
-   **/  MarkdownIt.prototype.parseInline = function(src, env) {
+	 * MarkdownIt.parseInline(src, env) -> Array
+	 * - src (String): source string
+	 * - env (Object): environment sandbox
+	 *
+	 * The same as [[MarkdownIt.parse]] but skip all block rules. It returns the
+	 * block tokens list with the single `inline` element, containing parsed inline
+	 * tokens in `children` property. Also updates `env` object.
+	 **/  MarkdownIt.prototype.parseInline = function(src, env) {
     let state = new this.core.State(src, this, env);
     state.inlineMode = true;
     this.core.process(state);
     return state.tokens;
   };
   /**
-   * MarkdownIt.renderInline(src [, env]) -> String
-   * - src (String): source string
-   * - env (Object): environment sandbox
-   *
-   * Similar to [[MarkdownIt.render]] but for single paragraph content. Result
-   * will NOT be wrapped into `<p>` tags.
-   **/  MarkdownIt.prototype.renderInline = function(src, env) {
+	 * MarkdownIt.renderInline(src [, env]) -> String
+	 * - src (String): source string
+	 * - env (Object): environment sandbox
+	 *
+	 * Similar to [[MarkdownIt.render]] but for single paragraph content. Result
+	 * will NOT be wrapped into `<p>` tags.
+	 **/  MarkdownIt.prototype.renderInline = function(src, env) {
     env = env || {};
     return this.renderer.render(this.parseInline(src, env), this.options, env);
   };
