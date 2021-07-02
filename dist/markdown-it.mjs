@@ -1,4 +1,4 @@
-/*! @gerhobbelt/markdown-it 12.0.6-57 https://github.com/GerHobbelt/markdown-it @license MIT */
+/*! @gerhobbelt/markdown-it 12.0.6-58 https://github.com/GerHobbelt/markdown-it @license MIT */
 import require$$8 from "punycode";
 
 var commonjsGlobal = typeof globalThis !== "undefined" ? globalThis : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : {};
