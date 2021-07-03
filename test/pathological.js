@@ -23,9 +23,9 @@ const pathological = JSON.parse(fs.readFileSync(p.join(__dirname, 'pathological.
 
 // ----------- ex-marky ---------------------
 /* global performance */
-var perf = typeof performance !== 'undefined' && performance;
+const perf = typeof performance !== 'undefined' && performance;
 
-var now = perf && perf.now ? function () { return perf.now(); } : function () { return Date.now(); }
+const now = perf && perf.now ? function () { return perf.now(); } : function () { return Date.now(); };
 // ----------- ex-marky ---------------------
 
 
@@ -79,9 +79,9 @@ async function test_pattern(func) {
   };
 
   const TIME_LIMIT = 1000;
-  let start = now();
+  const start = now();
   while (total_time_spent < 10 * TIME_LIMIT) {
-    let mark = now();
+    const mark = now();
     rounds++;
 
     err = null;
@@ -91,7 +91,7 @@ async function test_pattern(func) {
       err = ex;
     }
 
-    let entry = now();
+    const entry = now();
     dt = entry - mark;
     total_time_spent = entry - start;
 

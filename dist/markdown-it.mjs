@@ -1,4 +1,4 @@
-/*! @gerhobbelt/markdown-it 12.1.0-58 https://github.com/GerHobbelt/markdown-it @license MIT */
+/*! @gerhobbelt/markdown-it 12.1.0-59 https://github.com/GerHobbelt/markdown-it @license MIT */
 import punycode from "punycode";
 
 // HTML5 entities map: { name -> utf16string }
