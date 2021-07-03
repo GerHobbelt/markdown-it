@@ -2174,12 +2174,12 @@
   //  - exclude      - list of characters to ignore (in addition to a-zA-Z0-9)
   //  - keepEscaped  - don't encode '%' in a correct escape sequence (default: true)
   
-    function encode$1(string, exclude, keepEscaped) {
+    function encode(string, exclude, keepEscaped) {
     var i, l, code, nextCode, cache, result = "";
     if (typeof exclude !== "string") {
       // encode(string, keepEscaped)
       keepEscaped = exclude;
-      exclude = encode$1.defaultChars;
+      exclude = encode.defaultChars;
     }
     if (typeof keepEscaped === "undefined") {
       keepEscaped = true;
@@ -2214,9 +2214,9 @@
     }
     return result;
   }
-  encode$1.defaultChars = ";/?:@&=+$,-_.!~*'()#";
-  encode$1.componentChars = "-_.!~*'()";
-  var encode_1 = encode$1;
+  encode.defaultChars = ";/?:@&=+$,-_.!~*'()#";
+  encode.componentChars = "-_.!~*'()";
+  var encode_1 = encode;
   /* eslint-disable no-bitwise */  var decodeCache = {};
   function getDecodeCache(exclude) {
     var i, ch, cache = decodeCache[exclude];
@@ -2236,10 +2236,10 @@
   }
   // Decode percent-encoded string.
   
-    function decode$1(string, exclude) {
+    function decode(string, exclude) {
     var cache;
     if (typeof exclude !== "string") {
-      exclude = decode$1.defaultChars;
+      exclude = decode.defaultChars;
     }
     cache = getDecodeCache(exclude);
     return string.replace(/(%[a-f0-9]{2})+/gi, (function(seq) {
@@ -2301,10 +2301,10 @@
       return result;
     }));
   }
-  decode$1.defaultChars = ";/?:@&=+$,#";
-  decode$1.componentChars = "";
-  var decode_1 = decode$1;
-  var format$1 = function format(url) {
+  decode.defaultChars = ";/?:@&=+$,#";
+  decode.componentChars = "";
+  var decode_1 = decode;
+  var format = function format(url) {
     var result = "";
     result += url.protocol || "";
     result += url.slashes ? "//" : "";
@@ -2574,11 +2574,11 @@
       this.hostname = host;
     }
   };
-  var parse$1 = urlParse;
-  var encode = mdurl.encode = encode_1;
-  var decode = mdurl.decode = decode_1;
-  var format = mdurl.format = format$1;
-  var parse = mdurl.parse = parse$1;
+  var parse = urlParse;
+  mdurl.encode = encode_1;
+  mdurl.decode = decode_1;
+  mdurl.format = format;
+  mdurl.parse = parse;
   var uc_micro = {};
   var regex$3 = /[\0-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF]/;
   var regex$2 = /[\0-\x1F\x7F-\x9F]/;
@@ -7861,7 +7861,7 @@
   ////////////////////////////////////////////////////////////////////////////////
     const RECODE_HOSTNAME_FOR = [ "http:", "https:", "mailto:" ];
   function normalizeLink(url) {
-    const parsed = parse(url, true);
+    const parsed = mdurl.parse(url, true);
     if (parsed.hostname) {
       // Encode hostnames in urls like:
       // `http://host/`, `https://host/`, `mailto:user@host`, `//host/`
@@ -7873,10 +7873,10 @@
         } catch (er) {}
       }
     }
-    return encode(format(parsed));
+    return mdurl.encode(mdurl.format(parsed));
   }
   function normalizeLinkText(url) {
-    const parsed = parse(url, true);
+    const parsed = mdurl.parse(url, true);
     if (parsed.hostname) {
       // Encode hostnames in urls like:
       // `http://host/`, `https://host/`, `mailto:user@host`, `//host/`
@@ -7898,7 +7898,7 @@
       }
     }
     // add '%' to exclude list because of https://github.com/markdown-it/markdown-it/issues/720
-        return decode(format(parsed), decode.defaultChars + "%");
+        return mdurl.decode(mdurl.format(parsed), mdurl.decode.defaultChars + "%");
   }
   /**
    * class MarkdownIt

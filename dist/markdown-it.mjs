@@ -2169,12 +2169,12 @@ function getEncodeCache(exclude) {
 //  - exclude      - list of characters to ignore (in addition to a-zA-Z0-9)
 //  - keepEscaped  - don't encode '%' in a correct escape sequence (default: true)
 
-function encode$1(string, exclude, keepEscaped) {
+function encode(string, exclude, keepEscaped) {
   var i, l, code, nextCode, cache, result = "";
   if (typeof exclude !== "string") {
     // encode(string, keepEscaped)
     keepEscaped = exclude;
-    exclude = encode$1.defaultChars;
+    exclude = encode.defaultChars;
   }
   if (typeof keepEscaped === "undefined") {
     keepEscaped = true;
@@ -2210,11 +2210,11 @@ function encode$1(string, exclude, keepEscaped) {
   return result;
 }
 
-encode$1.defaultChars = ";/?:@&=+$,-_.!~*'()#";
+encode.defaultChars = ";/?:@&=+$,-_.!~*'()#";
 
-encode$1.componentChars = "-_.!~*'()";
+encode.componentChars = "-_.!~*'()";
 
-var encode_1 = encode$1;
+var encode_1 = encode;
 
 /* eslint-disable no-bitwise */ var decodeCache = {};
 
@@ -2237,10 +2237,10 @@ function getDecodeCache(exclude) {
 
 // Decode percent-encoded string.
 
-function decode$1(string, exclude) {
+function decode(string, exclude) {
   var cache;
   if (typeof exclude !== "string") {
-    exclude = decode$1.defaultChars;
+    exclude = decode.defaultChars;
   }
   cache = getDecodeCache(exclude);
   return string.replace(/(%[a-f0-9]{2})+/gi, (function(seq) {
@@ -2303,13 +2303,13 @@ function decode$1(string, exclude) {
   }));
 }
 
-decode$1.defaultChars = ";/?:@&=+$,#";
+decode.defaultChars = ";/?:@&=+$,#";
 
-decode$1.componentChars = "";
+decode.componentChars = "";
 
-var decode_1 = decode$1;
+var decode_1 = decode;
 
-var format$1 = function format(url) {
+var format = function format(url) {
   var result = "";
   result += url.protocol || "";
   result += url.slashes ? "//" : "";
@@ -2584,15 +2584,15 @@ Url.prototype.parseHost = function(host) {
   }
 };
 
-var parse$1 = urlParse;
+var parse = urlParse;
 
-var encode = mdurl.encode = encode_1;
+mdurl.encode = encode_1;
 
-var decode = mdurl.decode = decode_1;
+mdurl.decode = decode_1;
 
-var format = mdurl.format = format$1;
+mdurl.format = format;
 
-var parse = mdurl.parse = parse$1;
+mdurl.parse = parse;
 
 var uc_micro = {};
 
@@ -8113,7 +8113,7 @@ function validateLink(url) {
 const RECODE_HOSTNAME_FOR = [ "http:", "https:", "mailto:" ];
 
 function normalizeLink(url) {
-  const parsed = parse(url, true);
+  const parsed = mdurl.parse(url, true);
   if (parsed.hostname) {
     // Encode hostnames in urls like:
     // `http://host/`, `https://host/`, `mailto:user@host`, `//host/`
@@ -8125,11 +8125,11 @@ function normalizeLink(url) {
       } catch (er) {}
     }
   }
-  return encode(format(parsed));
+  return mdurl.encode(mdurl.format(parsed));
 }
 
 function normalizeLinkText(url) {
-  const parsed = parse(url, true);
+  const parsed = mdurl.parse(url, true);
   if (parsed.hostname) {
     // Encode hostnames in urls like:
     // `http://host/`, `https://host/`, `mailto:user@host`, `//host/`
@@ -8151,7 +8151,7 @@ function normalizeLinkText(url) {
     }
   }
   // add '%' to exclude list because of https://github.com/markdown-it/markdown-it/issues/720
-    return decode(format(parsed), decode.defaultChars + "%");
+    return mdurl.decode(mdurl.format(parsed), mdurl.decode.defaultChars + "%");
 }
 
 /**
