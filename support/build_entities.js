@@ -10,6 +10,7 @@ const src = fs.readFileSync('node_modules/entities/lib/maps/entities.json', 'utf
 const json = JSON.parse(src);
 
 const js = `
+
 // HTML5 entities map: { name -> utf16string }
 //
 
@@ -17,7 +18,9 @@ const js = `
 /*eslint quotes:0*/
 //export * from "entities/lib/maps/entities.json";
 
-export default ${ JSON.stringify(json, null, 2) };
+const entities = ${ JSON.stringify(json, null, 2) };
+
+export default entities;
 
 `;
 
