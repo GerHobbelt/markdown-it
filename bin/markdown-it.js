@@ -2,8 +2,19 @@
 /*eslint no-console:0*/
 
 
-const fs = require('fs');
-const argparse = require('argparse');
+import fs from "fs";
+import path from 'path';
+import argparse from "argparse";
+
+import MarkdownIt from "../dist/markdown-it.mjs";
+
+import { fileURLToPath } from 'url';
+
+// see https://nodejs.org/docs/latest-v13.x/api/esm.html#esm_no_require_exports_module_exports_filename_dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const packageJson = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -15,7 +26,7 @@ const cli = new argparse.ArgumentParser({
 
 cli.add_argument('-v', '--version', {
   action: 'version',
-  version: require('../package.json').version
+    version: packageJson.version
 });
 
 cli.add_argument('--no-html', {
@@ -28,7 +39,7 @@ cli.add_argument('-l', '--linkify', {
   action: 'store_true'
 });
 
-cli.add_argument([ '-p', '--plugins' ], {
+cli.add_argument('-p', '--plugins', {
   help: 'List of plugin package names to include (e.g. markdown-it-footnote). Assumes plugins have been installed already.',
   action: 'append',
   nargs: '+'
@@ -73,7 +84,7 @@ function readFile(filename, encoding, callback) {
   }
 }
 
-function loadPlugins(md, plugins) {
+async function loadPlugins(md, plugins) {
   // Flatten array of plugins or arrays of plugins and load them.
   plugins = [].concat.apply([], plugins);
 
@@ -81,7 +92,7 @@ function loadPlugins(md, plugins) {
     const name = plugins[index];
 
     try {
-      const plugin = require(name);
+      const plugin = await import(name);
       md.use(plugin.default || plugin);
     } catch (e) {
       console.error('cannot load plugin ' + name);
@@ -90,7 +101,7 @@ function loadPlugins(md, plugins) {
 }
 ////////////////////////////////////////////////////////////////////////////////
 
-readFile(options.file, 'utf8', function (err, input) {
+readFile(options.file, 'utf8', async function (err, input) {
   let output, md;
 
   if (err) {
@@ -107,14 +118,16 @@ readFile(options.file, 'utf8', function (err, input) {
     process.exit(1);
   }
 
-  md = require('..')({
+  md = MarkdownIt({
     html: !options.no_html,
     xhtmlOut: false,
     typographer: options.typographer,
     linkify: options.linkify
   });
 
-  if (options.plugins) loadPlugins(md, options.plugins);
+  if (options.plugins) {
+    await loadPlugins(md, options.plugins);
+  }
 
   try {
     output = md.render(input);
