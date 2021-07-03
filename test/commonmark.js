@@ -3,8 +3,8 @@
 
 import p from 'path';
 import markdownItTestgen from '@gerhobbelt/markdown-it-testgen';
-import chai from 'chai';
-import { MarkdownIt } from '../index.js';
+import assert from 'assert';
+import MarkdownIt from '../index.js';
 
 import { fileURLToPath } from 'url';
 
@@ -13,7 +13,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = p.dirname(__filename);
 
 const load = markdownItTestgen.load;
-const assert = chai.assert;
 
 
 function generate(path, md) {

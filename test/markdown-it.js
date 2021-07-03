@@ -4,7 +4,7 @@
 import path from 'path';
 
 import generate from '@gerhobbelt/markdown-it-testgen';
-import { MarkdownIt } from '../index.js';
+import MarkdownIt from '../index.js';
 
 import { fileURLToPath } from 'url';
 

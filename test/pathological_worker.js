@@ -1,6 +1,6 @@
 
 
-import { MarkdownIt as markdownit } from '../index.js';
+import markdownit from '../index.js';
 
 
 export function render(str) {

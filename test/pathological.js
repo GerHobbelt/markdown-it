@@ -3,9 +3,7 @@
 import needle from 'needle';
 import assert from 'assert';
 import crypto from 'crypto';
-//import { Worker } from 'jest-worker';
 //import { Worker } from 'worker_threads';
-//import * as marky from 'marky';
 import chalk from 'chalk';
 
 import { render } from './pathological_worker.js';

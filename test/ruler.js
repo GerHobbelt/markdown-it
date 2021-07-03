@@ -1,10 +1,9 @@
 
 
 
-import chai from 'chai';
+import assert from 'assert';
 import Ruler from '../lib/ruler.js';
 
-const assert = chai.assert;
 
 
 describe('Ruler', function () {

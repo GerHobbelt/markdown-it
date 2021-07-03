@@ -5,6 +5,13 @@
 import fs from 'fs';
 import path from 'path';
 
+import { fileURLToPath } from 'url';
+
+// see https://nodejs.org/docs/latest-v13.x/api/esm.html#esm_no_require_exports_module_exports_filename_dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+
 let arg = fs.readdirSync(path.join(__dirname, '..')).filter(fn => fn.endsWith('.cpuprofile'));
 if (arg.length > 0) {
 	// sort latest to oldest:

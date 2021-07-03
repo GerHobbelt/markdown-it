@@ -285,6 +285,19 @@ foo
 .
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src line: 649
+
+.
+&nbsp; &amp; &copy; &AElig; &Dcaron;
+&frac34; &HilbertSpace; &DifferentialD;
+&ClockwiseContourIntegral; &ngE;
+.
+<p>  &amp; © Æ Ď
+¾ ℋ ⅆ
+∲ ≧̸</p>
+.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 src line: 668
 
 .
@@ -342,6 +355,38 @@ src line: 728
 <a href="&ouml;&ouml;.html">
 .
 <a href="&ouml;&ouml;.html">
+.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src line: 735
+
+.
+[foo](/f&ouml;&ouml; "f&ouml;&ouml;")
+.
+<p><a href="/f%C3%B6%C3%B6" title="föö">foo</a></p>
+.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src line: 742
+
+.
+[foo]
+
+[foo]: /f&ouml;&ouml; "f&ouml;&ouml;"
+.
+<p><a href="/f%C3%B6%C3%B6" title="föö">foo</a></p>
+.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src line: 751
+
+.
+``` f&ouml;&ouml;
+foo
+```
+.
+<pre><code class="language-föö">foo
+</code></pre>
 .
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -406,6 +451,15 @@ src line: 810
 &#9;foo
 .
 <p>	foo</p>
+.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src line: 817
+
+.
+[a](url &quot;tit&quot;)
+.
+<p>[a](url &quot;tit&quot;)</p>
 .
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -6199,6 +6253,15 @@ src line: 7703
 .
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src line: 7719
+
+.
+[link](foo%20b&auml;)
+.
+<p><a href="foo%20b%C3%A4">link</a></p>
+.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 src line: 7730
 
 .
@@ -6218,6 +6281,15 @@ src line: 7739
 <p><a href="/url" title="title">link</a>
 <a href="/url" title="title">link</a>
 <a href="/url" title="title">link</a></p>
+.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src line: 7753
+
+.
+[link](/url "title \"&quot;")
+.
+<p><a href="/url" title="title &quot;&quot;">link</a></p>
 .
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

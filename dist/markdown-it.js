@@ -1,8 +1,8 @@
-/*! @gerhobbelt/markdown-it 12.1.0-59 https://github.com/GerHobbelt/markdown-it @license MIT */
+/*! @gerhobbelt/markdown-it 12.1.0-60 https://github.com/GerHobbelt/markdown-it @license MIT */
 (function(global, factory) {
-  typeof exports === "object" && typeof module !== "undefined" ? factory(exports, require("punycode")) : typeof define === "function" && define.amd ? define([ "exports", "punycode" ], factory) : (global = typeof globalThis !== "undefined" ? globalThis : global || self, 
-  factory(global.markdownit = {}, global.punycode));
-})(this, (function(exports, punycode) {
+  typeof exports === "object" && typeof module !== "undefined" ? module.exports = factory(require("punycode")) : typeof define === "function" && define.amd ? define([ "punycode" ], factory) : (global = typeof globalThis !== "undefined" ? globalThis : global || self, 
+  global.markdownit = factory(global.punycode));
+})(this, (function(punycode) {
   "use strict";
   function _interopDefaultLegacy(e) {
     return e && typeof e === "object" && "default" in e ? e : {
@@ -14,7 +14,7 @@
   
   /*eslint quotes:0*/
   //export * from "entities/lib/maps/entities.json";
-    var entities = {
+    const entities = {
     Aacute: "\xc1",
     aacute: "\xe1",
     Abreve: "\u0102",
@@ -2141,10 +2141,6 @@
     zwj: "\u200d",
     zwnj: "\u200c"
   };
-  var entities$1 =  Object.freeze({
-    __proto__: null,
-    default: entities
-  });
   var regex$4 = /[!-#%-\*,-\/:;\?@\[-\]_\{\}\xA1\xA7\xAB\xB6\xB7\xBB\xBF\u037E\u0387\u055A-\u055F\u0589\u058A\u05BE\u05C0\u05C3\u05C6\u05F3\u05F4\u0609\u060A\u060C\u060D\u061B\u061E\u061F\u066A-\u066D\u06D4\u0700-\u070D\u07F7-\u07F9\u0830-\u083E\u085E\u0964\u0965\u0970\u09FD\u0A76\u0AF0\u0C84\u0DF4\u0E4F\u0E5A\u0E5B\u0F04-\u0F12\u0F14\u0F3A-\u0F3D\u0F85\u0FD0-\u0FD4\u0FD9\u0FDA\u104A-\u104F\u10FB\u1360-\u1368\u1400\u166D\u166E\u169B\u169C\u16EB-\u16ED\u1735\u1736\u17D4-\u17D6\u17D8-\u17DA\u1800-\u180A\u1944\u1945\u1A1E\u1A1F\u1AA0-\u1AA6\u1AA8-\u1AAD\u1B5A-\u1B60\u1BFC-\u1BFF\u1C3B-\u1C3F\u1C7E\u1C7F\u1CC0-\u1CC7\u1CD3\u2010-\u2027\u2030-\u2043\u2045-\u2051\u2053-\u205E\u207D\u207E\u208D\u208E\u2308-\u230B\u2329\u232A\u2768-\u2775\u27C5\u27C6\u27E6-\u27EF\u2983-\u2998\u29D8-\u29DB\u29FC\u29FD\u2CF9-\u2CFC\u2CFE\u2CFF\u2D70\u2E00-\u2E2E\u2E30-\u2E4E\u3001-\u3003\u3008-\u3011\u3014-\u301F\u3030\u303D\u30A0\u30FB\uA4FE\uA4FF\uA60D-\uA60F\uA673\uA67E\uA6F2-\uA6F7\uA874-\uA877\uA8CE\uA8CF\uA8F8-\uA8FA\uA8FC\uA92E\uA92F\uA95F\uA9C1-\uA9CD\uA9DE\uA9DF\uAA5C-\uAA5F\uAADE\uAADF\uAAF0\uAAF1\uABEB\uFD3E\uFD3F\uFE10-\uFE19\uFE30-\uFE52\uFE54-\uFE61\uFE63\uFE68\uFE6A\uFE6B\uFF01-\uFF03\uFF05-\uFF0A\uFF0C-\uFF0F\uFF1A\uFF1B\uFF1F\uFF20\uFF3B-\uFF3D\uFF3F\uFF5B\uFF5D\uFF5F-\uFF65]|\uD800[\uDD00-\uDD02\uDF9F\uDFD0]|\uD801\uDD6F|\uD802[\uDC57\uDD1F\uDD3F\uDE50-\uDE58\uDE7F\uDEF0-\uDEF6\uDF39-\uDF3F\uDF99-\uDF9C]|\uD803[\uDF55-\uDF59]|\uD804[\uDC47-\uDC4D\uDCBB\uDCBC\uDCBE-\uDCC1\uDD40-\uDD43\uDD74\uDD75\uDDC5-\uDDC8\uDDCD\uDDDB\uDDDD-\uDDDF\uDE38-\uDE3D\uDEA9]|\uD805[\uDC4B-\uDC4F\uDC5B\uDC5D\uDCC6\uDDC1-\uDDD7\uDE41-\uDE43\uDE60-\uDE6C\uDF3C-\uDF3E]|\uD806[\uDC3B\uDE3F-\uDE46\uDE9A-\uDE9C\uDE9E-\uDEA2]|\uD807[\uDC41-\uDC45\uDC70\uDC71\uDEF7\uDEF8]|\uD809[\uDC70-\uDC74]|\uD81A[\uDE6E\uDE6F\uDEF5\uDF37-\uDF3B\uDF44]|\uD81B[\uDE97-\uDE9A]|\uD82F\uDC9F|\uD836[\uDE87-\uDE8B]|\uD83A[\uDD5E\uDD5F]/;
   var mdurl = {};
   var encodeCache = {};
@@ -2583,33 +2579,18 @@
   var decode = mdurl.decode = decode_1;
   var format = mdurl.format = format$1;
   var parse = mdurl.parse = parse$1;
-  var index$1 =  Object.freeze( Object.assign( Object.create(null), mdurl, {
-    default: mdurl,
-    encode: encode,
-    decode: decode,
-    format: format,
-    parse: parse
-  }));
   var uc_micro = {};
   var regex$3 = /[\0-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF]/;
   var regex$2 = /[\0-\x1F\x7F-\x9F]/;
   var regex$1 = /[\xAD\u0600-\u0605\u061C\u06DD\u070F\u08E2\u180E\u200B-\u200F\u202A-\u202E\u2060-\u2064\u2066-\u206F\uFEFF\uFFF9-\uFFFB]|\uD804[\uDCBD\uDCCD]|\uD82F[\uDCA0-\uDCA3]|\uD834[\uDD73-\uDD7A]|\uDB40[\uDC01\uDC20-\uDC7F]/;
   var regex = /[ \xA0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000]/;
-  var Any = uc_micro.Any = regex$3;
-  var Cc = uc_micro.Cc = regex$2;
-  var Cf = uc_micro.Cf = regex$1;
-  var P = uc_micro.P = regex$4;
-  var Z = uc_micro.Z = regex;
-  var index =  Object.freeze( Object.assign( Object.create(null), uc_micro, {
-    default: uc_micro,
-    Any: Any,
-    Cc: Cc,
-    Cf: Cf,
-    P: P,
-    Z: Z
-  }));
+  uc_micro.Any = regex$3;
+  uc_micro.Cc = regex$2;
+  uc_micro.Cf = regex$1;
+  uc_micro.P = regex$4;
+  uc_micro.Z = regex;
   // Utilities
-    function isNil$1(v) {
+    function isNil(v) {
     return v === null || typeof v === "undefined";
   }
   function _class$1(obj) {
@@ -2619,12 +2600,12 @@
     return _class$1(obj) === "[object String]";
   }
   const _hasOwnProperty = Object.prototype.hasOwnProperty;
-  function has$1(object, key) {
+  function has(object, key) {
     return _hasOwnProperty.call(object, key);
   }
   // Merge objects
   
-    function assign$2(obj /*from1, from2, from3, ...*/) {
+    function assign$1(obj /*from1, from2, from3, ...*/) {
     const sources = Array.prototype.slice.call(arguments, 1);
     sources.forEach((function(source) {
       if (!source) {
@@ -2645,7 +2626,7 @@
     return [].concat(src.slice(0, pos), newElements, src.slice(pos + 1));
   }
   ////////////////////////////////////////////////////////////////////////////////
-    function isValidEntityCode$1(c) {
+    function isValidEntityCode(c) {
     /*eslint no-bitwise:0*/
     // broken sequence
     if (c >= 55296 && c <= 57343) {
@@ -2677,7 +2658,7 @@
     }
     return true;
   }
-  function fromCodePoint$1(c) {
+  function fromCodePoint(c) {
     /*eslint no-bitwise:0*/
     if (c > 65535) {
       c -= 65536;
@@ -2692,13 +2673,13 @@
   const DIGITAL_ENTITY_TEST_RE = /^#((?:x[a-f0-9]{1,8}|[0-9]{1,8}))/i;
   function replaceEntityPattern(match, name) {
     let code = 0;
-    if (has$1(entities$1, name)) {
-      return entities$1[name];
+    if (has(entities, name)) {
+      return entities[name];
     }
     if (name.charCodeAt(0) === 35 /* # */ && DIGITAL_ENTITY_TEST_RE.test(name)) {
       code = name[1].toLowerCase() === "x" ? parseInt(name.slice(2), 16) : parseInt(name.slice(1), 10);
-      if (isValidEntityCode$1(code)) {
-        return fromCodePoint$1(code);
+      if (isValidEntityCode(code)) {
+        return fromCodePoint(code);
       }
     }
     return match;
@@ -2713,7 +2694,7 @@
     }
     return str.replace(UNESCAPE_MD_RE, "$1");
   }
-  function unescapeAll$2(str) {
+  function unescapeAll(str) {
     if (str.indexOf("\\") < 0 && str.indexOf("&") < 0) {
       return str;
     }
@@ -2738,7 +2719,7 @@
   function replaceUnsafeChar(ch) {
     return HTML_REPLACEMENTS[ch];
   }
-  function escapeHtml$1(str) {
+  function escapeHtml(str) {
     if (HTML_ESCAPE_TEST_RE.test(str)) {
       return str.replace(HTML_ESCAPE_REPLACE_RE, replaceUnsafeChar);
     }
@@ -2750,7 +2731,7 @@
     return str.replace(REGEXP_ESCAPE_RE, "\\$&");
   }
   ////////////////////////////////////////////////////////////////////////////////
-    function isSpace$b(code) {
+    function isSpace(code) {
     switch (code) {
      case 9:
      case 32:
@@ -2759,7 +2740,7 @@
     return false;
   }
   // Zs (unicode class) || [\t\f\v\r\n]
-    function isWhiteSpace$2(code) {
+    function isWhiteSpace(code) {
     if (code >= 8192 && code <= 8202) {
       return true;
     }
@@ -2786,7 +2767,7 @@
   }
   ////////////////////////////////////////////////////////////////////////////////
   // Currently without astral characters support.
-    function isPunctChar$2(ch) {
+    function isPunctChar(ch) {
     return regex$4.test(ch);
   }
   // Markdown ASCII punctuation characters.
@@ -2796,7 +2777,7 @@
   
   // Don't confuse with unicode punctuation !!! It lacks some chars in ascii range.
   
-    function isMdAsciiPunct$2(ch) {
+    function isMdAsciiPunct(ch) {
     switch (ch) {
      case 33 /* ! */ :
      case 34 /* " */ :
@@ -2838,7 +2819,7 @@
   }
   // Helper to unify [reference labels].
   
-    function normalizeReference$3(str) {
+    function normalizeReference(str) {
     // Trim and collapse whitespace
     str = str.trim().replace(/\s+/g, " ");
     // In node v10 'ẞ'.toLowerCase() === 'Ṿ', which is presumed to be a bug
@@ -2888,7 +2869,7 @@
   /* eslint-env browser */  const _g = typeof global !== "undefined" ? global : window;
   const tokensRef = new _g.WeakMap;
   // TODO: performance tweaks for emphasis **_* pattern which has only 1/10 performance after adding line offset
-    function getLineOffset$1(state, tokenIdx) {
+    function getLineOffset(state, tokenIdx) {
     const blockState = state.env.state_block;
     const parentToken = state.env.parentToken;
     const tokensBefore = typeof tokenIdx !== "undefined" ? state.tokens.slice(0, tokenIdx) : state.tokens;
@@ -2913,31 +2894,31 @@
     resultsMap.set(tokenIdx, lineOffset);
     return lineOffset;
   }
-  function trimLeftOffset$4(str) {
+  function trimLeftOffset(str) {
     return str.length - str.trimLeft().length;
   }
   var utils =  Object.freeze({
     __proto__: null,
-    mdurl: index$1,
-    ucmicro: index,
-    isNil: isNil$1,
-    assign: assign$2,
+    mdurl: mdurl,
+    ucmicro: uc_micro,
+    isNil: isNil,
+    assign: assign$1,
     isString: isString$1,
-    has: has$1,
+    has: has,
     unescapeMd: unescapeMd,
-    unescapeAll: unescapeAll$2,
-    isValidEntityCode: isValidEntityCode$1,
-    fromCodePoint: fromCodePoint$1,
-    escapeHtml: escapeHtml$1,
+    unescapeAll: unescapeAll,
+    isValidEntityCode: isValidEntityCode,
+    fromCodePoint: fromCodePoint,
+    escapeHtml: escapeHtml,
     arrayReplaceAt: arrayReplaceAt,
-    isSpace: isSpace$b,
-    isWhiteSpace: isWhiteSpace$2,
-    isMdAsciiPunct: isMdAsciiPunct$2,
-    isPunctChar: isPunctChar$2,
+    isSpace: isSpace,
+    isWhiteSpace: isWhiteSpace,
+    isMdAsciiPunct: isMdAsciiPunct,
+    isPunctChar: isPunctChar,
     escapeRE: escapeRE$1,
-    normalizeReference: normalizeReference$3,
-    getLineOffset: getLineOffset$1,
-    trimLeftOffset: trimLeftOffset$4
+    normalizeReference: normalizeReference,
+    getLineOffset: getLineOffset,
+    trimLeftOffset: trimLeftOffset
   });
   // Parse link label
   
@@ -2996,7 +2977,7 @@
         }
         if (code === 62 /* > */) {
           result.pos = pos + 1;
-          result.str = unescapeAll$2(str.slice(start + 1, pos));
+          result.str = unescapeAll(str.slice(start + 1, pos));
           result.ok = true;
           return result;
         }
@@ -3047,17 +3028,14 @@
     if (level !== 0) {
       return result;
     }
-    result.str = unescapeAll$2(str.slice(start, pos));
+    result.str = unescapeAll(str.slice(start, pos));
     result.lines = lines;
     result.pos = pos;
     result.ok = true;
     return result;
   }
   // Parse link title
-    const unescapeAll$1 = {
-    unescapeAll: unescapeAll$2
-  }.unescapeAll;
-  function parseLinkTitle(str, pos, max) {
+    function parseLinkTitle(str, pos, max) {
     let code, marker, lines = 0, start = pos, result = {
       ok: false,
       pos: 0,
@@ -3081,7 +3059,7 @@
       if (code === marker) {
         result.pos = pos + 1;
         result.lines = lines;
-        result.str = unescapeAll$1(str.slice(start + 1, pos));
+        result.str = unescapeAll(str.slice(start + 1, pos));
         result.ok = true;
         return result;
       } else if (code === 40 /* ( */ && marker === 41 /* ) */) {
@@ -3111,18 +3089,7 @@
    * Generates HTML from parsed token stream. Each instance has independent
    * copy of rules. Those can be rewritten with ease. Also, you can add new
    * rules if you create plugin and adds new token types.
-   **/  const assign$1 = {
-    assign: assign$2
-  }.assign;
-  const unescapeAll = {
-    unescapeAll: unescapeAll$2
-  }.unescapeAll;
-  const escapeHtml = {
-    escapeHtml: escapeHtml$1
-  }.escapeHtml;
-  const isNil = {
-    isNil: isNil$1
-  }.isNil;
+   **/
   ////////////////////////////////////////////////////////////////////////////////
     const default_rules = {};
   default_rules.code_inline = function(tokens, idx, options, env, slf) {
@@ -3808,16 +3775,7 @@
     }
   }
   // Convert straight quotation marks to typographic ones
-    const isWhiteSpace$1 = {
-    isWhiteSpace: isWhiteSpace$2
-  }.isWhiteSpace;
-  const isPunctChar$1 = {
-    isPunctChar: isPunctChar$2
-  }.isPunctChar;
-  const isMdAsciiPunct$1 = {
-    isMdAsciiPunct: isMdAsciiPunct$2
-  }.isMdAsciiPunct;
-  const QUOTE_TEST_RE = /['"]/;
+    const QUOTE_TEST_RE = /['"]/;
   const QUOTE_RE = /['"]/g;
   const APOSTROPHE = "\u2019";
  /* ’ */  function replaceAt(str, index, ch) {
@@ -3882,10 +3840,10 @@
             break;
           }
         }
-        isLastPunctChar = isMdAsciiPunct$1(lastChar) || isPunctChar$1(String.fromCharCode(lastChar));
-        isNextPunctChar = isMdAsciiPunct$1(nextChar) || isPunctChar$1(String.fromCharCode(nextChar));
-        isLastWhiteSpace = isWhiteSpace$1(lastChar);
-        isNextWhiteSpace = isWhiteSpace$1(nextChar);
+        isLastPunctChar = isMdAsciiPunct(lastChar) || isPunctChar(String.fromCharCode(lastChar));
+        isNextPunctChar = isMdAsciiPunct(nextChar) || isPunctChar(String.fromCharCode(nextChar));
+        isLastWhiteSpace = isWhiteSpace(lastChar);
+        isNextWhiteSpace = isWhiteSpace(nextChar);
         if (isNextWhiteSpace) {
           canOpen = false;
         } else if (isNextPunctChar) {
@@ -4199,13 +4157,7 @@
   };
   Core.prototype.State = StateCore;
   // GFM table, https://github.github.com/gfm/#tables-extension-
-    const isSpace$a = {
-    isSpace: isSpace$b
-  }.isSpace;
-  const trimLeftOffset$3 = {
-    trimLeftOffset: trimLeftOffset$4
-  }.trimLeftOffset;
-  function getLine(state, line) {
+    function getLine(state, line) {
     const pos = state.bMarks[line] + state.tShift[line], max = state.eMarks[line];
     return state.src.substr(pos, max - pos);
   }
@@ -4263,17 +4215,17 @@
       return false;
     }
     secondCh = state.src.charCodeAt(pos++);
-    if (secondCh !== 124 /* | */ && secondCh !== 45 /* - */ && secondCh !== 58 /* : */ && !isSpace$a(secondCh)) {
+    if (secondCh !== 124 /* | */ && secondCh !== 45 /* - */ && secondCh !== 58 /* : */ && !isSpace(secondCh)) {
       return false;
     }
     // if first character is '-', then second character must not be a space
     // (due to parsing ambiguity with list)
-        if (firstCh === 45 /* - */ && isSpace$a(secondCh)) {
+        if (firstCh === 45 /* - */ && isSpace(secondCh)) {
       return false;
     }
     while (pos < state.eMarks[nextLine]) {
       ch = state.src.charCodeAt(pos);
-      if (ch !== 124 /* | */ && ch !== 45 /* - */ && ch !== 58 /* : */ && !isSpace$a(ch)) {
+      if (ch !== 124 /* | */ && ch !== 45 /* - */ && ch !== 58 /* : */ && !isSpace(ch)) {
         return false;
       }
       pos++;
@@ -4359,7 +4311,7 @@
       token = state.push("inline", "", 0);
       token.content = columns[i].trim();
       token.children = [];
-      token.position = columnVIndex + trimLeftOffset$3(columns[i]);
+      token.position = columnVIndex + trimLeftOffset(columns[i]);
       token.size = token.content.length;
       columnVIndex += columns[i].length;
       // empty headings get the column index number as a data-label
@@ -4442,7 +4394,7 @@
         token.content = originalContent.trim();
         token.children = [];
         token.size = token.content.length;
-        token.position = columnVIndex + trimLeftOffset$3(originalContent);
+        token.position = columnVIndex + trimLeftOffset(originalContent);
         columnVIndex += originalContent.length;
         token.map = [ nextLine, nextLine + 1 ];
         token = state.push("td_close", "td", -1);
@@ -4583,10 +4535,7 @@
     return true;
   }
   // Block quotes
-    const isSpace$9 = {
-    isSpace: isSpace$b
-  }.isSpace;
-  function blockquote(state, startLine, endLine, silent) {
+    function blockquote(state, startLine, endLine, silent) {
     let adjustTab, ch, i, initial, blockStart, l, lastLineEmpty, lines, nextLine, offset, oldBMarks, oldBSCount, oldIndent, oldParentType, oldSCount, oldTShift, spaceAfterMarker, terminate, terminatorRules, token, isOutdented, oldLineMax = state.lineMax, pos = state.bMarks[startLine] + state.tShift[startLine], max = state.eMarks[startLine];
     // if it's indented more than 3 spaces, it should be a code block
         if (state.sCount[startLine] - state.blkIndent >= 4) {
@@ -4636,7 +4585,7 @@
     state.bMarks[startLine] = pos;
     while (pos < max) {
       ch = state.src.charCodeAt(pos);
-      if (isSpace$9(ch)) {
+      if (isSpace(ch)) {
         if (ch === 9) {
           offset += 4 - (offset + state.bsCount[startLine] + (adjustTab ? 1 : 0)) % 4;
         } else {
@@ -4725,7 +4674,7 @@
         state.bMarks[nextLine] = pos;
         while (pos < max) {
           ch = state.src.charCodeAt(pos);
-          if (isSpace$9(ch)) {
+          if (isSpace(ch)) {
             if (ch === 9) {
               offset += 4 - (offset + state.bsCount[nextLine] + (adjustTab ? 1 : 0)) % 4;
             } else {
@@ -4810,10 +4759,7 @@
     return true;
   }
   // Horizontal rule
-    const isSpace$8 = {
-    isSpace: isSpace$b
-  }.isSpace;
-  function hr(state, startLine, endLine, silent) {
+    function hr(state, startLine, endLine, silent) {
     let marker, cnt, ch, token, originalPos, pos = state.bMarks[startLine] + state.tShift[startLine], max = state.eMarks[startLine];
     // if it's indented more than 3 spaces, it should be a code block
         if (state.sCount[startLine] - state.blkIndent >= 4) {
@@ -4829,7 +4775,7 @@
         cnt = 1;
     while (pos < max) {
       ch = state.src.charCodeAt(pos++);
-      if (ch !== marker && !isSpace$8(ch)) {
+      if (ch !== marker && !isSpace(ch)) {
         return false;
       }
       if (ch === marker) {
@@ -4851,9 +4797,6 @@
     return true;
   }
   // Lists
-    const isSpace$7 = {
-    isSpace: isSpace$b
-  }.isSpace;
   // Search `[-+*][\n ]`, returns next pos after marker on success
   // or -1 on fail.
     function skipBulletListMarker(state, startLine) {
@@ -4867,7 +4810,7 @@
     }
     if (pos < max) {
       ch = state.src.charCodeAt(pos);
-      if (!isSpace$7(ch)) {
+      if (!isSpace(ch)) {
         // " -test " - is not a list item
         return -1;
       }
@@ -4908,7 +4851,7 @@
     }
     if (pos < max) {
       ch = state.src.charCodeAt(pos);
-      if (!isSpace$7(ch)) {
+      if (!isSpace(ch)) {
         // " 1.test " - is not a list item
         return -1;
       }
@@ -5135,12 +5078,6 @@
     }
     return true;
   }
-  const normalizeReference$2 = {
-    normalizeReference: normalizeReference$3
-  }.normalizeReference;
-  const isSpace$6 = {
-    isSpace: isSpace$b
-  }.isSpace;
   function reference(state, startLine, _endLine, silent) {
     let ch, destEndPos, destEndLineNo, endLine, href, i, l, label, labelEnd, oldParentType, res, start, str, terminate, terminatorRules, title, lines = 0, pos = state.bMarks[startLine] + state.tShift[startLine], max = state.eMarks[startLine], nextLine = startLine + 1;
     // if it's indented more than 3 spaces, it should be a code block
@@ -5217,7 +5154,7 @@
       ch = str.charCodeAt(pos);
       if (ch === 10) {
         lines++;
-      } else if (isSpace$6(ch)) ; else {
+      } else if (isSpace(ch)) ; else {
         break;
       }
     }
@@ -5243,7 +5180,7 @@
       ch = str.charCodeAt(pos);
       if (ch === 10) {
         lines++;
-      } else if (isSpace$6(ch)) ; else {
+      } else if (isSpace(ch)) ; else {
         break;
       }
     }
@@ -5262,7 +5199,7 @@
     // skip trailing spaces until the rest of the line
         while (pos < max) {
       ch = str.charCodeAt(pos);
-      if (!isSpace$6(ch)) {
+      if (!isSpace(ch)) {
         break;
       }
       pos++;
@@ -5276,7 +5213,7 @@
         lines = destEndLineNo;
         while (pos < max) {
           ch = str.charCodeAt(pos);
-          if (!isSpace$6(ch)) {
+          if (!isSpace(ch)) {
             break;
           }
           pos++;
@@ -5287,7 +5224,7 @@
       // garbage at the end of the line
       return false;
     }
-    label = normalizeReference$2(str.slice(1, labelEnd));
+    label = normalizeReference(str.slice(1, labelEnd));
     if (!label) {
       // CommonMark 0.20 disallows empty labels
       return false;
@@ -5328,12 +5265,9 @@
   const processing = "<[?][\\s\\S]*?[?]>";
   const declaration = "<![A-Z]+\\s+[^>]*>";
   const cdata = "<!\\[CDATA\\[[\\s\\S]*?\\]\\]>";
-  const HTML_TAG_RE$1 = new RegExp("^(?:" + open_tag + "|" + close_tag + "|" + comment + "|" + processing + "|" + declaration + "|" + cdata + ")");
-  const HTML_OPEN_CLOSE_TAG_RE$1 = new RegExp("^(?:" + open_tag + "|" + close_tag + ")");
+  const HTML_TAG_RE = new RegExp("^(?:" + open_tag + "|" + close_tag + "|" + comment + "|" + processing + "|" + declaration + "|" + cdata + ")");
+  const HTML_OPEN_CLOSE_TAG_RE = new RegExp("^(?:" + open_tag + "|" + close_tag + ")");
   // HTML block
-    const HTML_OPEN_CLOSE_TAG_RE = {
-    HTML_OPEN_CLOSE_TAG_RE: HTML_OPEN_CLOSE_TAG_RE$1
-  }.HTML_OPEN_CLOSE_TAG_RE;
   // An array of opening and corresponding closing sequences for html tags,
   // last argument defines whether it can terminate a paragraph or not
   
@@ -5391,13 +5325,7 @@
     return true;
   }
   // heading (#, ##, ...)
-    const isSpace$5 = {
-    isSpace: isSpace$b
-  }.isSpace;
-  const trimLeftOffset$2 = {
-    trimLeftOffset: trimLeftOffset$4
-  }.trimLeftOffset;
-  function heading(state, startLine, endLine, silent) {
+    function heading(state, startLine, endLine, silent) {
     let ch, level, tmp, token, originalPos, originalMax, pos = state.bMarks[startLine] + state.tShift[startLine], max = state.eMarks[startLine];
     // if it's indented more than 3 spaces, it should be a code block
         if (state.sCount[startLine] - state.blkIndent >= 4) {
@@ -5416,7 +5344,7 @@
       level++;
       ch = state.src.charCodeAt(++pos);
     }
-    if (level > 6 || pos < max && !isSpace$5(ch)) {
+    if (level > 6 || pos < max && !isSpace(ch)) {
       return false;
     }
     if (silent) {
@@ -5426,7 +5354,7 @@
         max = state.skipSpacesBack(max, pos);
     tmp = state.skipCharsBack(max, 35, pos);
  // #
-        if (tmp > pos && isSpace$5(state.src.charCodeAt(tmp - 1))) {
+        if (tmp > pos && isSpace(state.src.charCodeAt(tmp - 1))) {
       max = tmp;
     }
     state.line = startLine + 1;
@@ -5440,7 +5368,7 @@
     token.content = originalContent.trim();
     token.map = [ startLine, state.line ];
     token.children = [];
-    token.position = pos + trimLeftOffset$2(originalContent);
+    token.position = pos + trimLeftOffset(originalContent);
     token.size = token.content.length;
  // (max - pos) includes leading and trailing whitespace
         token = state.push("heading_close", "h" + String(level), -1);
@@ -5450,10 +5378,7 @@
     return true;
   }
   // lheading (---, ===)
-    const trimLeftOffset$1 = {
-    trimLeftOffset: trimLeftOffset$4
-  }.trimLeftOffset;
-  function lheading(state, startLine, endLine /*, silent*/) {
+    function lheading(state, startLine, endLine /*, silent*/) {
     let content, terminate, i, l, token, pos, max, level, marker, nextLine = startLine + 1, oldParentType, terminatorRules = state.md.block.ruler.getRules("paragraph");
     // if it's indented more than 3 spaces, it should be a code block
         if (state.sCount[startLine] - state.blkIndent >= 4) {
@@ -5518,7 +5443,7 @@
     token.content = content.trim();
     token.map = [ startLine, state.line - 1 ];
     token.children = [];
-    token.position = state.bMarks[startLine] + trimLeftOffset$1(content);
+    token.position = state.bMarks[startLine] + trimLeftOffset(content);
     token.size = token.content.length;
  // content.length includes leading and trailing whitespace
         token = state.push("heading_close", "h" + String(level), -1);
@@ -5529,10 +5454,7 @@
     return true;
   }
   // Paragraph
-    const trimLeftOffset = {
-    trimLeftOffset: trimLeftOffset$4
-  }.trimLeftOffset;
-  function paragraph(state, startLine /*, endLine*/) {
+    function paragraph(state, startLine /*, endLine*/) {
     let content, terminate, i, l, token, oldParentType, nextLine = startLine + 1, terminatorRules = state.md.block.ruler.getRules("paragraph"), endLine = state.lineMax, pos = state.bMarks[startLine];
     oldParentType = state.parentType;
     state.parentType = "paragraph";
@@ -5578,10 +5500,7 @@
     return true;
   }
   // Parser state class
-    const isSpace$4 = {
-    isSpace: isSpace$b
-  }.isSpace;
-  function StateBlock(src, md, env, tokens) {
+    function StateBlock(src, md, env, tokens) {
     let ch, s, start, pos, len, indent, offset, indent_found;
     this.src = src;
     // link to parser instance
@@ -5644,7 +5563,7 @@
     for (start = pos = indent = offset = 0, len = s.length; pos < len; pos++) {
       ch = s.charCodeAt(pos);
       if (!indent_found) {
-        if (isSpace$4(ch)) {
+        if (isSpace(ch)) {
           indent++;
           if (ch === 9) {
             offset += 4 - offset % 4;
@@ -5709,7 +5628,7 @@
     let ch;
     for (let max = this.src.length; pos < max; pos++) {
       ch = this.src.charCodeAt(pos);
-      if (!isSpace$4(ch)) {
+      if (!isSpace(ch)) {
         break;
       }
     }
@@ -5721,7 +5640,7 @@
       return pos;
     }
     while (pos > min) {
-      if (!isSpace$4(this.src.charCodeAt(--pos))) {
+      if (!isSpace(this.src.charCodeAt(--pos))) {
         return pos + 1;
       }
     }
@@ -5766,7 +5685,7 @@
       }
       while (first < last && lineIndent < indent) {
         ch = this.src.charCodeAt(first);
-        if (isSpace$4(ch)) {
+        if (isSpace(ch)) {
           if (ch === 9) {
             lineIndent += 4 - (lineIndent + this.bsCount[line]) % 4;
           } else {
@@ -5916,9 +5835,10 @@
       token.__linkInfo = linkInfo;
       token.position = oldPos;
       token.size = 0;
-      // TODO: position + size
-            token = state.push("text", "", 0);
+      token = state.push("text", "", 0);
       token.content = urlText;
+      token.position = oldPos;
+      token.size = link.lastIndex - oldPos;
       token = state.push("link_close", "a", -1);
       token.markup = "linkify";
       token.info = "auto";
@@ -6076,10 +5996,7 @@
     return true;
   };*/
   // Process '\n'
-    const isSpace$3 = {
-    isSpace: isSpace$b
-  }.isSpace;
-  function newline(state, silent) {
+    function newline(state, silent) {
     let pmax, max, pos = state.pos;
     if (state.src.charCodeAt(pos) !== 10 /* \n */) {
       return false;
@@ -6108,17 +6025,14 @@
     }
     pos++;
     // skip heading spaces for next line
-        while (pos < max && isSpace$3(state.src.charCodeAt(pos))) {
+        while (pos < max && isSpace(state.src.charCodeAt(pos))) {
       pos++;
     }
     state.pos = pos;
     return true;
   }
   // Process escaped chars and hardbreaks
-    const isSpace$2 = {
-    isSpace: isSpace$b
-  }.isSpace;
-  const ESCAPED = [];
+    const ESCAPED = [];
   for (let i = 0; i < 256; i++) {
     ESCAPED.push(0);
   }
@@ -6150,7 +6064,7 @@
         // skip leading whitespaces from next line
                 while (pos < max) {
           ch = state.src.charCodeAt(pos);
-          if (!isSpace$2(ch)) {
+          if (!isSpace(ch)) {
             break;
           }
           pos++;
@@ -6280,7 +6194,7 @@
       token.nesting = 1;
       token.markup = "~~";
       token.content = "";
-      token.position = startDelim.position + getLineOffset$1(state, startDelim.token);
+      token.position = startDelim.position + getLineOffset(state, startDelim.token);
       token = state.tokens[endDelim.token];
       token.type = "s_close";
       token.tag = "s";
@@ -6390,7 +6304,7 @@
       token.nesting = 1;
       token.markup = isStrong ? ch + ch : ch;
       token.content = "";
-      token.position = startDelim.position + getLineOffset$1(state, startDelim.token);
+      token.position = startDelim.position + getLineOffset(state, startDelim.token);
       token = state.tokens[endDelim.token];
       token.type = isStrong ? "strong_close" : "em_close";
       token.tag = isStrong ? "strong" : "em";
@@ -6416,13 +6330,7 @@
     }
   }
   // Process [link](<to> "stuff")
-    const normalizeReference$1 = {
-    normalizeReference: normalizeReference$3
-  }.normalizeReference;
-  const isSpace$1 = {
-    isSpace: isSpace$b
-  }.isSpace;
-  function link(state, silent) {
+    function link(state, silent) {
     let attrs, code, label, labelEnd, labelStart, pos, res, ref, token, href = "", title = "", oldPos = state.pos, max = state.posMax, start = state.pos, parseReference = true;
     if (state.src.charCodeAt(state.pos) !== 91 /* [ */) {
       return false;
@@ -6443,7 +6351,7 @@
             pos++;
       for (;pos < max; pos++) {
         code = state.src.charCodeAt(pos);
-        if (!isSpace$1(code) && code !== 10) {
+        if (!isSpace(code) && code !== 10) {
           break;
         }
       }
@@ -6466,7 +6374,7 @@
                 start = pos;
         for (;pos < max; pos++) {
           code = state.src.charCodeAt(pos);
-          if (!isSpace$1(code) && code !== 10) {
+          if (!isSpace(code) && code !== 10) {
             break;
           }
         }
@@ -6480,7 +6388,7 @@
           //                         ^^ skipping these spaces
                     for (;pos < max; pos++) {
             code = state.src.charCodeAt(pos);
-            if (!isSpace$1(code) && code !== 10) {
+            if (!isSpace(code) && code !== 10) {
               break;
             }
           }
@@ -6513,7 +6421,7 @@
             if (!label) {
         label = state.src.slice(labelStart, labelEnd);
       }
-      ref = state.env.references[normalizeReference$1(label)];
+      ref = state.env.references[normalizeReference(label)];
       if (!ref) {
         state.pos = oldPos;
         return false;
@@ -6545,13 +6453,7 @@
     return true;
   }
   // Process ![image](<src> "title")
-    const normalizeReference = {
-    normalizeReference: normalizeReference$3
-  }.normalizeReference;
-  const isSpace = {
-    isSpace: isSpace$b
-  }.isSpace;
-  function image(state, silent) {
+    function image(state, silent) {
     let attrs, code, content, label, labelEnd, labelStart, pos, ref, res, title, token, tokens, start, href = "", oldPos = state.pos, max = state.posMax, endPos = state.pos;
     if (state.src.charCodeAt(state.pos) !== 33 /* ! */) {
       return false;
@@ -6750,10 +6652,7 @@
     return false;
   }
   // Process html tags
-    const HTML_TAG_RE = {
-    HTML_TAG_RE: HTML_TAG_RE$1
-  }.HTML_TAG_RE;
-  function isLetter(ch) {
+    function isLetter(ch) {
     /*eslint no-bitwise:0*/
     const lc = ch | 32;
  // to lower case
@@ -6788,16 +6687,7 @@
     return true;
   }
   // Process html entity - &#123;, &#xAF;, &quot;, ...
-    const has = {
-    has: has$1
-  }.has;
-  const isValidEntityCode = {
-    isValidEntityCode: isValidEntityCode$1
-  }.isValidEntityCode;
-  const fromCodePoint = {
-    fromCodePoint: fromCodePoint$1
-  }.fromCodePoint;
-  const DIGITAL_RE = /^&#((?:x[a-f0-9]{1,6}|[0-9]{1,7}));/i;
+    const DIGITAL_RE = /^&#((?:x[a-f0-9]{1,6}|[0-9]{1,7}));/i;
   const NAMED_RE = /^&([a-z][a-z0-9]{1,31});/i;
   function entity(state, silent) {
     let ch, code, match, pos = state.pos, max = state.posMax;
@@ -6819,9 +6709,9 @@
       } else {
         match = state.src.slice(pos).match(NAMED_RE);
         if (match) {
-          if (has(entities$1, match[1])) {
+          if (has(entities, match[1])) {
             if (!silent) {
-              state.pending += entities$1[match[1]];
+              state.pending += entities[match[1]];
             }
             state.pos += match[0].length;
             return true;
@@ -6829,11 +6719,7 @@
         }
       }
     }
-    if (!silent) {
-      state.pending += "&";
-    }
-    state.pos++;
-    return true;
+    return false;
   }
   // For each opening emphasis-like marker find a matching closing one
   
@@ -6951,19 +6837,7 @@
     }
   }
   // Inline parser state
-    const isWhiteSpace = {
-    isWhiteSpace: isWhiteSpace$2
-  }.isWhiteSpace;
-  const isPunctChar = {
-    isPunctChar: isPunctChar$2
-  }.isPunctChar;
-  const isMdAsciiPunct = {
-    isMdAsciiPunct: isMdAsciiPunct$2
-  }.isMdAsciiPunct;
-  const getLineOffset = {
-    getLineOffset: getLineOffset$1
-  }.getLineOffset;
-  function StateInline(src, md, env, outTokens) {
+    function StateInline(src, md, env, outTokens) {
     this.src = src;
     this.env = env;
     this.md = md;
@@ -7083,23 +6957,9 @@
    **/
   ////////////////////////////////////////////////////////////////////////////////
   // Parser rules
-    const _rules0 = [ [ "linkify", {
-    preProcess: preProcess
-  }.preProcess ] ];
-  const _rules = [ [ "linkify", {
-    tokenize: tokenize$2
-  }.tokenize ], [ "text", text ], [ "newline", newline ], [ "escape", escape ], [ "backticks", backtick ], [ "strikethrough", {
-    tokenize: tokenize$1
-  }.tokenize ], [ "emphasis", {
-    tokenize: tokenize
-  }.tokenize ], [ "link", link ], [ "image", image ], [ "autolink", autolink ], [ "html_inline", html_inline ], [ "entity", entity ] ];
-  const _rules2 = [ [ "balance_pairs", link_pairs ], [ "strikethrough", {
-    postProcess: postProcess$1
-  }.postProcess ], [ "emphasis", {
-    postProcess: postProcess
-  }.postProcess ], [ "linkify", {
-    postProcess: postProcess$2
-  }.postProcess ], [ "text_collapse", text_collapse ] ];
+    const _rules0 = [ [ "linkify", preProcess ] ];
+  const _rules = [ [ "linkify", tokenize$2 ], [ "text", text ], [ "newline", newline ], [ "escape", escape ], [ "backticks", backtick ], [ "strikethrough", tokenize$1 ], [ "emphasis", tokenize ], [ "link", link ], [ "image", image ], [ "autolink", autolink ], [ "html_inline", html_inline ], [ "entity", entity ] ];
+  const _rules2 = [ [ "balance_pairs", link_pairs ], [ "strikethrough", postProcess$1 ], [ "emphasis", postProcess ], [ "linkify", postProcess$2 ], [ "text_collapse", text_collapse ] ];
   /**
    * new ParserInline()
    **/  function ParserInline() {
@@ -7804,7 +7664,7 @@
    **/  LinkifyIt.prototype.onCompile = function onCompile() {};
   var linkifyIt = LinkifyIt;
   // markdown-it default options
-    var default$0 = {
+    var defaultPreset = {
     options: {
       html: false,
       // Enable HTML tags in source
@@ -7979,7 +7839,7 @@
   };
   // Main parser class
     const config = {
-    default: default$0,
+    default: defaultPreset,
     zero: zero,
     commonmark: commonmark
   };
@@ -8268,7 +8128,7 @@
      *
      * Link components parser functions, useful to write plugins. See details
      * [here](https://github.com/markdown-it/markdown-it/blob/master/lib/helpers).
-     **/    this.helpers = assign$2({}, helpers);
+     **/    this.helpers = assign$1({}, helpers);
     this.options = {};
     this.configure(presetName);
     if (options) {
@@ -8294,7 +8154,7 @@
    * it's best to create multiple instances and initialize each with separate
    * config.
    **/  MarkdownIt.prototype.set = function(options) {
-    assign$2(this.options, options);
+    assign$1(this.options, options);
     return this;
   };
   /** chainable, internal
@@ -8475,8 +8335,5 @@
     env = env || {};
     return this.renderer.render(this.parseInline(src, env), this.options, env);
   };
-  exports.MarkdownIt = MarkdownIt;
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
+  return MarkdownIt;
 }));

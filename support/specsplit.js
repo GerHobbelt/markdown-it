@@ -12,7 +12,7 @@ import path from 'path';
 import util from 'util';
 import argparse from 'argparse';
 
-import { MarkdownIt as md } from '../lib/index.js';
+import md from '../index.js';
 
 import { fileURLToPath } from 'url';
 

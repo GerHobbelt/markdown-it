@@ -1,7 +1,7 @@
 
 
 
-import chai from 'chai';
+import assert from 'assert';
 import { fromCodePoint } from '../lib/common/utils.js';
 import { isValidEntityCode } from '../lib/common/utils.js';
 import { assign } from '../lib/common/utils.js';
@@ -9,8 +9,6 @@ import { escapeRE } from '../lib/common/utils.js';
 import { isWhiteSpace } from '../lib/common/utils.js';
 import { isMdAsciiPunct } from '../lib/common/utils.js';
 import { unescapeMd } from '../lib/common/utils.js';
-
-const assert = chai.assert;
 
 
 describe('Utils', function () {

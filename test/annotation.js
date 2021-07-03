@@ -1,10 +1,9 @@
 
 // Implemented originally in https://github.com/markdown-it/markdown-it/pull/204
 
-import chai from 'chai';
-import { MarkdownIt } from '../index.js';
+import assert from 'assert';
+import MarkdownIt from '../index.js';
 
-const assert = chai.assert;
 
 function assertTokenContent(src, token, content) {
   assert.strictEqual(src.slice(token.position, token.position + token.size), content);

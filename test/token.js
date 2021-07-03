@@ -1,10 +1,8 @@
 
 
 
-import chai from 'chai';
+import assert from 'assert';
 import Token from '../lib/token.js';
-
-const assert = chai.assert;
 
 
 describe('Token', function () {

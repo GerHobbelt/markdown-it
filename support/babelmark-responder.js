@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { MarkdownIt } from '../index.js';
+import MarkdownIt from '../index.js';
 import express from 'express';
 
 
