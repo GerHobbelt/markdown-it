@@ -42,10 +42,10 @@ gh-demo: demo
 	#rm -rf ./demo
 
 lint:
-	eslint .
+	eslint . --ext .js,.ts
 
 lintfix:
-	eslint --fix .
+	eslint --fix . --ext .js,.ts
 
 test: specsplit
 	mocha
@@ -130,7 +130,7 @@ todo:
 	@echo ""
 	grep 'TODO' -n -r ./ --exclude-dir=node_modules --exclude-dir=unicode-homographs --exclude-dir=.nyc_output --exclude-dir=dist --exclude-dir=coverage --exclude=Makefile 2>/dev/null || test true
 
-clean:
+clean: report-config
 	-rm -rf ./coverage/
 	-rm -rf ./demo/
 	-rm -rf ./apidoc/
@@ -151,7 +151,10 @@ prep: superclean
 
 prep-ci: clean
 	-rm -rf ./node_modules/
-	-npm ci
+	# HACK to allow CI to pass the npm install phase (crash due to minimatch SHA failure **WTF?!**)
+	-rm package-lock.json
+	#-npm ci
+	-npm install
 	-npm prune
 	-npm audit fix
 	-mocha --version

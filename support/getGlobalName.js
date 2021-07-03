@@ -5,53 +5,53 @@
 const argparse = require('argparse');
 const hdr = require('./header.js');
 
-const cli = new argparse.ArgumentParser({
-  prog: 'getGlobalName',
-  version: hdr.version,
-  addHelp: true
-});
+function help() {
+  console.error(`
+getGlobalName [choice]
 
-cli.addArgument([ 'type' ], {
-  help: 'type of name/string to produce',
-  nargs: '?',
-  choices: [ 'global', 'package', 'version', 'license', 'microbundle' ]
-});
+Type of name/string to produce.
 
-const options = cli.parseArgs();
+Choices:
+  global, package, version, license, microbundle
+
+`);
+}
 
 function print(msg) {
   process.stdout.write(msg);
 }
 
-////////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////////
 
-switch (options.type) {
+switch (process.argv[2]) {
 default:
-  cli.exit(1, cli.formatHelp());
+  help();
+  process.exit(1);
   break;
 
 case 'version':
   print(hdr.version);
-  cli.exit(0);
+  process.exit(0);
   break;
 
 case 'package':
   print(hdr.packageName);
-  cli.exit(0);
+  process.exit(0);
   break;
 
 case 'global':
   print(hdr.globalName);
-  cli.exit(0);
+  process.exit(0);
   break;
 
 case 'microbundle':
   print(hdr.safeVariableName);
-  cli.exit(0);
+  process.exit(0);
   break;
 
 case 'license':
   print(hdr.license);
-  cli.exit(0);
+  process.exit(0);
   break;
 }
+

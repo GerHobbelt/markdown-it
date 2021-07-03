@@ -1,8 +1,5 @@
 
-
-
 const path = require('path');
-
 
 const generate = require('@gerhobbelt/markdown-it-testgen');
 

@@ -1,8 +1,9 @@
 # markdown-it <!-- omit in toc -->
 
-[![CI](https://github.com/markdown-it/markdown-it/workflows/CI/badge.svg)](https://github.com/markdown-it/markdown-it/actions)
-[![NPM version](https://img.shields.io/npm/v/markdown-it.svg?style=flat)](https://www.npmjs.org/package/markdown-it)
-[![Coverage Status](https://coveralls.io/repos/markdown-it/markdown-it/badge.svg?branch=master&service=github)](https://coveralls.io/github/markdown-it/markdown-it?branch=master)
+[![Node.js CI](https://github.com/GerHobbelt/markdown-it/actions/workflows/node.js.yml/badge.svg)](https://github.com/GerHobbelt/markdown-it/actions/workflows/node.js.yml)
+![CircleCI](https://img.shields.io/circleci/build/github/GerHobbelt/markdown-it)
+[![NPM version](https://img.shields.io/npm/v/@gerhobbelt/markdown-it.svg?style=flat)](https://www.npmjs.org/package/@gerhobbelt/markdown-it)
+[![Coverage Status](https://coveralls.io/repos/GerHobbelt/markdown-it/badge.svg?branch=master&service=github)](https://coveralls.io/github/GerHobbelt/markdown-it?branch=master)
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/markdown-it/markdown-it)
 
 > Markdown parser done right. Fast and easy to extend.
@@ -232,7 +233,7 @@ Via plugins:
 
 - [subscript](https://github.com/markdown-it/markdown-it-sub)
 - [superscript](https://github.com/markdown-it/markdown-it-sup)
-- [footnote](https://github.com/markdown-it/markdown-it-footnote)
+- [footnote](https://github.com/markdown-it/markdown-it)
 - [definition list](https://github.com/markdown-it/markdown-it-deflist)
 - [abbreviation](https://github.com/markdown-it/markdown-it-abbr)
 - [emoji](https://github.com/markdown-it/markdown-it-emoji)
