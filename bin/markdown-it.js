@@ -2,11 +2,11 @@
 /*eslint no-console:0*/
 
 
-import fs from "fs";
+import fs from 'fs';
 import path from 'path';
-import argparse from "argparse";
+import argparse from 'argparse';
 
-import MarkdownIt from "../dist/markdown-it.mjs";
+import MarkdownIt from '../dist/markdown-it.mjs';
 
 import { fileURLToPath } from 'url';
 
@@ -26,7 +26,7 @@ const cli = new argparse.ArgumentParser({
 
 cli.add_argument('-v', '--version', {
   action: 'version',
-    version: packageJson.version
+  version: packageJson.version
 });
 
 cli.add_argument('--no-html', {
