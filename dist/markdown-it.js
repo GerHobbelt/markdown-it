@@ -1,4 +1,4 @@
-/*! @gerhobbelt/markdown-it 12.1.0-61 https://github.com/GerHobbelt/markdown-it @license MIT */
+/*! @gerhobbelt/markdown-it 12.1.0-63 https://github.com/GerHobbelt/markdown-it @license MIT */
 (function(global, factory) {
   typeof exports === "object" && typeof module !== "undefined" ? module.exports = factory(require("punycode")) : typeof define === "function" && define.amd ? define([ "punycode" ], factory) : (global = typeof globalThis !== "undefined" ? globalThis : global || self, 
   global.markdownit = factory(global.punycode));
