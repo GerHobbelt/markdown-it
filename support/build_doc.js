@@ -4,7 +4,7 @@
 
 /* eslint-env es6 */
 
-const shell = require('shelljs');
+import * as shell from 'shelljs';
 
 shell.rm('-rf', 'apidoc');
 

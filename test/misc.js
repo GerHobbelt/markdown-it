@@ -1,8 +1,11 @@
 
 
 
-const assert     = require('chai').assert;
-const markdownit = require('../');
+import chai from 'chai';
+import { MarkdownIt as markdownit } from '../index.js';
+import markdownItForInline from '@gerhobbelt/markdown-it-for-inline';
+
+const assert = chai.assert;
 
 
 describe('API', function () {
@@ -227,7 +230,7 @@ describe('Misc', function () {
 
   it('Should render link target attr', function () {
     const md = markdownit()
-      .use(require('@gerhobbelt/markdown-it-for-inline'), 'target', 'link_open', function (tokens, idx) {
+      .use(markdownItForInline, 'target', 'link_open', function (tokens, idx) {
         tokens[idx].attrs.push([ 'target', '_blank' ]);
       });
 

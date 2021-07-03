@@ -1,21 +1,26 @@
 
 
 
-const assert = require('chai').assert;
+import chai from 'chai';
+import { fromCodePoint } from '../lib/common/utils.js';
+import { isValidEntityCode } from '../lib/common/utils.js';
+import { assign } from '../lib/common/utils.js';
+import { escapeRE } from '../lib/common/utils.js';
+import { isWhiteSpace } from '../lib/common/utils.js';
+import { isMdAsciiPunct } from '../lib/common/utils.js';
+import { unescapeMd } from '../lib/common/utils.js';
+
+const assert = chai.assert;
 
 
 describe('Utils', function () {
 
   it('fromCodePoint', function () {
-    const fromCodePoint = require('../lib/common/utils').fromCodePoint;
-
     assert.strictEqual(fromCodePoint(0x20), ' ');
     assert.strictEqual(fromCodePoint(0x1F601), '😁');
   });
 
   it('isValidEntityCode', function () {
-    const isValidEntityCode = require('../lib/common/utils').isValidEntityCode;
-
     assert.strictEqual(isValidEntityCode(0x20), true);
     assert.strictEqual(isValidEntityCode(0xD800), false);
     assert.strictEqual(isValidEntityCode(0xFDD0), false);
@@ -28,8 +33,6 @@ describe('Utils', function () {
   });
 
   /*it('replaceEntities', function () {
-    var replaceEntities = require('../lib/common/utils').replaceEntities;
-
     assert.strictEqual(replaceEntities('&amp;'), '&');
     assert.strictEqual(replaceEntities('&#32;'), ' ');
     assert.strictEqual(replaceEntities('&#x20;'), ' ');
@@ -40,8 +43,6 @@ describe('Utils', function () {
   });*/
 
   it('assign', function () {
-    const assign = require('../lib/common/utils').assign;
-
     assert.deepEqual(assign({ a: 1 }, null, { b: 2 }), { a: 1, b: 2 });
     assert.throws(function () {
       assign({}, 123);
@@ -49,14 +50,10 @@ describe('Utils', function () {
   });
 
   it('escapeRE', function () {
-    const escapeRE = require('../lib/common/utils').escapeRE;
-
     assert.strictEqual(escapeRE(' .?*+^$[]\\(){}|-'), ' \\.\\?\\*\\+\\^\\$\\[\\]\\\\\\(\\)\\{\\}\\|\\-');
   });
 
   it('isWhiteSpace', function () {
-    const isWhiteSpace = require('../lib/common/utils').isWhiteSpace;
-
     assert.strictEqual(isWhiteSpace(0x2000), true);
     assert.strictEqual(isWhiteSpace(0x09), true);
 
@@ -64,8 +61,6 @@ describe('Utils', function () {
   });
 
   it('isMdAsciiPunct', function () {
-    const isMdAsciiPunct = require('../lib/common/utils').isMdAsciiPunct;
-
     assert.strictEqual(isMdAsciiPunct(0x30), false);
 
     '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~'.split('').forEach(function (ch) {
@@ -74,8 +69,6 @@ describe('Utils', function () {
   });
 
   it('unescapeMd', function () {
-    const unescapeMd = require('../lib/common/utils').unescapeMd;
-
     assert.strictEqual(unescapeMd('\\foo'), '\\foo');
     assert.strictEqual(unescapeMd('foo'), 'foo');
 

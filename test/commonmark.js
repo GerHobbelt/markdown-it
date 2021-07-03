@@ -1,9 +1,19 @@
 
 
 
-const p      = require('path');
-const load   = require('@gerhobbelt/markdown-it-testgen').load;
-const assert = require('chai').assert;
+import p from 'path';
+import markdownItTestgen from '@gerhobbelt/markdown-it-testgen';
+import chai from 'chai';
+import { MarkdownIt } from '../index.js';
+
+import { fileURLToPath } from 'url';
+
+// see https://nodejs.org/docs/latest-v13.x/api/esm.html#esm_no_require_exports_module_exports_filename_dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = p.dirname(__filename);
+
+const load = markdownItTestgen.load;
+const assert = chai.assert;
 
 
 function generate(path, md) {
@@ -24,7 +34,7 @@ function generate(path, md) {
 
 
 describe('CommonMark', function () {
-  const md = require('../')('commonmark');
+  const md = MarkdownIt('commonmark');
 
   generate(p.join(__dirname, 'fixtures/commonmark/good.txt'), md);
 });

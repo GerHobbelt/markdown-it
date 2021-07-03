@@ -7,11 +7,18 @@
 
 
 
-const fs        = require('fs');
-const path      = require('path');
-const util      = require('util');
-const argparse  = require('argparse');
-const md        = require('..');
+import fs from 'fs';
+import path from 'path';
+import util from 'util';
+import argparse from 'argparse';
+
+import { MarkdownIt as md } from '../lib/index.js';
+
+import { fileURLToPath } from 'url';
+
+// see https://nodejs.org/docs/latest-v13.x/api/esm.html#esm_no_require_exports_module_exports_filename_dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 
 const cli = new argparse.ArgumentParser({

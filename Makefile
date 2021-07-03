@@ -86,10 +86,20 @@ publish:
 	git tag ${NPM_VERSION} && git push origin ${NPM_VERSION}
 	npm run pub
 
-rollup:
+rollup: entities
 	-rm -rf ./dist
 	mkdir dist
 	rollup -c support/rollup.config.js
+
+bundle: entities
+	-rm -rf ./dist
+	mkdir dist
+	microbundle --no-compress --sourcemap
+
+entities: lib/common/entities.js
+
+lib/common/entities.js: node_modules/entities/lib/maps/entities.json support/build_entities.js
+	node support/build_entities.js
 
 benchmark-deps:
 	npm install --prefix benchmark/extra/ -g marked@0.3.6 commonmark@0.26.0 markdown-it/markdown-it.git#2.2.1
@@ -164,5 +174,5 @@ report-config:
 	-echo "NPM_PACKAGE=${NPM_PACKAGE} NPM_VERSION=${NPM_VERSION} GLOBAL_NAME=${GLOBAL_NAME} BUNDLE_NAME=${BUNDLE_NAME} TMP_PATH=${TMP_PATH} REMOTE_NAME=${REMOTE_NAME} REMOTE_REPO=${REMOTE_REPO} CURR_HEAD=${CURR_HEAD}"
 
 
-.PHONY: clean superclean prep prep-ci report-config publish lint lintfix test todo demo coverage report-coverage doc build minify gh-demo gh-doc specsplit rollup benchmark-deps benchmark profile profile2chrome
+.PHONY: clean superclean prep prep-ci report-config publish lint lintfix test todo demo coverage report-coverage doc build minify gh-demo gh-doc specsplit rollup benchmark-deps benchmark profile profile2chrome entities
 .SILENT: help todo report-config

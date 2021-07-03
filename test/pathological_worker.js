@@ -1,7 +1,8 @@
 
 
-const markdownit = require('../');
+import { MarkdownIt as markdownit } from '../index.js';
 
-exports.render = (str) => {
+
+export function render(str) {
   return markdownit().render(str);
-};
+}

@@ -1,11 +1,33 @@
 /* eslint-disable no-bitwise */
 
-const needle = require('needle');
-const assert = require('assert');
-const crypto = require('crypto');
-const Worker = require('jest-worker').Worker;
-const marky = require('marky');
-const chalk = require('chalk');
+import needle from 'needle';
+import assert from 'assert';
+import crypto from 'crypto';
+//import { Worker } from 'jest-worker';
+//import { Worker } from 'worker_threads';
+//import * as marky from 'marky';
+import chalk from 'chalk';
+
+import { render } from './pathological_worker.js';
+
+import fs from 'fs';
+import p from 'path';
+import { fileURLToPath } from 'url';
+
+// see https://nodejs.org/docs/latest-v13.x/api/esm.html#esm_no_require_exports_module_exports_filename_dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = p.dirname(__filename);
+
+const pathological = JSON.parse(fs.readFileSync(p.join(__dirname, 'pathological.json'), 'utf8'));
+
+
+// ----------- ex-marky ---------------------
+/* global performance */
+var perf = typeof performance !== 'undefined' && performance;
+
+var now = perf && perf.now ? function () { return perf.now(); } : function () { return Date.now(); }
+// ----------- ex-marky ---------------------
+
 
 
 async function test_pattern(func) {
@@ -57,33 +79,21 @@ async function test_pattern(func) {
   };
 
   const TIME_LIMIT = 1000;
+  let start = now();
   while (total_time_spent < 10 * TIME_LIMIT) {
-    const worker = new Worker(require.resolve('./pathological_worker.js'), {
-      numWorkers: 1,
-      enableWorkerThreads: true
-    });
-
-    marky.mark('pathological_test');
+    let mark = now();
     rounds++;
 
     err = null;
     try {
-      result = await Promise.race([
-        worker.render(func(n)),
-
-        new Promise(function (resolve, reject) {
-          setTimeout(() => { reject(new Error('Terminated (timeout exceeded)')); }, TIME_LIMIT);
-        })
-      ]);
+      result = render(func(n));
     } catch (ex) {
       err = ex;
-    } finally {
-      await worker.end();
     }
 
-    const entry = marky.stop('pathological_test');
-    dt = entry.duration;
-    total_time_spent += dt;
+    let entry = now();
+    dt = entry - mark;
+    total_time_spent = entry - start;
 
     if (err) errcnt++;
 
@@ -109,7 +119,7 @@ async function test_pattern(func) {
         }
 
         // guestimate next N to try:
-        const rc = n / Math.max(1, dt - 20);
+        const rc = n / Math.max(1, 11 * Math.max(10, dt));
         n = Math.min(Math.max(n * 2, TIME_LIMIT * rc), 1E9);
       }
     }
@@ -175,7 +185,7 @@ describe('Pathological sequences speed', () => {
 
       assert.strictEqual(
         src_md5,
-        require('./pathological.json').md5,
+        pathological.md5,
         'CRC or cmark pathological tests hanged. Verify and update pathological.json'
       );
     });

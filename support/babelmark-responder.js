@@ -1,13 +1,29 @@
 #!/usr/bin/env node
 
+import { MarkdownIt } from '../index.js';
+import express from 'express';
+
+
+import fs from 'fs';
+import path from 'path';
+
+import { fileURLToPath } from 'url';
+
+// see https://nodejs.org/docs/latest-v13.x/api/esm.html#esm_no_require_exports_module_exports_filename_dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const packageJson = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
+
+
 /* eslint-env es6 */
 /* eslint-disable no-console */
 
 
-const md  = require('../')('commonmark');
-const app = require('express')();
+const md = MarkdownIt('commonmark');
+const app = express();
 
-const version = require('../package.json').version;
+const version = packageJson.version;
 
 const banner = `<!doctype html>
 <html lang="en">

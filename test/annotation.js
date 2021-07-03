@@ -1,14 +1,17 @@
 
 // Implemented originally in https://github.com/markdown-it/markdown-it/pull/204
 
-const assert = require('chai').assert;
+import chai from 'chai';
+import { MarkdownIt } from '../index.js';
+
+const assert = chai.assert;
 
 function assertTokenContent(src, token, content) {
   assert.strictEqual(src.slice(token.position, token.position + token.size), content);
 }
 
 describe('Annotation', function () {
-  const md = require('../')({
+  const md = MarkdownIt({
     html: true,
     langPrefix: '',
     typographer: false,

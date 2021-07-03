@@ -4,8 +4,8 @@
 
 
 
-const fs = require('fs');
-const argparse = require('argparse');
+import fs from 'fs';
+import argparse from 'argparse';
 
 
 ////////////////////////////////////////////////////////////////////////////////

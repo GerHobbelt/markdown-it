@@ -1,4 +1,86 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src line: 649
+
+.
+&nbsp; &amp; &copy; &AElig; &Dcaron;
+&frac34; &HilbertSpace; &DifferentialD;
+&ClockwiseContourIntegral; &ngE;
+.
+<p>  &amp; © Æ Ď
+¾ ℋ ⅆ
+∲ ≧̸</p>
+.
+
+error:
+
+<p>&amp;nbsp; &amp;amp; &amp;copy; &amp;AElig; &amp;Dcaron;
+&amp;frac34; &amp;HilbertSpace; &amp;DifferentialD;
+&amp;ClockwiseContourIntegral; &amp;ngE;</p>
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src line: 735
+
+.
+[foo](/f&ouml;&ouml; "f&ouml;&ouml;")
+.
+<p><a href="/f%C3%B6%C3%B6" title="föö">foo</a></p>
+.
+
+error:
+
+<p><a href="/f&amp;ouml;&amp;ouml;" title="f&amp;ouml;&amp;ouml;">foo</a></p>
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src line: 742
+
+.
+[foo]
+
+[foo]: /f&ouml;&ouml; "f&ouml;&ouml;"
+.
+<p><a href="/f%C3%B6%C3%B6" title="föö">foo</a></p>
+.
+
+error:
+
+<p><a href="/f&amp;ouml;&amp;ouml;" title="f&amp;ouml;&amp;ouml;">foo</a></p>
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src line: 751
+
+.
+``` f&ouml;&ouml;
+foo
+```
+.
+<pre><code class="language-föö">foo
+</code></pre>
+.
+
+error:
+
+<pre><code class="language-f&amp;ouml;&amp;ouml;">foo
+</code></pre>
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src line: 817
+
+.
+[a](url &quot;tit&quot;)
+.
+<p>[a](url &quot;tit&quot;)</p>
+.
+
+error:
+
+<p>[a](url &amp;quot;tit&amp;quot;)</p>
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 src line: 3506
 
 .
@@ -50,4 +132,32 @@ error:
 
 <blockquote>
 </blockquote>
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src line: 7719
+
+.
+[link](foo%20b&auml;)
+.
+<p><a href="foo%20b%C3%A4">link</a></p>
+.
+
+error:
+
+<p><a href="foo%20b&amp;auml;">link</a></p>
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src line: 7753
+
+.
+[link](/url "title \"&quot;")
+.
+<p><a href="/url" title="title &quot;&quot;">link</a></p>
+.
+
+error:
+
+<p><a href="/url" title="title &quot;&amp;quot;">link</a></p>
 

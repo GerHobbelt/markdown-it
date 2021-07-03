@@ -2,8 +2,8 @@
 // Always find the LATEST cpuprofile file and patch that one into the devtools hint HTML page in /support/
 //
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
 let arg = fs.readdirSync(path.join(__dirname, '..')).filter(fn => fn.endsWith('.cpuprofile'));
 if (arg.length > 0) {

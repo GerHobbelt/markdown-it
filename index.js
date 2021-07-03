@@ -1,4 +1,4 @@
 
 
 
-module.exports = require('./lib/');
+export * from './lib/index.js';

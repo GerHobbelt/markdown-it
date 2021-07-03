@@ -1,8 +1,11 @@
 
 
 
-const assert = require('chai').assert;
-const Ruler  = require('../lib/ruler');
+import chai from 'chai';
+import Ruler from '../lib/ruler.js';
+
+const assert = chai.assert;
+
 
 describe('Ruler', function () {
 

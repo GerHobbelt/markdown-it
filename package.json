@@ -11,8 +11,10 @@
   ],
   "repository": "GerHobbelt/markdown-it",
   "license": "MIT",
-  "main": "dist/markdown-it.js",
-  "module": "dist/markdown-it.mjs",
+  "type": "module",
+  "source": "index.js",
+  "main": "./dist/markdown-it.js",
+  "module": "./dist/markdown-it.mjs",
   "bin": {
     "markdown-it": "bin/markdown-it.js"
   },
@@ -44,6 +46,7 @@
   ],
   "dependencies": {
     "entities": "2.2.0",
+    "esbuild": "^0.12.14",
     "github-markdown-css": "4.0.0",
     "linkify-it": "3.0.2",
     "mdurl": "1.0.1",
@@ -86,7 +89,7 @@
     "@gerhobbelt/markdown-it-sub": "1.0.1-5",
     "@gerhobbelt/markdown-it-sup": "1.0.1-4",
     "@gerhobbelt/markdown-it-table-of-contents": "0.4.4-2",
-    "@gerhobbelt/markdown-it-testgen": "0.1.6-20",
+    "@gerhobbelt/markdown-it-testgen": "0.1.6-21",
     "@gerhobbelt/markdown-it-title": "4.0.0-8",
     "@gerhobbelt/markdown-it-toc": "1.1.1-2",
     "@gerhobbelt/markdown-it-toc-and-anchor": "4.5.0-5",
@@ -112,6 +115,7 @@
     "jest-worker": "27.0.6",
     "marked": "2.1.3",
     "marky": "1.2.2",
+    "microbundle": "^0.13.3",
     "microtime": "3.0.0",
     "mocha": "9.0.2",
     "ndoc": "6.0.0",
