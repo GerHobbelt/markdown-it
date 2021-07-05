@@ -12,7 +12,7 @@ hljs.registerLanguage('actionscript', require('@gerhobbelt/highlight.js/lib/lang
 hljs.registerLanguage('apache',       require('@gerhobbelt/highlight.js/lib/languages/apache'));
 hljs.registerLanguage('armasm',       require('@gerhobbelt/highlight.js/lib/languages/armasm'));
 hljs.registerLanguage('xml',          require('@gerhobbelt/highlight.js/lib/languages/xml'));
-hljs.registerLanguage('asciidoc',     require('@gerhobbelt/highlight.js/lib//languages/asciidoc'));
+hljs.registerLanguage('asciidoc',     require('@gerhobbelt/highlight.js/lib/languages/asciidoc'));
 hljs.registerLanguage('avrasm',       require('@gerhobbelt/highlight.js/lib/languages/avrasm'));
 hljs.registerLanguage('bash',         require('@gerhobbelt/highlight.js/lib/languages/bash'));
 hljs.registerLanguage('clojure',      require('@gerhobbelt/highlight.js/lib/languages/clojure'));
@@ -182,6 +182,7 @@ function usePlugins(md) {
   return md
   .use(require('@gerhobbelt/markdown-it-abbr'))
   .use(require('@gerhobbelt/markdown-it-attrs'))
+  .use(require('@gerhobbelt/markdown-it-attribution'))
   .use(require('@gerhobbelt/markdown-it-container'), 'warning')
   .use(require('@gerhobbelt/markdown-it-checkbox'))
   .use(require('@gerhobbelt/markdown-it-deflist'))
