@@ -1,10 +1,12 @@
-var demo = function(url, assert) {
+var demo = function(path, fs, url, assert) {
   "use strict";
   function _interopDefaultLegacy(e) {
     return e && typeof e === "object" && "default" in e ? e : {
       default: e
     };
   }
+  var path__default =  _interopDefaultLegacy(path);
+  var fs__default =  _interopDefaultLegacy(fs);
   var commonjsGlobal = typeof globalThis !== "undefined" ? globalThis : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : {};
   function getAugmentedNamespace(n) {
     if (n.__esModule) return n;
@@ -28209,7 +28211,7 @@ var demo = function(url, assert) {
   /*! markdown-it-deflist 2.0.4-2 https://github.com//GerHobbelt/markdown-it-deflist @license MIT */
   // Process definition lists
   
-     function deflist_plugin(md) {
+    module.exports = function deflist_plugin(md) {
     let isSpace = md.utils.isSpace;
  // Search `[:~][\n ]`, returns next pos after marker on success
     // or -1 on fail.
@@ -28583,7 +28585,9 @@ var demo = function(url, assert) {
     md.renderer.rules.emoji = emoji_html;
     md.core.ruler.push("emoji", create_rule(md, opts.defs, opts.shortcuts, opts.scanRE, opts.replaceRE));
   }
-  const emojies_defs = null;
+  const __filename = url.fileURLToPath(document.currentScript && document.currentScript.src || new URL("index.js", document.baseURI).href);
+  const __dirname = path__default["default"].dirname(__filename);
+  const emojies_defs = JSON.parse(fs__default["default"].readFileSync(path__default["default"].normalize(path__default["default"].join(__dirname, "../lib/data/full.json")), "utf8"));
   function emoji_plugin(md, options) {
     let defaults = {
       defs: emojies_defs,
@@ -28598,7 +28602,8 @@ var demo = function(url, assert) {
     default: emoji_plugin
   });
   var require$$63 =  getAugmentedNamespace(markdownitEmoji);
-   function fontawesome_plugin(md) {
+  /*! markdown-it-fontawesome 0.3.0-3 https://github.com//GerHobbelt/markdown-it-fontawesome @license MIT */  let Plugin = require("@gerhobbelt/markdown-it-regexp");
+  module.exports = function fontawesome_plugin(md) {
     // FA4 style.
     md.use(Plugin(/\:fa-([\w\-]+)\:/, (function(match, utils) {
       return '<i class="fa fa-' + utils.escape(match[1]) + '"></i>';
@@ -30392,7 +30397,7 @@ var demo = function(url, assert) {
   (function(module, exports) {
     (function(root, factory) {
       {
-         factory();
+        module.exports = factory();
       }
     })(commonjsGlobal, (function() {
       function math(state, silent) {
@@ -55264,6 +55269,8 @@ var demo = function(url, assert) {
     return string;
   };
   var truncate$1 = truncate$2;
+  var getLength = Buffer.byteLength.bind(Buffer);
+  var truncateUtf8Bytes = truncate$1.bind(null, getLength);
   /*jshint node:true*/
   /**
 	 * Replaces characters in strings that are illegal/unsafe for filenames.
@@ -55290,7 +55297,7 @@ var demo = function(url, assert) {
 	 * @param  {String} input   Original filename
 	 * @param  {Object} options {replacement: String | Function }
 	 * @return {String}         Sanitized filename
-	 */  var truncate = null;
+	 */  var truncate = truncateUtf8Bytes;
   var illegalRe = /[\/\?<>\\:\*\|"]/g;
   var controlRe = /[\x00-\x1f\x80-\x9f]/g;
   var reservedRe = /^\.+$/;
@@ -55911,4 +55918,4 @@ var demo = function(url, assert) {
     updateResult();
   }));
   return demo_template;
-}();
+}(path, fs, url, assert);
